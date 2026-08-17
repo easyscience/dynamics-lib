@@ -2000,16 +2000,15 @@ narrow.</p>
 <p>Analytical convolution is used automatically when both components are <code>DeltaFunction</code>,
 <code>Gaussian</code>, <code>Lorentzian</code>, or <code>Voigt</code>:
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.convolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convolution</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
-<span class="n">sample_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
-    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
+<span class="n">sample_components</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">edyn</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
 <span class="p">)</span>
-<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
+<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">edyn</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
 <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 
-<span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+<span class="n">convolver</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Convolution</span><span class="p">(</span>
     <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
     <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
     <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -2404,7 +2403,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.Convolution.convert_x_unit&lt;/code&gt;)" href="#easydynamics.convolution.Convolution.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+                  <p>Convert the energy axis, energy_offset, and all components to the specified unit, and</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2695,7 +2694,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.Convolution.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3372,11 +3371,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset (only valid while upsample_factor is None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3958,9 +3957,10 @@ ConvolutionSettings are unaffected — a new energy array is a convolver-local c
 
     <div class="doc doc-contents ">
 
-        <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
-<p>If any conversion fails, the already-converted state is rolled back best-effort before the
-failing conversion's exception is re-raised.</p>
+        <p>Convert the energy axis, energy_offset, and all components to the specified unit, and
+invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3994,32 +3994,6 @@ failing conversion's exception is re-raised.</p>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="TypeError">TypeError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
             </td>
           </tr>
       </tbody>
@@ -4188,7 +4162,7 @@ issues during <strong>init</strong>.</p>
                 <code>value</code>
             </td>
             <td>
-                  <code><span title="any">any</span></code>
+                  <code><span title="object">object</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4251,7 +4225,7 @@ issues during <strong>init</strong>.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;AnalyticalConvolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sample_components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolution_components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;dimensionless&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;energy_offset&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyConvolution&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.analytical_convolution.AnalyticalConvolution&lt;/code&gt;)" href="#easydynamics.convolution.analytical_convolution.AnalyticalConvolution">AnalyticalConvolution</a></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;AnalyticalConvolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.analytical_convolution.AnalyticalConvolution&lt;/code&gt;)" href="#easydynamics.convolution.analytical_convolution.AnalyticalConvolution">AnalyticalConvolution</a></code></td>
             <td>
               <div class="doc-md-description">
                 <p>Analytical convolution of a ModelComponent or ComponentCollection with a ResolutionModel.</p>
@@ -4285,7 +4259,7 @@ issues during <strong>init</strong>.</p>
 
 
 <h5 id="easydynamics.convolution.analytical_convolution.AnalyticalConvolution" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">AnalyticalConvolution</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">y_unit</span><span class="o">=</span><span class="s1">&#39;dimensionless&#39;</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">AnalyticalConvolution</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
@@ -4296,11 +4270,17 @@ issues during <strong>init</strong>.</p>
 
         <p>Analytical convolution of a ModelComponent or ComponentCollection with a ResolutionModel.</p>
 <p>Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians
-and Voigt profiles.</p>
+and Voigt profiles. Dispatch is subclass-tolerant: a subclass of e.g. Lorentzian is convolved
+with the Lorentzian rules.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
 
+        <p>Accepts the same arguments as ConvolutionBase, but requires sample_components and
+resolution_components to be provided.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -4316,154 +4296,40 @@ and Voigt profiles.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>energy</code>
+                <code>*args</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a></code>
+                  <code><span title="object">object</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>1D array of energy values where the convolution is evaluated.</p>
+                <p>Positional arguments passed to ConvolutionBase.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>()</code>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>sample_components</code>
+                <code>**kwargs</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ComponentCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;dimensionless&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ComponentCollection&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;dimensionless&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ModelComponent&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a> | None</code>
+                  <code><span title="object">object</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The sample model to be convolved.</p>
+                <p>Keyword arguments passed to ConvolutionBase.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
             </td>
             <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>resolution_components</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ComponentCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;dimensionless&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ComponentCollection&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;dimensionless&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ModelComponent&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The resolution model to convolve with.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>x_unit</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The unit of the energy axis.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>&#39;meV&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>y_unit</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The unit of the model output (intensity).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>&#39;dimensionless&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>energy_offset</code>
-            </td>
-            <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The energy offset applied to the convolution.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>0.0</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>display_name</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Display name of the model.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>&#39;MyConvolution&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>unique_name</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Unique name of the model. If None, a unique name will be generated.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
+                  <code>{}</code>
             </td>
           </tr>
       </tbody>
@@ -4485,10 +4351,7 @@ and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If energy is not a numpy ndarray or a scipp Variable or if energy_unit is not a string
-or scipp unit, or if energy_offset is not a number or a Parameter, or if
-sample_components is not a ComponentCollection or ModelComponent, or if
-resolution_components is not a ComponentCollection or ModelComponent.</p>
+                <p>If sample_components or resolution_components is None.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6131,16 +5994,15 @@ narrow.</p>
 <p>Analytical convolution is used automatically when both components are <code>DeltaFunction</code>,
 <code>Gaussian</code>, <code>Lorentzian</code>, or <code>Voigt</code>:
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.convolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convolution</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
-<span class="n">sample_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
-    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
+<span class="n">sample_components</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">edyn</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
 <span class="p">)</span>
-<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
+<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">edyn</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
 <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 
-<span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+<span class="n">convolver</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Convolution</span><span class="p">(</span>
     <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
     <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
     <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -6568,7 +6430,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.convert_x_unit&lt;/code&gt;)" href="#easydynamics.convolution.convolution.Convolution.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+                  <p>Convert the energy axis, energy_offset, and all components to the specified unit, and</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6826,7 +6688,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.convolution.Convolution.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7503,11 +7365,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset (only valid while upsample_factor is None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7734,7 +7596,7 @@ issues during <strong>init</strong>.</p>
                 <code>value</code>
             </td>
             <td>
-                  <code><span title="any">any</span></code>
+                  <code><span title="object">object</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8269,9 +8131,10 @@ ConvolutionSettings are unaffected — a new energy array is a convolver-local c
 
     <div class="doc doc-contents ">
 
-        <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
-<p>If any conversion fails, the already-converted state is rolled back best-effort before the
-failing conversion's exception is re-raised.</p>
+        <p>Convert the energy axis, energy_offset, and all components to the specified unit, and
+invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8305,32 +8168,6 @@ failing conversion's exception is re-raised.</p>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="TypeError">TypeError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
             </td>
           </tr>
       </tbody>
@@ -8622,10 +8459,10 @@ failing conversion's exception is re-raised.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If energy is not a numpy ndarray or a scipp Variable or if energy_unit is not a string
-or scipp unit, or if energy_offset is not a number or a Parameter, or if
-sample_components is not a ComponentCollection or ModelComponent, or if
-resolution_components is not a ComponentCollection or ModelComponent.</p>
+                <p>If energy is not a numpy ndarray or a scipp Variable or if x_unit is not a string or
+scipp unit, or if energy_offset is not a number or a Parameter, or if sample_components
+is not a ComponentCollection or ModelComponent, or if resolution_components is not a
+ComponentCollection or ModelComponent.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8635,6 +8472,19 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
       </tbody>
     </table>
 
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>ValueError</code> propagates from the validation helpers if resolution_components contains a
+DeltaFunction, or if the x_unit of the sample or resolution components does not match the
+convolver's x_unit.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
 
 
 
@@ -10669,8 +10519,8 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
-string or sc.Unit.</p>
+                <p>If sample_components or resolution_components is None, or if temperature is not None, a
+number, or a Parameter, or if temperature_unit is not a string or sc.Unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10818,7 +10668,7 @@ string or sc.Unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution.NumericalConvolution.convert_x_unit&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution.NumericalConvolution.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+                  <p>Convert the energy axis, energy_offset, and all components to the specified unit, and</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11087,7 +10937,7 @@ string or sc.Unit.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution.NumericalConvolution.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution.NumericalConvolution.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11764,11 +11614,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset (only valid while upsample_factor is None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12398,9 +12248,10 @@ ConvolutionSettings are unaffected — a new energy array is a convolver-local c
 
     <div class="doc doc-contents ">
 
-        <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
-<p>If any conversion fails, the already-converted state is rolled back best-effort before the
-failing conversion's exception is re-raised.</p>
+        <p>Convert the energy axis, energy_offset, and all components to the specified unit, and
+invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12434,32 +12285,6 @@ failing conversion's exception is re-raised.</p>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="TypeError">TypeError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
             </td>
           </tr>
       </tbody>
@@ -12912,8 +12737,8 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
-string or sc.Unit.</p>
+                <p>If sample_components or resolution_components is None, or if temperature is not None, a
+number, or a Parameter, or if temperature_unit is not a string or sc.Unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12948,6 +12773,17 @@ string or sc.Unit.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Set the energy array and invalidate this convolver's plan.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit">convert_x_unit</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Convert the energy axis, energy_offset, and all components to the specified unit, and</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13047,17 +12883,6 @@ string or sc.Unit.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit">convert_x_unit</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_y_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_y_unit&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_y_unit">convert_y_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -13130,7 +12955,7 @@ string or sc.Unit.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13503,11 +13328,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset (only valid while upsample_factor is None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -14129,6 +13954,64 @@ ConvolutionSettings are unaffected — a new energy array is a convolver-local c
 <div class="doc doc-object doc-function">
 
 
+<h7 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">convert_x_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert the energy axis, energy_offset, and all components to the specified unit, and
+invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h7 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.to_dict" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
@@ -14565,89 +14448,6 @@ can be changed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.convert_x_unit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">convert_x_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
-<p>If any conversion fails, the already-converted state is rolled back best-effort before the
-failing conversion's exception is re-raised.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>unit</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The unit of the energy.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="TypeError">TypeError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
     </div>

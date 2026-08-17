@@ -2107,11 +2107,12 @@ result is normalized by <span class="arithmatex">\(k_B*T\)</span> to have value 
                 <code>energy</code>
             </td>
             <td>
-                  <code><span title="float">float</span> | <span title="list">list</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a></code>
+                  <code><span title="float">float</span> | <span title="list">list</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.DataArray&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray">DataArray</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The energy transfer. If number, assumed to be in meV unless energy_unit is set.</p>
+                <p>The energy transfer. If number, assumed to be in meV unless energy_unit is set. If a
+DataArray, its single coordinate is used as the energy axis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2130,7 +2131,8 @@ result is normalized by <span class="arithmatex">\(k_B*T\)</span> to have value 
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature. If number, assumed to be in K unless temperature_unit is set.</p>
+                <p>The temperature. Must be a single scalar value. If number, assumed to be in K unless
+temperature_unit is set.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2217,9 +2219,9 @@ default, True.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If energy or temperature is not a number, list, numpy array, or scipp Variable, or if
-energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature
-is not a boolean.</p>
+                <p>If energy or temperature is not one of the accepted types, or if energy_unit or
+temperature_unit is not a string or scipp Unit, or if divide_by_temperature is not a
+boolean.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2232,9 +2234,9 @@ is not a boolean.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if
-temperature is a scipp Variable that does not have a single dimension named 'temperature',
-or if energy is a scipp Variable that does not have a single dimension named 'energy'.</p>
+                <p>If temperature is negative or is not a single scalar value, if energy is a list or numpy
+array with more than 1 dimension, or if energy is a scipp DataArray without exactly one
+coordinate.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2300,9 +2302,9 @@ temperature cannot be converted to the expected units.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <p><strong>Basic usage</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.utils.detailed_balance</span><span class="w"> </span><span class="kn">import</span> <span class="n">detailed_balance_factor</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
-<span class="n">dbf</span> <span class="o">=</span> <span class="n">detailed_balance_factor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># 1 meV at 300 K</span>
+<span class="n">dbf</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">detailed_balance_factor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># 1 meV at 300 K</span>
 </code></pre></div>
 <p><strong>Specifying units and disabling temperature normalisation</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">dbf</span> <span class="o">=</span> <span class="n">detailed_balance_factor</span><span class="p">(</span>
@@ -2345,14 +2347,14 @@ contains a residuals array.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <p><strong>Plotting data, model, and residuals from a DataGroup</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.utils.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">slicerplot_with_residuals</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
 <span class="n">dg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">({</span>
     <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="n">my_data</span><span class="p">,</span>
     <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="n">my_model</span><span class="p">,</span>
     <span class="s1">&#39;Residuals&#39;</span><span class="p">:</span> <span class="n">my_residuals</span><span class="p">,</span>
 <span class="p">})</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">slicerplot_with_residuals</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">residuals_key</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;energy&#39;</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">slicerplot_with_residuals</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">residuals_key</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;energy&#39;</span><span class="p">)</span>
 </code></pre></div>
 <!-- prettier-ignore-start -->
 
@@ -3313,11 +3315,12 @@ result is normalized by <span class="arithmatex">\(k_B*T\)</span> to have value 
                 <code>energy</code>
             </td>
             <td>
-                  <code><span title="float">float</span> | <span title="list">list</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a></code>
+                  <code><span title="float">float</span> | <span title="list">list</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.DataArray&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray">DataArray</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The energy transfer. If number, assumed to be in meV unless energy_unit is set.</p>
+                <p>The energy transfer. If number, assumed to be in meV unless energy_unit is set. If a
+DataArray, its single coordinate is used as the energy axis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3336,7 +3339,8 @@ result is normalized by <span class="arithmatex">\(k_B*T\)</span> to have value 
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature. If number, assumed to be in K unless temperature_unit is set.</p>
+                <p>The temperature. Must be a single scalar value. If number, assumed to be in K unless
+temperature_unit is set.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3423,9 +3427,9 @@ default, True.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If energy or temperature is not a number, list, numpy array, or scipp Variable, or if
-energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature
-is not a boolean.</p>
+                <p>If energy or temperature is not one of the accepted types, or if energy_unit or
+temperature_unit is not a string or scipp Unit, or if divide_by_temperature is not a
+boolean.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3438,9 +3442,9 @@ is not a boolean.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if
-temperature is a scipp Variable that does not have a single dimension named 'temperature',
-or if energy is a scipp Variable that does not have a single dimension named 'energy'.</p>
+                <p>If temperature is negative or is not a single scalar value, if energy is a list or numpy
+array with more than 1 dimension, or if energy is a scipp DataArray without exactly one
+coordinate.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3506,9 +3510,9 @@ temperature cannot be converted to the expected units.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <p><strong>Basic usage</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.utils.detailed_balance</span><span class="w"> </span><span class="kn">import</span> <span class="n">detailed_balance_factor</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
-<span class="n">dbf</span> <span class="o">=</span> <span class="n">detailed_balance_factor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># 1 meV at 300 K</span>
+<span class="n">dbf</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">detailed_balance_factor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># 1 meV at 300 K</span>
 </code></pre></div>
 <p><strong>Specifying units and disabling temperature normalisation</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">dbf</span> <span class="o">=</span> <span class="n">detailed_balance_factor</span><span class="p">(</span>
@@ -3855,14 +3859,14 @@ contains a residuals array.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <p><strong>Plotting data, model, and residuals from a DataGroup</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.utils.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">slicerplot_with_residuals</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
 <span class="n">dg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">({</span>
     <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="n">my_data</span><span class="p">,</span>
     <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="n">my_model</span><span class="p">,</span>
     <span class="s1">&#39;Residuals&#39;</span><span class="p">:</span> <span class="n">my_residuals</span><span class="p">,</span>
 <span class="p">})</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">slicerplot_with_residuals</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">residuals_key</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;energy&#39;</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">slicerplot_with_residuals</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">residuals_key</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;energy&#39;</span><span class="p">)</span>
 </code></pre></div>
 <!-- prettier-ignore-start -->
 
@@ -6073,7 +6077,8 @@ checked; the upper-bound check is deferred until Q is available.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q_index is not an int (or not an int or None when allow_none=True).</p>
+                <p>If Q_index is not an int (or not an int or None when allow_none=True). Booleans are
+rejected explicitly, since <code>True</code> would otherwise silently mean index 1.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

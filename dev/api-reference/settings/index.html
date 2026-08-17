@@ -2225,7 +2225,7 @@ None. If suppress_warnings is not a boolean.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.settings.ConvolutionSettings.extension_factor&lt;/code&gt;)" href="#easydynamics.settings.ConvolutionSettings.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2470,7 +2470,8 @@ None. If suppress_warnings is not a boolean.</p>
 
         <p>Get the extension factor.</p>
 <p>The extension factor determines how much the energy range is extended on both sides before
-convolution. 0.2 means extending by 20% of the original energy span on each side</p>
+convolution. 0.2 means extending by 20% of the original energy span on each side. None is
+only valid while upsampling is disabled (upsample_factor=None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2487,11 +2488,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3968,7 +3969,7 @@ None. If suppress_warnings is not a boolean.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings.extension_factor&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings.extension_factor">extension_factor</a></code></td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4140,7 +4141,8 @@ None. If suppress_warnings is not a boolean.</p>
 
         <p>Get the extension factor.</p>
 <p>The extension factor determines how much the energy range is extended on both sides before
-convolution. 0.2 means extending by 20% of the original energy span on each side</p>
+convolution. 0.2 means extending by 20% of the original energy span on each side. None is
+only valid while upsampling is disabled (upsample_factor=None).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4157,11 +4159,11 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><span title="float">float</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The extension factor.</p>
+                <p>The extension factor, or None if unset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
