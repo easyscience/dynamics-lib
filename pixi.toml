@@ -119,7 +119,10 @@ docstring-lint-check = 'pydoclint --quiet src/'
 notebook-lint-check = 'nbqa ruff docs/docs/tutorials/'
 py-lint-check = 'ruff check src/ tests/ docs/docs/tutorials/'
 py-format-check = 'ruff format --check src/ tests/ docs/docs/tutorials/'
-nonpy-format-check = 'npx prettier --list-different --config=prettierrc.toml --ignore-unknown .'
+# Refreshes prettier first, so the local version can never drift behind the one CI installs.
+nonpy-format-check = { cmd = 'npx prettier --list-different --config=prettierrc.toml --ignore-unknown .', depends-on = [
+  'prettier-install',
+] }
 nonpy-format-check-modified = 'python tools/nonpy_prettier_modified.py'
 
 check = 'pre-commit run --hook-stage manual --all-files'
@@ -134,7 +137,9 @@ notebook-lint-fix = 'nbqa ruff --fix docs/docs/tutorials/'
 py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
 py-lint-fix-unsafe = 'ruff check --fix --unsafe-fixes src/ tests/ docs/docs/tutorials/'
 py-format-fix = 'ruff format src/ tests/ docs/docs/tutorials/'
-nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
+nonpy-format-fix = { cmd = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .', depends-on = [
+  'prettier-install',
+] }
 nonpy-format-fix-modified = 'python tools/nonpy_prettier_modified.py --write'
 success-message = 'echo "✅ All auto-formatting steps completed successfully!"'
 
@@ -272,7 +277,10 @@ default-build = 'python -m build'
 dist-build = 'python -m build --wheel --outdir dist'
 
 npm-config = 'npm config set registry https://registry.npmjs.org/'
-prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
+# --prefix . keeps the install inside this repository: without it, npm walks up the directory
+# tree and a stray package.json in a parent directory can silently pin an old prettier.
+# @latest keeps local runs on the same version CI installs.
+prettier-install = 'npm install --prefix . --no-save --no-audit --no-fund prettier@latest prettier-plugin-toml@latest'
 
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
 
