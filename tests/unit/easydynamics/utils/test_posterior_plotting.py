@@ -72,6 +72,29 @@ class TestPlotTrace:
         # EXPECT the real units are shown, and an empty one is skipped
         assert [axis.get_ylabel() for axis in fig.axes] == ['a (meV)', 'b (m^2/s)', 'c']
 
+    def test_zero_row_draws_raise(self):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='no samples'):
+            plot_trace(draws=np.zeros((0, 2)), names=['a', 'b'])
+
+    def test_zero_column_draws_raise(self):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='no parameters'):
+            plot_trace(draws=np.zeros((5, 0)), names=[])
+
+    def test_a_single_draw_keeps_a_usable_axis(self):
+        # THEN
+        fig = plot_trace(draws=np.ones((1, 2)), names=['a', 'b'])
+
+        # EXPECT a non-inverted, non-degenerate x range
+        left, right = fig.axes[0].get_xlim()
+        assert left < right
+
+    def test_mismatched_logp_length_raises(self, draws):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='one entry per draw'):
+            plot_trace(draws=draws, names=['a', 'b', 'c'], logp=np.zeros(len(draws) - 1))
+
 
 class TestPlotCorner:
     def test_grid_is_square_in_the_parameter_count(self, draws):
@@ -110,6 +133,26 @@ class TestPlotCorner:
         assert bottom_row[0].get_xlabel() == 'a (meV)'
         assert bottom_row[1].get_xlabel() == 'b'
         assert bottom_row[2].get_xlabel() == 'c'
+
+    def test_non_finite_draws_raise_naming_the_column(self, draws):
+        # WHEN one column contains a NaN
+        draws[5, 1] = np.nan
+
+        # THEN EXPECT a clear error naming that column, not numpy's "range [nan, nan]"
+        with pytest.raises(ValueError, match='non-finite') as excinfo:
+            plot_corner(draws=draws, names=['a', 'b', 'c'])
+        assert ': b.' in str(excinfo.value)
+
+    def test_columns_share_limits_between_histogram_and_hexbin_panels(self, draws):
+        # THEN
+        fig = plot_corner(draws=draws, names=['a', 'b', 'c'])
+
+        # EXPECT every panel of a column agrees with the diagonal histogram on x-limits, so the
+        # ticks line up down the column
+        grid = np.array(fig.axes, dtype=object).reshape(3, 3)
+        for col in range(3):
+            column_limits = [grid[row, col].get_xlim() for row in range(col, 3)]
+            assert all(limits == pytest.approx(column_limits[0]) for limits in column_limits)
 
 
 class TestPlotPosteriorPredictive:

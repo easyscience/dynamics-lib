@@ -650,6 +650,19 @@ class TestExperiment:
         assert np.array_equal(weights, np.ones_like(y))
         assert np.array_equal(mask, np.isfinite(y) & np.isfinite(x))
 
+    def test_has_variances_true_when_the_data_carries_them(self, experiment_with_data):
+        # WHEN THEN EXPECT
+        assert experiment_with_data.has_variances
+
+    def test_has_variances_false_when_the_data_has_none(self, experiment):
+        # WHEN THEN EXPECT the fixture's data has no variances, so the all-ones weights that
+        # extract_x_y_weights_only_finite falls back to are recognisable as placeholders
+        assert not experiment.has_variances
+
+    def test_has_variances_false_without_data(self):
+        # WHEN THEN EXPECT
+        assert not Experiment().has_variances
+
     ##############
     # test dunder methods
     ##############

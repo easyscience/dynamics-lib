@@ -135,14 +135,21 @@ class TestRealChain:
         after = [float(p.value) for p in analysis.get_free_parameters()]
         assert after == pytest.approx(before)
 
-    def test_extend_grows_the_chain(self, sampled_analysis):
-        # WHEN
-        before = int(sampled_analysis.bayesian.results.state.Ngen)
+    def test_extend_grows_the_chain(self):
+        # WHEN a chain of this test's own: extending mutates the sampler state, so running it on
+        # the module-scoped fixture would hand every later test the extended chain
+        analysis = build_analysis()
+        analysis.fit()
+        analysis.bayesian.suggest_bounds().apply()
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            analysis.bayesian.sample(**SAMPLE_KWARGS)
+        before = int(analysis.bayesian.results.state.Ngen)
 
         # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extended = sampled_analysis.bayesian.extend(
+            extended = analysis.bayesian.extend(
                 additional_samples=500, thin=2, sampler_kwargs={'trim': False, 'outliers': 'none'}
             )
 
