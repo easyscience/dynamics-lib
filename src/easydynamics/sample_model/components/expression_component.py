@@ -74,8 +74,8 @@ class ExpressionComponent(ModelComponent):
     the unit of the evaluated expression is derived from the parameter units and x_unit (see
     ``output_unit``). A derived unit that differs from y_unit but is convertible to it is handled
     automatically: the expression is evaluated in a coherent (SI) scale, so parameter units of
-    mixed scales combine correctly, and the result is expressed in y_unit. A warning is issued
-    only when the derived unit is dimensionally incompatible with y_unit:
+    mixed scales combine correctly, and the result is expressed in y_unit. A warning is issued only
+    when the derived unit is dimensionally incompatible with y_unit:
     ```python
     expr = edyn.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
@@ -177,8 +177,8 @@ class ExpressionComponent(ModelComponent):
             symbols ``hbar`` and ``kb`` are provided automatically as read-only physical constants
             (in meV*s and meV/K respectively) unless overridden via *parameters*. The string is
             parsed with ``sympy.sympify``, which can execute arbitrary code — only use expression
-            strings from a trusted source. Symbol names that collide with an existing attribute
-            of the class (e.g. ``name``, ``evaluate``) are rejected.
+            strings from a trusted source. Symbol names that collide with an existing attribute of
+            the class (e.g. ``name``, ``evaluate``) are rejected.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values. Parameters that are not given a
             unit are dimensionless.
@@ -202,9 +202,9 @@ class ExpressionComponent(ModelComponent):
         Raises
         ------
         ValueError
-            If the expression is invalid or does not contain 'x', if a symbol name collides with
-            an existing attribute of the class, or if parameter_units names a parameter that is
-            not in the expression.
+            If the expression is invalid or does not contain 'x', if a symbol name collides with an
+            existing attribute of the class, or if parameter_units names a parameter that is not in
+            the expression.
         TypeError
             If any parameter value is not numeric, or if parameter_units is not a dictionary.
         """
@@ -457,9 +457,9 @@ class ExpressionComponent(ModelComponent):
 
         This relabels the unit: the numeric value, bounds, and variance are kept as-is. Use
         ``Parameter.convert_unit`` instead to rescale a value into a compatible unit. Issues a
-        warning if the resulting output unit of the expression is incompatible with y_unit
-        (a convertible output unit rescales evaluated values into y_unit instead). Raises the
-        same exceptions as :meth:`_relabel_parameter_unit` on invalid input.
+        warning if the resulting output unit of the expression is incompatible with y_unit (a
+        convertible output unit rescales evaluated values into y_unit instead). Raises the same
+        exceptions as :meth:`_relabel_parameter_unit` on invalid input.
 
         Parameters
         ----------
@@ -709,8 +709,8 @@ class ExpressionComponent(ModelComponent):
         Returns
         -------
         bool
-            True when the expression uses physical constants or any parameter has a unit other
-            than dimensionless. Unit-agnostic expressions (all parameters dimensionless) evaluate
+            True when the expression uses physical constants or any parameter has a unit other than
+            dimensionless. Unit-agnostic expressions (all parameters dimensionless) evaluate
             without any unit handling.
         """
         return bool(self._constants) or any(

@@ -70,10 +70,10 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Parameters
         ----------
         components : ModelComponent | list[ModelComponent] | None, default=None
-            Initial model components to add to the ComponentCollection. Components are
-            stored by reference (not copied), so their Parameters stay shared with the
-            objects passed in; mutating a component mutates it everywhere it is used.
-            Pass a copy if independent parameters are needed.
+            Initial model components to add to the ComponentCollection. Components are stored by
+            reference (not copied), so their Parameters stay shared with the objects passed in;
+            mutating a component mutates it everywhere it is used. Pass a copy if independent
+            parameters are needed.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis (energy, Q, etc.).
         y_unit : str | sc.Unit, default='dimensionless'
@@ -228,10 +228,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Append a model component or the components from another ComponentCollection to this
         ComponentCollection.
 
-        Components are appended by reference (not copied): their Parameters stay shared with
-        the passed-in objects, so a fit through one collection updates the same Parameters
-        seen by any other holder of the component. Pass a copy if independent parameters are
-        needed.
+        Components are appended by reference (not copied): their Parameters stay shared with the
+        passed-in objects, so a fit through one collection updates the same Parameters seen by any
+        other holder of the component. Pass a copy if independent parameters are needed.
 
         Parameters
         ----------
@@ -290,8 +289,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If there are no components in the model, if any component area is negative, or if
-            the total area is zero, negative or not finite, which would prevent normalization.
+            If there are no components in the model, if any component area is negative, or if the
+            total area is zero, negative or not finite, which would prevent normalization.
         """
         if not self:
             raise ValueError('No components in the model to normalize.')
@@ -458,9 +457,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         """
         Create a new collection of this class containing the given components.
 
-        Used by slicing. Overridden because ComponentCollection's constructor signature
-        differs from EasyDynamicsList's. The new collection carries this collection's units
-        and references the same component objects (no copies).
+        Used by slicing. Overridden because ComponentCollection's constructor signature differs
+        from EasyDynamicsList's. The new collection carries this collection's units and references
+        the same component objects (no copies).
 
         Parameters
         ----------

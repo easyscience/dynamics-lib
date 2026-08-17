@@ -81,9 +81,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         Raises
         ------
         TypeError
-            If sample_components or resolution_components is None, or if temperature is not
-            None, a number, or a Parameter, or if temperature_unit is not a string or
-            sc.Unit.
+            If sample_components or resolution_components is None, or if temperature is not None, a
+            number, or a Parameter, or if temperature_unit is not a string or sc.Unit.
         """
         super().__init__(
             energy=energy,
@@ -138,14 +137,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         Check whether this convolver's plan is up to date.
 
-        Plan validity is tracked per convolver so several convolvers can share one settings
-        object: each convolver stores the plan versions of its ConvolutionSettings and
-        DetailedBalanceSettings it last rebuilt against (None after a convolver-local
-        invalidation such as a new energy grid), and the settings bump their versions
-        whenever a knob changes. In addition, a snapshot of the component collections'
-        mutation versions and the energy_offset binding is compared, so in-place mutations
-        of a live collection (e.g. append_component) or rebinding the offset to a new
-        Parameter also invalidate the plan.
+        Plan validity is tracked per convolver so several convolvers can share one settings object:
+        each convolver stores the plan versions of its ConvolutionSettings and
+        DetailedBalanceSettings it last rebuilt against (None after a convolver-local invalidation
+        such as a new energy grid), and the settings bump their versions whenever a knob changes.
+        In addition, a snapshot of the component collections' mutation versions and the
+        energy_offset binding is compared, so in-place mutations of a live collection (e.g.
+        append_component) or rebinding the offset to a new Parameter also invalidate the plan.
 
         Returns
         -------
@@ -172,10 +170,10 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         Snapshot the mutable state the convolution plan was built from.
 
-        Captures the identity and mutation version of the sample and resolution collections
-        (so both rebinding and in-place mutation are detected) and the identity of the
-        energy_offset Parameter (so rebinding to a new Parameter invalidates the plan while
-        numeric assignment mutating the shared Parameter does not).
+        Captures the identity and mutation version of the sample and resolution collections (so
+        both rebinding and in-place mutation are detected) and the identity of the energy_offset
+        Parameter (so rebinding to a new Parameter invalidates the plan while numeric assignment
+        mutating the shared Parameter does not).
 
         Returns
         -------
@@ -246,8 +244,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         Convert the energy axis, energy_offset, and all components to the specified unit, and
         invalidate this convolver's plan.
 
-        The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the
-        same ConvolutionSettings are unaffected.
+        The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+        ConvolutionSettings are unaffected.
 
         Parameters
         ----------
@@ -518,7 +516,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                 if width_param.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
                     warnings.warn(
                         (
-                            f"The {width_label} of the {model_name} component "
+                            f'The {width_label} of the {model_name} component '
                             f"'{comp.unique_name}' "
                             f'({width_param.value}) is large compared to the span of the input '
                             f'array ({self._energy_grid.energy_span_dense}). '
@@ -531,7 +529,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                 if width_param.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
                     warnings.warn(
                         (
-                            f"The {width_label} of the {model_name} component "
+                            f'The {width_label} of the {model_name} component '
                             f"'{comp.unique_name}' "
                             f'({width_param.value}) is small compared to the spacing of the input '
                             f'array ({self._energy_grid.energy_dense_step}). '

@@ -1209,8 +1209,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Notes
         -----
-        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
-        out of range or not an int.
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is out
+        of range or not an int.
         """
         if fit_method not in ('independent', 'simultaneous'):
             raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
@@ -1406,8 +1406,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Notes
         -----
-        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
-        out of range or not an int.
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is out
+        of range or not an int.
         """
         # Deliberately imported lazily, to guard against an import cycle between the
         # analysis and utils packages.
@@ -1622,9 +1622,9 @@ class MultiQPosteriorSampler(PosteriorSampler):
         -----
         A ``NotImplementedError`` propagates when the latest chain is simultaneous: it binds every
         dataset at once, and no per-Q chain exists for Q_index to pick out. A ``RuntimeError``
-        propagates if a slider is asked for outside a notebook or nothing has been sampled yet,
-        and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of
-        range or not an int.
+        propagates if a slider is asked for outside a notebook or nothing has been sampled yet, and
+        an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of range
+        or not an int.
         """
         if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
             raise ValueError(f'n_draws must be a positive integer. Got {n_draws}.')

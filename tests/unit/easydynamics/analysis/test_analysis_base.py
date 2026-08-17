@@ -397,9 +397,7 @@ class TestAnalysisBase:
     def test_detailed_balance_settings_setter_invalid_fires_no_hook(self, analysis_base):
         # WHEN / THEN
         with (
-            patch.object(
-                analysis_base, '_on_detailed_balance_settings_changed'
-            ) as mock_hook,
+            patch.object(analysis_base, '_on_detailed_balance_settings_changed') as mock_hook,
             pytest.raises(TypeError),
         ):
             analysis_base.detailed_balance_settings = 'invalid_settings'

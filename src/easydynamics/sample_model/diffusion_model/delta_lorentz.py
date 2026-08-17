@@ -488,9 +488,8 @@ class DeltaLorentz(DiffusionModelBase):
         The per-Q parameter lists (A_0/A_1 and lorentzian_width, when Q-variation is enabled) are
         recreated here so the built components are backed by the very parameters stored in the
         lists, keeping ``calculate_width``/``calculate_EISF``/``calculate_QISF`` in sync with the
-        components. The created collections are installed on the model (they become the
-        collections returned by ``get_component_collections``), so the returned list is the live
-        one.
+        components. The created collections are installed on the model (they become the collections
+        returned by ``get_component_collections``), so the returned list is the live one.
 
         Returns
         -------
@@ -944,8 +943,8 @@ class DeltaLorentz(DiffusionModelBase):
         """
         Handle changes to the Q values.
 
-        Rebuilds the component collections; the per-Q A_0, A_1 and lorentzian_width parameter
-        lists are recreated inside ``create_component_collections``.
+        Rebuilds the component collections; the per-Q A_0, A_1 and lorentzian_width parameter lists
+        are recreated inside ``create_component_collections``.
         """
         self.create_component_collections()
 

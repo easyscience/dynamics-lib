@@ -102,9 +102,12 @@ class ResolutionModel(ModelBase):
         ------
         TypeError
             If the component is a DeltaFunction, Polynomial, or Exponential.
-        RuntimeError
-            If the model holds calibrated per-Q collections from ``from_sample_model``; a
-            template change would schedule a rebuild that silently discards them.
+
+        Notes
+        -----
+        A ``RuntimeError`` propagates from the calibration guard if the model holds calibrated
+        per-Q collections from ``from_sample_model``; a template change would schedule a rebuild
+        that silently discards them.
         """
         self._assert_not_calibrated('append a component')
         components = component if isinstance(component, ComponentCollection) else (component,)
@@ -126,11 +129,11 @@ class ResolutionModel(ModelBase):
         name : str
             The name of the component to remove.
 
-        Raises
-        ------
-        RuntimeError
-            If the model holds calibrated per-Q collections from ``from_sample_model``; a
-            template change would schedule a rebuild that silently discards them.
+        Notes
+        -----
+        A ``RuntimeError`` propagates from the calibration guard if the model holds calibrated
+        per-Q collections from ``from_sample_model``; a template change would schedule a rebuild
+        that silently discards them.
         """
         self._assert_not_calibrated('remove a component')
         super().remove_component(name)
@@ -139,11 +142,11 @@ class ResolutionModel(ModelBase):
         """
         Clear all components from the ResolutionModel.
 
-        Raises
-        ------
-        RuntimeError
-            If the model holds calibrated per-Q collections from ``from_sample_model``; a
-            template change would schedule a rebuild that silently discards them.
+        Notes
+        -----
+        A ``RuntimeError`` propagates from the calibration guard if the model holds calibrated
+        per-Q collections from ``from_sample_model``; a template change would schedule a rebuild
+        that silently discards them.
         """
         self._assert_not_calibrated('clear the components')
         super().clear_components()
@@ -158,13 +161,11 @@ class ResolutionModel(ModelBase):
         confirm : bool, default=False
             Confirmation to clear Q values.
 
-        Raises
-        ------
-        ValueError
-            If confirm is not True.
-        RuntimeError
-            If the model holds calibrated per-Q collections from ``from_sample_model``; clearing
-            Q would discard them.
+        Notes
+        -----
+        A ``ValueError`` propagates from the base implementation if confirm is not True, and a
+        ``RuntimeError`` propagates from the calibration guard if the model holds calibrated per-Q
+        collections from ``from_sample_model``; clearing Q would discard them.
         """
         self._assert_not_calibrated('clear Q')
         super().clear_Q(confirm=confirm)
@@ -174,8 +175,8 @@ class ResolutionModel(ModelBase):
         Raise if this model holds calibrated per-Q collections installed by from_sample_model.
 
         The per-Q collections installed by ``from_sample_model`` hold the fitted (calibrated)
-        resolution, but the template components do not. Any mutation that schedules a rebuild
-        would silently replace the calibrated collections with unfitted template copies, so such
+        resolution, but the template components do not. Any mutation that schedules a rebuild would
+        silently replace the calibrated collections with unfitted template copies, so such
         mutations fail loudly instead.
 
         Parameters
@@ -214,10 +215,10 @@ class ResolutionModel(ModelBase):
         belong in a resolution model.
 
         When the SampleModel has Q values, the fitted per-Q collections are installed as the
-        calibrated resolution and the model is locked: mutations that would rebuild the
-        collections from the (unfitted) template — ``append_component``, ``remove_component``,
-        ``clear_components``, ``clear_Q`` — raise a RuntimeError instead of silently discarding
-        the calibration.
+        calibrated resolution and the model is locked: mutations that would rebuild the collections
+        from the (unfitted) template — ``append_component``, ``remove_component``,
+        ``clear_components``, ``clear_Q`` — raise a RuntimeError instead of silently discarding the
+        calibration.
 
         Parameters
         ----------
@@ -236,8 +237,8 @@ class ResolutionModel(ModelBase):
         Raises
         ------
         TypeError
-            If sample_model is not a SampleModel, if normalize_area or fix_parameters are not
-            bool, or if the SampleModel contains Polynomial or Exponential components.
+            If sample_model is not a SampleModel, if normalize_area or fix_parameters are not bool,
+            or if the SampleModel contains Polynomial or Exponential components.
         ValueError
             If a per-Q collection contains only DeltaFunction components, leaving no resolution
             shape after stripping.

@@ -67,6 +67,7 @@ class TestNameMixin:
 
     def test_invalid_name_fails_before_global_registration(self):
         """Regression: name validation must run before the parent registers the object."""
+
         # WHEN a class whose MRO reaches the registering NewBase through NameMixin
         class _RegisteredWithName(NameMixin, NewBase):
             pass

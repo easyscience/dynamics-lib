@@ -351,10 +351,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Summarize what the fitter was built for, in target order.
 
         Each entry records the target's model, prediction name, and dataset key. The targets
-        themselves must be part of the signature, not just the models: swapping which predictions
-        a binding fits (``binding.targets = ['width'] -> ['area']``) keeps the model list
-        identical while changing both the frozen fit functions and the data they are fitted
-        against.
+        themselves must be part of the signature, not just the models: swapping which predictions a
+        binding fits (``binding.targets = ['width'] -> ['area']``) keeps the model list identical
+        while changing both the frozen fit functions and the data they are fitted against.
 
         Returns
         -------
@@ -373,9 +372,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         A FitBinding can be edited in place -- ``binding.targets = ...`` -- which this object
         cannot observe. Doing so changes which functions are fitted against which datasets, while
-        the cached MultiFitter still holds the old fit functions, and the fit then either dies
-        deep inside the minimizer or silently fits stale functions. Compare the targets the fitter
-        was built for against the current ones instead.
+        the cached MultiFitter still holds the old fit functions, and the fit then either dies deep
+        inside the minimizer or silently fits stale functions. Compare the targets the fitter was
+        built for against the current ones instead.
         """
         if self._fitter is None:
             return

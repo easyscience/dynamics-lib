@@ -104,8 +104,7 @@ class ModelBase(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If Q is not set on the model, or if there are no components in the model to
-            evaluate.
+            If Q is not set on the model, or if there are no components in the model to evaluate.
 
         Returns
         -------
@@ -166,9 +165,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Get the template ComponentCollection of the SampleModel.
 
-        This is the live template collection: mutating it in place (e.g. via
-        ``append_component``) is detected through its ``version`` and triggers a rebuild of
-        the per-Q collections on next use.
+        This is the live template collection: mutating it in place (e.g. via ``append_component``)
+        is detected through its ``version`` and triggers a rebuild of the per-Q collections on next
+        use.
 
         Returns
         -------
@@ -204,9 +203,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Return whether component collections need to be rebuilt before use.
 
-        Collections are stale when the dirty flag was raised (Q or component changes through
-        the model's methods) or when the live template collection was mutated in place since
-        the collections were last built.
+        Collections are stale when the dirty flag was raised (Q or component changes through the
+        model's methods) or when the live template collection was mutated in place since the
+        collections were last built.
 
         Returns
         -------
@@ -223,9 +222,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Get the dirty flag for the per-Q component collections.
 
-        Implemented as a property so every write is intercepted: raising the flag bumps the
-        state counter (making ``state_version`` change), and clearing it records the template
-        collection version the collections were built from.
+        Implemented as a property so every write is intercepted: raising the flag bumps the state
+        counter (making ``state_version`` change), and clearing it records the template collection
+        version the collections were built from.
 
         Returns
         -------
@@ -243,9 +242,8 @@ class ModelBase(EasyDynamicsModelBase):
         Parameters
         ----------
         value : bool
-            ``True`` marks the collections stale and bumps the state counter. ``False``
-            marks them current and records the template collection version they now
-            correspond to.
+            ``True`` marks the collections stale and bumps the state counter. ``False`` marks them
+            current and records the template collection version they now correspond to.
         """
         value = bool(value)
         if value:
@@ -259,11 +257,11 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Get a monotonic version of everything affecting the per-Q component collections.
 
-        The value changes whenever Q changes, components are added/removed/replaced through
-        the model's methods, or the live template collection (``components``) is mutated in
-        place. Implemented as an internal counter plus the template collection's mutation
-        version, so it only ever increases. Reading never rebuilds, clears or mutates
-        anything; equal values mean the collections' inputs are unchanged.
+        The value changes whenever Q changes, components are added/removed/replaced through the
+        model's methods, or the live template collection (``components``) is mutated in place.
+        Implemented as an internal counter plus the template collection's mutation version, so it
+        only ever increases. Reading never rebuilds, clears or mutates anything; equal values mean
+        the collections' inputs are unchanged.
 
         Returns
         -------
@@ -475,8 +473,8 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Rebuild component collections if any dependency has changed since they were last built.
 
-        Uses the full staleness check, so both flag-raising changes (Q, component methods)
-        and in-place mutations of the live template collection trigger a rebuild.
+        Uses the full staleness check, so both flag-raising changes (Q, component methods) and
+        in-place mutations of the live template collection trigger a rebuild.
         """
         if self.component_collections_is_dirty:
             self._generate_component_collections()

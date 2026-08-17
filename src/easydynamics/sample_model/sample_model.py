@@ -567,9 +567,7 @@ class SampleModel(ModelBase):
                 # DBF is a plain numpy array (a dimensionless factor when
                 # normalize_detailed_balance is True), so multiply the values and keep the
                 # unit label the collections produced, consistent with numpy output.
-                y = [
-                    sc.array(dims=yi.dims, values=yi.values * DBF, unit=yi.unit) for yi in y
-                ]
+                y = [sc.array(dims=yi.dims, values=yi.values * DBF, unit=yi.unit) for yi in y]
             else:
                 y = [yi * DBF for yi in y]
 

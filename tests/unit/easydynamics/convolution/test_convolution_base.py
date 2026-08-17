@@ -436,9 +436,7 @@ class TestConvolutionBase:
 
     def test_init_sample_components_x_unit_mismatch_raises(self):
         # WHEN sample components in ueV but the convolver in meV
-        sample = ComponentCollection(
-            components=Gaussian(name='G', x_unit='ueV'), x_unit='ueV'
-        )
+        sample = ComponentCollection(components=Gaussian(name='G', x_unit='ueV'), x_unit='ueV')
 
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'sample_components has x_unit'):
@@ -451,9 +449,7 @@ class TestConvolutionBase:
 
     def test_init_resolution_components_x_unit_mismatch_raises(self):
         # WHEN resolution components in ueV but the convolver in meV
-        resolution = ComponentCollection(
-            components=Gaussian(name='R', x_unit='ueV'), x_unit='ueV'
-        )
+        resolution = ComponentCollection(components=Gaussian(name='R', x_unit='ueV'), x_unit='ueV')
 
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'resolution_components has x_unit'):

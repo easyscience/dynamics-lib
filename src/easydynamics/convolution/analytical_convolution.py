@@ -74,8 +74,8 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         Resolve a component to the canonical analytical type name used for dispatch.
 
-        A subclass of one of the analytical types (Gaussian, Lorentzian, Voigt) resolves to
-        its base type's name, so subclasses are convolved with the base type's rules.
+        A subclass of one of the analytical types (Gaussian, Lorentzian, Voigt) resolves to its
+        base type's name, so subclasses are convolved with the base type's rules.
 
         Parameters
         ----------
@@ -85,8 +85,8 @@ class AnalyticalConvolution(ConvolutionBase):
         Returns
         -------
         str
-            The canonical type name, or the component's own class name if it is not an
-            analytical type.
+            The canonical type name, or the component's own class name if it is not an analytical
+            type.
         """
         for analytical_type in cls._ANALYTICAL_TYPES:
             if isinstance(component, analytical_type):
@@ -216,8 +216,8 @@ class AnalyticalConvolution(ConvolutionBase):
         resolution_component: ModelComponent,
     ) -> np.ndarray:
         """
-        Convolution of a delta function with a resolution component results in the same
-        component shifted by the delta center. The areas are multiplied.
+        Convolution of a delta function with a resolution component results in the same component
+        shifted by the delta center. The areas are multiplied.
 
         Parameters
         ----------

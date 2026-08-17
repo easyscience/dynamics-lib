@@ -385,9 +385,9 @@ class Polynomial(ModelComponent):
         """
         Rescale a coefficient's value and bounds by a positive factor without clamping.
 
-        The bounds are temporarily widened to infinity so the value assignment cannot be
-        silently clamped by the Parameter's min/max (easyscience clamps out-of-bounds values
-        instead of raising), then the original bounds are rescaled by the same factor.
+        The bounds are temporarily widened to infinity so the value assignment cannot be silently
+        clamped by the Parameter's min/max (easyscience clamps out-of-bounds values instead of
+        raising), then the original bounds are rescaled by the same factor.
 
         Parameters
         ----------
@@ -412,7 +412,7 @@ class Polynomial(ModelComponent):
         polynomial output is unchanged after the conversion. The coefficient bounds (min/max) are
         rescaled by the same factor, so bounded coefficients convert without being clamped. If any
         step fails, the already-converted coefficients are rolled back best-effort before the
-        exception is re-raised.
+        exception propagates.
 
         Parameters
         ----------
@@ -432,6 +432,7 @@ class Polynomial(ModelComponent):
         scale = self._x_unit_helper.value / new_helper.value
 
         rescaled: list[tuple[Parameter, float]] = []
+        converted = False
         try:
             for i, param in enumerate(self._coefficients):
                 factor = scale**i
@@ -440,11 +441,12 @@ class Polynomial(ModelComponent):
                 if factor != 1.0:  # ruff: ignore[float-equality-comparison]
                     self._rescale_coefficient(param, factor)
                     rescaled.append((param, factor))
-        except Exception:
-            for param, factor in rescaled:
-                with suppress(Exception):
-                    self._rescale_coefficient(param, 1.0 / factor)
-            raise
+            converted = True
+        finally:
+            if not converted:
+                for param, factor in rescaled:
+                    with suppress(Exception):
+                        self._rescale_coefficient(param, 1.0 / factor)
 
         self._x_unit_helper = new_helper
         self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
@@ -454,9 +456,9 @@ class Polynomial(ModelComponent):
         Rescale all coefficients so the evaluated output remains the same physical value.
 
         All coefficients (values and bounds) are multiplied by the conversion factor from
-        ``old_y_unit`` to ``new_y_unit`` so that ``I(x) [new_y_unit]`` represents the same
-        physical quantity as ``I(x) [old_y_unit]``. If any step fails, the already-converted
-        coefficients are rolled back best-effort before the exception is re-raised.
+        ``old_y_unit`` to ``new_y_unit`` so that ``I(x) [new_y_unit]`` represents the same physical
+        quantity as ``I(x) [old_y_unit]``. If any step fails, the already-converted coefficients
+        are rolled back best-effort before the exception propagates.
 
         Parameters
         ----------
@@ -481,6 +483,7 @@ class Polynomial(ModelComponent):
         scale = y_helper_new.value / y_helper.value
 
         rescaled: list[Parameter] = []
+        converted = False
         try:
             for param in self._coefficients:
                 # Exact comparison on purpose: only a scale of exactly 1.0 (converting to the
@@ -488,11 +491,12 @@ class Polynomial(ModelComponent):
                 if scale != 1.0:  # ruff: ignore[float-equality-comparison]
                     self._rescale_coefficient(param, scale)
                     rescaled.append(param)
-        except Exception:
-            for param in rescaled:
-                with suppress(Exception):
-                    self._rescale_coefficient(param, 1.0 / scale)
-            raise
+            converted = True
+        finally:
+            if not converted:
+                for param in rescaled:
+                    with suppress(Exception):
+                        self._rescale_coefficient(param, 1.0 / scale)
         self._y_unit = new_y_str
 
     def __repr__(self) -> str:

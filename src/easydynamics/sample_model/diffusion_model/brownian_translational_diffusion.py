@@ -237,8 +237,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Create ComponentCollection components for the Brownian translational diffusion model at
         given Q values.
 
-        The created collections are installed on the model (they become the collections returned
-        by ``get_component_collections``), so the returned list is the live one.
+        The created collections are installed on the model (they become the collections returned by
+        ``get_component_collections``), so the returned list is the live one.
 
         Returns
         -------

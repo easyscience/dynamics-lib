@@ -210,8 +210,8 @@ def _convert_to_scipp_variable(
     value : float | list | np.ndarray | Parameter | sc.Variable | sc.DataArray
         The value to convert. Can be a number, list, numpy array, Parameter, scipp Variable, or
         scipp DataArray. If a number or list, the unit must be specified in the unit argument. A
-        DataArray must have exactly one coordinate, which is used as the value (consistent with
-        how components treat DataArray input to ``evaluate``).
+        DataArray must have exactly one coordinate, which is used as the value (consistent with how
+        components treat DataArray input to ``evaluate``).
     name : str
         The name of the variable, used for error messages.
     unit : str | None, default=None

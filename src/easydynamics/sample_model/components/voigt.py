@@ -139,13 +139,11 @@ class Voigt(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
-        ValueError
-            If *value* violates the area parameter's bounds (e.g. a negative value when the
-            area was created non-negative, giving it ``min=0``).
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
         self._set_bounded_parameter_value(self._area, value, 'area')
 

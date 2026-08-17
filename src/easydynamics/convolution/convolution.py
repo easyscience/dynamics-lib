@@ -248,9 +248,9 @@ class Convolution(NumericalConvolutionBase):
         """
         Remove a plan-internal object from the easyscience global map.
 
-        The plan collections and sub-convolvers are private, per-plan objects recreated on
-        every rebuild; pruning the previous generation keeps the global map from growing
-        with every rebuild.
+        The plan collections and sub-convolvers are private, per-plan objects recreated on every
+        rebuild; pruning the previous generation keeps the global map from growing with every
+        rebuild.
 
         Parameters
         ----------

@@ -607,9 +607,9 @@ class TestParameterAnalysis:
             parameter_analysis.plot(names=['parameter1'])
 
         # EXPECT the diffusion binding is not evaluated for a plot that does not show it
-        parameter_analysis.calculate_model_dataset.assert_called_once_with(
-            [parameter_analysis.bindings[0]]
-        )
+        parameter_analysis.calculate_model_dataset.assert_called_once_with([
+            parameter_analysis.bindings[0]
+        ])
 
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',

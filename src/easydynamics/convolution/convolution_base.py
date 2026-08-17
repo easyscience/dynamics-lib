@@ -60,13 +60,16 @@ class ConvolutionBase(EasyDynamicsModelBase):
         Raises
         ------
         TypeError
-            If energy is not a numpy ndarray or a scipp Variable or if x_unit is not a string
-            or scipp unit, or if energy_offset is not a number or a Parameter, or if
-            sample_components is not a ComponentCollection or ModelComponent, or if
-            resolution_components is not a ComponentCollection or ModelComponent.
-        ValueError
-            If resolution_components contains a DeltaFunction, or if the x_unit of the sample
-            or resolution components does not match the convolver's x_unit.
+            If energy is not a numpy ndarray or a scipp Variable or if x_unit is not a string or
+            scipp unit, or if energy_offset is not a number or a Parameter, or if sample_components
+            is not a ComponentCollection or ModelComponent, or if resolution_components is not a
+            ComponentCollection or ModelComponent.
+
+        Notes
+        -----
+        A ``ValueError`` propagates from the validation helpers if resolution_components contains a
+        DeltaFunction, or if the x_unit of the sample or resolution components does not match the
+        convolver's x_unit.
         """
 
         super().__init__(
@@ -139,8 +142,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         Validate that the resolution collection contains no DeltaFunction components.
 
         Convolving with a delta function in the resolution is not supported on any path
-        (analytical, numerical, or delta), so the invariant is enforced when the resolution
-        is bound to the convolver.
+        (analytical, numerical, or delta), so the invariant is enforced when the resolution is
+        bound to the convolver.
 
         Parameters
         ----------
@@ -163,8 +166,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         Validate that sample and resolution collections use the convolver's x_unit.
 
-        Components in a different (even compatible) x_unit would be evaluated with raw
-        numbers in the wrong unit, silently producing wrong results.
+        Components in a different (even compatible) x_unit would be evaluated with raw numbers in
+        the wrong unit, silently producing wrong results.
 
         Raises
         ------
@@ -260,9 +263,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         Parameters
         ----------
         energy : np.ndarray | sc.Variable
-            1D array of energy values where the convolution is evaluated. A scipp Variable
-            must carry the convolver's x_unit; the x_unit itself can only be changed via
-            convert_x_unit.
+            1D array of energy values where the convolution is evaluated. A scipp Variable must
+            carry the convolver's x_unit; the x_unit itself can only be changed via convert_x_unit.
 
         Raises
         ------
@@ -444,8 +446,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
         ------
         TypeError
             If resolution_components is not a ComponentCollection or ModelComponent.
-        ValueError
-            If resolution_components contains a DeltaFunction.
+
+        Notes
+        -----
+        A ``ValueError`` propagates from the validation helper if resolution_components contains a
+        DeltaFunction.
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(

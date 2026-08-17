@@ -687,9 +687,7 @@ class TestComponentCollection:
 
     def test_version_starts_at_zero_and_bumps_on_mutation(self):
         # WHEN a freshly constructed collection with initial components
-        collection = ComponentCollection(
-            components=[Gaussian(name='G1'), Lorentzian(name='L1')]
-        )
+        collection = ComponentCollection(components=[Gaussian(name='G1'), Lorentzian(name='L1')])
 
         # EXPECT it starts at version 0
         assert collection.version == 0

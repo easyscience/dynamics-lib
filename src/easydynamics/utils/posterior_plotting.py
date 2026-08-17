@@ -15,7 +15,6 @@ import warnings
 from typing import TYPE_CHECKING
 from typing import Any
 
-import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colormaps

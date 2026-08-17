@@ -27,9 +27,9 @@ class CreateParametersMixin:
         Assign a value to a bounded parameter, raising instead of silently clamping.
 
         easyscience's ``Parameter.value`` setter silently clamps out-of-bounds values to the
-        nearest bound, which corrupts the parameter (e.g. assigning -1.0 to an area with
-        ``min=0`` stores 0.0). Component setters route assignments through this helper so a
-        bounds violation raises a clear error instead.
+        nearest bound, which corrupts the parameter (e.g. assigning -1.0 to an area with ``min=0``
+        stores 0.0). Component setters route assignments through this helper so a bounds violation
+        raises a clear error instead.
 
         Parameters
         ----------

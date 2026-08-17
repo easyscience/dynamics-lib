@@ -90,8 +90,8 @@ class DetailedBalanceSettings(EasyDynamicsBase):
         """
         Invalidate the convolution plan for every convolver sharing these settings.
 
-        Bumps the plan version, so every convolver that recorded an earlier version rebuilds
-        its plan before the next convolution.
+        Bumps the plan version, so every convolver that recorded an earlier version rebuilds its
+        plan before the next convolution.
         """
         self._plan_version += 1
 

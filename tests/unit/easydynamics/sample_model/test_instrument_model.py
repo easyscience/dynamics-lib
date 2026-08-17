@@ -560,9 +560,7 @@ class TestInstrumentModel:
 
         # EXPECT the change callback propagated the instrument's Q to the new model
         assert instrument_model.resolution_model is new_resolution_model
-        np.testing.assert_array_equal(
-            new_resolution_model.Q.values, np.array([1.0, 2.0, 3.0])
-        )
+        np.testing.assert_array_equal(new_resolution_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_on_background_model_change(self, instrument_model, background_model):
         # WHEN a background model that does not know the instrument's Q yet
@@ -574,9 +572,7 @@ class TestInstrumentModel:
 
         # EXPECT the change callback propagated the instrument's Q to the new model
         assert instrument_model.background_model is new_background_model
-        np.testing.assert_array_equal(
-            new_background_model.Q.values, np.array([1.0, 2.0, 3.0])
-        )
+        np.testing.assert_array_equal(new_background_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_repr_contains_expected_fields(self, instrument_model):
         # WHEN THEN

@@ -990,8 +990,8 @@ class Analysis(AnalysisBase):
         Get all variables used in the analysis, across every Q index.
 
         Overrides the easyscience fallback, which scans every attribute of the object and would
-        therefore build the MultiFitter and the Sampler as side effects of merely listing
-        variables (and fail outright on an empty analysis).
+        therefore build the MultiFitter and the Sampler as side effects of merely listing variables
+        (and fail outright on an empty analysis).
 
         Returns
         -------

@@ -14,15 +14,12 @@ class AmbiguousNameError(Exception):
         name : str
             The ambiguous name that was looked up.
         matches : list[object]
-            The elements whose name matched. The elements' unique names are used in the
-            message so the matches can be told apart.
+            The elements whose name matched. The elements' unique names are used in the message so
+            the matches can be told apart.
         """
         self.name = name
         self.matches = matches
         match_names = [
-            match.unique_name if hasattr(match, 'unique_name') else str(match)
-            for match in matches
+            match.unique_name if hasattr(match, 'unique_name') else str(match) for match in matches
         ]
-        super().__init__(
-            f"Ambiguous name '{name}' matches {len(matches)} elements: {match_names}"
-        )
+        super().__init__(f"Ambiguous name '{name}' matches {len(matches)} elements: {match_names}")

@@ -790,7 +790,6 @@ class TestNumericalConvolutionBase:
         assert 'temperature=None' in repr_str
         assert 'normalize_detailed_balance=True' in repr_str
 
-
     def test_create_energy_grid_raises_when_extension_factor_none_with_upsampling(self):
         # WHEN upsampling is enabled but there is no extension_factor, the dense energy grid
         # cannot be built
@@ -800,7 +799,5 @@ class TestNumericalConvolutionBase:
                 energy=np.linspace(-10, 10, 101),
                 sample_components=ComponentCollection(display_name='ComponentCollection'),
                 resolution_components=ComponentCollection(display_name='ResolutionModel'),
-                convolution_settings=ConvolutionSettings(
-                    upsample_factor=5, extension_factor=None
-                ),
+                convolution_settings=ConvolutionSettings(upsample_factor=5, extension_factor=None),
             )

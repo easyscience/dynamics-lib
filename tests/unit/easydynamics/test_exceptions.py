@@ -35,8 +35,7 @@ class TestAmbiguousNameError:
 
         # EXPECT the message names the matches instead of dumping object reprs
         assert str(error) == (
-            "Ambiguous name 'SameName' matches 2 elements: "
-            "['UniqueGaussian1', 'UniqueGaussian2']"
+            "Ambiguous name 'SameName' matches 2 elements: ['UniqueGaussian1', 'UniqueGaussian2']"
         )
 
     def test_empty_matches(self):

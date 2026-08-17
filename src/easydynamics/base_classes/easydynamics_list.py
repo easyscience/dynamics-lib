@@ -74,10 +74,10 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         """
         Get the mutation version of the list.
 
-        Starts at 0 for a freshly constructed list and is incremented by every mutating
-        operation (append, insert, extend, remove, pop, clear, sort, item assignment and
-        deletion). Consumers can record the version and later compare it to detect in-place
-        mutations without callbacks. Read-only; reading never mutates the list.
+        Starts at 0 for a freshly constructed list and is incremented by every mutating operation
+        (append, insert, extend, remove, pop, clear, sort, item assignment and deletion). Consumers
+        can record the version and later compare it to detect in-place mutations without callbacks.
+        Read-only; reading never mutates the list.
 
         Returns
         -------
@@ -228,9 +228,9 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         """
         Create a new instance of this list class containing the given items.
 
-        Used by slicing. Subclasses whose constructor signature differs from
-        EasyDynamicsList's (e.g. ComponentCollection) must override this so slicing
-        returns a working instance of the same class.
+        Used by slicing. Subclasses whose constructor signature differs from EasyDynamicsList's
+        (e.g. ComponentCollection) must override this so slicing returns a working instance of the
+        same class.
 
         Parameters
         ----------
@@ -328,23 +328,22 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         """
         Set an item (or slice of items) in the list.
 
-        Mirrors the duplicate handling of append/insert: assigning an item that is already
-        in the list (to a different position) warns and is ignored.
+        Mirrors the duplicate handling of append/insert: assigning an item that is already in the
+        list (to a different position) warns and is ignored.
 
         Parameters
         ----------
         idx : int | slice
             The index or slice to assign to.
         value : ProtectedType_ | list[ProtectedType_]
-            The new item (or items, for a slice) to assign. Items must be instances of one
-            of the protected types.
+            The new item (or items, for a slice) to assign. Items must be instances of one of the
+            protected types.
 
-        Raises
-        ------
-        TypeError
-            If idx or value has an invalid type.
-        ValueError
-            If slice assignment changes the slice length.
+        Notes
+        -----
+        A ``TypeError`` propagates from the type validation or the base assignment if idx or value
+        has an invalid type, and a ``ValueError`` propagates from the base assignment if slice
+        assignment changes the slice length.
         """
         if isinstance(idx, int):
             self._validate_type(value)
@@ -371,12 +370,10 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         idx : int | slice | str
             Index, slice, or name of the item to delete.
 
-        Raises
-        ------
-        KeyError
-            If idx is a string that does not match any item.
-        TypeError
-            If idx is not an int, slice, or string.
+        Notes
+        -----
+        A ``KeyError`` propagates from the base deletion if idx is a string that does not match any
+        item, and a ``TypeError`` propagates from it if idx is not an int, slice, or string.
         """
         super().__delitem__(idx)
         self._bump_version()

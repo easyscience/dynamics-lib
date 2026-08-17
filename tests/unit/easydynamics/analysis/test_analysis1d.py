@@ -1072,9 +1072,7 @@ class TestAnalysis1d:
         # EXPECT - convolver was rebuilt (_ensure_convolver_current called _create_convolver)
         analysis1d._create_convolver.assert_called_once()
 
-    @pytest.mark.skipif(
-        not HAS_STATE_VERSION, reason='pending ModelBase.state_version contract'
-    )
+    @pytest.mark.skipif(not HAS_STATE_VERSION, reason='pending ModelBase.state_version contract')
     def test_fit_does_not_rebuild_convolver_when_nothing_changed(self, analysis1d):
         """fit() should not call _create_convolver if nothing has changed since last fit."""
         # WHEN - a first fit has built the convolver against the current model state
@@ -1253,9 +1251,7 @@ class TestAnalysis1d:
         assert first._convolver is not first_convolver
         assert second._convolver is not second_convolver
 
-    @pytest.mark.skipif(
-        not HAS_STATE_VERSION, reason='pending ModelBase.state_version contract'
-    )
+    @pytest.mark.skipif(not HAS_STATE_VERSION, reason='pending ModelBase.state_version contract')
     def test_prepare_does_not_rebuild_when_the_models_are_unchanged(self, sibling_analyses):
         # WHEN a convolver has been built against the current model state
         first, _ = sibling_analyses
@@ -1277,9 +1273,7 @@ class TestAnalysis1d:
         analysis1d._convolver_is_dirty = False
 
         # THEN a new settings object is assigned
-        analysis1d.detailed_balance_settings = DetailedBalanceSettings(
-            use_detailed_balance=False
-        )
+        analysis1d.detailed_balance_settings = DetailedBalanceSettings(use_detailed_balance=False)
 
         # EXPECT
         assert analysis1d._convolver_is_dirty is True
