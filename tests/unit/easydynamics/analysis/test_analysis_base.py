@@ -422,9 +422,6 @@ class TestAnalysisBase:
         ],
     )
     def test_extra_parameters_property(self, analysis_base, extra_parameters):
-        # WHEN
-        analysis_base.extra_parameters = extra_parameters
-
         # THEN
         analysis_base.extra_parameters = extra_parameters
 

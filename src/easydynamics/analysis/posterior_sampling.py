@@ -757,6 +757,8 @@ class PosteriorSampler:
         Figure
             The matplotlib Figure.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_trace
 
         results = self._require_results()
@@ -783,6 +785,8 @@ class PosteriorSampler:
         Figure
             The matplotlib Figure.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_corner
 
         results = self._require_results()
@@ -824,6 +828,8 @@ class PosteriorSampler:
         ValueError
             If n_draws is not a positive integer.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_posterior_predictive
 
         if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
@@ -1267,6 +1273,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         TypeError
             If Q_index is not an int or None.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import corner_with_slider
 
         verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)

@@ -691,33 +691,31 @@ class TestSampleModel:
         assert model.components[0].y_unit == '1/eV'
         assert g.area.value == pytest.approx(1e3)
 
+    def test_remove_diffusion_model_raises_with_duplicate_names(self):
+        # WHEN a SampleModel with two DiffusionModels sharing a name
+        Q = np.linspace(0.5, 2.0, 3)
+        model = SampleModel(
+            Q=Q,
+            diffusion_models=[
+                BrownianTranslationalDiffusion(name='dup'),
+                BrownianTranslationalDiffusion(name='dup'),
+            ],
+        )
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'Multiple DiffusionModels share the name'):
+            model.remove_diffusion_model('dup')
 
-def test_remove_diffusion_model_raises_with_duplicate_names():
-    # GIVEN a SampleModel with two DiffusionModels sharing a name
-    Q = np.linspace(0.5, 2.0, 3)
-    model = SampleModel(
-        Q=Q,
-        diffusion_models=[
-            BrownianTranslationalDiffusion(name='dup'),
-            BrownianTranslationalDiffusion(name='dup'),
-        ],
-    )
-    # WHEN THEN EXPECT
-    with pytest.raises(ValueError, match=r'Multiple DiffusionModels share the name'):
-        model.remove_diffusion_model('dup')
-
-
-def test_convert_x_unit_rolls_back_when_diffusion_model_conversion_fails():
-    # GIVEN a SampleModel whose diffusion model raises during x-unit conversion
-    Q = np.linspace(0.5, 2.0, 3)
-    brownian = BrownianTranslationalDiffusion()
-    model = SampleModel(Q=Q, diffusion_models=brownian)
-    original_unit = model.x_unit
-    # WHEN the conversion fails partway through
-    with (
-        patch.object(brownian, 'convert_x_unit', side_effect=RuntimeError('boom')),
-        pytest.raises(RuntimeError, match='boom'),
-    ):
-        model.convert_x_unit('ueV')
-    # EXPECT the model's own x_unit to be rolled back to the original
-    assert model.x_unit == original_unit
+    def test_convert_x_unit_rolls_back_when_diffusion_model_conversion_fails(self):
+        # WHEN a SampleModel whose diffusion model raises during x-unit conversion
+        Q = np.linspace(0.5, 2.0, 3)
+        brownian = BrownianTranslationalDiffusion()
+        model = SampleModel(Q=Q, diffusion_models=brownian)
+        original_unit = model.x_unit
+        # THEN EXPECT the conversion fails partway through
+        with (
+            patch.object(brownian, 'convert_x_unit', side_effect=RuntimeError('boom')),
+            pytest.raises(RuntimeError, match='boom'),
+        ):
+            model.convert_x_unit('ueV')
+        # EXPECT the model's own x_unit to be rolled back to the original
+        assert model.x_unit == original_unit

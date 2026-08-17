@@ -13,7 +13,9 @@ class TestCreateParametersMixin:
     def dummy_model(self):
         return CreateParametersMixin()
 
-    # ------------- Area----------------------
+    #############
+    # Area
+    #############
     @pytest.mark.parametrize('unit', ['meV', 'eV'])
     @pytest.mark.parametrize('area_input', [2, 2.0])
     def test_create_area_parameter_from_numeric(self, dummy_model, area_input, unit):
@@ -53,7 +55,9 @@ class TestCreateParametersMixin:
 
         assert area_param.min == -float('inf')  # No min constraint for negative area
 
-    # ------------- Bounded value assignment ----------------------
+    #############
+    # Bounded value assignment
+    #############
     def test_set_bounded_parameter_value_within_bounds(self, dummy_model):
         # WHEN
         param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
@@ -82,7 +86,9 @@ class TestCreateParametersMixin:
         with pytest.raises(TypeError, match='p must be a number'):
             dummy_model._set_bounded_parameter_value(param, 'invalid', 'p')
 
-    # ------------- Center----------------------
+    #############
+    # Center
+    #############
     @pytest.mark.parametrize('unit', ['meV', 'eV'])
     @pytest.mark.parametrize('center_input', [0, 0.0])
     def test_create_center_parameter_from_numeric(self, dummy_model, center_input, unit):

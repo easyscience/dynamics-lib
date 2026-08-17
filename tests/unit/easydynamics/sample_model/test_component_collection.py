@@ -9,6 +9,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 from scipy.integrate import simpson
 
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
@@ -113,7 +114,9 @@ class TestComponentCollection:
         with pytest.raises(TypeError, match='unit must be'):
             ComponentCollection(x_unit=123)
 
-    # ───── Component Management ─────
+    #############
+    # Component Management
+    #############
 
     def test_append_component(self, component_collection):
         # WHEN
@@ -308,7 +311,9 @@ class TestComponentCollection:
         ):
             component_collection.evaluate_component(x, 123)
 
-    # ───── Utilities ─────
+    #############
+    # Utilities
+    #############
 
     def test_normalize_area(self, component_collection):
         # WHEN THEN
@@ -676,7 +681,9 @@ class TestComponentCollection:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('1/meV')
 
-    # ───── Versioning ─────
+    #############
+    # Versioning
+    #############
 
     def test_version_starts_at_zero_and_bumps_on_mutation(self):
         # WHEN a freshly constructed collection with initial components
@@ -693,7 +700,9 @@ class TestComponentCollection:
         collection.pop('G2')
         assert collection.version == 2
 
-    # ───── Slicing ─────
+    #############
+    # Slicing
+    #############
 
     def test_getitem_slice_returns_working_collection(self, component_collection):
         "Regression: slicing used to crash because the base slice path called the wrong ctor"
@@ -712,7 +721,9 @@ class TestComponentCollection:
         x = np.linspace(-5, 5, 11)
         np.testing.assert_allclose(sliced.evaluate(x), component_collection[0].evaluate(x))
 
-    # ───── Regression tests ─────
+    #############
+    # Regression tests
+    #############
 
     def test_normalize_area_negative_area_raises(self, component_collection):
         "Regression: negative areas used to be silently clamped by normalization"
@@ -750,8 +761,6 @@ class TestComponentCollection:
     def test_evaluate_component_ambiguous_name_raises(self):
         "Regression: duplicate names used to silently evaluate the first match"
         # WHEN a collection with two components sharing a name
-        from easydynamics.exceptions import AmbiguousNameError
-
         with pytest.warns(UserWarning, match='Duplicate component names'):
             collection = ComponentCollection(
                 components=[

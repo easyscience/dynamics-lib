@@ -9,6 +9,7 @@ mpl.use('Agg')
 
 import matplotlib.pyplot as plt
 
+from easydynamics.utils.posterior_plotting import corner_with_slider
 from easydynamics.utils.posterior_plotting import plot_corner
 from easydynamics.utils.posterior_plotting import plot_posterior_predictive
 from easydynamics.utils.posterior_plotting import plot_trace
@@ -154,6 +155,47 @@ class TestPlotCorner:
             column_limits = [grid[row, col].get_xlim() for row in range(col, 3)]
             assert all(limits == pytest.approx(column_limits[0]) for limits in column_limits)
 
+    #############
+    # Scientific notation
+    #############
+
+    def test_shared_exponent_is_folded_into_the_label(self):
+        # WHEN the values are small enough that matplotlib factors out an exponent, which it parks
+        # on top of the axis label
+        draws = np.random.default_rng(0).normal(size=(200, 2)) * 1e-8 + 1.15e-8
+
+        # THEN
+        fig = plot_corner(draws=draws, names=['D', 'scale'], units=['m^2/s', ''])
+
+        # EXPECT the exponent and the unit share one parenthetical, and the overlapping offset
+        # text is hidden
+        xlabel = fig.axes[-2].get_xlabel()
+        assert xlabel.startswith('D (1e')
+        assert 'm^2/s' in xlabel
+        assert not fig.axes[-2].xaxis.get_offset_text().get_visible()
+
+    def test_shared_exponent_is_folded_into_the_y_label_too(self):
+        # WHEN the values are small enough that the left column's y axes also factor out an
+        # exponent
+        draws = np.random.default_rng(0).normal(size=(200, 2)) * 1e-8 + 1.15e-8
+
+        # THEN
+        fig = plot_corner(draws=draws, names=['D', 'scale'], units=['m^2/s', ''])
+
+        # EXPECT the hexbin panel in the left column folds the exponent into its y label and
+        # hides the overlapping offset text
+        axis = fig.axes[2]
+        ylabel = axis.get_ylabel()
+        assert ylabel.startswith('scale (1e')
+        assert not axis.yaxis.get_offset_text().get_visible()
+
+
+class TestCornerWithSlider:
+    def test_empty_chains_raise(self):
+        # THEN EXPECT a clear refusal rather than an IndexError from an empty selection
+        with pytest.raises(ValueError, match='No chains to plot'):
+            corner_with_slider({})
+
 
 class TestPlotPosteriorPredictive:
     def test_returns_a_figure_with_data_and_band(self):
@@ -231,20 +273,3 @@ class TestPlotPosteriorPredictive:
         # EXPECT
         assert fig.axes[0].get_xlabel() == 'Energy (meV)'
         assert fig.axes[0].get_ylabel() == 'Intensity'
-
-
-class TestScientificNotation:
-    def test_shared_exponent_is_folded_into_the_label(self):
-        # WHEN the values are small enough that matplotlib factors out an exponent, which it parks
-        # on top of the axis label
-        draws = np.random.default_rng(0).normal(size=(200, 2)) * 1e-8 + 1.15e-8
-
-        # THEN
-        fig = plot_corner(draws=draws, names=['D', 'scale'], units=['m^2/s', ''])
-
-        # EXPECT the exponent and the unit share one parenthetical, and the overlapping offset
-        # text is hidden
-        xlabel = fig.axes[-2].get_xlabel()
-        assert xlabel.startswith('D (1e')
-        assert 'm^2/s' in xlabel
-        assert not fig.axes[-2].xaxis.get_offset_text().get_visible()

@@ -327,7 +327,9 @@ class TestPolynomial:
         assert np.isclose(p.coefficients[0].value, 1.0)
         assert np.isclose(p.coefficients[1].value, 2.0)
 
-    # --- Serialization ---
+    #############
+    # Serialization
+    #############
 
     def test_to_dict(self, polynomial: Polynomial):
         # WHEN
@@ -387,7 +389,9 @@ class TestPolynomial:
         with pytest.raises(ValueError, match='must be a dictionary representing'):
             Polynomial.from_dict({'not': 'valid'})
 
-    # --- Sparse dict initialization ---
+    #############
+    # Sparse dict initialization
+    #############
 
     def test_sparse_dict_single_term(self):
         # WHEN
@@ -449,7 +453,9 @@ class TestPolynomial:
         assert p.x_unit == 'ueV'
         assert p.y_unit == 'counts'
 
-    # --- add_coefficient ---
+    #############
+    # add_coefficient
+    #############
 
     def test_add_coefficient_increases_degree(self, polynomial: Polynomial):
         # WHEN
@@ -498,7 +504,9 @@ class TestPolynomial:
         # THEN EXPECT: the new coefficient is fittable
         assert len(polynomial.get_all_variables()) == 4
 
-    # --- remove_coefficient ---
+    #############
+    # remove_coefficient
+    #############
 
     def test_remove_coefficient_decreases_degree(self, polynomial: Polynomial):
         # WHEN
@@ -561,10 +569,9 @@ class TestPolynomial:
         assert polynomial.x_unit == 'ueV'
         np.testing.assert_allclose(after, before, rtol=1e-8)
 
-
-def test_suppress_warnings_setter_raises_for_non_bool():
-    # GIVEN a Polynomial
-    p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
-    # WHEN THEN EXPECT
-    with pytest.raises(TypeError, match=r'Suppress_warnings must be True or False'):
-        p.suppress_warnings = 'yes'
+    def test_suppress_warnings_setter_raises_for_non_bool(self):
+        # WHEN a Polynomial
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=r'Suppress_warnings must be True or False'):
+            p.suppress_warnings = 'yes'

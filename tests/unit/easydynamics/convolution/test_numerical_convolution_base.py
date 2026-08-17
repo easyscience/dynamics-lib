@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
@@ -670,8 +671,6 @@ class TestNumericalConvolutionBase:
         components with gaussian_width/lorentzian_width.
         """
         # WHEN a Voigt with one very narrow and one very wide width
-        from easydynamics.sample_model import Voigt
-
         voigt = Voigt(
             name='NarrowWideVoigt',
             area=1.0,

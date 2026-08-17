@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Any
 
+import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MaxNLocator
@@ -455,8 +456,6 @@ def corner_with_slider(
     ValueError
         If no chains are given.
     """
-    import ipywidgets as widgets
-
     if not chains:
         raise ValueError('No chains to plot.')
 

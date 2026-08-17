@@ -5,6 +5,7 @@ import warnings
 from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
@@ -478,8 +479,6 @@ class Analysis1d(AnalysisBase):
         InteractiveFigure
             A plot of the data and model.
         """
-        import plopp as pp
-
         data_and_model = self.data_and_model_to_datagroup(
             energy=energy,
             add_background=add_background,

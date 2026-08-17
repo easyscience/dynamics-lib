@@ -14,6 +14,9 @@ from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 
+GAUSSIAN_EXPRESSION = 'A / (sigma*sqrt(2*pi)) * exp(-(x - x0)**2 / (2*sigma**2))'
+GAUSSIAN_UNITS = {'A': 'meV', 'x0': 'meV', 'sigma': 'meV'}
+
 
 class TestExpressionComponent:
     @pytest.fixture
@@ -368,22 +371,17 @@ class TestExpressionComponent:
         expected = np.array([-0.84270079, 0.0, 0.84270079])  # erf(-1), erf(0), erf(1)
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
+    def test_evaluate_raises_when_input_unit_differs_from_x_unit(self):
+        # WHEN an ExpressionComponent with x_unit meV
+        expr = ExpressionComponent('A * x', parameters={'A': 2.0}, x_unit='meV')
+        x = sc.array(dims=['x'], values=[1.0, 2.0], unit='ueV')
+        # THEN EXPECT a UnitError when evaluating with x in a different unit
+        with pytest.raises(sc.UnitError, match=r'cannot auto-convert its parameters'):
+            expr.evaluate(x)
 
-def test_evaluate_raises_when_input_unit_differs_from_x_unit():
-    # GIVEN an ExpressionComponent with x_unit meV
-    expr = ExpressionComponent('A * x', parameters={'A': 2.0}, x_unit='meV')
-    x = sc.array(dims=['x'], values=[1.0, 2.0], unit='ueV')
-    # WHEN evaluating with x in a different unit THEN EXPECT a UnitError
-    with pytest.raises(sc.UnitError, match=r'cannot auto-convert its parameters'):
-        expr.evaluate(x)
-
-
-GAUSSIAN_EXPRESSION = 'A / (sigma*sqrt(2*pi)) * exp(-(x - x0)**2 / (2*sigma**2))'
-GAUSSIAN_UNITS = {'A': 'meV', 'x0': 'meV', 'sigma': 'meV'}
-
-
-class TestExpressionComponentUnitCorrectness:
-    """Compare unit-aware expressions against the built-in components."""
+    #############
+    # Unit correctness: comparisons against the built-in components
+    #############
 
     @pytest.fixture
     def gaussian_expr(self):
@@ -468,8 +466,10 @@ class TestExpressionComponentUnitCorrectness:
                 x_unit='meV',
             )
 
+    #############
+    # Output unit
+    #############
 
-class TestExpressionComponentOutputUnit:
     def test_output_unit_gaussian_is_dimensionless(self):
         # WHEN: area in meV divided by sigma in meV
         expr = ExpressionComponent(
@@ -702,8 +702,10 @@ class TestExpressionComponentOutputUnit:
         expected = 6.582120e-13 * 4.6e-10 * 1e20 / (1.0 + 4.6e-10 * 1e20 * 22e-12)
         assert value == pytest.approx(expected, rel=1e-5)
 
+    #############
+    # Physical constants
+    #############
 
-class TestExpressionComponentPhysicalConstants:
     def test_kb_constant_value_and_unit(self):
         # WHEN
         expr = ExpressionComponent(

@@ -8,6 +8,7 @@ from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
 
@@ -469,8 +470,6 @@ class TestConvolutionBase:
 
     def test_init_with_delta_in_resolution_raises(self):
         # WHEN
-        from easydynamics.sample_model import DeltaFunction
-
         resolution = ComponentCollection(components=DeltaFunction(name='D'))
 
         # THEN EXPECT
@@ -483,8 +482,6 @@ class TestConvolutionBase:
 
     def test_resolution_components_setter_with_delta_raises(self, convolution_base):
         # WHEN
-        from easydynamics.sample_model import DeltaFunction
-
         resolution = ComponentCollection(components=DeltaFunction(name='D'))
 
         # THEN EXPECT

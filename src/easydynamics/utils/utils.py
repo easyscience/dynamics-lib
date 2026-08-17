@@ -276,6 +276,8 @@ def _in_notebook() -> bool:
         True if in a Jupyter notebook, False otherwise.
     """
     try:
+        # Imported here deliberately: IPython may be absent at runtime, and the except
+        # clause below turns that into the answer "not a notebook".
         from IPython import get_ipython
 
         shell = get_ipython().__class__.__name__

@@ -16,6 +16,7 @@ import re
 import pytest
 
 import easydynamics as edyn
+from easydynamics.sample_model import Gaussian
 
 SUB_PACKAGES = [
     'easydynamics.analysis',
@@ -53,9 +54,6 @@ class TestFrontDoor:
         assert missing == [], f'{module_name} exports not re-exported: {missing}'
 
     def test_re_exports_are_the_same_objects(self):
-        # WHEN
-        from easydynamics.sample_model import Gaussian
-
         # THEN EXPECT the front door is an alias, not a copy
         assert edyn.Gaussian is Gaussian
 

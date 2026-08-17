@@ -8,6 +8,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
 
 import easydynamics as edyn
@@ -877,6 +878,11 @@ class TestAnalysis:
         fake_fitter.fit.assert_called_once()
         assert result == 'simultaneous_result'
 
+    def test_uses_a_multifitter(self, multi_q_analysis):
+        # EXPECT
+        assert isinstance(multi_q_analysis.fitter, MultiFitter)
+        assert len(multi_q_analysis.fitter.fit_object) == len(Q_VALUES)
+
     def test_get_all_variables(self, analysis):
         # WHEN
         extra_par = Parameter(name='extra_par', value=1.0)
@@ -1395,8 +1401,6 @@ class TestAnalysis:
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, multi_q_analysis):
         # WHEN a parameter belongs to no Q index of this analysis
-        from easyscience.variable import Parameter
-
         stranger = Parameter(name='Gaussian width', value=1.0)
 
         # EXPECT it is returned unqualified rather than mislabelled

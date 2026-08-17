@@ -3,6 +3,7 @@
 
 
 from easydynamics.exceptions import AmbiguousNameError
+from easydynamics.sample_model import Gaussian
 
 
 class TestAmbiguousNameError:
@@ -24,8 +25,6 @@ class TestAmbiguousNameError:
     def test_object_matches_print_their_names(self):
         "Regression: the message used to print raw objects instead of their names"
         # WHEN matches are objects with unique names, as raised by EasyDynamicsList
-        from easydynamics.sample_model import Gaussian
-
         matches = [
             Gaussian(name='SameName', unique_name='UniqueGaussian1'),
             Gaussian(name='SameName', unique_name='UniqueGaussian2'),

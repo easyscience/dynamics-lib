@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.variable import Parameter
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -19,6 +20,10 @@ from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+    JumpTranslationalDiffusion,
 )
 from easydynamics.utils.fit_target import FitTarget
 
@@ -1443,6 +1448,22 @@ class TestParameterAnalysis:
         # EXPECT
         mock_invalidate.assert_called_once()
 
+    def test_missing_parameters_dataset_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis()
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No parameters Dataset'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+    def test_missing_bindings_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis(parameters=make_dataset())
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No fit bindings'):
+            parameter_analysis.bayesian.sample(samples=10)
+
     #############
     # Chain parameters and labels
     #############
@@ -1509,8 +1530,6 @@ class TestParameterAnalysis:
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
         # WHEN a parameter belongs to none of the binding models
-        from easyscience.variable import Parameter
-
         stranger = Parameter(name='Width line_c0', value=1.0)
 
         # THEN EXPECT it is returned unqualified rather than mislabelled
@@ -1567,8 +1586,6 @@ class TestParameterAnalysis:
 
     def test_ambiguous_name_owned_by_no_model_keeps_its_name(self):
         # WHEN a parameter shares an ambiguous name but belongs to none of the models
-        from easyscience.variable import Parameter
-
         analysis = edyn.ParameterAnalysis(
             parameters=make_dataset(),
             bindings=[
@@ -1618,8 +1635,6 @@ class TestParameterAnalysisWorkflows:
 
     def test_delta_lorentz_three_target_simultaneous_fit(self):
         # WHEN: synthetic width, area, and delta area curves from a known DeltaLorentz
-        from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
-
         Q = np.linspace(0.4, 2.0, 9)
         truth = DeltaLorentz(scale=2.0, mean_u_squared=0.3, A_0=0.6, lorentzian_width=0.12)
         dataset = self._dataset_from_targets(truth, Q)
@@ -1637,10 +1652,6 @@ class TestParameterAnalysisWorkflows:
 
     def test_jump_diffusion_width_only_fit(self):
         # WHEN: synthetic widths from a known jump diffusion model
-        from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
-            JumpTranslationalDiffusion,
-        )
-
         Q = np.linspace(0.4, 2.0, 9)
         truth = JumpTranslationalDiffusion(diffusion_coefficient=2.4e-9, relaxation_time=2.0)
         dataset = self._dataset_from_targets(truth, Q)

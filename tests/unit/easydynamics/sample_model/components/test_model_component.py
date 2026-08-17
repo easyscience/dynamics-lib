@@ -231,7 +231,9 @@ class TestModelComponent:
         assert g_mev.width.value == pytest.approx(0.5)
         assert g_mev.area.value == pytest.approx(1.0)
 
-    # ───── Regression tests ─────
+    #############
+    # Regression tests
+    #############
 
     def test_convert_x_unit_rollback_on_failure(self, dummy: DummyComponent):
         # Conversion to 'm' (length) is incompatible with 'meV' (energy) → triggers rollback

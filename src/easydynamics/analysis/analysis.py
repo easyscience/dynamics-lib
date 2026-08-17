@@ -6,6 +6,7 @@ from copy import copy
 from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
@@ -453,8 +454,6 @@ class Analysis(AnalysisBase):
         self._verify_bool(add_background, 'add_background')
         self._verify_bool(plot_residuals, 'plot_residuals')
 
-        import plopp as pp
-
         data_and_model = self.data_and_model_to_datagroup(
             energy=energy,
             add_background=add_background,
@@ -697,8 +696,6 @@ class Analysis(AnalysisBase):
         }
 
         plot_kwargs_defaults.update(kwargs)
-
-        import plopp as pp
 
         return pp.plot(
             data_to_plot,

@@ -8,6 +8,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.convolution import Convolution
@@ -763,8 +764,6 @@ class TestConvolution:
         result_before = conv.convolution()
 
         # THEN rebinding the offset to a brand-new Parameter
-        from easyscience.variable import Parameter
-
         conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
         result_after = conv.convolution()
 
