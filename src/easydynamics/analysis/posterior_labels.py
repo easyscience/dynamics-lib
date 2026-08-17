@@ -101,9 +101,9 @@ class ParameterLabels:
         Map each parameter's ``unique_name`` to its label.
 
         Saved alongside a chain, because unique names are per-session: without this a reloaded
-        chain cannot be matched back to any parameter. Where two parameters share a display
-        label, the recorded labels carry a deterministic positional suffix (``width [1]``,
-        ``width [2]``) so each column can be matched back to exactly one parameter.
+        chain cannot be matched back to any parameter. Where two parameters share a display label,
+        the recorded labels carry a deterministic positional suffix (``width [1]``, ``width [2]``)
+        so each column can be matched back to exactly one parameter.
 
         Returns
         -------

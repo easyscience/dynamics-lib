@@ -214,8 +214,8 @@ def plot_marginal(
     """
     Plot the marginal posterior distribution of a single parameter.
 
-    Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
-    and 84th percentiles marked -- the same 68% credible interval the posterior summary reports.
+    Shows a density-normalized histogram of the parameter's draws, with the median and the 16th and
+    84th percentiles marked -- the same 68% credible interval the posterior summary reports.
 
     Parameters
     ----------
@@ -224,8 +224,8 @@ def plot_marginal(
     name : str
         The label the parameter is reported under.
     unit : str | None, default=None
-        The parameter's unit, appended to the axis label. Empty or dimensionless units are
-        skipped, since a bare "dimensionless" only adds clutter.
+        The parameter's unit, appended to the axis label. Empty or dimensionless units are skipped,
+        since a bare "dimensionless" only adds clutter.
     title : str | None, default=None
         Figure title.
     bins : int, default=40
@@ -282,9 +282,8 @@ def plot_correlations(
     data: the chain trades one off against the other. The matrix condenses what the off-diagonal
     panels of the corner plot show, one number per pair, which scales better to many parameters.
 
-    Correlations are dimensionless, so the labels carry no units. A constant column has no
-    defined correlation with anything; its cells are shown greyed out and marked "n/a" rather
-    than failing.
+    Correlations are dimensionless, so the labels carry no units. A constant column has no defined
+    correlation with anything; its cells are shown greyed out and marked "n/a" rather than failing.
 
     Parameters
     ----------
@@ -295,8 +294,8 @@ def plot_correlations(
     title : str | None, default=None
         Figure title.
     figsize : tuple[float, float] | None, default=None
-        Figure size in inches. Defaults to a square that scales with the parameter count, plus
-        room for the colorbar.
+        Figure size in inches. Defaults to a square that scales with the parameter count, plus room
+        for the colorbar.
 
     Returns
     -------
@@ -473,8 +472,8 @@ def _correlation_matrix(draws: np.ndarray) -> np.ndarray:
     np.ndarray
         The ``(n_parameters, n_parameters)`` correlation matrix, two-dimensional even for a
         single-parameter chain, with NaN wherever a column has zero variance. Numpy's
-        division-by-zero warnings for those columns are suppressed, since the NaNs are handled
-        by the caller rather than being a numerical accident.
+        division-by-zero warnings for those columns are suppressed, since the NaNs are handled by
+        the caller rather than being a numerical accident.
     """
     with np.errstate(invalid='ignore', divide='ignore'), warnings.catch_warnings():
         warnings.simplefilter('ignore', RuntimeWarning)

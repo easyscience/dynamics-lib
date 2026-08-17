@@ -258,8 +258,8 @@ class PosteriorSampler:
             as marginalizing over it: the resulting intervals are conditional on those values and
             will be too narrow if the parameters are correlated. The default samples everything.
         progress : bool, default=False
-            Print a progress line, redrawn in place as the sampler advances and closed with a
-            done marker when the run finishes. Off by default so scripted runs stay quiet; a
+            Print a progress line, redrawn in place as the sampler advances and closed with a done
+            marker when the run finishes. Off by default so scripted runs stay quiet; a
             ``progress_callback`` given in ``sampler_options`` takes precedence over it.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler, e.g. ``sampler_kwargs`` or ``progress_callback``.
@@ -271,10 +271,10 @@ class PosteriorSampler:
 
         Notes
         -----
-        Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state
-        and the underlying EasyScience Sampler exposes no seed control, so two identical calls
-        return two different chains. Their summaries should nevertheless agree to well within the
-        reported credible intervals; if they do not, the chain is too short to have converged.
+        Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state and
+        the underlying EasyScience Sampler exposes no seed control, so two identical calls return
+        two different chains. Their summaries should nevertheless agree to well within the reported
+        credible intervals; if they do not, the chain is too short to have converged.
         """
         reporter = _install_progress_reporter(progress, sampler_options)
         try:
@@ -313,8 +313,7 @@ class PosteriorSampler:
             The same restriction as in :meth:`sample`. It must leave the chain the same width,
             since BUMPS resumes from a stored chain whose columns are fixed.
         progress : bool, default=False
-            Print a progress line, redrawn in place as the sampler advances, as in
-            :meth:`sample`.
+            Print a progress line, redrawn in place as the sampler advances, as in :meth:`sample`.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler.
 
@@ -333,8 +332,8 @@ class PosteriorSampler:
 
         Notes
         -----
-        Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's
-        global random state and exposes no seed control.
+        Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's global
+        random state and exposes no seed control.
         """
         if self._sampler is None:
             raise RuntimeError('No chain to extend. Call sample() or load() first.')
@@ -804,9 +803,8 @@ class PosteriorSampler:
         """
         Plot the marginal posterior distribution of a single sampled parameter.
 
-        Shows a density-normalized histogram of the parameter's draws, with the median and the
-        16th and 84th percentiles marked -- the same 68% credible interval :meth:`summary`
-        reports.
+        Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
+        and 84th percentiles marked -- the same 68% credible interval :meth:`summary` reports.
 
         Parameters
         ----------
@@ -1145,8 +1143,8 @@ def _install_progress_reporter(
     Returns
     -------
     _SamplingProgress | None
-        The installed reporter, which the caller must close after the run, or None when nothing
-        was installed.
+        The installed reporter, which the caller must close after the run, or None when nothing was
+        installed.
     """
     if not progress or 'progress_callback' in sampler_options:
         return None
@@ -1159,13 +1157,13 @@ class _SamplingProgress:
     """
     Renders the sampler's per-generation callbacks as a single self-overwriting progress line.
 
-    BUMPS invokes the callback once per DREAM generation, which for a long run is far too often
-    to print, so the line is only redrawn when the percentage changes. Carriage-return output
-    works in terminals and notebooks alike, and needs no extra dependency.
+    BUMPS invokes the callback once per DREAM generation, which for a long run is far too often to
+    print, so the line is only redrawn when the percentage changes. Carriage-return output works in
+    terminals and notebooks alike, and needs no extra dependency.
 
     The generation total in the payload is the backend's own estimate, and it overestimates when
-    DREAM runs more chains than the estimate assumes, so a finished run can stop short of 100%.
-    The line is therefore closed with an explicit done marker rather than trusting the estimate.
+    DREAM runs more chains than the estimate assumes, so a finished run can stop short of 100%. The
+    line is therefore closed with an explicit done marker rather than trusting the estimate.
     """
 
     def __init__(self) -> None:
@@ -1206,8 +1204,8 @@ class _SamplingProgress:
         Parameters
         ----------
         completed : bool
-            Whether the run finished. A finished run gets a done marker; a failed one only has
-            its line terminated, so the exception is not decorated with a claim of success.
+            Whether the run finished. A finished run gets a done marker; a failed one only has its
+            line terminated, so the exception is not decorated with a claim of success.
         """
         if not self._printed:
             return
