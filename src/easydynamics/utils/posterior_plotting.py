@@ -37,9 +37,6 @@ def plot_trace(
     excursions. A visible trend means the chain has not reached the typical set and needs a longer
     burn-in.
 
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
-    not have one entry per column, or if ``logp`` does not have one entry per draw.
-
     Parameters
     ----------
     draws : np.ndarray
@@ -60,6 +57,12 @@ def plot_trace(
     -------
     Figure
         The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``draws`` is not two-dimensional or is empty, if ``names`` does not have one entry per
+        column, or if ``logp`` does not have one entry per draw.
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)
@@ -112,9 +115,6 @@ def plot_corner(
     distribution of a pair: a compact blob means the two are independent, while a narrow diagonal
     ridge means they are correlated and cannot be determined separately from this data.
 
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
-    not have one entry per column, or if any column contains non-finite values.
-
     Parameters
     ----------
     draws : np.ndarray
@@ -135,6 +135,12 @@ def plot_corner(
     -------
     Figure
         The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``draws`` is not two-dimensional or is empty, if ``names`` does not have one entry per
+        column, or if any column contains non-finite values.
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)
@@ -284,6 +290,8 @@ def plot_correlations(
 
     Correlations are dimensionless, so the labels carry no units. A constant column has no defined
     correlation with anything; its cells are shown greyed out and marked "n/a" rather than failing.
+    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or
+    is empty, or if ``names`` does not have one entry per column.
 
     Parameters
     ----------
@@ -301,12 +309,6 @@ def plot_correlations(
     -------
     Figure
         The matplotlib Figure.
-
-    Raises
-    ------
-    ValueError
-        If ``draws`` is not two-dimensional or is empty, or if ``names`` does not have one entry
-        per column.
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)

@@ -277,6 +277,7 @@ class PosteriorSampler:
         credible intervals; if they do not, the chain is too short to have converged.
         """
         reporter = _install_progress_reporter(progress, sampler_options)
+        completed = False
         try:
             results = self._run(
                 parameters=parameters,
@@ -284,12 +285,10 @@ class PosteriorSampler:
                     samples=samples, burn=burn, thin=thin, population=population, **sampler_options
                 ),
             )
-        except BaseException:
+            completed = True
+        finally:
             if reporter is not None:
-                reporter.close(completed=False)
-            raise
-        if reporter is not None:
-            reporter.close(completed=True)
+                reporter.close(completed=completed)
         return results
 
     def extend(
@@ -326,18 +325,19 @@ class PosteriorSampler:
         ------
         RuntimeError
             If there is no chain to extend, or the previous run failed and left no results.
-        ValueError
-            If the model or data changed since the chain was started, or this run's parameters
-            differ from the ones the chain holds.
 
         Notes
         -----
+        A ``ValueError`` propagates from the run guards if the model or data changed since the
+        chain was started, or if this run's parameters differ from the ones the chain holds.
+
         Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's global
         random state and exposes no seed control.
         """
         if self._sampler is None:
             raise RuntimeError('No chain to extend. Call sample() or load() first.')
         reporter = _install_progress_reporter(progress, sampler_options)
+        completed = False
         try:
             results = self._run(
                 parameters=parameters,
@@ -346,12 +346,10 @@ class PosteriorSampler:
                 ),
                 reuse_sampler=True,
             )
-        except BaseException:
+            completed = True
+        finally:
             if reporter is not None:
-                reporter.close(completed=False)
-            raise
-        if reporter is not None:
-            reporter.close(completed=True)
+                reporter.close(completed=completed)
         return results
 
     def _run(
@@ -1041,8 +1039,7 @@ class PosteriorSampler:
                 parameter if isinstance(parameter, str) else getattr(parameter, 'name', '?')
             )
             raise ValueError(
-                f'No sampled parameter named {requested!r}. '
-                f'Available: {", ".join(sorted(names))}.'
+                f'No sampled parameter named {requested!r}. Available: {", ".join(sorted(names))}.'
             )
         return matches[0]
 
