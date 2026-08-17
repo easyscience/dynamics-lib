@@ -22,7 +22,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
     The model consists of a Lorentzian function for each Q-value, where the width is given by
 
-    $$ \Gamma(Q) = \frac{Q^2}{1+D t Q^2}. $$
+    $$ \Gamma(Q) = \frac{\hbar D Q^2}{1+D t Q^2}. $$
 
     where $D$ is the diffusion coefficient and $t$ is the relaxation time. Q is assumed to have
     units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
@@ -87,10 +87,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
-            model with '_Lorentzian' appended. By default, None.
+            model. By default, None.
         lorentzian_display_name : str | None, default=None
-            Display name of the Lorentzian component. If None, it will be set to the display name
-            of the diffusion model with '_Lorentzian' appended. By default, None
+            Display name of the Lorentzian component. If None, it will be set to the
+            lorentzian_name. By default, None
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
@@ -305,6 +305,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """
         Create ComponentCollection components for the diffusion model at given Q values.
 
+        The created collections are installed on the model (they become the collections returned by
+        ``get_component_collections``), so the returned list is the live one.
+
         Returns
         -------
         list[ComponentCollection]
@@ -361,7 +364,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
             component_collection_list[i].append_component(lorentzian_component)
 
-        return component_collection_list
+        self._component_collections = component_collection_list
+        return self._component_collections
 
     ################################
     # Private methods

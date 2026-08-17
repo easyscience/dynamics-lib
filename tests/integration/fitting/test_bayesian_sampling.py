@@ -18,6 +18,8 @@ import scipp as sc
 
 mpl.use('Agg')
 
+import matplotlib.pyplot as plt
+
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
@@ -192,8 +194,6 @@ class TestRealChain:
 
     def test_plots_render(self, sampled_analysis):
         # WHEN
-        import matplotlib.pyplot as plt
-
         n_parameters = len(sampled_analysis.get_free_parameters())
 
         # THEN

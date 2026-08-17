@@ -420,9 +420,6 @@ class Experiment(EasyDynamicsBase):
                 )
             if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
                 value = int(value)
-                # This line can be removed when scipp resize support
-                # resizing with coordinates
-                dimensions[dim] = value
             if not (isinstance(value, (int, sc.Variable))):
                 raise TypeError(
                     f'Dimension values must be integers or sc.Variable. '

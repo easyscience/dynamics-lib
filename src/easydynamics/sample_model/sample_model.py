@@ -16,6 +16,7 @@ from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 
 
@@ -125,6 +126,32 @@ class SampleModel(ModelBase):
             self._diffusion_models = diffusion_models
 
         Q = _validate_and_convert_Q(Q)
+
+        # Validate (and build) everything else before mutating the passed diffusion models
+        # below, so a failed construction does not leave them changed (their Q set and their
+        # component collections rebuilt).
+        temperature_unit = _validate_unit(temperature_unit)
+        if temperature is None:
+            temperature_parameter = None
+        else:
+            if not isinstance(temperature, Numeric):
+                raise TypeError('temperature must be a number or None')
+
+            if temperature < 0:
+                raise ValueError('temperature must be non-negative')
+            temperature_parameter = Parameter(
+                name='Temperature',
+                value=temperature,
+                unit=temperature_unit,
+                display_name='Temperature',
+                fixed=True,
+            )
+
+        if detailed_balance_settings is None:
+            detailed_balance_settings = DetailedBalanceSettings()
+        elif not isinstance(detailed_balance_settings, DetailedBalanceSettings):
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings or None')
+
         for dm in self.diffusion_models:
             dm.Q = Q  # Ensure diffusion models have the same Q as the SampleModel
 
@@ -137,29 +164,9 @@ class SampleModel(ModelBase):
             Q=Q,
         )
 
-        if temperature is None:
-            self._temperature = None
-        else:
-            if not isinstance(temperature, Numeric):
-                raise TypeError('temperature must be a number or None')
-
-            if temperature < 0:
-                raise ValueError('temperature must be non-negative')
-            self._temperature = Parameter(
-                name='Temperature',
-                value=temperature,
-                unit=temperature_unit,
-                display_name='Temperature',
-                fixed=True,
-            )
+        self._temperature = temperature_parameter
         self._temperature_unit = temperature_unit
-
-        if detailed_balance_settings is None:
-            self._detailed_balance_settings = DetailedBalanceSettings()
-        elif isinstance(detailed_balance_settings, DetailedBalanceSettings):
-            self._detailed_balance_settings = detailed_balance_settings
-        else:
-            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings or None')
+        self._detailed_balance_settings = detailed_balance_settings
 
     # ------------------------------------------------------------------
     # Component management
@@ -326,14 +333,14 @@ class SampleModel(ModelBase):
             self._temperature.value = value
 
     @property
-    def temperature_unit(self) -> str | sc.Unit:
+    def temperature_unit(self) -> str:
         """
         Get the temperature unit.
 
         Returns
         -------
-        str | sc.Unit
-            The unit of the temperature parameter.
+        str
+            The unit of the temperature parameter, normalized to a string.
         """
         return self._temperature_unit
 
@@ -378,6 +385,7 @@ class SampleModel(ModelBase):
         if self.temperature is None:
             raise ValueError('Temperature is not set, cannot convert unit.')
 
+        unit = _validate_unit(unit)  # normalize to str, as easyscience expects
         old_unit = self.temperature.unit
 
         try:
@@ -555,7 +563,13 @@ class SampleModel(ModelBase):
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
                 energy_unit=self.x_unit,
             )
-            y = [yi * DBF for yi in y]
+            if output == 'scipp':
+                # DBF is a plain numpy array (a dimensionless factor when
+                # normalize_detailed_balance is True), so multiply the values and keep the
+                # unit label the collections produced, consistent with numpy output.
+                y = [sc.array(dims=yi.dims, values=yi.values * DBF, unit=yi.unit) for yi in y]
+            else:
+                y = [yi * DBF for yi in y]
 
         return y
 

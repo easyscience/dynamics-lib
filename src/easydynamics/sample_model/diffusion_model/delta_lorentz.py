@@ -179,19 +179,10 @@ class DeltaLorentz(DiffusionModelBase):
         # --------------------------------------------------------------
         self._allow_Q_variation = self._create_Q_variation_dict(allow_Q_variation)
 
-        self._A_0_list = []
-        self._A_1_list = []
-        self._lorentzian_width_list = []
-        if self.Q is not None:
-            if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
-
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
-                    self.lorentzian_width,
-                )
-
-        self._component_collections = self.create_component_collections()
+        # create_component_collections creates the per-Q parameter lists (A_0/A_1 and
+        # lorentzian_width) itself, so the components it builds are backed by the very
+        # parameters stored in those lists.
+        self.create_component_collections()
 
     # ------------------------------------------------------------------
     # Properties
@@ -492,7 +483,13 @@ class DeltaLorentz(DiffusionModelBase):
         self,
     ) -> list[ComponentCollection]:
         r"""
-        Create ComponentCollections  for the DeltaLorentz model at given Q values.
+        Create ComponentCollections for the DeltaLorentz model at given Q values.
+
+        The per-Q parameter lists (A_0/A_1 and lorentzian_width, when Q-variation is enabled) are
+        recreated here so the built components are backed by the very parameters stored in the
+        lists, keeping ``calculate_width``/``calculate_EISF``/``calculate_QISF`` in sync with the
+        components. The created collections are installed on the model (they become the collections
+        returned by ``get_component_collections``), so the returned list is the live one.
 
         Returns
         -------
@@ -501,24 +498,31 @@ class DeltaLorentz(DiffusionModelBase):
             value.
         """
         if self.Q is None:
-            return []
+            self._A_0_list = []
+            self._A_1_list = []
+            self._lorentzian_width_list = []
+            self._component_collections = []
+            return self._component_collections
 
         Q = self.Q.values
 
         if self._allow_Q_variation['A_0'] is True:
-            A_0_list, A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
-            self._A_0_list = A_0_list
-            self._A_1_list = A_1_list
+            self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
+        else:
+            self._A_0_list = []
+            self._A_1_list = []
 
         if self._allow_Q_variation['lorentzian_width'] is True:
-            lorentzian_width_list = self._create_lorentzian_width_parameter_list(
+            self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
                 self.lorentzian_width
             )
-            self._lorentzian_width_list = lorentzian_width_list
+        else:
+            self._lorentzian_width_list = []
 
         component_collection_list = [None] * len(Q)
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
+                name=f'{self.name}_Q{Q_value:.2f}',
                 display_name=f'{self.display_name}_Q{Q_value:.2f}',
                 x_unit=self.x_unit,
                 y_unit=self.y_unit,
@@ -588,7 +592,8 @@ class DeltaLorentz(DiffusionModelBase):
 
             component_collection_list[i].append_component(delta_component)
 
-        return component_collection_list
+        self._component_collections = component_collection_list
+        return self._component_collections
 
     def get_fit_targets(self) -> list[FitTarget]:
         """
@@ -877,8 +882,13 @@ class DeltaLorentz(DiffusionModelBase):
         A_0_list = []
         A_1_list = []
         for _ in range(len(self.Q)):
+            # Like the per-Q width parameters (named '<lorentzian_name> width'), the per-Q
+            # amplitudes carry the model name so they do not collide with other models'
+            # parameters. The name is the same at every Q on purpose: parameters are tracked
+            # across Q by name (unique within a Q, shared across Q).
             a0 = Parameter(
-                name='A_0',
+                name=f'{self.name} A_0',
+                display_name='A_0',
                 value=float(A_0.value),
                 fixed=False,
                 min=0.0,
@@ -886,7 +896,7 @@ class DeltaLorentz(DiffusionModelBase):
             )
 
             a1 = Parameter.from_dependency(
-                name='A_1',
+                name=f'{self.name} A_1',
                 dependency_expression='1 - A_0',
                 dependency_map={'A_0': a0},
             )
@@ -931,27 +941,12 @@ class DeltaLorentz(DiffusionModelBase):
 
     def _on_Q_change(self) -> None:
         """
-        Handle changes to the Q values. Updates the A_0, A_1 and lorentzian_width parameters if
-        they are allowed to vary with Q.
-        """
-        if self.Q is None:
-            self._A_0_list = []
-            self._A_1_list = []
-            self._lorentzian_width_list = []
-        else:
-            if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
-            else:
-                self._A_0_list = []
-                self._A_1_list = []
+        Handle changes to the Q values.
 
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
-                    self.lorentzian_width
-                )
-            else:
-                self._lorentzian_width_list = []
-        self._component_collections = self.create_component_collections()
+        Rebuilds the component collections; the per-Q A_0, A_1 and lorentzian_width parameter lists
+        are recreated inside ``create_component_collections``.
+        """
+        self.create_component_collections()
 
     def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
         """

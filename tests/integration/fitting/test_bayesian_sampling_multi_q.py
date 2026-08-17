@@ -19,6 +19,8 @@ import scipp as sc
 
 mpl.use('Agg')
 
+import matplotlib.pyplot as plt
+
 import easydynamics as edyn
 import easydynamics.sample_model as sm
 
@@ -142,8 +144,6 @@ class TestSimultaneousChain:
 
     def test_plots_render(self, simultaneously_sampled):
         # WHEN
-        import matplotlib.pyplot as plt
-
         n_parameters = len(simultaneously_sampled._chain_parameters())
 
         # THEN

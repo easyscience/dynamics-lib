@@ -184,6 +184,34 @@ class TestPolynomial:
         with pytest.raises(Exception, match='unit must be '):
             polynomial.convert_x_unit(123)
 
+    def test_convert_x_unit_rescales_bounded_coefficient_without_clamping(self):
+        # WHEN a linear coefficient with a lower bound that the converted value would cross
+        # (regression: the value was multiplied in place and easyscience silently clamped
+        # it to the bound, corrupting the coefficient irreversibly)
+        bounded = Parameter(name='c1', value=1.0, min=0.5)
+        polynomial = Polynomial(coefficients=[0.0, bounded], x_unit='meV')
+
+        # THEN
+        polynomial.convert_x_unit('microeV')
+
+        # EXPECT the value and the bound are rescaled together instead of clamping
+        assert bounded.value == pytest.approx(1e-3)
+        assert bounded.min == pytest.approx(0.5e-3)
+        # and the evaluated polynomial is physically unchanged: 1000 microeV = 1 meV
+        assert polynomial.evaluate(np.array([1000.0]))[0] == pytest.approx(1.0)
+
+    def test_convert_y_unit_rescales_bounded_coefficient_without_clamping(self):
+        # WHEN a coefficient with an upper bound that the converted value would cross
+        bounded = Parameter(name='c0', value=1.0, max=2.0)
+        polynomial = Polynomial(coefficients=[bounded], x_unit='meV', y_unit='1/meV')
+
+        # THEN
+        polynomial.convert_y_unit('1/eV')
+
+        # EXPECT the value and the bound are rescaled together instead of clamping
+        assert bounded.value == pytest.approx(1e3)
+        assert bounded.max == pytest.approx(2e3)
+
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
         polynomial_copy = copy(polynomial)
@@ -299,7 +327,9 @@ class TestPolynomial:
         assert np.isclose(p.coefficients[0].value, 1.0)
         assert np.isclose(p.coefficients[1].value, 2.0)
 
-    # --- Serialization ---
+    #############
+    # Serialization
+    #############
 
     def test_to_dict(self, polynomial: Polynomial):
         # WHEN
@@ -359,7 +389,9 @@ class TestPolynomial:
         with pytest.raises(ValueError, match='must be a dictionary representing'):
             Polynomial.from_dict({'not': 'valid'})
 
-    # --- Sparse dict initialization ---
+    #############
+    # Sparse dict initialization
+    #############
 
     def test_sparse_dict_single_term(self):
         # WHEN
@@ -421,7 +453,9 @@ class TestPolynomial:
         assert p.x_unit == 'ueV'
         assert p.y_unit == 'counts'
 
-    # --- add_coefficient ---
+    #############
+    # add_coefficient
+    #############
 
     def test_add_coefficient_increases_degree(self, polynomial: Polynomial):
         # WHEN
@@ -470,7 +504,9 @@ class TestPolynomial:
         # THEN EXPECT: the new coefficient is fittable
         assert len(polynomial.get_all_variables()) == 4
 
-    # --- remove_coefficient ---
+    #############
+    # remove_coefficient
+    #############
 
     def test_remove_coefficient_decreases_degree(self, polynomial: Polynomial):
         # WHEN
@@ -533,10 +569,9 @@ class TestPolynomial:
         assert polynomial.x_unit == 'ueV'
         np.testing.assert_allclose(after, before, rtol=1e-8)
 
-
-def test_suppress_warnings_setter_raises_for_non_bool():
-    # GIVEN a Polynomial
-    p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
-    # WHEN THEN EXPECT
-    with pytest.raises(TypeError, match=r'Suppress_warnings must be True or False'):
-        p.suppress_warnings = 'yes'
+    def test_suppress_warnings_setter_raises_for_non_bool(self):
+        # WHEN a Polynomial
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=r'Suppress_warnings must be True or False'):
+            p.suppress_warnings = 'yes'

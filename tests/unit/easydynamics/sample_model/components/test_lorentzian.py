@@ -124,6 +124,24 @@ class TestLorentzian:
         with pytest.raises(ValueError, match='width must be positive'):
             lorentzian.width = -0.5
 
+    def test_area_setter_out_of_bounds_raises(self, lorentzian: Lorentzian):
+        # WHEN the fixture's area was created non-negative, so it carries min=0
+        original_area = lorentzian.area.value
+
+        # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            lorentzian.area = -1.0
+        assert lorentzian.area.value == pytest.approx(original_area)
+
+    def test_width_setter_below_minimum_raises(self, lorentzian: Lorentzian):
+        # WHEN the width parameter carries an absolute minimum (1e-10)
+        original_width = lorentzian.width.value
+
+        # THEN EXPECT a tiny positive width below the bound raises instead of being clamped
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            lorentzian.width = 1e-12
+        assert lorentzian.width.value == pytest.approx(original_width)
+
     def test_evaluate(self, lorentzian: Lorentzian):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])

@@ -783,6 +783,8 @@ class PosteriorSampler:
         Figure
             The matplotlib Figure.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_trace
 
         results = self._require_results()
@@ -809,6 +811,8 @@ class PosteriorSampler:
         Figure
             The matplotlib Figure.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_corner
 
         results = self._require_results()
@@ -909,6 +913,8 @@ class PosteriorSampler:
         ValueError
             If n_draws is not a positive integer.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import plot_posterior_predictive
 
         if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
@@ -1203,8 +1209,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Notes
         -----
-        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
-        out of range or not an int.
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is out
+        of range or not an int.
         """
         if fit_method not in ('independent', 'simultaneous'):
             raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
@@ -1400,9 +1406,11 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Notes
         -----
-        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
-        out of range or not an int.
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is out
+        of range or not an int.
         """
+        # Deliberately imported lazily, to guard against an import cycle between the
+        # analysis and utils packages.
         from easydynamics.utils.posterior_plotting import corner_with_slider
 
         verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
@@ -1614,9 +1622,9 @@ class MultiQPosteriorSampler(PosteriorSampler):
         -----
         A ``NotImplementedError`` propagates when the latest chain is simultaneous: it binds every
         dataset at once, and no per-Q chain exists for Q_index to pick out. A ``RuntimeError``
-        propagates if a slider is asked for outside a notebook or nothing has been sampled yet,
-        and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of
-        range or not an int.
+        propagates if a slider is asked for outside a notebook or nothing has been sampled yet, and
+        an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of range
+        or not an int.
         """
         if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
             raise ValueError(f'n_draws must be a positive integer. Got {n_draws}.')

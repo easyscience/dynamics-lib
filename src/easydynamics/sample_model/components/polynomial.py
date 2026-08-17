@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Sequence
+from contextlib import suppress
 
 import numpy as np
 import scipp as sc
@@ -379,12 +380,39 @@ class Polynomial(ModelComponent):
         """
         return list(self._coefficients)
 
+    @staticmethod
+    def _rescale_coefficient(param: Parameter, factor: float) -> None:
+        """
+        Rescale a coefficient's value and bounds by a positive factor without clamping.
+
+        The bounds are temporarily widened to infinity so the value assignment cannot be silently
+        clamped by the Parameter's min/max (easyscience clamps out-of-bounds values instead of
+        raising), then the original bounds are rescaled by the same factor.
+
+        Parameters
+        ----------
+        param : Parameter
+            The coefficient Parameter to rescale.
+        factor : float
+            The (strictly positive) rescaling factor.
+        """
+        old_min = param.min
+        old_max = param.max
+        param.min = -np.inf
+        param.max = np.inf
+        param.value = param.value * factor
+        param.min = old_min * factor
+        param.max = old_max * factor
+
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
         Convert the x-axis unit by rescaling coefficients with power-law factors.
 
         Each coefficient ``c_i`` is rescaled by ``(old_scale / new_scale) ** i`` so the evaluated
-        polynomial output is unchanged after the conversion.
+        polynomial output is unchanged after the conversion. The coefficient bounds (min/max) are
+        rescaled by the same factor, so bounded coefficients convert without being clamped. If any
+        step fails, the already-converted coefficients are rolled back best-effort before the
+        exception propagates.
 
         Parameters
         ----------
@@ -400,21 +428,37 @@ class Polynomial(ModelComponent):
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise UnitError('new_x_unit must be a string or a scipp unit.')
 
-        conversion_value_before = self._x_unit_helper.value
-        self._x_unit_helper = sc.to_unit(self._x_unit_helper, unit=new_x_unit)
-        conversion_value_after = self._x_unit_helper.value
-        for i, param in enumerate(self._coefficients):
-            param.value *= (conversion_value_before / conversion_value_after) ** i
+        new_helper = sc.to_unit(self._x_unit_helper, unit=new_x_unit)
+        scale = self._x_unit_helper.value / new_helper.value
 
+        rescaled: list[tuple[Parameter, float]] = []
+        converted = False
+        try:
+            for i, param in enumerate(self._coefficients):
+                factor = scale**i
+                # Exact comparison on purpose: only a factor of exactly 1.0 (same unit, or the
+                # constant term's scale**0) is a guaranteed no-op worth skipping.
+                if factor != 1.0:  # ruff: ignore[float-equality-comparison]
+                    self._rescale_coefficient(param, factor)
+                    rescaled.append((param, factor))
+            converted = True
+        finally:
+            if not converted:
+                for param, factor in rescaled:
+                    with suppress(Exception):
+                        self._rescale_coefficient(param, 1.0 / factor)
+
+        self._x_unit_helper = new_helper
         self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """
         Rescale all coefficients so the evaluated output remains the same physical value.
 
-        All coefficients are multiplied by the conversion factor from ``old_y_unit`` to
-        ``new_y_unit`` so that ``I(x) [new_y_unit]`` represents the same physical quantity as
-        ``I(x) [old_y_unit]``.
+        All coefficients (values and bounds) are multiplied by the conversion factor from
+        ``old_y_unit`` to ``new_y_unit`` so that ``I(x) [new_y_unit]`` represents the same physical
+        quantity as ``I(x) [old_y_unit]``. If any step fails, the already-converted coefficients
+        are rolled back best-effort before the exception propagates.
 
         Parameters
         ----------
@@ -438,8 +482,21 @@ class Polynomial(ModelComponent):
         y_helper_new = sc.to_unit(y_helper, new_y_str)
         scale = y_helper_new.value / y_helper.value
 
-        for param in self._coefficients:
-            param.value *= scale
+        rescaled: list[Parameter] = []
+        converted = False
+        try:
+            for param in self._coefficients:
+                # Exact comparison on purpose: only a scale of exactly 1.0 (converting to the
+                # same unit) is a guaranteed no-op worth skipping.
+                if scale != 1.0:  # ruff: ignore[float-equality-comparison]
+                    self._rescale_coefficient(param, scale)
+                    rescaled.append(param)
+            converted = True
+        finally:
+            if not converted:
+                for param in rescaled:
+                    with suppress(Exception):
+                        self._rescale_coefficient(param, 1.0 / scale)
         self._y_unit = new_y_str
 
     def __repr__(self) -> str:

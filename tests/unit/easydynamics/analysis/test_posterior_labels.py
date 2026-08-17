@@ -11,7 +11,25 @@ def make_parameter(name, unit='meV'):
     return Parameter(name=name, value=1.0, unit=unit)
 
 
-class TestLabelling:
+class _CountingParameter:
+    """A Parameter stand-in that counts how often its name is read."""
+
+    def __init__(self, name, unique_name):
+        self._name = name
+        self.unique_name = unique_name
+        self.name_accesses = 0
+
+    @property
+    def name(self):
+        self.name_accesses += 1
+        return self._name
+
+
+class TestParameterLabels:
+    #############
+    # Labelling
+    #############
+
     def test_unique_names_are_left_alone(self):
         # WHEN nothing is ambiguous, a qualifier would only cost width
         parameters = [make_parameter('area'), make_parameter('width')]
@@ -54,8 +72,10 @@ class TestLabelling:
         # EXPECT
         assert labels.label(first) == 'width'
 
+    #############
+    # Chain columns
+    #############
 
-class TestChainColumns:
     def test_columns_resolve_by_unique_name(self):
         # WHEN
         parameters = [make_parameter('area'), make_parameter('width')]
@@ -131,19 +151,25 @@ class TestChainColumns:
             second.unique_name: 'width (Q_index=1)',
         }
 
+    #############
+    # Cost
+    #############
 
-class TestCost:
     def test_labelling_does_not_rescan_per_parameter(self):
         # WHEN there are many parameters. Computing the name counts per parameter is quadratic,
-        # which was seconds of work for an analysis with many Q values.
-        parameters = [make_parameter(f'p{i // 2}') for i in range(400)]
+        # which was seconds of work for an analysis with many Q values, so labelling one parameter
+        # must not read every parameter's name again.
+        parameters = [_CountingParameter(f'p{i // 2}', f'Parameter_{i}') for i in range(400)]
         labels = ParameterLabels(parameters, qualify=lambda _p: 'q')
+        for parameter in parameters:
+            parameter.name_accesses = 0
 
-        # THEN EXPECT labelling all of them stays cheap
-        import time
-
-        start = time.perf_counter()
+        # THEN
         names = [labels.label(p) for p in parameters]
-        assert time.perf_counter() - start < 0.5
+
+        # EXPECT a bounded number of name reads per label() call: a quadratic implementation
+        # recounting the names inside label() would read all 400 names on every call
+        total_accesses = sum(p.name_accesses for p in parameters)
+        assert total_accesses <= 4 * len(parameters)
         assert len(names) == len(parameters)
         assert np.all([n.endswith('(q)') for n in names])

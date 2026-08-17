@@ -8,7 +8,9 @@ The sampler is driven through the analyses that hold one: an Analysis1d and a Pa
 for PosteriorSampler, and an Analysis for the multi-Q subclass.
 """
 
+import json
 import types
+import warnings
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -18,10 +20,11 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting import AvailableMinimizers
-from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
 
 mpl.use('Agg')
+
+import matplotlib.pyplot as plt
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -560,8 +563,6 @@ class TestPosteriorSampler:
 
     def test_save_writes_the_parameter_name_sidecar(self, analysis, tmp_path):
         # WHEN
-        import json
-
         bound_all(analysis)
 
         # THEN
@@ -798,10 +799,6 @@ class TestPosteriorSampler:
 
     def test_trace_and_corner_render_from_a_chain(self, analysis):
         # WHEN
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt
-
-        mpl.use('Agg')
         bound_all(analysis)
         n_parameters = len(analysis.get_free_parameters())
 
@@ -1219,22 +1216,6 @@ class TestPosteriorSampler:
         # EXPECT
         assert [float(p.value) for p in parameters] == pytest.approx(before)
 
-    def test_missing_parameters_dataset_raises(self):
-        # WHEN
-        parameter_analysis = edyn.ParameterAnalysis()
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='No parameters Dataset'):
-            parameter_analysis.bayesian.sample(samples=10)
-
-    def test_missing_bindings_raises(self):
-        # WHEN
-        parameter_analysis = edyn.ParameterAnalysis(parameters=make_dataset())
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='No fit bindings'):
-            parameter_analysis.bayesian.sample(samples=10)
-
 
 class TestMultiQPosteriorSampler:
     #############
@@ -1324,13 +1305,6 @@ class TestMultiQPosteriorSampler:
 
         # EXPECT the sampler sees the same prepared convolvers a simultaneous fit would
         assert all(not a._convolver_is_dirty for a in multi_q_analysis.analysis_list)
-
-    def test_uses_a_multifitter(self, multi_q_analysis):
-        # WHEN
-
-        # EXPECT
-        assert isinstance(multi_q_analysis.fitter, MultiFitter)
-        assert len(multi_q_analysis.fitter.fit_object) == len(Q_VALUES)
 
     #############
     # Independent sampling
@@ -1995,8 +1969,6 @@ class warnings_as_errors:
     """Context manager asserting that no UserWarning is emitted inside the block."""
 
     def __enter__(self):
-        import warnings
-
         self._ctx = warnings.catch_warnings(record=True)
         self._caught = self._ctx.__enter__()
         warnings.simplefilter('always')

@@ -8,6 +8,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.convolution import Convolution
@@ -20,6 +21,7 @@ from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
 class TestConvolution:
@@ -402,7 +404,7 @@ class TestConvolution:
 
     def test_check_if_pair_is_analytic_raises_with_delta_in_resolution(self, default_convolution):
         """
-        Test that _check_if_pair_is_analytic raises TypeError when
+        Test that _check_if_pair_is_analytic raises ValueError when
         resolution component is DeltaFunction.
         """
         # WHEN
@@ -412,7 +414,7 @@ class TestConvolution:
 
         # THEN EXPECT
         with pytest.raises(
-            TypeError,
+            ValueError,
             match='This is not supported',
         ):
             conv._check_if_pair_is_analytic(
@@ -631,6 +633,251 @@ class TestConvolution:
         # EXPECT: y_unit updated and propagated to sub-convolvers via Convolution.convert_y_unit
         assert conv.y_unit == '1/eV'
         assert conv._analytical_convolver._y_unit == '1/eV'
+
+    #############
+    # Plan invalidation regressions
+    #############
+
+    def test_invalidate_plan_on_change_names_are_real_attributes(self, default_convolution):
+        "Regression: the tracked-attribute set used to contain names that never exist"
+        # WHEN THEN EXPECT every tracked name is an actual attribute of a built convolver
+        for name in Convolution._invalidate_plan_on_change:
+            assert hasattr(default_convolution, name), name
+
+    def test_in_place_sample_append_contributes_to_convolution(self):
+        "Regression: appending to the live sample collection used to leave output unchanged"
+        # WHEN a convolver that has already produced output
+        energy = np.linspace(-10, 10, 1001)
+        sample_components = ComponentCollection(
+            components=[Gaussian(name='G', area=2.0, center=0.1, width=0.4)]
+        )
+        resolution_components = ComponentCollection(
+            components=[Gaussian(name='R', area=1.0, center=0.0, width=0.5)]
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        result_before = conv.convolution()
+
+        # THEN mutating the live sample collection in place
+        conv.sample_components.append_component(
+            Lorentzian(name='L', area=1.0, center=0.0, width=0.3)
+        )
+        result_after = conv.convolution()
+
+        # EXPECT the new component contributes, matching a freshly built convolver
+        fresh = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        assert not np.allclose(result_after, result_before)
+        np.testing.assert_allclose(result_after, fresh.convolution(), rtol=1e-10)
+
+    def test_in_place_resolution_append_contributes_to_convolution(self):
+        "Regression: appending to the live resolution collection used to leave output unchanged"
+        # WHEN a convolver that has already produced output
+        energy = np.linspace(-10, 10, 1001)
+        sample_components = ComponentCollection(
+            components=[Gaussian(name='G', area=2.0, center=0.1, width=0.4)]
+        )
+        resolution_components = ComponentCollection(
+            components=[Gaussian(name='R', area=1.0, center=0.0, width=0.5)]
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        result_before = conv.convolution()
+
+        # THEN mutating the live resolution collection in place
+        conv.resolution_components.append_component(
+            Gaussian(name='R2', area=0.5, center=0.0, width=0.2)
+        )
+        result_after = conv.convolution()
+
+        # EXPECT the new component contributes, matching a freshly built convolver
+        fresh = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        assert not np.allclose(result_after, result_before)
+        np.testing.assert_allclose(result_after, fresh.convolution(), rtol=1e-10)
+
+    def test_detailed_balance_toggle_changes_output(self):
+        "Regression: toggling use_detailed_balance after construction used to be ignored"
+        # WHEN a convolver built with detailed balance off
+        energy = np.linspace(-10, 10, 1001)
+        sample_components = ComponentCollection(
+            components=[Lorentzian(name='L', area=2.0, center=0.0, width=0.4)]
+        )
+        resolution_components = ComponentCollection(
+            components=[Gaussian(name='R', area=1.0, center=0.0, width=0.5)]
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            temperature=300.0,
+            detailed_balance_settings=DetailedBalanceSettings(use_detailed_balance=False),
+        )
+        result_off = conv.convolution()
+
+        # THEN toggling detailed balance on after construction
+        conv.detailed_balance_settings.use_detailed_balance = True
+        result_on = conv.convolution()
+
+        # EXPECT the output changes and matches a convolver built with detailed balance on
+        fresh = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            temperature=300.0,
+            detailed_balance_settings=DetailedBalanceSettings(use_detailed_balance=True),
+        )
+        assert not np.allclose(result_on, result_off)
+        np.testing.assert_allclose(result_on, fresh.convolution(), rtol=1e-10)
+
+    def test_energy_offset_rebind_reaches_sub_convolvers(self):
+        "Regression: rebinding energy_offset used to leave sub-convolvers on the old Parameter"
+        # WHEN a convolver with analytical, numerical and delta components and offset 0
+        energy = np.linspace(-10, 10, 1001)
+        sample_components = ComponentCollection(
+            components=[
+                Gaussian(name='G', area=2.0, center=0.1, width=0.4),
+                DampedHarmonicOscillator(name='DHO', area=2.0, center=1.0, width=0.1),
+                DeltaFunction(name='D', area=1.0, center=0.3),
+            ]
+        )
+        resolution_components = ComponentCollection(
+            components=[Gaussian(name='R', area=1.0, center=0.0, width=0.5)]
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        result_before = conv.convolution()
+
+        # THEN rebinding the offset to a brand-new Parameter
+        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        result_after = conv.convolution()
+
+        # EXPECT every path (analytical, numerical, delta) sees the new offset, matching a
+        # freshly built convolver
+        fresh = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            energy_offset=1.0,
+        )
+        assert not np.allclose(result_after, result_before)
+        np.testing.assert_allclose(result_after, fresh.convolution(), rtol=1e-10)
+
+    #############
+    # Dispatch and validation regressions
+    #############
+
+    def test_subclass_of_analytical_component_convolves_like_base(self):
+        "Regression: a Lorentzian subclass was routed analytically but rejected by dispatch"
+
+        # WHEN a subclass of Lorentzian in the sample model
+        class MyLorentzian(Lorentzian):
+            pass
+
+        energy = np.linspace(-10, 10, 1001)
+        conv = Convolution(
+            energy=energy,
+            sample_components=MyLorentzian(name='MyL', area=2.0, center=0.1, width=0.4),
+            resolution_components=Gaussian(name='R', area=1.0, center=0.0, width=0.5),
+        )
+
+        # THEN it is routed to the analytical convolver and convolved with the base rules
+        result = conv.convolution()
+
+        # EXPECT
+        assert len(conv._analytical_sample_components) == 1
+        reference = Convolution(
+            energy=energy,
+            sample_components=Lorentzian(name='L', area=2.0, center=0.1, width=0.4),
+            resolution_components=Gaussian(name='R2', area=1.0, center=0.0, width=0.5),
+        )
+        np.testing.assert_allclose(result, reference.convolution(), rtol=1e-10)
+
+    def test_empty_resolution_raises(self):
+        "Regression: an empty resolution used to silently produce zeros"
+        # WHEN THEN EXPECT at construction
+        with pytest.raises(ValueError, match=r'resolution_components is empty'):
+            Convolution(
+                energy=np.linspace(-10, 10, 101),
+                sample_components=Gaussian(name='G', area=1.0, center=0.0, width=0.4),
+                resolution_components=ComponentCollection(),
+            )
+
+    def test_emptying_resolution_in_place_raises_on_next_convolution(self, default_convolution):
+        # WHEN the live resolution collection is emptied after construction
+        conv = default_convolution
+        conv.resolution_components.pop('GaussianRes')
+
+        # THEN EXPECT the next convolution rebuilds the plan and refuses to silently
+        # return zeros
+        with pytest.raises(ValueError, match=r'resolution_components is empty'):
+            conv.convolution()
+
+    #############
+    # Registry and label housekeeping
+    #############
+
+    def test_plan_rebuilds_do_not_leak_registry_entries(self, default_convolution):
+        "Regression: every plan rebuild used to register new objects in the global map forever"
+        # WHEN a convolver that has built its plan at least once
+        conv = default_convolution
+        conv.convolution()
+        vertices_before = len(conv._global_object.map.vertices())
+
+        # THEN forcing several full plan rebuilds
+        for _ in range(3):
+            conv._plan_seen_version = None
+            conv.convolution()
+
+        # EXPECT the global map did not grow
+        assert len(conv._global_object.map.vertices()) == vertices_before
+
+    def test_convert_y_unit_updates_plan_collection_labels(self):
+        "Regression: plan-collection y_unit labels used to stay stale until the next rebuild"
+        # WHEN a convolver with analytical, numerical and delta components in 1/meV
+        energy = np.linspace(-10, 10, 1001)
+        sample_components = ComponentCollection(
+            components=[
+                Gaussian(name='G', area=1.0, center=0.0, width=0.4, y_unit='1/meV'),
+                DampedHarmonicOscillator(
+                    name='DHO', area=1.0, center=1.0, width=0.1, y_unit='1/meV'
+                ),
+                DeltaFunction(name='D', area=1.0, center=0.0, y_unit='1/meV'),
+            ],
+            y_unit='1/meV',
+        )
+        resolution_components = ComponentCollection(
+            components=[Gaussian(name='R', area=1.0, center=0.0, width=0.5)]
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            y_unit='1/meV',
+        )
+
+        # THEN
+        conv.convert_y_unit('1/eV')
+
+        # EXPECT the plan collections' labels follow without waiting for a rebuild
+        assert conv._analytical_sample_components.y_unit == '1/eV'
+        assert conv._numerical_sample_components.y_unit == '1/eV'
+        assert conv._delta_sample_components.y_unit == '1/eV'
 
     def test_convert_y_unit_propagates_to_numerical_convolver(self):
         # WHEN: a DHO sample component forces a numerical convolver

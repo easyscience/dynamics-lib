@@ -81,8 +81,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         Raises
         ------
         TypeError
-            If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
-            string or sc.Unit.
+            If sample_components or resolution_components is None, or if temperature is not None, a
+            number, or a Parameter, or if temperature_unit is not a string or sc.Unit.
         """
         super().__init__(
             energy=energy,
@@ -94,6 +94,17 @@ class NumericalConvolutionBase(ConvolutionBase):
             display_name=display_name,
             unique_name=unique_name,
         )
+
+        # ConvolutionBase tolerates None collections, but numerical convolvers cannot
+        # convolve without both models — fail early with a clear error.
+        if self._sample_components is None:
+            raise TypeError(
+                'sample_components must be a ComponentCollection or ModelComponent, not None.'
+            )
+        if self._resolution_components is None:
+            raise TypeError(
+                'resolution_components must be a ComponentCollection or ModelComponent, not None.'
+            )
 
         if temperature is not None and not isinstance(temperature, (Numeric, Parameter)):
             raise TypeError('Temperature must be None, a number or a Parameter.')
@@ -126,10 +137,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         Check whether this convolver's plan is up to date.
 
-        Plan validity is tracked per convolver so several convolvers can share one
-        ConvolutionSettings object: each convolver stores the settings' plan version it last
-        rebuilt against (None after a convolver-local invalidation such as a new energy grid), and
-        the settings bump their version whenever an accuracy knob changes.
+        Plan validity is tracked per convolver so several convolvers can share one settings object:
+        each convolver stores the plan versions of its ConvolutionSettings and
+        DetailedBalanceSettings it last rebuilt against (None after a convolver-local invalidation
+        such as a new energy grid), and the settings bump their versions whenever a knob changes.
+        In addition, a snapshot of the component collections' mutation versions and the
+        energy_offset binding is compared, so in-place mutations of a live collection (e.g.
+        append_component) or rebinding the offset to a new Parameter also invalidate the plan.
 
         Returns
         -------
@@ -139,11 +153,40 @@ class NumericalConvolutionBase(ConvolutionBase):
         seen_version = getattr(self, '_plan_seen_version', None)
         if seen_version is None:
             return False
-        return self.convolution_settings._plan_valid_for(seen_version)  # ruff: ignore[private-member-access]
+        if not self.convolution_settings._plan_valid_for(seen_version):  # ruff: ignore[private-member-access]
+            return False
+        seen_db_version = getattr(self, '_plan_seen_db_version', None)
+        if not self.detailed_balance_settings._plan_valid_for(seen_db_version):  # ruff: ignore[private-member-access]
+            return False
+        return getattr(self, '_plan_seen_state', None) == self._plan_state_snapshot()
 
     def _mark_convolution_plan_current(self) -> None:
         """Record that this convolver's plan matches its current state and settings."""
         self._plan_seen_version = self.convolution_settings._plan_version  # ruff: ignore[private-member-access]
+        self._plan_seen_db_version = self.detailed_balance_settings._plan_version  # ruff: ignore[private-member-access]
+        self._plan_seen_state = self._plan_state_snapshot()
+
+    def _plan_state_snapshot(self) -> tuple:
+        """
+        Snapshot the mutable state the convolution plan was built from.
+
+        Captures the identity and mutation version of the sample and resolution collections (so
+        both rebinding and in-place mutation are detected) and the identity of the energy_offset
+        Parameter (so rebinding to a new Parameter invalidates the plan while numeric assignment
+        mutating the shared Parameter does not).
+
+        Returns
+        -------
+        tuple
+            A comparable snapshot of the plan-relevant state.
+        """
+        return (
+            id(self._sample_components),
+            self._sample_components.version,
+            id(self._resolution_components),
+            self._resolution_components.version,
+            id(self._energy_offset),
+        )
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -196,6 +239,22 @@ class NumericalConvolutionBase(ConvolutionBase):
         ConvolutionBase.energy.fset(self, energy)
         self._plan_seen_version = None
 
+    def convert_x_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the energy axis, energy_offset, and all components to the specified unit, and
+        invalidate this convolver's plan.
+
+        The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+        ConvolutionSettings are unaffected.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The unit of the energy.
+        """
+        super().convert_x_unit(unit)
+        self._plan_seen_version = None
+
     @property
     def upsample_factor(self) -> Numeric | None:
         """
@@ -222,7 +281,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         self.convolution_settings.upsample_factor = factor
 
     @property
-    def extension_factor(self) -> float:
+    def extension_factor(self) -> float | None:
         """
         Get the extension factor.
 
@@ -231,23 +290,24 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Returns
         -------
-        float
-            The extension factor.
+        float | None
+            The extension factor, or None if unset (only valid while upsample_factor is None).
         """
 
         return self.convolution_settings.extension_factor
 
     @extension_factor.setter
-    def extension_factor(self, factor: Numeric) -> None:
+    def extension_factor(self, factor: Numeric | None) -> None:
         """
         Set the extension factor.
 
         The extension factor determines how much the energy range is extended on both sides before
-        convolution. 0.2 means extending by 20% of the original energy span on each side.
+        convolution. 0.2 means extending by 20% of the original energy span on each side. None is
+        accepted but requires upsample_factor to be None as well before the next convolution.
 
         Parameters
         ----------
-        factor : Numeric
+        factor : Numeric | None
             The new extension factor.
         """
         self.convolution_settings.extension_factor = factor
@@ -331,6 +391,9 @@ class NumericalConvolutionBase(ConvolutionBase):
         if not isinstance(value, DetailedBalanceSettings):
             raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
         self._detailed_balance_settings = value
+        # Convolver-local invalidation: other convolvers sharing the new settings object are
+        # unaffected.
+        self._plan_seen_version = None
 
     def _create_energy_grid(
         self,
@@ -352,6 +415,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         EnergyGrid
             The dense grid created by upsampling and extending energy.
         """
+        # Validate up front so both the upsampled and the non-upsampled path raise the same
+        # clear error (a single point has no spacing, so no grid can be built from it).
+        if len(self.energy.values) < 2:
+            raise ValueError('Energy array must have at least two points.')
+
         if self.upsample_factor is None:
             # Check if the array is uniformly spaced.
             energy_diff = np.diff(self.energy.values)
@@ -435,13 +503,22 @@ class NumericalConvolutionBase(ConvolutionBase):
         # Handle ComponentCollection or ModelComponent
         components = model if isinstance(model, ComponentCollection) else [model]
 
+        # Cover plain-width components as well as Voigt-style components with separate
+        # gaussian_width/lorentzian_width parameters.
+        width_attribute_names = ('width', 'gaussian_width', 'lorentzian_width')
+
         for comp in components:
-            if hasattr(comp, 'width'):
-                if comp.width.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
+            for attribute_name in width_attribute_names:
+                width_param = getattr(comp, attribute_name, None)
+                if width_param is None:
+                    continue
+                width_label = attribute_name.replace('_', ' ')
+                if width_param.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
                     warnings.warn(
                         (
-                            f"The width of the {model_name} component '{comp.unique_name}' "
-                            f'({comp.width.value}) is large compared to the span of the input '
+                            f'The {width_label} of the {model_name} component '
+                            f"'{comp.unique_name}' "
+                            f'({width_param.value}) is large compared to the span of the input '
                             f'array ({self._energy_grid.energy_span_dense}). '
                             f'This may lead to inaccuracies in the convolution. '
                             f'Increase extension_factor to improve accuracy.'
@@ -449,11 +526,12 @@ class NumericalConvolutionBase(ConvolutionBase):
                         UserWarning,
                         stacklevel=3,
                     )
-                if comp.width.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
+                if width_param.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
                     warnings.warn(
                         (
-                            f"The width of the {model_name} component '{comp.unique_name}' "
-                            f'({comp.width.value}) is small compared to the spacing of the input '
+                            f'The {width_label} of the {model_name} component '
+                            f"'{comp.unique_name}' "
+                            f'({width_param.value}) is small compared to the spacing of the input '
                             f'array ({self._energy_grid.energy_dense_step}). '
                             f'This may lead to inaccuracies in the convolution. '
                             f'Increase upsample_factor to improve accuracy.'

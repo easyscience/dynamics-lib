@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import warnings
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -132,13 +134,15 @@ class TestSuggestBounds:
             suggest_bounds_for_parameters([make_parameter()], n_sigma='wide')
 
 
-class TestBoundsSuggestionsApply:
+class TestBoundsSuggestions:
+    #############
+    # Applying suggestions
+    #############
+
     def test_apply_sets_bounds_and_reports_changes(self):
-        # WHEN
+        # WHEN nothing has changed yet, since apply has not been called
         parameter = make_parameter(value=10.0, error=0.5)
         suggestions = suggest_bounds_for_parameters([parameter])
-
-        # WHEN nothing has changed until apply is called
         assert parameter.max == np.inf
 
         # THEN
@@ -160,6 +164,45 @@ class TestBoundsSuggestionsApply:
         # EXPECT the unusable suggestion is skipped rather than written
         assert changed == []
         assert parameter.min == -np.inf
+
+    #############
+    # Absurd-bounds warning
+    #############
+
+    def test_applying_a_wildly_wide_bound_warns(self):
+        # WHEN a fit returns an enormous uncertainty, which is what a degenerate parameter looks
+        # like coming out of least squares
+        parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT it is still applied, since it is what the fit implied, but not silently
+        with pytest.warns(UserWarning, match='far wider than the parameter'):
+            changed = suggestions.apply()
+        assert changed == [parameter]
+
+    def test_a_sane_bound_applies_without_warning(self):
+        # WHEN
+        parameter = make_parameter(name='sane', value=10.0, error=0.5)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            suggestions.apply()
+
+    def test_a_zero_valued_parameter_is_not_called_absurd(self):
+        # WHEN there is no magnitude to compare the width against
+        parameter = make_parameter(name='zero', value=0.0, error=1.0)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT no warning, since the ratio is meaningless rather than alarming
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            suggestions.apply()
+
+    #############
+    # Repr and iteration
+    #############
 
     def test_repr_lists_parameters_and_flags_attention(self):
         # WHEN
@@ -347,6 +390,8 @@ class TestSummarizeDraws:
         assert entry.unit == ''
         assert np.isnan(entry.value)
 
+
+class TestPosteriorSummary:
     def test_lookup_of_missing_name_raises(self):
         # WHEN
         summary = summarize_draws(np.zeros((5, 1)), ['x'], [None])
@@ -366,8 +411,6 @@ class TestSummarizeDraws:
         assert 'Gaussian area' in text
         assert 'median' in text
 
-
-class TestPosteriorSummaryContainer:
     def test_len_and_iteration(self):
         # WHEN
         parameters = [make_parameter(name='a'), make_parameter(name='b')]
@@ -381,40 +424,3 @@ class TestPosteriorSummaryContainer:
     def test_repr_with_no_entries(self):
         # WHEN THEN EXPECT
         assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))
-
-
-class TestAbsurdBoundsWarning:
-    def test_applying_a_wildly_wide_bound_warns(self):
-        # WHEN a fit returns an enormous uncertainty, which is what a degenerate parameter looks
-        # like coming out of least squares
-        parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
-        suggestions = suggest_bounds_for_parameters([parameter])
-
-        # THEN EXPECT it is still applied, since it is what the fit implied, but not silently
-        with pytest.warns(UserWarning, match='far wider than the parameter'):
-            changed = suggestions.apply()
-        assert changed == [parameter]
-
-    def test_a_sane_bound_applies_without_warning(self):
-        # WHEN
-        parameter = make_parameter(name='sane', value=10.0, error=0.5)
-        suggestions = suggest_bounds_for_parameters([parameter])
-
-        # THEN EXPECT
-        import warnings as warnings_module
-
-        with warnings_module.catch_warnings():
-            warnings_module.simplefilter('error')
-            suggestions.apply()
-
-    def test_a_zero_valued_parameter_is_not_called_absurd(self):
-        # WHEN there is no magnitude to compare the width against
-        parameter = make_parameter(name='zero', value=0.0, error=1.0)
-        suggestions = suggest_bounds_for_parameters([parameter])
-
-        # THEN EXPECT no warning, since the ratio is meaningless rather than alarming
-        import warnings as warnings_module
-
-        with warnings_module.catch_warnings():
-            warnings_module.simplefilter('error')
-            suggestions.apply()

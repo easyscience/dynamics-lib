@@ -1,12 +1,15 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from collections import Counter
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.variable import Parameter
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -16,6 +19,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 Q_VALUES = [0.5, 1.0, 1.5]
 
@@ -466,11 +470,19 @@ class TestAnalysis:
 
     @pytest.mark.parametrize('include_residuals', [True, False])
     def test_data_and_model_to_datagroup(self, analysis, include_residuals):
-        # WHEN
+        # WHEN a custom energy grid is passed
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
-        datagroup = analysis.data_and_model_to_datagroup(
-            energy=energy, include_residuals=include_residuals
-        )
+
+        # THEN residuals cannot be computed on a custom grid, so they are omitted with a warning
+        if include_residuals:
+            with pytest.warns(UserWarning, match='omitted'):
+                datagroup = analysis.data_and_model_to_datagroup(
+                    energy=energy, include_residuals=include_residuals
+                )
+        else:
+            datagroup = analysis.data_and_model_to_datagroup(
+                energy=energy, include_residuals=include_residuals
+            )
 
         # EXPECT
         assert isinstance(datagroup, sc.DataGroup)
@@ -478,12 +490,20 @@ class TestAnalysis:
         assert 'Model' in datagroup
         assert sc.identical(datagroup['Data'], analysis.experiment.binned_data)
         assert sc.identical(datagroup['Model'], analysis._create_model_array(energy=energy))
-        if include_residuals:
-            assert 'Residuals' in datagroup
-            assert sc.identical(
-                datagroup['Residuals'],
-                analysis.experiment.binned_data - analysis._create_model_array(),
-            )
+        assert 'Residuals' not in datagroup
+
+    def test_data_and_model_to_datagroup_residuals_on_experiment_grid(self, analysis):
+        # WHEN no custom energy grid is given
+
+        # THEN
+        datagroup = analysis.data_and_model_to_datagroup(include_residuals=True)
+
+        # EXPECT residuals present and consistent with the data and model on the same grid
+        assert 'Residuals' in datagroup
+        assert sc.identical(
+            datagroup['Residuals'],
+            analysis.experiment.binned_data - analysis._create_model_array(),
+        )
 
     def test_data_and_model_to_datagroup_no_data_raises(self, analysis):
         # WHEN
@@ -799,6 +819,137 @@ class TestAnalysis:
         for analysis1d in analysis.analysis_list:
             assert analysis1d.convolution_settings.upsample_factor == 7
             assert analysis1d.convolution_settings.extension_factor == pytest.approx(0.3)
+
+    def test_on_detailed_balance_settings_changed(self, analysis):
+        # WHEN the analysis list has been built with the old settings
+        _ = analysis.analysis_list
+        assert analysis._analysis_list_is_dirty is False
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN (this calls _on_detailed_balance_settings_changed internally)
+        analysis.detailed_balance_settings = new_settings
+
+        # EXPECT the parent holds the new settings object and the per-Q analyses are rebuilt
+        # around it, so the change actually reaches every Q index
+        assert analysis.detailed_balance_settings is new_settings
+        assert analysis._analysis_list_is_dirty is True
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.detailed_balance_settings is new_settings
+
+    def test_detailed_balance_settings_change_invalidates_the_fitter(self, analysis):
+        # WHEN
+        original = analysis.fitter
+
+        # THEN
+        analysis.detailed_balance_settings = DetailedBalanceSettings(use_detailed_balance=False)
+
+        # EXPECT
+        assert analysis.fitter is not original
+
+    def test_rebin_invalidates_the_fitter_and_the_sampler(self, analysis):
+        # WHEN the fitter and sampler exist from before the rebin
+        original_fitter = analysis.fitter
+        sampler = analysis.bayesian
+
+        # THEN - energy rebin leaves Q unchanged, so no confirm required
+        with (
+            patch.object(analysis.experiment, 'rebin'),
+            patch.object(sampler, 'invalidate') as mock_invalidate,
+        ):
+            analysis.rebin({'energy': 2})
+
+        # EXPECT neither keeps referencing the pre-rebin Analysis1d objects and data
+        assert analysis.fitter is not original_fitter
+        mock_invalidate.assert_called_once()
+
+    def test_simultaneous_fit_uses_the_configured_fitter(self, analysis):
+        # WHEN the cached fitter has been configured (e.g. its minimizer switched)
+        fake_fitter = MagicMock()
+        fake_fitter.fit.return_value = 'simultaneous_result'
+        analysis._fitter = fake_fitter
+        analysis._fitter_is_dirty = False
+
+        # THEN
+        result = analysis.fit(fit_method='simultaneous')
+
+        # EXPECT the configured fitter object performed the fit, not a throwaway MultiFitter
+        fake_fitter.fit.assert_called_once()
+        assert result == 'simultaneous_result'
+
+    def test_uses_a_multifitter(self, multi_q_analysis):
+        # EXPECT
+        assert isinstance(multi_q_analysis.fitter, MultiFitter)
+        assert len(multi_q_analysis.fitter.fit_object) == len(Q_VALUES)
+
+    def test_get_all_variables(self, analysis):
+        # WHEN
+        extra_par = Parameter(name='extra_par', value=1.0)
+        analysis._extra_parameters = [extra_par]
+
+        # THEN
+        variables = analysis.get_all_variables()
+
+        # EXPECT variables across every Q index plus the extra parameters
+        expected = analysis.sample_model.get_all_variables()
+        expected.extend(analysis.instrument_model.get_all_variables())
+        expected.append(extra_par)
+        assert Counter(variables) == Counter(expected)
+
+    def test_get_all_variables_on_an_empty_analysis(self):
+        # WHEN
+        analysis = Analysis(display_name='Empty')
+
+        # THEN EXPECT no failure and no variables
+        assert analysis.get_all_variables() == []
+        assert analysis.get_parameters_near_bounds() == []
+
+    def test_get_parameters_near_bounds_builds_no_fitter_or_sampler(self, analysis):
+        # WHEN neither the fitter nor the sampler exists yet
+        assert analysis._fitter is None
+        assert analysis._bayesian is None
+
+        # THEN
+        analysis.get_parameters_near_bounds()
+
+        # EXPECT listing parameters did not build them as side effects
+        assert analysis._fitter is None
+        assert analysis._bayesian is None
+
+    #############
+    # The bayesian sampler (the Analysis side of the contract)
+    #############
+
+    def test_bayesian_returns_the_cached_sampler(self, analysis):
+        # THEN
+        sampler = analysis.bayesian
+
+        # EXPECT the same object on second access
+        assert sampler is analysis.bayesian
+
+    def test_bayesian_is_invalidated_when_the_experiment_changes(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+        new_experiment = Experiment(data=analysis.experiment.data.copy(deep=True))
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.experiment = new_experiment
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_the_sample_model_changes(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.sample_model = SampleModel(components=Gaussian())
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
@@ -1173,6 +1324,13 @@ class TestAnalysis:
         assert 'display_name=' in repr_str
         assert 'n_analyses=' in repr_str
 
+    def test_repr_reports_a_current_analysis_count(self, analysis):
+        # WHEN the analysis list has not been built yet
+        assert analysis._analysis_list == []
+
+        # THEN EXPECT repr ensures the list is current instead of reporting a stale count
+        assert 'n_analyses=3' in repr(analysis)
+
     #############
     # Chain parameters and labels
     #############
@@ -1243,8 +1401,6 @@ class TestAnalysis:
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, multi_q_analysis):
         # WHEN a parameter belongs to no Q index of this analysis
-        from easyscience.variable import Parameter
-
         stranger = Parameter(name='Gaussian width', value=1.0)
 
         # EXPECT it is returned unqualified rather than mislabelled

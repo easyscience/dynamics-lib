@@ -12,7 +12,7 @@ from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.exceptions import AmbiguousNameError
 
-ProtectedType_ = TypeVar('T', bound=EasyDynamicsBase | EasyDynamicsModelBase)
+ProtectedType_ = TypeVar('ProtectedType_', bound=EasyDynamicsBase | EasyDynamicsModelBase)
 
 
 class EasyDynamicsList(EasyList[ProtectedType_]):
@@ -49,6 +49,10 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         if display_name is None:
             display_name = unique_name
 
+        # Must exist before super().__init__, which appends the initial items through the
+        # version-bumping mutators below.
+        self._version = 0
+
         super().__init__(
             *args,
             protected_types=protected_types,
@@ -56,6 +60,31 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
             unique_name=unique_name,
             **kwargs,
         )
+
+        # A freshly constructed list always reports version 0, regardless of how many
+        # initial items were added during construction.
+        self._version = 0
+
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
+    @property
+    def version(self) -> int:
+        """
+        Get the mutation version of the list.
+
+        Starts at 0 for a freshly constructed list and is incremented by every mutating operation
+        (append, insert, extend, remove, pop, clear, sort, item assignment and deletion). Consumers
+        can record the version and later compare it to detect in-place mutations without callbacks.
+        Read-only; reading never mutates the list.
+
+        Returns
+        -------
+        int
+            The current mutation version.
+        """
+        return self._version
 
     # ------------------------------------------------------------------
     # List methods
@@ -87,6 +116,7 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
             return
 
         super().insert(index, value)
+        self._bump_version()
 
     def append(self, value: ProtectedType_) -> None:
         """
@@ -126,13 +156,31 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
 
         # Overwritten to update warning
         if isinstance(index, int):
-            return self._data.pop(index)
+            item = self._data.pop(index)
+            self._bump_version()
+            return item
         if isinstance(index, str):
             for i, item in enumerate(self._data):
                 if self._get_key(item) == index:
-                    return self._data.pop(i)
+                    popped = self._data.pop(i)
+                    self._bump_version()
+                    return popped
             raise KeyError(f'No item with name "{index}" found')
         raise TypeError('Index must be an int or str')
+
+    def sort(self, key: object = None, reverse: bool = False) -> None:
+        """
+        Sort the list in place according to the given key function.
+
+        Parameters
+        ----------
+        key : object, default=None
+            Mapping function to sort by.
+        reverse : bool, default=False
+            Whether to reverse the sort order.
+        """
+        super().sort(key=key, reverse=reverse)
+        self._bump_version()
 
     # ------------------------------------------------------------------
     # Other methods
@@ -171,6 +219,30 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _bump_version(self) -> None:
+        """Record that the list was mutated, so version-based consumers rebuild."""
+        self._version += 1
+
+    def _copy_with_items(self, items: list[ProtectedType_]) -> EasyDynamicsList[ProtectedType_]:
+        """
+        Create a new instance of this list class containing the given items.
+
+        Used by slicing. Subclasses whose constructor signature differs from EasyDynamicsList's
+        (e.g. ComponentCollection) must override this so slicing returns a working instance of the
+        same class.
+
+        Parameters
+        ----------
+        items : list[ProtectedType_]
+            The items the new list should contain.
+
+        Returns
+        -------
+        EasyDynamicsList[ProtectedType_]
+            A new list of the same class containing the items.
+        """
+        return self.__class__(items, protected_types=self._protected_types)
 
     def _get_key(self, obj: EasyDynamicsBase | EasyDynamicsModelBase) -> str:
         """
@@ -241,7 +313,7 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         if isinstance(idx, int):
             return self._data[idx]
         if isinstance(idx, slice):
-            return self.__class__(self._data[idx], protected_types=self._protected_types)
+            return self._copy_with_items(self._data[idx])
         if isinstance(idx, str):
             matches = [r for r in self._data if self._get_key(r) == idx]
             if len(matches) == 1:
@@ -251,3 +323,57 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
 
             raise KeyError(f'No item with name "{idx}" found')
         raise TypeError('Index must be an int, slice, or str')
+
+    def __setitem__(self, idx: int | slice, value: ProtectedType_ | list[ProtectedType_]) -> None:
+        """
+        Set an item (or slice of items) in the list.
+
+        Mirrors the duplicate handling of append/insert: assigning an item that is already in the
+        list (to a different position) warns and is ignored.
+
+        Parameters
+        ----------
+        idx : int | slice
+            The index or slice to assign to.
+        value : ProtectedType_ | list[ProtectedType_]
+            The new item (or items, for a slice) to assign. Items must be instances of one of the
+            protected types.
+
+        Notes
+        -----
+        A ``TypeError`` propagates from the type validation or the base assignment if idx or value
+        has an invalid type, and a ``ValueError`` propagates from the base assignment if slice
+        assignment changes the slice length.
+        """
+        if isinstance(idx, int):
+            self._validate_type(value)
+            if value is not self._data[idx] and value in self:
+                warnings.warn(
+                    (
+                        f'Item with name "{self._get_key(value)}" already '
+                        f'in EasyDynamicsList, it will be ignored'
+                    ),
+                    UserWarning,
+                    stacklevel=2,
+                )
+                return
+
+        super().__setitem__(idx, value)
+        self._bump_version()
+
+    def __delitem__(self, idx: int | slice | str) -> None:
+        """
+        Delete an item by index, slice, or name.
+
+        Parameters
+        ----------
+        idx : int | slice | str
+            Index, slice, or name of the item to delete.
+
+        Notes
+        -----
+        A ``KeyError`` propagates from the base deletion if idx is a string that does not match any
+        item, and a ``TypeError`` propagates from it if idx is not an int, slice, or string.
+        """
+        super().__delitem__(idx)
+        self._bump_version()

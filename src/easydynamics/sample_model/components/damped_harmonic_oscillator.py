@@ -130,14 +130,13 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -203,7 +202,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             raise TypeError('width must be a number')
         if float(value) <= 0:
             raise ValueError('width must be positive')
-        self._width.value = value
+        self._set_bounded_parameter_value(self._width, value, 'width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""

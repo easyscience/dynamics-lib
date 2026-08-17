@@ -375,6 +375,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         if not isinstance(value, DetailedBalanceSettings):
             raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
         self._detailed_balance_settings = value
+        self._on_detailed_balance_settings_changed()
 
     @property
     def extra_parameters(self) -> list[Parameter]:
@@ -492,6 +493,11 @@ class AnalysisBase(EasyDynamicsModelBase):
     def _on_convolution_settings_changed(self) -> None:
         """
         For subclasses that implement convolution, this method can be overridden
+        """
+
+    def _on_detailed_balance_settings_changed(self) -> None:
+        """
+        For subclasses that apply detailed balance, this method can be overridden
         """
 
     def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:

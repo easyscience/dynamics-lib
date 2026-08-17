@@ -7536,15 +7536,19 @@ packages:
   requires_dist:
   - darkdetect
   - easyscience>=2.5.1
+  - h5py
   - ipykernel
   - ipympl
   - ipython
   - ipywidgets
   - jupyterlab
   - matplotlib
+  - numpy
   - pixi-kernel
   - plopp
   - pooch
+  - scipp
+  - scipy
   - sympy
   - build ; extra == 'dev'
   - copier ; extra == 'dev'

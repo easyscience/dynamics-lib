@@ -11,7 +11,10 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-EPSILON = 1e-8  # tolerance for bin-edge comparisons
+# Absolute tolerance for deciding whether the center falls inside the x range. It is expressed
+# in the unit x is evaluated in (typically meV), so it only serves to absorb floating-point
+# noise at the grid edges — it is not a physically meaningful width.
+EPSILON = 1e-8
 
 if TYPE_CHECKING:
     import scipp as sc
@@ -121,14 +124,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -184,12 +186,25 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             Zero everywhere, with a single non-zero bin nearest the center when center falls within
             the x range.
 
+        Raises
+        ------
+        ValueError
+            If x_vals contains a single point. A delta function's evaluated height is ``area /
+            bin_width``, and a single point defines no bin width.
+
         Notes
         -----
         When ``center`` falls within the x range, the bin nearest to ``center`` receives ``area /
         bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an identity
         element (handled by the Convolution class).
         """
+        if x_vals.size == 1:
+            raise ValueError(
+                'A DeltaFunction cannot be evaluated at a single x value: its evaluated height '
+                'is area / bin_width, and a single point defines no bin width. Evaluate on a '
+                'grid of at least two x values.'
+            )
+
         center = self._resolve_param_value(self._center, eval_unit)
         area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
@@ -205,14 +220,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             i = np.argmin(np.abs(x_sorted - center))
 
             # left half-width
-            if i == 0:
-                left = x_sorted[1] - x_sorted[0] if x_sorted.size > 1 else 0.5
-            else:
-                left = x_sorted[i] - x_sorted[i - 1]
+            left = x_sorted[i] - x_sorted[i - 1] if i > 0 else x_sorted[1] - x_sorted[0]
 
             # right half-width
             if i == x_sorted.size - 1:
-                right = x_sorted[-1] - x_sorted[-2] if x_sorted.size > 1 else 0.5
+                right = x_sorted[-1] - x_sorted[-2]
             else:
                 right = x_sorted[i + 1] - x_sorted[i]
 

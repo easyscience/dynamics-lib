@@ -9,16 +9,16 @@ for anyone who prefers them; this is only the front door.
 """
 
 from easydynamics.analysis import Analysis
+from easydynamics.analysis import Analysis1d
 from easydynamics.analysis import BoundsSuggestion
 from easydynamics.analysis import BoundsSuggestions
+from easydynamics.analysis import FitBinding
 from easydynamics.analysis import MultiQPosteriorSampler
 from easydynamics.analysis import ParameterAnalysis
 from easydynamics.analysis import ParameterLabels
 from easydynamics.analysis import ParameterPosterior
 from easydynamics.analysis import PosteriorSampler
 from easydynamics.analysis import PosteriorSummary
-from easydynamics.analysis.analysis1d import Analysis1d
-from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes import EasyDynamicsBase
 from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.convolution import Convolution
@@ -42,11 +42,11 @@ from easydynamics.sample_model import Voigt
 from easydynamics.settings import ConvolutionSettings
 from easydynamics.settings import DetailedBalanceSettings
 from easydynamics.utils import detailed_balance_factor
+from easydynamics.utils import hbar
 from easydynamics.utils import plot_corner
 from easydynamics.utils import plot_posterior_predictive
 from easydynamics.utils import plot_trace
 from easydynamics.utils import slicerplot_with_residuals
-from easydynamics.utils.utils import hbar
 
 __all__ = [
     'Analysis',

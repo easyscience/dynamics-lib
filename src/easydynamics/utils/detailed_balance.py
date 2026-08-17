@@ -23,7 +23,7 @@ LARGE_THRESHOLD = 100
 
 
 def detailed_balance_factor(
-    energy: float | list | np.ndarray | sc.Variable,
+    energy: float | list | np.ndarray | sc.Variable | sc.DataArray,
     temperature: float | sc.Variable | Parameter,
     energy_unit: str | sc.Unit = 'meV',
     temperature_unit: str | sc.Unit = 'K',
@@ -37,10 +37,12 @@ def detailed_balance_factor(
 
     Parameters
     ----------
-    energy : float | list | np.ndarray | sc.Variable
-        The energy transfer. If number, assumed to be in meV unless energy_unit is set.
+    energy : float | list | np.ndarray | sc.Variable | sc.DataArray
+        The energy transfer. If number, assumed to be in meV unless energy_unit is set. If a
+        DataArray, its single coordinate is used as the energy axis.
     temperature : float | sc.Variable | Parameter
-        The temperature. If number, assumed to be in K unless temperature_unit is set.
+        The temperature. Must be a single scalar value. If number, assumed to be in K unless
+        temperature_unit is set.
     energy_unit : str | sc.Unit, default='meV'
         Unit for energy if energy is given as a number or list.
     temperature_unit : str | sc.Unit, default='K'
@@ -52,13 +54,13 @@ def detailed_balance_factor(
     Raises
     ------
     TypeError
-        If energy or temperature is not a number, list, numpy array, or scipp Variable, or if
-        energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature
-        is not a boolean.
+        If energy or temperature is not one of the accepted types, or if energy_unit or
+        temperature_unit is not a string or scipp Unit, or if divide_by_temperature is not a
+        boolean.
     ValueError
-        If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if
-        temperature is a scipp Variable that does not have a single dimension named 'temperature',
-        or if energy is a scipp Variable that does not have a single dimension named 'energy'.
+        If temperature is negative or is not a single scalar value, if energy is a list or numpy
+        array with more than 1 dimension, or if energy is a scipp DataArray without exactly one
+        coordinate.
     UnitError
         If the provided energy_unit or temperature_unit is invalid, or if the units of energy or
         temperature cannot be converted to the expected units.
@@ -108,6 +110,12 @@ def detailed_balance_factor(
     temperature = _convert_to_scipp_variable(
         value=temperature, unit=temperature_unit, name='temperature'
     )
+
+    if temperature.sizes != {}:
+        raise ValueError(
+            f'temperature must be a single scalar value, '
+            f'got an array with sizes {dict(temperature.sizes)}.'
+        )
 
     if temperature.value < 0:
         raise ValueError('Temperature must be non-negative.')
@@ -190,7 +198,7 @@ def detailed_balance_factor(
 
 
 def _convert_to_scipp_variable(
-    value: float | list | np.ndarray | Parameter | sc.Variable,
+    value: float | list | np.ndarray | Parameter | sc.Variable | sc.DataArray,
     name: str,
     unit: str | None = None,
 ) -> sc.Variable:
@@ -199,9 +207,11 @@ def _convert_to_scipp_variable(
 
     Parameters
     ----------
-    value : float | list | np.ndarray | Parameter | sc.Variable
-        The value to convert. Can be a number, list, numpy array, Parameter, or scipp Variable. If
-        a number or list, the unit must be specified in the unit argument.
+    value : float | list | np.ndarray | Parameter | sc.Variable | sc.DataArray
+        The value to convert. Can be a number, list, numpy array, Parameter, scipp Variable, or
+        scipp DataArray. If a number or list, the unit must be specified in the unit argument. A
+        DataArray must have exactly one coordinate, which is used as the value (consistent with how
+        components treat DataArray input to ``evaluate``).
     name : str
         The name of the variable, used for error messages.
     unit : str | None, default=None
@@ -213,6 +223,9 @@ def _convert_to_scipp_variable(
     ------
     TypeError
         If value is not one of the accepted types, or if unit is not a string when needed.
+    ValueError
+        If value is a list or numpy array with more than 1 dimension, or a DataArray without
+        exactly one coordinate.
     UnitError
         If the provided unit is invalid.
 
@@ -221,6 +234,16 @@ def _convert_to_scipp_variable(
     sc.Variable
         The input value converted to a scipp Variable with appropriate units.
     """
+    if isinstance(value, sc.DataArray):
+        coords = dict(value.coords)
+        if len(coords) != 1:
+            coord_names = ', '.join(coords.keys())
+            raise ValueError(
+                f'scipp.DataArray must have exactly one coordinate to be used as {name}. '
+                f'Found {len(coords)} coordinates: {coord_names}.'
+            )
+        value = next(iter(coords.values()))
+
     if isinstance(value, sc.Variable):
         return value
 
@@ -236,6 +259,11 @@ def _convert_to_scipp_variable(
         if name == 'energy':
             raise TypeError(f'{name} must be a number, list, numpy array or scipp Variable')
         raise TypeError(f'{name} must be a number, list, numpy array, Parameter or scipp Variable')
+
+    if array_value.ndim > 1:
+        raise ValueError(
+            f'{name} must be at most one-dimensional, got {array_value.ndim} dimensions.'
+        )
 
     # Create appropriate scipp variable based on shape
     if array_value.shape == () or (array_value.shape == (1,)):
