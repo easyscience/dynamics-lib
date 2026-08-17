@@ -54,6 +54,17 @@ class TestVerifyQIndex:
         # THEN EXPECT: a non-negative index is accepted; the bound check is deferred
         verify_Q_index(100, None)
 
+    @pytest.mark.parametrize('bool_index', [True, False], ids=['True', 'False'])
+    def test_bool_raises(self, bool_index):
+        # WHEN THEN EXPECT: bools are ints in Python, but Q_index=True must not mean index 1
+        with pytest.raises(TypeError, match='Q_index must be an int'):
+            verify_Q_index(bool_index, None)
+
+    def test_bool_raises_even_when_none_is_allowed(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_index must be an int or None'):
+            verify_Q_index(True, None, allow_none=True)
+
 
 class TestConvertValueUnit:
     def test_same_unit_returns_value_unchanged(self):

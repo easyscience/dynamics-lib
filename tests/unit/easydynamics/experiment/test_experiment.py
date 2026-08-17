@@ -255,6 +255,19 @@ class TestExperiment:
         assert rebinned_data.sizes['Q'] == 10
         assert rebinned_data.sizes['energy'] == 7
 
+    def test_rebin_does_not_mutate_the_callers_dimensions_dict(self, experiment):
+        "Regression: rebin must not write int-converted values back into the caller's dict"
+        # WHEN
+        dimensions = {'Q': 6.0, 'energy': 7}
+        original = dict(dimensions)
+
+        # THEN
+        experiment.rebin(dimensions)
+
+        # EXPECT the caller's dict is unchanged (6.0 not silently replaced by 6)
+        assert dimensions == original
+        assert isinstance(dimensions['Q'], float)
+
     def test_rebin_no_data_raises(self):
         "Test rebinning data when no data is present"
         # WHEN

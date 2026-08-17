@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -120,6 +121,9 @@ class Analysis1d(AnalysisBase):
         self._fit_result = None
         self._convolver = None
         self._convolver_is_dirty = True
+        # The model state_versions the convolver was built against; None until it is built.
+        # Tracked per Analysis1d so sibling analyses sharing a model each notice a change.
+        self._convolver_model_versions = None
         self._fitter = None
         self._fitter_is_dirty = True
         self._bayesian = None
@@ -360,14 +364,33 @@ class Analysis1d(AnalysisBase):
 
         The energy grid is fixed for the duration of a fit or a sampling run, so the convolution
         objects are built once here and reused for every model evaluation.
+
+        Staleness is detected by comparing the models' ``state_version`` against the versions the
+        convolver was built with. Unlike polling the models' dirty flags, reading a version
+        consumes nothing, so every Analysis1d sharing a model notices the change — not just the
+        first one to ask.
         """
-        if (
-            self.sample_model.component_collections_is_dirty
-            or self.instrument_model.resolution_model.component_collections_is_dirty
-        ):
+        current = self._model_state_versions()
+        if None in current or current != self._convolver_model_versions:
             self._convolver_is_dirty = True
 
         self._ensure_convolver_current()
+
+    def _model_state_versions(self) -> tuple:
+        """
+        Get the current ``state_version`` of each model the convolver depends on.
+
+        Returns
+        -------
+        tuple
+            The ``(sample_model, resolution_model)`` state versions. ``None`` entries, for models
+            that do not expose ``state_version`` yet, never compare equal to a recorded build
+            version, so the convolver is then conservatively rebuilt.
+        """
+        return (
+            getattr(self.sample_model, 'state_version', None),
+            getattr(self.instrument_model.resolution_model, 'state_version', None),
+        )
 
     def as_fit_function(
         self,
@@ -467,7 +490,8 @@ class Analysis1d(AnalysisBase):
         plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
         plot_kwargs_defaults.update(kwargs)
 
-        if plot_residuals:
+        # Residuals may have been omitted (with a warning) for a custom energy grid.
+        if plot_residuals and 'Residuals' in data_and_model:
             fig = slicerplot_with_residuals(
                 data_and_model,
                 residuals_key='Residuals',
@@ -539,9 +563,21 @@ class Analysis1d(AnalysisBase):
             raise ValueError('Q_index must be set to create DataGroup.')
 
         energy = self._verify_energy(energy)
+        custom_energy = energy is not None
 
         if energy is None:
             energy = self._masked_energy
+
+        if include_residuals and custom_energy:
+            # Residuals are data - model on the experiment grid; mixing them with a model on a
+            # custom grid would make the DataGroup internally inconsistent.
+            warnings.warn(
+                'Residuals are computed on the experiment energy grid and are omitted '
+                'when a custom energy grid is given.',
+                UserWarning,
+                stacklevel=2,
+            )
+            include_residuals = False
 
         data_and_model = {
             'Data': self.experiment.get_masked_binned_data(Q_index=self.Q_index),
@@ -589,6 +625,7 @@ class Analysis1d(AnalysisBase):
 
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
         """Refresh the pre-built Convolution object for the current Q index."""
+        self._convolver_model_versions = self._model_state_versions()
         self._convolver = self._create_convolver(energy=energy)
         self._convolver_is_dirty = False
 
@@ -660,9 +697,15 @@ class Analysis1d(AnalysisBase):
         super()._on_convolution_settings_changed()
         self._convolver_is_dirty = True
 
+    def _on_detailed_balance_settings_changed(self) -> None:
+        """Mark the convolver as dirty when the detailed balance settings change."""
+        super()._on_detailed_balance_settings_changed()
+        self._convolver_is_dirty = True
+
     def _ensure_convolver_current(self) -> None:
         """Rebuild the convolver if any dependency has changed since it was last built."""
         if self._convolver_is_dirty:
+            self._convolver_model_versions = self._model_state_versions()
             self._convolver = self._create_convolver()
             self._convolver_is_dirty = False
 

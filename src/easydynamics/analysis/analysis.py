@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import warnings
 from copy import copy
 from typing import Any
 
@@ -298,6 +299,10 @@ class Analysis(AnalysisBase):
             self.instrument_model.clear_Q(confirm=True)
 
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        # The cached MultiFitter holds the old Analysis1d objects, and the Sampler binds its data
+        # at construction, so both are stale after a rebin.
+        self._invalidate_fitter()
 
     def calculate(
         self,
@@ -448,9 +453,6 @@ class Analysis(AnalysisBase):
         self._verify_bool(add_background, 'add_background')
         self._verify_bool(plot_residuals, 'plot_residuals')
 
-        if energy is None:
-            energy = self.energy
-
         import plopp as pp
 
         data_and_model = self.data_and_model_to_datagroup(
@@ -464,7 +466,8 @@ class Analysis(AnalysisBase):
         plot_kwargs_defaults['keep'] = 'energy'
         plot_kwargs_defaults.update(kwargs)
 
-        if plot_residuals:
+        # Residuals may have been omitted (with a warning) for a custom energy grid.
+        if plot_residuals and 'Residuals' in data_and_model:
             fig = slicerplot_with_residuals(
                 data_and_model,
                 residuals_key='Residuals',
@@ -531,7 +534,19 @@ class Analysis(AnalysisBase):
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
 
+        custom_energy = energy is not None
         energy = self._verify_energy(energy) if energy is not None else self.energy
+
+        if include_residuals and custom_energy:
+            # Residuals are data - model on the experiment grid; mixing them with a model on a
+            # custom grid would make the DataGroup internally inconsistent.
+            warnings.warn(
+                'Residuals are computed on the experiment energy grid and are omitted '
+                'when a custom energy grid is given.',
+                UserWarning,
+                stacklevel=2,
+            )
+            include_residuals = False
 
         data_and_model = {
             'Data': self.experiment.binned_data,
@@ -766,6 +781,18 @@ class Analysis(AnalysisBase):
         self._owner_index = None
         self._invalidate_fitter()
 
+    def _on_detailed_balance_settings_changed(self) -> None:
+        """
+        Update the detailed balance settings when they change.
+
+        The per-Q analyses hold the settings object they were built with, so replacing it on this
+        Analysis requires rebuilding the list for the new object to reach every Q index.
+        """
+        super()._on_detailed_balance_settings_changed()
+        self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
+
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
         if self._analysis_list_is_dirty and self.Q is not None:
@@ -953,16 +980,35 @@ class Analysis(AnalysisBase):
                 energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
             )
 
-        mf = MultiFitter(
-            fit_objects=self.analysis_list,
-            fit_functions=self.get_fit_functions(),
-        )
-
-        return mf.fit(
+        # Use the configured fitter rather than a throwaway MultiFitter, so minimizer and
+        # tolerance settings applied through the ``fitter`` property take effect.
+        return self.fitter.fit(
             x=xs,
             y=ys,
             weights=ws,
         )
+
+    def get_all_variables(self) -> list[Parameter]:
+        """
+        Get all variables used in the analysis, across every Q index.
+
+        Overrides the easyscience fallback, which scans every attribute of the object and would
+        therefore build the MultiFitter and the Sampler as side effects of merely listing
+        variables (and fail outright on an empty analysis).
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all variables, including any extra parameters.
+        """
+        variables = self.sample_model.get_all_variables()
+
+        variables.extend(self.instrument_model.get_all_variables())
+
+        if self._extra_parameters:
+            variables.extend(self._extra_parameters)
+
+        return variables
 
     def get_fit_functions(self) -> list[callable]:
         """
@@ -1057,9 +1103,10 @@ class Analysis(AnalysisBase):
     #############
 
     def __repr__(self) -> str:
+        # The property ensures the list is current, so n_analyses is not reported stale.
         return (
             f'{self.__class__.__name__}('
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
-            f'n_analyses={len(self._analysis_list)})'
+            f'n_analyses={len(self.analysis_list)})'
         )

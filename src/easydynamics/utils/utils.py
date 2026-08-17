@@ -44,14 +44,15 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
     Raises
     ------
     TypeError
-        If Q_index is not an int (or not an int or None when allow_none=True).
+        If Q_index is not an int (or not an int or None when allow_none=True). Booleans are
+        rejected explicitly, since ``True`` would otherwise silently mean index 1.
     IndexError
         If Q_index is negative, or out of range when Q is available.
     """
     if allow_none and Q_index is None:
         return
 
-    if Q_index is None or not isinstance(Q_index, int):
+    if Q_index is None or isinstance(Q_index, bool) or not isinstance(Q_index, int):
         if allow_none:
             raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
         raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')

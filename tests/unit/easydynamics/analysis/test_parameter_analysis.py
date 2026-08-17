@@ -574,6 +574,38 @@ class TestParameterAnalysis:
         # 6. Return value propagated
         assert result == mock_plot.return_value
 
+    def test_plot_with_empty_names_raises_a_clear_error(self, parameter_analysis):
+        # WHEN / THEN / EXPECT: an empty list is an error, not a bare IndexError
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(ValueError, match='names must not be an empty list'),
+        ):
+            parameter_analysis.plot(names=[])
+
+    def test_plot_evaluates_only_the_bindings_being_plotted(
+        self, parameter_analysis, mock_model_dataset
+    ):
+        # WHEN only the first binding's target is requested
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot'),
+        ):
+            parameter_analysis.plot(names=['parameter1'])
+
+        # EXPECT the diffusion binding is not evaluated for a plot that does not show it
+        parameter_analysis.calculate_model_dataset.assert_called_once_with(
+            [parameter_analysis.bindings[0]]
+        )
+
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
         [
@@ -1139,6 +1171,26 @@ class TestParameterAnalysis:
         np.testing.assert_allclose(y, [1.0, 2.0])
         np.testing.assert_allclose(w, [1.0, 1.0])
 
+    def test_get_xyweight_from_dataset_no_variances_filters_nan_values(self, parameter_analysis):
+        # WHEN a dataset without variances contains a NaN value
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, np.nan], unit='meV'),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        # THEN
+        x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+        # EXPECT the NaN row is filtered like on the with-variances path
+        np.testing.assert_allclose(x, [0.1])
+        np.testing.assert_allclose(y, [1.0])
+        np.testing.assert_allclose(w, [1.0])
+
     def test_get_xyweight_from_dataset_all_nan_variances_raises(self, parameter_analysis):
         # WHEN
         Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
@@ -1278,6 +1330,118 @@ class TestParameterAnalysis:
 
         # EXPECT
         assert len(analysis.fit()) == 1
+
+    def test_swapping_targets_of_the_same_model_rebuilds_the_fitter(self):
+        # WHEN a binding's targets are swapped in place without changing how many there are:
+        # the model list stays identical, so a model-only signature would miss the change and
+        # fit the stale width function against the area data
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets=['width'],
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        analysis.fit()
+        original = analysis._fitter
+
+        # THEN
+        binding.targets = ['area']
+        analysis.fit()
+
+        # EXPECT the fitter was rebuilt for the new target
+        assert analysis._fitter is not original
+
+    def test_append_binding_invalidates_the_fitter(self, analysis):
+        # WHEN
+        original = analysis.fitter
+        new_binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+
+        # THEN
+        analysis.append_binding(new_binding)
+
+        # EXPECT
+        assert analysis.fitter is not original
+
+    def test_clear_bindings_invalidates_the_fitter(self, analysis):
+        # WHEN
+        _ = analysis.fitter
+        assert analysis._fitter_is_dirty is False
+
+        # THEN
+        analysis.clear_bindings()
+
+        # EXPECT
+        assert analysis._fitter_is_dirty is True
+
+    def test_bindings_list_is_copied_from_the_caller(self):
+        # WHEN a caller passes a list and mutates it afterwards
+        binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+        caller_list = [binding]
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=caller_list)
+
+        # THEN
+        caller_list.clear()
+
+        # EXPECT the analysis still holds the binding it was given
+        assert analysis.bindings == [binding]
+
+    #############
+    # The bayesian sampler (the ParameterAnalysis side of the contract)
+    #############
+
+    def test_bayesian_returns_the_cached_sampler(self, analysis):
+        # THEN
+        sampler = analysis.bayesian
+
+        # EXPECT the same object on second access
+        assert sampler is analysis.bayesian
+
+    def test_bayesian_is_invalidated_when_the_parameters_change(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.parameters = make_dataset()
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_the_bindings_change(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.bindings = analysis.bindings[:1]
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_a_binding_is_appended(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+        new_binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.append_binding(new_binding)
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
 
     #############
     # Chain parameters and labels

@@ -270,8 +270,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The results of the fit
         """
 
-        xs, ys, ws, _, models = self._build_fit_inputs()
-        self._invalidate_fitter_if_targets_changed(models)
+        xs, ys, ws, _, _ = self._build_fit_inputs()
+        self._invalidate_fitter_if_targets_changed()
         return self.fitter.fit(x=xs, y=ys, weights=ws)
 
     def _build_fit_inputs(self) -> tuple[list, list, list, list, list]:
@@ -343,43 +343,43 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             A MultiFitter over the per-target models and fit functions.
         """
         _, _, _, funcs, models = self._build_fit_inputs()
-        self._fitter_targets = self._target_signature(models)
+        self._fitter_targets = self._target_signature()
         return MultiFitter(fit_objects=models, fit_functions=funcs)
 
-    @staticmethod
-    def _target_signature(models: list) -> tuple:
+    def _target_signature(self) -> tuple:
         """
-        Summarize which models the fitter was built for, in target order.
+        Summarize what the fitter was built for, in target order.
 
-        Parameters
-        ----------
-        models : list
-            The model behind each fit target.
+        Each entry records the target's model, prediction name, and dataset key. The targets
+        themselves must be part of the signature, not just the models: swapping which predictions
+        a binding fits (``binding.targets = ['width'] -> ['area']``) keeps the model list
+        identical while changing both the frozen fit functions and the data they are fitted
+        against.
 
         Returns
         -------
         tuple
             A comparable signature of the current targets.
         """
-        return tuple(model.unique_name for model in models)
+        return tuple(
+            (binding.model.unique_name, target.name, target.dataset_key)
+            for binding in self.bindings
+            for target in binding.get_targets()
+        )
 
-    def _invalidate_fitter_if_targets_changed(self, models: list) -> None:
+    def _invalidate_fitter_if_targets_changed(self) -> None:
         """
         Rebuild the cached fitter when the bindings no longer resolve to the same targets.
 
         A FitBinding can be edited in place -- ``binding.targets = ...`` -- which this object
-        cannot observe. Doing so changes how many datasets there are, while the cached MultiFitter
-        still holds the old fit functions, and the fit then dies deep inside the minimizer. Compare
-        the targets the fitter was built for against the current ones instead.
-
-        Parameters
-        ----------
-        models : list
-            The model behind each fit target, as currently resolved.
+        cannot observe. Doing so changes which functions are fitted against which datasets, while
+        the cached MultiFitter still holds the old fit functions, and the fit then either dies
+        deep inside the minimizer or silently fits stale functions. Compare the targets the fitter
+        was built for against the current ones instead.
         """
         if self._fitter is None:
             return
-        if self._target_signature(models) != getattr(self, '_fitter_targets', None):
+        if self._target_signature() != getattr(self, '_fitter_targets', None):
             self._invalidate_fitter()
 
     def _sampling_data(self) -> tuple[list, list, list]:
@@ -391,8 +391,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         tuple[list, list, list]
             The ``(x, y, weights)`` triple, one entry per fit target.
         """
-        xs, ys, ws, _, models = self._build_fit_inputs()
-        self._invalidate_fitter_if_targets_changed(models)
+        xs, ys, ws, _, _ = self._build_fit_inputs()
+        self._invalidate_fitter_if_targets_changed()
         return xs, ys, ws
 
     def _chain_parameters(self) -> list[Parameter]:
@@ -445,10 +445,6 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if self.parameters is None:
             raise ValueError('No parameters available to plot.')
 
-        full_model_dataset = None
-        if self.bindings:
-            full_model_dataset = self.calculate_model_dataset(self.bindings)
-
         # If no names are provided, default to plot all parameters that have bindings.
         # If no bindings are provided, plot all parameters.
         if names is None:
@@ -461,6 +457,23 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                     names.extend(target.dataset_key for target in b.get_targets())
 
         names = self._normalize_names(names)
+
+        if not names:
+            raise ValueError(
+                'names must not be an empty list. Pass parameter names to plot, '
+                'or None to plot all parameters with bindings.'
+            )
+
+        # Evaluate only the bindings whose targets are actually being plotted.
+        full_model_dataset = None
+        if self.bindings:
+            relevant_bindings = [
+                b
+                for b in self.bindings
+                if any(target.dataset_key in names for target in b.get_targets())
+            ]
+            if relevant_bindings:
+                full_model_dataset = self.calculate_model_dataset(relevant_bindings)
 
         # Check that the units of the specified parameters are consistent.
         units = [self.parameters[name].unit for name in names]
@@ -589,12 +602,14 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if not isinstance(binding, FitBinding):
             raise TypeError('binding must be a FitBinding object.')
         self._bindings.append(binding)
+        self._invalidate_fitter()
 
     def clear_bindings(self) -> None:
         """
         Clear all FitBindings from the list of bindings for the parameter analysis.
         """
         self._bindings.clear()
+        self._invalidate_fitter()
 
     def get_all_variables(self) -> list:
         """
@@ -638,7 +653,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if isinstance(bindings, FitBinding):
             return [bindings]
         if isinstance(bindings, list) and all(isinstance(b, FitBinding) for b in bindings):
-            return bindings
+            # Copy so later mutation of the caller's list cannot silently change the bindings.
+            return list(bindings)
         raise TypeError('bindings must be a FitBinding, a list of FitBindings, or None.')
 
     def _verify_parameters(self, parameters: sc.Dataset | Analysis | None) -> sc.Dataset | None:
@@ -799,7 +815,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         q_values = self._parameters[parameter_name].coords['Q'].values
 
         if variances is None:
-            return q_values, values, np.ones_like(values)
+            # Apply the same finite filtering as the variance path: NaN values arise when a
+            # parameter is absent for a given Q, and must not leak into a fit.
+            finite_mask = np.isfinite(values)
+            return q_values[finite_mask], values[finite_mask], np.ones_like(values[finite_mask])
 
         # NaN variances arise when a parameter is absent for a given Q (parameters_to_dataset
         # fills np.nan for missing parameters). Filter those rows silently; other non-finite or
