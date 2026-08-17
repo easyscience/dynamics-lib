@@ -7535,12 +7535,13 @@ packages:
   name: easydynamics
   requires_dist:
   - darkdetect
-  - easyscience
+  - easyscience>=2.5.1
   - ipykernel
   - ipympl
   - ipython
   - ipywidgets
   - jupyterlab
+  - matplotlib
   - pixi-kernel
   - plopp
   - pooch

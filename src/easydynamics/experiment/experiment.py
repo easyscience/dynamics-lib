@@ -585,6 +585,21 @@ class Experiment(EasyDynamicsBase):
         var = data.variances
         return x, y, var
 
+    @property
+    def has_variances(self) -> bool:
+        """
+        Whether the data carries variances.
+
+        When it does not, :meth:`extract_x_y_weights_only_finite` falls back to all-ones weights,
+        which are placeholders for the fit rather than measured uncertainties.
+
+        Returns
+        -------
+        bool
+            True when there is data and it has variances.
+        """
+        return self._binned_data is not None and self._binned_data.variances is not None
+
     def extract_x_y_weights_only_finite(
         self, Q_index: int
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:

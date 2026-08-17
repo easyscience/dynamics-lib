@@ -12,6 +12,8 @@ from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.convolution.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
@@ -30,6 +32,10 @@ class Analysis1d(AnalysisBase):
     For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.
 
     Is used primarily in the Analysis class, but can also be used on its own for simpler analyses.
+
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.PosteriorSampler`.
 
     Examples
     --------
@@ -116,6 +122,9 @@ class Analysis1d(AnalysisBase):
         self._fit_result = None
         self._convolver = None
         self._convolver_is_dirty = True
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
 
         super().__init__(
             display_name=display_name,
@@ -245,6 +254,115 @@ class Analysis1d(AnalysisBase):
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
 
+        self._prepare_for_sampling()
+
+        x, y, weights = self._sampling_data()
+        fit_result = self.fitter.fit(x=x, y=y, weights=weights)
+
+        self._fit_result = fit_result
+
+        return fit_result
+
+    @property
+    def fitter(self) -> EasyScienceFitter:
+        """
+        The EasyScience Fitter used for fitting and sampling, built on first use.
+
+        Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
+        directly, e.g. ``analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)``.
+
+        Returns
+        -------
+        EasyScienceFitter
+            The cached Fitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = EasyScienceFitter(
+                fit_object=self,
+                fit_function=self.as_fit_function(),
+            )
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> PosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        PosteriorSampler
+            The sampler, which holds any chain that has been run.
+        """
+        if self._bayesian is None:
+            self._bayesian = PosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the Fitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        self._invalidate_bayesian_sampler()
+
+    def _invalidate_bayesian_sampler(self) -> None:
+        """Mark the Sampler as needing a rebuild, the data having changed."""
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    #############
+    # The contract PosteriorSampler relies on
+    #############
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters.
+
+        A single Q index holds one copy of each parameter, so nothing needs qualifying.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        return ParameterLabels(self._chain_parameters())
+
+    def _sampling_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Get the finite data for the chosen Q index, as used by both fitting and sampling.
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, np.ndarray]
+            The ``(x, y, weights)`` triple.
+        """
+        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
+            Q_index=self._require_Q_index()
+        )
+        return x, y, weights
+
+    def _chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters of this Analysis.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters that are free to vary, which are the ones the sampler explores.
+        """
+        return self.get_free_parameters()
+
+    def _prepare_for_sampling(self) -> None:
+        """
+        Rebuild the convolver if anything it depends on has changed.
+
+        The energy grid is fixed for the duration of a fit or a sampling run, so the convolution
+        objects are built once here and reused for every model evaluation.
+        """
         if (
             self.sample_model.component_collections_is_dirty
             or self.instrument_model.resolution_model.component_collections_is_dirty
@@ -252,20 +370,6 @@ class Analysis1d(AnalysisBase):
             self._convolver_is_dirty = True
 
         self._ensure_convolver_current()
-
-        fitter = EasyScienceFitter(
-            fit_object=self,
-            fit_function=self.as_fit_function(),
-        )
-
-        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
-            Q_index=self._require_Q_index()
-        )
-        fit_result = fitter.fit(x=x, y=y, weights=weights)
-
-        self._fit_result = fit_result
-
-        return fit_result
 
     def as_fit_function(
         self,
@@ -483,6 +587,7 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is not None and self.experiment is not None:
             self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
+        self._invalidate_bayesian_sampler()
 
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
         """Refresh the pre-built Convolution object for the current Q index."""
@@ -523,10 +628,13 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is None:
             self._masked_energy = None
             self._convolver_is_dirty = True
+            self._invalidate_bayesian_sampler()
             return
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver_is_dirty = True
+        # A different Q index means different data, and the Sampler binds its data at construction.
+        self._invalidate_bayesian_sampler()
 
     def _on_experiment_changed(self) -> None:
         """Mark the convolver as dirty when the experiment changes."""
@@ -535,16 +643,19 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is not None and self.experiment is not None:
             self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
+        self._invalidate_bayesian_sampler()
 
     def _on_sample_model_changed(self) -> None:
         """Mark the convolver as dirty when the sample model changes."""
         super()._on_sample_model_changed()
         self._convolver_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
         """Mark the convolver as dirty when the instrument model changes."""
         super()._on_instrument_model_changed()
         self._convolver_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
         """Mark the convolver as dirty when the convolution settings change."""
