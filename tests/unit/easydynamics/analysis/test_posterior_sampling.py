@@ -20,6 +20,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting import AvailableMinimizers
+from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
 
 mpl.use('Agg')
