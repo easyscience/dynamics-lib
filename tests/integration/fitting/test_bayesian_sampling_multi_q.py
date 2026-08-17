@@ -10,6 +10,7 @@ removal, which indexes past the end of its own buffer on chains as short as thes
 """
 
 import warnings
+from unittest.mock import patch
 
 import matplotlib as mpl
 import numpy as np
@@ -179,6 +180,63 @@ class TestIndependentChains:
             ]
             spread = max(independent.minus, independent.plus, simultaneous.plus)
             assert abs(independent.median - simultaneous.median) < 4 * spread
+
+
+class TestIndependentChainWidgets:
+    def test_corner_slider_renders_from_the_real_chains(self, independently_sampled):
+        # WHEN
+        analysis, _ = independently_sampled
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = analysis.bayesian.plot_corner()
+
+        # EXPECT every real chain pre-rendered behind the slider, and moving the slider swapping
+        # the stored renderings rather than drawing anything new
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+        first_bytes = image.value
+        slider.value = 1
+        assert image.value != first_bytes
+        slider.value = 0
+        assert image.value == first_bytes
+
+    def test_predictive_slider_renders_from_the_real_chains(self, independently_sampled):
+        # WHEN the plopp slicer needs an interactive matplotlib backend, switched in for the test
+        import matplotlib.pyplot as plt
+
+        analysis, _ = independently_sampled
+        plt.switch_backend('module://ipympl.backend_nbagg')
+        try:
+            # THEN
+            with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+                fig = analysis.bayesian.plot_posterior_predictive(n_draws=10)
+
+            # EXPECT a plopp figure whose one slider spans the sampled Q values, labelled like
+            # the single-Q predictive plot
+            controls = list(fig.bottom_bar[0].controls.values())
+            assert len(controls) == 1
+            assert controls[0].slider.min == 0
+            assert controls[0].slider.max == len(Q_VALUES) - 1
+            assert fig.ax.get_ylabel().startswith('Intensity')
+        finally:
+            plt.switch_backend('Agg')
+
+    def test_predictive_q_index_plots_one_q_from_its_own_chain(self, independently_sampled):
+        # WHEN
+        import matplotlib.pyplot as plt
+
+        analysis, _ = independently_sampled
+
+        # THEN
+        figure = analysis.bayesian.plot_posterior_predictive(Q_index=1, n_draws=10)
+
+        # EXPECT the single-Q matplotlib figure, with its data and credible band
+        labels = [text.get_text() for text in figure.axes[0].get_legend().get_texts()]
+        assert 'Data' in labels
+        assert any('credible band' in label for label in labels)
+        plt.close('all')
 
 
 class TestParameterAnalysisChain:
