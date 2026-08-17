@@ -294,8 +294,8 @@ def plot_correlations(
 
     Correlations are dimensionless, so the labels carry no units. A constant column has no defined
     correlation with anything; its cells are shown greyed out and marked "n/a" rather than failing.
-    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or
-    is empty, or if ``names`` does not have one entry per column.
+    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or is
+    empty, or if ``names`` does not have one entry per column.
 
     Parameters
     ----------
@@ -601,9 +601,9 @@ def figures_with_slider(figures: dict[int, Figure], description: str = 'Q index'
     Show one pre-rendered figure at a time, with a slider choosing which one.
 
     Every figure is rendered to PNG bytes once, up front, and the slider callback only swaps the
-    stored bytes into an image widget. Moving the slider therefore costs no matplotlib work at
-    all, which keeps it as responsive as the plopp slider on the data plots; re-rendering a
-    figure on every move is what made the previous slider feel sluggish.
+    stored bytes into an image widget. Moving the slider therefore costs no matplotlib work at all,
+    which keeps it as responsive as the plopp slider on the data plots; re-rendering a figure on
+    every move is what made the previous slider feel sluggish.
 
     The figures are closed after rendering, so no backend draws them a second time.
 
@@ -726,11 +726,11 @@ def predictive_with_slider(
     Built on ``plopp.slicer`` over a scipp DataGroup with a Q dimension, so the figure looks and
     handles exactly like ``Analysis.plot_data_and_model``: the data with its error bars, the model
     curves on top, and a Q slider underneath. Plopp draws no filled band for sliced data -- its
-    only spread representation is variance-based error bars -- so the credible band is drawn as
-    the posterior median with a dashed line along each band edge, labelled with the interval.
+    only spread representation is variance-based error bars -- so the credible band is drawn as the
+    posterior median with a dashed line along each band edge, labelled with the interval.
 
-    Rows are laid out on one common energy grid; where a Q has no point (masked or never
-    measured), NaN leaves a gap in the lines rather than inventing a value.
+    Rows are laid out on one common energy grid; where a Q has no point (masked or never measured),
+    NaN leaves a gap in the lines rather than inventing a value.
 
     Parameters
     ----------

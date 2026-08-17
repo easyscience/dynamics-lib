@@ -1198,12 +1198,13 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
-        IndexError
-            If Q_index is negative or out of range.
-        TypeError
-            If Q_index is not an int or None.
         ValueError
-            If fit_method is not "independent" or "simultaneous".
+            If fit_method is not "independent" or "simultaneous", or there are no Q values.
+
+        Notes
+        -----
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
+        out of range or not an int.
         """
         if fit_method not in ('independent', 'simultaneous'):
             raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
@@ -1241,8 +1242,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         Continue the existing simultaneous chain with additional samples.
 
-        The chains from independent sampling live on the per-Q samplers, so each is extended
-        there rather than here.
+        The chains from independent sampling live on the per-Q samplers, so each is extended there
+        rather than here.
 
         Parameters
         ----------
@@ -1265,9 +1266,11 @@ class MultiQPosteriorSampler(PosteriorSampler):
         RuntimeError
             If the latest sampling ran per Q index, so there is no simultaneous chain here to
             extend, or if there is no chain at all.
-        ValueError
-            If the model or data changed since the chain was started, or this run's parameters
-            differ from the ones the chain holds.
+
+        Notes
+        -----
+        A ``ValueError`` propagates from the run guards if the model or data changed since the
+        chain was started, or if this run's parameters differ from the ones the chain holds.
         """
         if self._results is None and self.results_per_q is not None:
             # Without this check, a stale simultaneous sampler would either be extended silently
@@ -1325,8 +1328,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Parameters
         ----------
         labeller : Callable[[Parameter], str] | None, default=None
-            Overrides the label a resolved column is reported under. The default is this
-            analysis' own Q-qualified labels.
+            Overrides the label a resolved column is reported under. The default is this analysis'
+            own Q-qualified labels.
 
         Returns
         -------
@@ -1392,12 +1395,13 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
-        IndexError
-            If Q_index is negative or out of range.
         RuntimeError
             If a slider is asked for outside a notebook.
-        TypeError
-            If Q_index is not an int or None.
+
+        Notes
+        -----
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
+        out of range or not an int.
         """
         from easydynamics.utils.posterior_plotting import corner_with_slider
 
@@ -1436,8 +1440,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         Plot the chain trace of each sampled parameter.
 
-        A simultaneous chain is one trace and is drawn directly. After independent sampling each
-        Q index has its own chain, so the traces are stepped through one at a time: pick one with
+        A simultaneous chain is one trace and is drawn directly. After independent sampling each Q
+        index has its own chain, so the traces are stepped through one at a time: pick one with
         ``Q_index``, or leave it out in a notebook to get a slider.
 
         Parameters
@@ -1453,14 +1457,11 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Figure | VBox
             The matplotlib Figure, or an ipywidgets box with a Q slider.
 
-        Raises
-        ------
-        IndexError
-            If Q_index is negative or out of range.
-        RuntimeError
-            If a slider is asked for outside a notebook, or nothing has been sampled yet.
-        TypeError
-            If Q_index is not an int or None.
+        Notes
+        -----
+        A ``RuntimeError`` propagates if a slider is asked for outside a notebook or nothing has
+        been sampled yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if
+        Q_index is out of range or not an int.
         """
         verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
         per_q = self.results_per_q
@@ -1504,16 +1505,12 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Figure | VBox
             The matplotlib Figure, or an ipywidgets box with a Q slider.
 
-        Raises
-        ------
-        IndexError
-            If Q_index is negative or out of range.
-        RuntimeError
-            If a slider is asked for outside a notebook, or nothing has been sampled yet.
-        TypeError
-            If Q_index is not an int or None.
-        ValueError
-            If the parameter matches no sampled chain column.
+        Notes
+        -----
+        A ``ValueError`` propagates if the parameter matches no sampled chain column, a
+        ``RuntimeError`` if a slider is asked for outside a notebook or nothing has been sampled
+        yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out
+        of range or not an int.
         """
         verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
         per_q = self.results_per_q
@@ -1539,9 +1536,9 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         Plot the Pearson correlation matrix of the sampled parameters.
 
-        A simultaneous chain gives one matrix over every Q's parameters at once. After
-        independent sampling no draw pairs one Q with another, so there is one matrix per chain:
-        pick one with ``Q_index``, or leave it out in a notebook to get a slider.
+        A simultaneous chain gives one matrix over every Q's parameters at once. After independent
+        sampling no draw pairs one Q with another, so there is one matrix per chain: pick one with
+        ``Q_index``, or leave it out in a notebook to get a slider.
 
         Parameters
         ----------
@@ -1556,14 +1553,11 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Figure | VBox
             The matplotlib Figure, or an ipywidgets box with a Q slider.
 
-        Raises
-        ------
-        IndexError
-            If Q_index is negative or out of range.
-        RuntimeError
-            If a slider is asked for outside a notebook, or nothing has been sampled yet.
-        TypeError
-            If Q_index is not an int or None.
+        Notes
+        -----
+        A ``RuntimeError`` propagates if a slider is asked for outside a notebook or nothing has
+        been sampled yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if
+        Q_index is out of range or not an int.
         """
         verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
         per_q = self.results_per_q
@@ -1588,9 +1582,9 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         After independent sampling each Q has its own chain, and its own band: pick one with
         ``Q_index`` for a single matplotlib figure, or leave it out in a notebook to get a plopp
-        figure with a Q slider, looking and handling exactly like
-        ``Analysis.plot_data_and_model``. Plopp draws no filled band, so the slider view shows
-        the posterior median with a dashed line along each band edge instead of a shaded band.
+        figure with a Q slider, looking and handling exactly like ``Analysis.plot_data_and_model``.
+        Plopp draws no filled band, so the slider view shows the posterior median with a dashed
+        line along each band edge instead of a shaded band.
 
         Parameters
         ----------
@@ -1613,17 +1607,16 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
-        IndexError
-            If Q_index is negative or out of range.
-        NotImplementedError
-            If the latest chain is simultaneous: it binds every dataset at once, and no per-Q
-            chain exists for Q_index to pick out.
-        RuntimeError
-            If a slider is asked for outside a notebook, or nothing has been sampled yet.
-        TypeError
-            If Q_index is not an int or None.
         ValueError
             If n_draws is not a positive integer, or credible_interval is out of range.
+
+        Notes
+        -----
+        A ``NotImplementedError`` propagates when the latest chain is simultaneous: it binds every
+        dataset at once, and no per-Q chain exists for Q_index to pick out. A ``RuntimeError``
+        propagates if a slider is asked for outside a notebook or nothing has been sampled yet,
+        and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of
+        range or not an int.
         """
         if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
             raise ValueError(f'n_draws must be a positive integer. Got {n_draws}.')
@@ -1674,9 +1667,9 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         Render one figure per sampled Q index and put them behind a slider.
 
-        Only the Q indices that actually hold a chain get a figure, so the slider cannot land on
-        an empty position. Each figure carries its per-Q Analysis' own display name, which names
-        the Q index.
+        Only the Q indices that actually hold a chain get a figure, so the slider cannot land on an
+        empty position. Each figure carries its per-Q Analysis' own display name, which names the Q
+        index.
 
         Parameters
         ----------
@@ -1708,8 +1701,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Find the display name a Parameter goes by within its own Q's chain.
 
         The same model is repeated per Q, so the name one chain reports a parameter under is the
-        name every other chain reports its own copy under. Resolving through it lets a slider
-        show the matching marginal at every Q even though the Parameter object belongs to one.
+        name every other chain reports its own copy under. Resolving through it lets a slider show
+        the matching marginal at every Q even though the Parameter object belongs to one.
 
         Parameters
         ----------
