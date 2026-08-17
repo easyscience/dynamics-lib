@@ -33,10 +33,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     construction or later via ``create_component_collections``:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    diffusion_model = sm.BrownianTranslationalDiffusion(
+    diffusion_model = edyn.BrownianTranslationalDiffusion(
         scale=1.0,
         diffusion_coefficient=2.4e-9,
         Q=Q,

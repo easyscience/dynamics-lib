@@ -27,11 +27,11 @@ class ResolutionModel(ModelBase):
     ``Polynomial``, and ``Exponential`` components are not allowed in a ResolutionModel:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    resolution_model = sm.ResolutionModel(
-        components=sm.Gaussian(width=0.05, area=1.0),
+    resolution_model = edyn.ResolutionModel(
+        components=edyn.Gaussian(width=0.05, area=1.0),
         Q=Q,
     )
     energy = np.linspace(-2, 2, 100)
@@ -43,7 +43,7 @@ class ResolutionModel(ModelBase):
     After fitting vanadium data with a SampleModel, use ``from_sample_model`` to convert it
     directly into a ResolutionModel:
     ```python
-    resolution_model = sm.ResolutionModel.from_sample_model(fitted_sample_model)
+    resolution_model = edyn.ResolutionModel.from_sample_model(fitted_sample_model)
     ```
     """
 

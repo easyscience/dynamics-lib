@@ -35,10 +35,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     Pass the diffusion coefficient (in m²/s) and relaxation time (in ps) along with Q values:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    diffusion_model = sm.JumpTranslationalDiffusion(
+    diffusion_model = edyn.JumpTranslationalDiffusion(
         scale=1.0,
         diffusion_coefficient=2.4e-9,
         relaxation_time=1.0,

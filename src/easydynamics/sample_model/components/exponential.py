@@ -28,9 +28,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
     By default the center is fixed at 0. A negative ``rate`` gives a decaying exponential:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    exp = sm.Exponential(amplitude=1.0, rate=-0.5)
+    exp = edyn.Exponential(amplitude=1.0, rate=-0.5)
     x = np.linspace(0, 5, 100)
     values = exp.evaluate(x)
     ```
@@ -39,9 +39,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     Pass a numeric value for ``center`` to leave it free during fitting:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    exp = sm.Exponential(amplitude=2.0, center=1.0, rate=-1.0, name='Background')
+    exp = edyn.Exponential(amplitude=2.0, center=1.0, rate=-1.0, name='Background')
     exp.amplitude = 3.0
     exp.rate = -0.5
     ```

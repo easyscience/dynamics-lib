@@ -34,9 +34,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     (at ±center) are captured by the model:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    dho = sm.DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
+    dho = edyn.DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
     x = np.linspace(-20, 20, 200)
     values = dho.evaluate(x)
     ```
@@ -44,9 +44,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     **Modifying parameters after construction**
 
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    dho = sm.DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
+    dho = edyn.DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
     dho.area = 3.0
     dho.center = 8.0
     dho.width = 0.3
