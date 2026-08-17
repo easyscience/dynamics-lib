@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import sys
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -2003,7 +2004,8 @@ class _SamplingProgress:
             return
         if completed:
             self._write('Sampling: done')
-        print(flush=True)
+        sys.stdout.write('\n')
+        sys.stdout.flush()
 
     def _write(self, line: str) -> None:
         """
@@ -2014,7 +2016,8 @@ class _SamplingProgress:
         line : str
             The text to show, padded so it fully overwrites a longer previous line.
         """
-        print(f'\r{line.ljust(self._line_length)}', end='', flush=True)
+        sys.stdout.write(f'\r{line.ljust(self._line_length)}')
+        sys.stdout.flush()
         self._line_length = max(self._line_length, len(line))
         self._printed = True
 
