@@ -10,16 +10,20 @@ loaded from disk. The Analysis classes wrap them in convenience methods.
 
 from __future__ import annotations
 
+import io
+import warnings
 from typing import TYPE_CHECKING
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import colormaps
 from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
     from ipywidgets import VBox
     from matplotlib.figure import Figure
+    from plopp.backends.matplotlib.figure import InteractiveFigure
 
 
 def plot_trace(
@@ -36,9 +40,6 @@ def plot_trace(
     A converged chain looks like a "hairy caterpillar": noisy but stationary, with no drift or long
     excursions. A visible trend means the chain has not reached the typical set and needs a longer
     burn-in.
-
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
-    not have one entry per column, or if ``logp`` does not have one entry per draw.
 
     Parameters
     ----------
@@ -60,6 +61,12 @@ def plot_trace(
     -------
     Figure
         The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``draws`` is not two-dimensional or is empty, if ``names`` does not have one entry per
+        column, or if ``logp`` does not have one entry per draw.
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)
@@ -112,9 +119,6 @@ def plot_corner(
     distribution of a pair: a compact blob means the two are independent, while a narrow diagonal
     ridge means they are correlated and cannot be determined separately from this data.
 
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
-    not have one entry per column, or if any column contains non-finite values.
-
     Parameters
     ----------
     draws : np.ndarray
@@ -135,6 +139,12 @@ def plot_corner(
     -------
     Figure
         The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``draws`` is not two-dimensional or is empty, if ``names`` does not have one entry per
+        column, or if any column contains non-finite values.
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)
@@ -199,6 +209,145 @@ def plot_corner(
 
     if title is not None:
         fig.suptitle(title)
+    fig.tight_layout()
+    return fig
+
+
+def plot_marginal(
+    values: np.ndarray,
+    name: str,
+    unit: str | None = None,
+    title: str | None = None,
+    bins: int = 40,
+    figsize: tuple[float, float] = (8.0, 5.0),
+) -> Figure:
+    """
+    Plot the marginal posterior distribution of a single parameter.
+
+    Shows a density-normalized histogram of the parameter's draws, with the median and the 16th and
+    84th percentiles marked -- the same 68% credible interval the posterior summary reports.
+
+    Parameters
+    ----------
+    values : np.ndarray
+        The parameter's posterior draws, one-dimensional.
+    name : str
+        The label the parameter is reported under.
+    unit : str | None, default=None
+        The parameter's unit, appended to the axis label. Empty or dimensionless units are skipped,
+        since a bare "dimensionless" only adds clutter.
+    title : str | None, default=None
+        Figure title.
+    bins : int, default=40
+        Number of histogram bins.
+    figsize : tuple[float, float], default=(8.0, 5.0)
+        Figure size in inches.
+
+    Returns
+    -------
+    Figure
+        The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``values`` is not one-dimensional, is empty, or contains non-finite entries.
+    """
+    values = np.asarray(values)
+    if values.ndim != 1:
+        raise ValueError(f'values must be one-dimensional. Got shape {values.shape}.')
+    if values.size == 0:
+        raise ValueError('values is empty: there are no samples to plot.')
+    # Caught up front, because numpy would otherwise report it as an obscure
+    # "range [nan, nan]" error from inside the histogram.
+    if not np.isfinite(values).all():
+        raise ValueError(f'values contain non-finite entries (NaN or infinity) for {name}.')
+
+    lower, median, upper = np.percentile(values, [16.0, 50.0, 84.0])
+
+    fig, axis = plt.subplots(figsize=figsize)
+    axis.hist(values, bins=bins, density=True, color='C0', histtype='stepfilled', alpha=0.7)
+    axis.axvline(median, color='C3', lw=1.5, label='Median')
+    axis.axvline(lower, color='C3', lw=1.0, ls='--', label='68% credible interval')
+    axis.axvline(upper, color='C3', lw=1.0, ls='--')
+    axis.set_xlabel(_with_unit(name, [unit] if unit is not None else None, 0))
+    axis.set_ylabel('Probability density')
+    axis.legend()
+    if title is not None:
+        axis.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
+def plot_correlations(
+    draws: np.ndarray,
+    names: list[str],
+    title: str | None = None,
+    figsize: tuple[float, float] | None = None,
+) -> Figure:
+    """
+    Plot the Pearson correlation matrix of the sampled parameters.
+
+    A strongly correlated pair (an entry near +1 or -1) cannot be determined separately from this
+    data: the chain trades one off against the other. The matrix condenses what the off-diagonal
+    panels of the corner plot show, one number per pair, which scales better to many parameters.
+
+    Correlations are dimensionless, so the labels carry no units. A constant column has no defined
+    correlation with anything; its cells are shown greyed out and marked "n/a" rather than failing.
+    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or is
+    empty, or if ``names`` does not have one entry per column.
+
+    Parameters
+    ----------
+    draws : np.ndarray
+        Posterior draws, shape ``(n_draws, n_parameters)``.
+    names : list[str]
+        One label per column of ``draws``.
+    title : str | None, default=None
+        Figure title.
+    figsize : tuple[float, float] | None, default=None
+        Figure size in inches. Defaults to a square that scales with the parameter count, plus room
+        for the colorbar.
+
+    Returns
+    -------
+    Figure
+        The matplotlib Figure.
+    """
+    draws = np.asarray(draws)
+    _verify_draws(draws, names)
+
+    matrix = _correlation_matrix(draws)
+    n = draws.shape[1]
+    if figsize is None:
+        side = max(4.0, 0.9 * n + 2.0)
+        figsize = (side + 1.5, side)
+
+    # A diverging map centred on zero, so positive and negative correlations read as two hues
+    # around a neutral midpoint. Cells with no defined correlation are greyed out.
+    colormap = colormaps['RdBu_r'].with_extremes(bad='0.85')
+
+    fig, axis = plt.subplots(figsize=figsize)
+    image = axis.imshow(np.ma.masked_invalid(matrix), cmap=colormap, vmin=-1.0, vmax=1.0)
+    axis.set_xticks(range(n), labels=names, rotation=45, ha='right', fontsize=8)
+    axis.set_yticks(range(n), labels=names, fontsize=8)
+    for row in range(n):
+        for col in range(n):
+            value = matrix[row, col]
+            defined = bool(np.isfinite(value))
+            axis.text(
+                col,
+                row,
+                f'{value:.2f}' if defined else 'n/a',
+                ha='center',
+                va='center',
+                fontsize=8,
+                # Saturated cells at the ends of the map are too dark for black text.
+                color='white' if defined and abs(value) > 0.6 else 'black',
+            )
+    fig.colorbar(image, ax=axis, label='Pearson correlation')
+    if title is not None:
+        axis.set_title(title)
     fig.tight_layout()
     return fig
 
@@ -315,6 +464,30 @@ def _column_limits(draws: np.ndarray) -> list[tuple[float, float]]:
     return [(float(low), float(high)) for low, high in zip(lows - pads, highs + pads, strict=True)]
 
 
+def _correlation_matrix(draws: np.ndarray) -> np.ndarray:
+    """
+    Compute the Pearson correlation matrix of a chain's columns.
+
+    Parameters
+    ----------
+    draws : np.ndarray
+        Posterior draws, shape ``(n_draws, n_parameters)``.
+
+    Returns
+    -------
+    np.ndarray
+        The ``(n_parameters, n_parameters)`` correlation matrix, two-dimensional even for a
+        single-parameter chain, with NaN wherever a column has zero variance. Numpy's
+        division-by-zero warnings for those columns are suppressed, since the NaNs are handled by
+        the caller rather than being a numerical accident.
+    """
+    with np.errstate(invalid='ignore', divide='ignore'), warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        matrix = np.corrcoef(draws, rowvar=False)
+    # np.corrcoef collapses a single-column input to a 0-d scalar; restore the 1x1 matrix.
+    return np.atleast_2d(np.asarray(matrix, dtype=float))
+
+
 def _unit_for(units: list[str] | None, column: int) -> str:
     """
     Get the unit to show for a column, if it is worth showing.
@@ -423,6 +596,66 @@ def _verify_draws(draws: np.ndarray, names: list[str]) -> None:
         )
 
 
+def figures_with_slider(figures: dict[int, Figure], description: str = 'Q index') -> VBox:
+    """
+    Show one pre-rendered figure at a time, with a slider choosing which one.
+
+    Every figure is rendered to PNG bytes once, up front, and the slider callback only swaps the
+    stored bytes into an image widget. Moving the slider therefore costs no matplotlib work at all,
+    which keeps it as responsive as the plopp slider on the data plots; re-rendering a figure on
+    every move is what made the previous slider feel sluggish.
+
+    The figures are closed after rendering, so no backend draws them a second time.
+
+    Parameters
+    ----------
+    figures : dict[int, Figure]
+        Mapping of slider position to the matplotlib Figure shown there. Only these positions are
+        offered, so the slider cannot land on an index with nothing to show.
+    description : str, default='Q index'
+        Label shown next to the slider.
+
+    Returns
+    -------
+    VBox
+        An ipywidgets box holding the image and, under it, the slider.
+
+    Raises
+    ------
+    ValueError
+        If no figures are given.
+    """
+    import ipywidgets as widgets
+
+    if not figures:
+        raise ValueError('No figures to show.')
+
+    indices = sorted(figures)
+    rendered = {}
+    for index in indices:
+        figure = figures[index]
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format='png', bbox_inches='tight')
+        rendered[index] = buffer.getvalue()
+        # Rendered to bytes already, so the figure is closed rather than left for a backend to
+        # draw a second time.
+        plt.close(figure)
+
+    image = widgets.Image(value=rendered[indices[0]], format='png')
+    image.layout.max_width = '100%'
+    # Swapping stored bytes is instant, so the image can follow the slider continuously; there is
+    # no need for the release-to-update behaviour an expensive redraw would force.
+    slider = widgets.SelectionSlider(
+        options=indices,
+        value=indices[0],
+        description=description,
+        continuous_update=True,
+    )
+    slider.observe(lambda change: setattr(image, 'value', rendered[change['new']]), names='value')
+    # Slider under the figure, matching where plopp puts its slicer controls.
+    return widgets.VBox([image, slider])
+
+
 def corner_with_slider(
     chains: dict[int, dict],
     title: str | None = None,
@@ -433,7 +666,8 @@ def corner_with_slider(
 
     Chains sampled separately share no draws, so there is no joint distribution across them to
     plot. Stepping through them one at a time shows the correlations that were actually sampled,
-    which is what a single combined figure could not do honestly.
+    which is what a single combined figure could not do honestly. The figures are pre-rendered
+    through :func:`figures_with_slider`, so the slider moves without re-drawing anything.
 
     Parameters
     ----------
@@ -448,53 +682,152 @@ def corner_with_slider(
     Returns
     -------
     VBox
-        An ipywidgets box holding the slider and the figure.
+        An ipywidgets box holding the figure and the slider.
 
     Raises
     ------
     ValueError
         If no chains are given.
     """
-    import ipywidgets as widgets
-
     if not chains:
         raise ValueError('No chains to plot.')
 
-    indices = sorted(chains)
-    output = widgets.Output()
-
-    def draw(index: int) -> None:
-        """
-        Render the corner plot for one chain.
-
-        Parameters
-        ----------
-        index : int
-            The chain to draw.
-        """
-        chain = chains[index]
-        figure = plot_corner(
+    figures = {
+        index: plot_corner(
             draws=chain['draws'],
             names=chain['names'],
             units=chain.get('units'),
             title=title if title is None else f'{title} (Q index {index})',
             **kwargs,
         )
-        # append_display_data rather than the `with output:` context manager, which captures
-        # nothing under some kernels and would leave the slider with a blank panel beside it.
-        output.outputs = ()
-        output.append_display_data(figure)
-        # Rendered into the widget already, so the figure is closed rather than left for a backend
-        # to draw a second time.
-        plt.close(figure)
+        for index, chain in chains.items()
+    }
+    return figures_with_slider(figures)
 
-    slider = widgets.SelectionSlider(
-        options=indices,
-        value=indices[0],
-        description='Q index',
-        continuous_update=False,
-    )
-    slider.observe(lambda change: draw(change['new']), names='value')
-    draw(indices[0])
-    # Slider under the figure, matching where plopp puts its slicer controls.
-    return widgets.VBox([output, slider])
+
+def predictive_with_slider(
+    energy: np.ndarray,
+    q_values: np.ndarray,
+    y: np.ndarray,
+    lower: np.ndarray,
+    median: np.ndarray,
+    upper: np.ndarray,
+    y_variances: np.ndarray | None = None,
+    energy_unit: str | None = None,
+    q_unit: str | None = None,
+    ylabel: str | None = None,
+    title: str | None = None,
+    credible_interval: float = 68.0,
+    **kwargs: dict[str, Any],
+) -> InteractiveFigure:
+    """
+    Plot per-Q posterior-predictive bands behind a plopp Q slider.
+
+    Built on ``plopp.slicer`` over a scipp DataGroup with a Q dimension, so the figure looks and
+    handles exactly like ``Analysis.plot_data_and_model``: the data with its error bars, the model
+    curves on top, and a Q slider underneath. Plopp draws no filled band for sliced data -- its
+    only spread representation is variance-based error bars -- so the credible band is drawn as the
+    posterior median with a dashed line along each band edge, labelled with the interval.
+
+    Rows are laid out on one common energy grid; where a Q has no point (masked or never measured),
+    NaN leaves a gap in the lines rather than inventing a value.
+
+    Parameters
+    ----------
+    energy : np.ndarray
+        The common energy grid, one column per point.
+    q_values : np.ndarray
+        The Q value of each row, shown on the slider.
+    y : np.ndarray
+        Observed values, shape ``(len(q_values), len(energy))``, NaN where a Q has no point.
+    lower : np.ndarray
+        Lower band edge per Q, same shape as ``y``.
+    median : np.ndarray
+        Posterior median prediction per Q, same shape as ``y``.
+    upper : np.ndarray
+        Upper band edge per Q, same shape as ``y``.
+    y_variances : np.ndarray | None, default=None
+        Variances of the observed values, drawn as error bars when given.
+    energy_unit : str | None, default=None
+        Unit of the energy grid, shown on the horizontal axis.
+    q_unit : str | None, default=None
+        Unit of the Q values, shown beside the slider.
+    ylabel : str | None, default=None
+        Label for the dependent axis.
+    title : str | None, default=None
+        Figure title.
+    credible_interval : float, default=68.0
+        Width of the credible band the edges enclose, as a percentage, used in their labels.
+    **kwargs : dict[str, Any]
+        Forwarded to ``plopp.slicer``, overriding the style defaults.
+
+    Returns
+    -------
+    InteractiveFigure
+        The plopp figure with its Q slider.
+
+    Raises
+    ------
+    ValueError
+        If the arrays do not share the shape ``(len(q_values), len(energy))``, or if
+        ``credible_interval`` is not between 0 and 100.
+    """
+    import plopp as pp
+    import scipp as sc
+
+    if not 0 < credible_interval < 100:
+        raise ValueError(f'credible_interval must be between 0 and 100. Got {credible_interval}.')
+    expected = (len(q_values), len(energy))
+    arrays = {'y': y, 'lower': lower, 'median': median, 'upper': upper}
+    if y_variances is not None:
+        arrays['y_variances'] = y_variances
+    for name, array in arrays.items():
+        if np.asarray(array).shape != expected:
+            raise ValueError(f'{name} must have shape {expected}. Got {np.asarray(array).shape}.')
+
+    coords = {
+        'Q': sc.array(dims=['Q'], values=np.asarray(q_values, dtype=float), unit=q_unit),
+        'energy': sc.array(
+            dims=['energy'], values=np.asarray(energy, dtype=float), unit=energy_unit
+        ),
+    }
+
+    def data_array(values: np.ndarray, variances: np.ndarray | None = None) -> sc.DataArray:
+        return sc.DataArray(
+            data=sc.array(
+                dims=['Q', 'energy'],
+                values=np.asarray(values, dtype=float),
+                variances=None if variances is None else np.asarray(variances, dtype=float),
+            ),
+            coords=coords,
+        )
+
+    lower_key = f'{credible_interval:.0f}% band (lower)'
+    upper_key = f'{credible_interval:.0f}% band (upper)'
+    data_group = sc.DataGroup({
+        'Data': data_array(y, y_variances),
+        'Posterior median': data_array(median),
+        lower_key: data_array(lower),
+        upper_key: data_array(upper),
+    })
+
+    # The same styling plot_data_and_model gives its DataGroup: data as open black circles, the
+    # model curves as lines, with the band edges dashed to read as edges rather than curves.
+    style = {
+        'keep': 'energy',
+        'linestyle': {'Data': 'none', 'Posterior median': '-', lower_key: '--', upper_key: '--'},
+        'marker': {'Data': 'o', 'Posterior median': None, lower_key: None, upper_key: None},
+        'color': {'Data': 'black', 'Posterior median': 'C3', lower_key: 'C3', upper_key: 'C3'},
+        'markerfacecolor': {'Data': 'none'},
+    }
+    if title is not None:
+        style['title'] = title
+    style.update(kwargs)
+
+    fig = pp.slicer(data_group, **style)
+    for widget in fig.bottom_bar[0].controls.values():
+        widget.slider_toggler.value = '-o-'
+    if ylabel is not None:
+        fig.ax.set_ylabel(ylabel)
+    fig.autoscale()
+    return fig

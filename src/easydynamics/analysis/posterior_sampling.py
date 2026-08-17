@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import sys
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -29,6 +30,7 @@ from easydynamics.analysis.posterior import parameters_at_bounds
 from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.analysis.posterior import unbounded_parameters
+from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
@@ -40,9 +42,9 @@ if TYPE_CHECKING:
     from easyscience.variable import Parameter
     from ipywidgets import VBox
     from matplotlib.figure import Figure
+    from plopp.backends.matplotlib.figure import InteractiveFigure
 
     from easydynamics.analysis.posterior import BoundsSuggestions
-    from easydynamics.analysis.posterior_labels import ParameterLabels
 
 # Suffix of the sidecar mapping chain columns to stable labels, written next to the BUMPS chain
 # files by save().
@@ -234,6 +236,7 @@ class PosteriorSampler:
         thin: int = 10,
         population: int | None = None,
         parameters: list[Parameter] | list[str] | None = None,
+        progress: bool = False,
         **sampler_options: dict[str, Any],
     ) -> SamplingResults:
         """
@@ -259,6 +262,10 @@ class PosteriorSampler:
             free parameters are held fixed for the run. Holding a parameter fixed is not the same
             as marginalizing over it: the resulting intervals are conditional on those values and
             will be too narrow if the parameters are correlated. The default samples everything.
+        progress : bool, default=False
+            Print a progress line, redrawn in place as the sampler advances and closed with a done
+            marker when the run finishes. Off by default so scripted runs stay quiet; a
+            ``progress_callback`` given in ``sampler_options`` takes precedence over it.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler, e.g. ``sampler_kwargs`` or ``progress_callback``.
 
@@ -269,23 +276,32 @@ class PosteriorSampler:
 
         Notes
         -----
-        Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state
-        and the underlying EasyScience Sampler exposes no seed control, so two identical calls
-        return two different chains. Their summaries should nevertheless agree to well within the
-        reported credible intervals; if they do not, the chain is too short to have converged.
+        Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state and
+        the underlying EasyScience Sampler exposes no seed control, so two identical calls return
+        two different chains. Their summaries should nevertheless agree to well within the reported
+        credible intervals; if they do not, the chain is too short to have converged.
         """
-        return self._run(
-            parameters=parameters,
-            run=lambda sampler: sampler.sample(
-                samples=samples, burn=burn, thin=thin, population=population, **sampler_options
-            ),
-        )
+        reporter = _install_progress_reporter(progress, sampler_options)
+        completed = False
+        try:
+            results = self._run(
+                parameters=parameters,
+                run=lambda sampler: sampler.sample(
+                    samples=samples, burn=burn, thin=thin, population=population, **sampler_options
+                ),
+            )
+            completed = True
+        finally:
+            if reporter is not None:
+                reporter.close(completed=completed)
+        return results
 
     def extend(
         self,
         additional_samples: int = 5000,
         thin: int = 10,
         parameters: list[Parameter] | list[str] | None = None,
+        progress: bool = False,
         **sampler_options: dict[str, Any],
     ) -> SamplingResults:
         """
@@ -300,6 +316,8 @@ class PosteriorSampler:
         parameters : list[Parameter] | list[str] | None, default=None
             The same restriction as in :meth:`sample`. It must leave the chain the same width,
             since BUMPS resumes from a stored chain whose columns are fixed.
+        progress : bool, default=False
+            Print a progress line, redrawn in place as the sampler advances, as in :meth:`sample`.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler.
 
@@ -312,24 +330,32 @@ class PosteriorSampler:
         ------
         RuntimeError
             If there is no chain to extend, or the previous run failed and left no results.
-        ValueError
-            If the model or data changed since the chain was started, or this run's parameters
-            differ from the ones the chain holds.
 
         Notes
         -----
-        Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's
-        global random state and exposes no seed control.
+        A ``ValueError`` propagates from the run guards if the model or data changed since the
+        chain was started, or if this run's parameters differ from the ones the chain holds.
+
+        Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's global
+        random state and exposes no seed control.
         """
         if self._sampler is None:
             raise RuntimeError('No chain to extend. Call sample() or load() first.')
-        return self._run(
-            parameters=parameters,
-            run=lambda sampler: sampler.extend(
-                additional_samples=additional_samples, thin=thin, **sampler_options
-            ),
-            reuse_sampler=True,
-        )
+        reporter = _install_progress_reporter(progress, sampler_options)
+        completed = False
+        try:
+            results = self._run(
+                parameters=parameters,
+                run=lambda sampler: sampler.extend(
+                    additional_samples=additional_samples, thin=thin, **sampler_options
+                ),
+                reuse_sampler=True,
+            )
+            completed = True
+        finally:
+            if reporter is not None:
+                reporter.close(completed=completed)
+        return results
 
     def _run(
         self,
@@ -794,6 +820,65 @@ class PosteriorSampler:
             **kwargs,
         )
 
+    def plot_marginal(self, parameter: Parameter | str, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot the marginal posterior distribution of a single sampled parameter.
+
+        Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
+        and 84th percentiles marked -- the same 68% credible interval :meth:`summary` reports.
+
+        Parameters
+        ----------
+        parameter : Parameter | str
+            The parameter to plot, as a Parameter object or its label.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_marginal`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+        """
+        from easydynamics.utils.posterior_plotting import plot_marginal
+
+        results = self._require_results()
+        column = self._resolve_column(results, parameter)
+        return plot_marginal(
+            values=results.draws[:, column],
+            name=self._display_names(results)[column],
+            unit=self._units(results)[column],
+            title=self._analysis.display_name,
+            **kwargs,
+        )
+
+    def plot_correlations(self, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot the Pearson correlation matrix of the sampled parameters.
+
+        A strongly correlated pair cannot be determined separately from this data. The matrix
+        condenses what the off-diagonal panels of :meth:`plot_corner` show, one number per pair,
+        which scales better to many parameters.
+
+        Parameters
+        ----------
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_correlations`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+        """
+        from easydynamics.utils.posterior_plotting import plot_correlations
+
+        results = self._require_results()
+        return plot_correlations(
+            draws=results.draws,
+            names=self._display_names(results),
+            title=self._analysis.display_name,
+            **kwargs,
+        )
+
     def plot_posterior_predictive(
         self,
         n_draws: int = 200,
@@ -934,6 +1019,53 @@ class PosteriorSampler:
         """
         return self._labels().resolve(results.param_names, self._saved_labels)
 
+    def _resolve_column(self, results: SamplingResults, parameter: Parameter | str) -> int:
+        """
+        Find the chain column holding a parameter's draws.
+
+        Labels are matched against the columns' display names, so the same names the summary and
+        the plots report under are the ones accepted here. Parameter objects are matched through
+        the resolved columns, so a parameter reloaded from a saved chain is found too.
+
+        Parameters
+        ----------
+        results : SamplingResults
+            The results whose columns should be searched.
+        parameter : Parameter | str
+            The parameter to look for, as a Parameter object or its label.
+
+        Returns
+        -------
+        int
+            The index of the column holding the parameter's draws.
+
+        Raises
+        ------
+        TypeError
+            If parameter is neither a Parameter object nor a string.
+        ValueError
+            If the parameter matches no column of the chain.
+        """
+        names = self._display_names(results)
+        if isinstance(parameter, str):
+            matches = [column for column, name in enumerate(names) if name == parameter]
+        elif hasattr(parameter, 'unique_name'):
+            matches = [
+                column
+                for column, candidate in enumerate(self._resolve(results))
+                if candidate is not None and candidate.unique_name == parameter.unique_name
+            ]
+        else:
+            raise TypeError('parameter must be a Parameter object or a label (string).')
+        if not matches:
+            requested = (
+                parameter if isinstance(parameter, str) else getattr(parameter, 'name', '?')
+            )
+            raise ValueError(
+                f'No sampled parameter named {requested!r}. Available: {", ".join(sorted(names))}.'
+            )
+        return matches[0]
+
     def _display_names(self, results: SamplingResults) -> list[str]:
         """
         Get a readable label for each column of a chain.
@@ -1066,12 +1198,13 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
-        IndexError
-            If Q_index is negative or out of range.
-        TypeError
-            If Q_index is not an int or None.
         ValueError
-            If fit_method is not "independent" or "simultaneous".
+            If fit_method is not "independent" or "simultaneous", or there are no Q values.
+
+        Notes
+        -----
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
+        out of range or not an int.
         """
         if fit_method not in ('independent', 'simultaneous'):
             raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
@@ -1109,8 +1242,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         Continue the existing simultaneous chain with additional samples.
 
-        The chains from independent sampling live on the per-Q samplers, so each is extended
-        there rather than here.
+        The chains from independent sampling live on the per-Q samplers, so each is extended there
+        rather than here.
 
         Parameters
         ----------
@@ -1133,9 +1266,11 @@ class MultiQPosteriorSampler(PosteriorSampler):
         RuntimeError
             If the latest sampling ran per Q index, so there is no simultaneous chain here to
             extend, or if there is no chain at all.
-        ValueError
-            If the model or data changed since the chain was started, or this run's parameters
-            differ from the ones the chain holds.
+
+        Notes
+        -----
+        A ``ValueError`` propagates from the run guards if the model or data changed since the
+        chain was started, or if this run's parameters differ from the ones the chain holds.
         """
         if self._results is None and self.results_per_q is not None:
             # Without this check, a stale simultaneous sampler would either be extended silently
@@ -1193,8 +1328,8 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Parameters
         ----------
         labeller : Callable[[Parameter], str] | None, default=None
-            Overrides the label a resolved column is reported under. The default is this
-            analysis' own Q-qualified labels.
+            Overrides the label a resolved column is reported under. The default is this analysis'
+            own Q-qualified labels.
 
         Returns
         -------
@@ -1260,12 +1395,13 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
-        IndexError
-            If Q_index is negative or out of range.
         RuntimeError
             If a slider is asked for outside a notebook.
-        TypeError
-            If Q_index is not an int or None.
+
+        Notes
+        -----
+        An ``IndexError`` or ``TypeError`` propagates from the Q_index validation if Q_index is
+        out of range or not an int.
         """
         from easydynamics.utils.posterior_plotting import corner_with_slider
 
@@ -1300,35 +1436,399 @@ class MultiQPosteriorSampler(PosteriorSampler):
             }
         return corner_with_slider(chains, title=self._analysis.display_name, **kwargs)
 
-    def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
+    def plot_trace(self, Q_index: int | None = None, **kwargs: dict[str, Any]) -> Figure | VBox:
         """
         Plot the chain trace of each sampled parameter.
 
-        Only available for a simultaneous chain, since the per-Q chains are separate runs of
-        different lengths rather than one trace.
+        A simultaneous chain is one trace and is drawn directly. After independent sampling each Q
+        index has its own chain, so the traces are stepped through one at a time: pick one with
+        ``Q_index``, or leave it out in a notebook to get a slider.
 
         Parameters
         ----------
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, which is a single trace already.
         **kwargs : dict[str, Any]
             Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_trace`.
 
         Returns
         -------
-        Figure
-            The matplotlib Figure.
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Notes
+        -----
+        A ``RuntimeError`` propagates if a slider is asked for outside a notebook or nothing has
+        been sampled yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if
+        Q_index is out of range or not an int.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_trace(**kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_trace(**kwargs)
+        self._require_notebook_for_slider(per_q)
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_trace(**kwargs)
+        )
+
+    def plot_marginal(
+        self,
+        parameter: Parameter | str,
+        Q_index: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> Figure | VBox:
+        """
+        Plot the marginal posterior distribution of a single sampled parameter.
+
+        A simultaneous chain holds every Q's parameters under Q-qualified labels, so the label
+        picks the Q as well (``'Gaussian width (Q_index=1)'``). After independent sampling the
+        chains are per-Q and the parameter goes by its plain label in each; pick a chain with
+        ``Q_index``, or leave it out in a notebook to step through the Q values with a slider.
+
+        Parameters
+        ----------
+        parameter : Parameter | str
+            The parameter to plot, as a Parameter object or its label. On the slider path a
+            Parameter object is resolved to its display name first, so the matching parameter of
+            every Q is shown even though the object itself belongs to one Q.
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, whose labels carry the Q index already.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_marginal`.
+
+        Returns
+        -------
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Notes
+        -----
+        A ``ValueError`` propagates if the parameter matches no sampled chain column, a
+        ``RuntimeError`` if a slider is asked for outside a notebook or nothing has been sampled
+        yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out
+        of range or not an int.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_marginal(parameter, **kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_marginal(parameter, **kwargs)
+        self._require_notebook_for_slider(per_q)
+        # Resolved to a display name up front, because a Parameter object belongs to one Q only
+        # and every chain must find its own copy under the shared name.
+        label = (
+            parameter
+            if isinstance(parameter, str)
+            else self._shared_display_name(parameter, per_q)
+        )
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_marginal(label, **kwargs)
+        )
+
+    def plot_correlations(
+        self, Q_index: int | None = None, **kwargs: dict[str, Any]
+    ) -> Figure | VBox:
+        """
+        Plot the Pearson correlation matrix of the sampled parameters.
+
+        A simultaneous chain gives one matrix over every Q's parameters at once. After independent
+        sampling no draw pairs one Q with another, so there is one matrix per chain: pick one with
+        ``Q_index``, or leave it out in a notebook to get a slider.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, which already covers every Q.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_correlations`.
+
+        Returns
+        -------
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Notes
+        -----
+        A ``RuntimeError`` propagates if a slider is asked for outside a notebook or nothing has
+        been sampled yet, and an ``IndexError`` or ``TypeError`` from the Q_index validation if
+        Q_index is out of range or not an int.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_correlations(**kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_correlations(**kwargs)
+        self._require_notebook_for_slider(per_q)
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_correlations(**kwargs)
+        )
+
+    def plot_posterior_predictive(
+        self,
+        n_draws: int = 200,
+        credible_interval: float = 68.0,
+        Q_index: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> Figure | InteractiveFigure:
+        """
+        Plot the data against the credible band implied by the posterior.
+
+        After independent sampling each Q has its own chain, and its own band: pick one with
+        ``Q_index`` for a single matplotlib figure, or leave it out in a notebook to get a plopp
+        figure with a Q slider, looking and handling exactly like ``Analysis.plot_data_and_model``.
+        Plopp draws no filled band, so the slider view shows the posterior median with a dashed
+        line along each band edge instead of a shaded band.
+
+        Parameters
+        ----------
+        n_draws : int, default=200
+            How many posterior draws to evaluate the model for, per Q on the slider path. Each
+            costs a full model evaluation.
+        credible_interval : float, default=68.0
+            Width of the credible band, as a percentage.
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_posterior_predictive`
+            for a single figure, or to
+            :func:`easydynamics.utils.posterior_plotting.predictive_with_slider` for the slider.
+
+        Returns
+        -------
+        Figure | InteractiveFigure
+            The matplotlib Figure for one Q, or the plopp figure with a Q slider.
+
+        Raises
+        ------
+        ValueError
+            If n_draws is not a positive integer, or credible_interval is out of range.
+
+        Notes
+        -----
+        A ``NotImplementedError`` propagates when the latest chain is simultaneous: it binds every
+        dataset at once, and no per-Q chain exists for Q_index to pick out. A ``RuntimeError``
+        propagates if a slider is asked for outside a notebook or nothing has been sampled yet,
+        and an ``IndexError`` or ``TypeError`` from the Q_index validation if Q_index is out of
+        range or not an int.
+        """
+        if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
+            raise ValueError(f'n_draws must be a positive integer. Got {n_draws}.')
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_posterior_predictive(
+                n_draws=n_draws, credible_interval=credible_interval, **kwargs
+            )
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_posterior_predictive(
+                n_draws=n_draws, credible_interval=credible_interval, **kwargs
+            )
+        self._require_notebook_for_slider(per_q)
+        return self._predictive_with_q_slider(per_q, n_draws, credible_interval, **kwargs)
+
+    #############
+    # Sliders over the independent per-Q chains
+    #############
+
+    def _require_notebook_for_slider(self, per_q: list[SamplingResults | None]) -> None:
+        """
+        Refuse the slider path outside a notebook, naming the sampled Q indices.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
 
         Raises
         ------
         RuntimeError
-            If only independent per-Q chains exist.
+            If not running in a Jupyter notebook.
         """
-        if self._results is None and self.results_per_q is not None:
-            raise RuntimeError(
-                'Each Q index has its own chain, so there is no single trace to draw. Use '
-                'analysis.analysis_list[Q_index].bayesian.plot_trace() for one of them, or sample '
-                "with fit_method='simultaneous'."
+        if _in_notebook():
+            return
+        sampled = [index for index, result in enumerate(per_q) if result is not None]
+        raise RuntimeError(
+            f'Each Q index has its own chain, and the slider needs a Jupyter notebook. '
+            f'Pass Q_index to plot one of them; sampled Q indices are {sampled}.'
+        )
+
+    def _figures_with_q_slider(
+        self,
+        per_q: list[SamplingResults | None],
+        plot_one: Callable[[object], Figure],
+    ) -> VBox:
+        """
+        Render one figure per sampled Q index and put them behind a slider.
+
+        Only the Q indices that actually hold a chain get a figure, so the slider cannot land on an
+        empty position. Each figure carries its per-Q Analysis' own display name, which names the Q
+        index.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+        plot_one : Callable[[object], Figure]
+            Renders the figure for one per-Q Analysis.
+
+        Returns
+        -------
+        VBox
+            An ipywidgets box with the pre-rendered figures behind a Q slider.
+        """
+        from easydynamics.utils.posterior_plotting import figures_with_slider
+
+        figures = {}
+        for analysis1d, result in zip(self._per_q(), per_q, strict=True):
+            if result is None:
+                continue
+            figures[analysis1d.Q_index] = plot_one(analysis1d)
+        return figures_with_slider(figures)
+
+    def _shared_display_name(
+        self,
+        parameter: Parameter,
+        per_q: list[SamplingResults | None],
+    ) -> str:
+        """
+        Find the display name a Parameter goes by within its own Q's chain.
+
+        The same model is repeated per Q, so the name one chain reports a parameter under is the
+        name every other chain reports its own copy under. Resolving through it lets a slider show
+        the matching marginal at every Q even though the Parameter object belongs to one.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to resolve.
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+
+        Returns
+        -------
+        str
+            The display name of the chain column holding the parameter's draws.
+
+        Raises
+        ------
+        ValueError
+            If no sampled chain holds draws of the parameter.
+        """
+        for analysis1d, result in zip(self._per_q(), per_q, strict=True):
+            if result is None:
+                continue
+            # The same labels that Q's own sampler reports its chain under: its free parameters,
+            # unqualified, since a single Q has one copy of each.
+            labels = ParameterLabels(analysis1d.get_free_parameters())
+            if any(
+                candidate.unique_name == parameter.unique_name for candidate in labels.parameters
+            ):
+                return labels.label(parameter)
+        name = getattr(parameter, 'name', '?')
+        raise ValueError(f'No sampled parameter named {name!r} in any per-Q chain.')
+
+    def _predictive_with_q_slider(
+        self,
+        per_q: list[SamplingResults | None],
+        n_draws: int,
+        credible_interval: float,
+        **kwargs: dict[str, Any],
+    ) -> InteractiveFigure:
+        """
+        Build the posterior-predictive figure with a Q slider from the per-Q chains.
+
+        Each sampled Q contributes its data, median prediction and band edges, computed from its
+        own chain with the same machinery the single-Q figure uses. Rows are laid out on the
+        experiment's common energy grid; a Q's masked-away points stay NaN, leaving a gap rather
+        than inventing a value there.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+        n_draws : int
+            How many posterior draws to evaluate the model for, per Q.
+        credible_interval : float
+            Width of the credible band, as a percentage.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.predictive_with_slider`.
+
+        Returns
+        -------
+        InteractiveFigure
+            The plopp figure with its Q slider.
+
+        Raises
+        ------
+        ValueError
+            If credible_interval is not between 0 and 100.
+        """
+        from easydynamics.utils.posterior_plotting import predictive_with_slider
+
+        if not 0 < credible_interval < 100:
+            raise ValueError(
+                f'credible_interval must be between 0 and 100. Got {credible_interval}.'
             )
-        return super().plot_trace(**kwargs)
+
+        energy = self._analysis.energy
+        q = self._analysis.Q
+        energy_values = np.asarray(energy.values, dtype=float)
+
+        # As in the single-Q figure: without variances the weights are all-ones placeholders, and
+        # inverting them would fabricate error bars the data never had.
+        experiment = getattr(self._analysis, 'experiment', None)
+        has_variances = experiment is None or getattr(experiment, 'has_variances', True)
+        sample_model = getattr(self._analysis, 'sample_model', None)
+        y_unit = None if sample_model is None else getattr(sample_model, 'y_unit', None)
+        kwargs.setdefault('ylabel', 'Intensity' if y_unit is None else f'Intensity ({y_unit})')
+
+        sampled = [
+            analysis1d
+            for analysis1d, result in zip(self._per_q(), per_q, strict=True)
+            if result is not None
+        ]
+        shape = (len(sampled), len(energy_values))
+        data = np.full(shape, np.nan)
+        variances = np.full(shape, np.nan) if has_variances else None
+        lower = np.full(shape, np.nan)
+        median = np.full(shape, np.nan)
+        upper = np.full(shape, np.nan)
+        tail = (100.0 - credible_interval) / 2.0
+        for row, analysis1d in enumerate(sampled):
+            _, y, weights, mask = analysis1d.experiment.extract_x_y_weights_only_finite(
+                Q_index=analysis1d.Q_index
+            )
+            predictions = analysis1d.bayesian.predictions(n_draws)
+            # The mask places every finite point back on the common grid, so the padding stays
+            # NaN wherever a point was masked away.
+            data[row, mask] = np.asarray(y)
+            if variances is not None:
+                variances[row, mask] = 1.0 / np.asarray(weights) ** 2
+            lower[row, mask], median[row, mask], upper[row, mask] = np.percentile(
+                predictions, [tail, 50.0, 100.0 - tail], axis=0
+            )
+
+        return predictive_with_slider(
+            energy=energy_values,
+            q_values=np.asarray([float(q.values[a.Q_index]) for a in sampled]),
+            y=data,
+            lower=lower,
+            median=median,
+            upper=upper,
+            y_variances=variances,
+            energy_unit=str(energy.unit),
+            q_unit=str(q.unit),
+            title=self._analysis.display_name,
+            credible_interval=credible_interval,
+            **kwargs,
+        )
 
     def _require_results(self) -> SamplingResults:
         """
@@ -1402,6 +1902,112 @@ def _warn_about_held_parameters(labels: object, held_fixed: list[Parameter]) -> 
         UserWarning,
         stacklevel=_stacklevel_above_module(),
     )
+
+
+def _install_progress_reporter(
+    progress: bool,
+    sampler_options: dict[str, Any],
+) -> _SamplingProgress | None:
+    """
+    Put a progress reporter into the sampler options when one is asked for.
+
+    A ``progress_callback`` the caller supplied themselves is left untouched, since an explicit
+    callback is more specific than the boolean convenience flag.
+
+    Parameters
+    ----------
+    progress : bool
+        Whether a progress line was requested.
+    sampler_options : dict[str, Any]
+        The options about to be forwarded to the EasyScience Sampler, modified in place.
+
+    Returns
+    -------
+    _SamplingProgress | None
+        The installed reporter, which the caller must close after the run, or None when nothing was
+        installed.
+    """
+    if not progress or 'progress_callback' in sampler_options:
+        return None
+    reporter = _SamplingProgress()
+    sampler_options['progress_callback'] = reporter
+    return reporter
+
+
+class _SamplingProgress:
+    """
+    Renders the sampler's per-generation callbacks as a single self-overwriting progress line.
+
+    BUMPS invokes the callback once per DREAM generation, which for a long run is far too often to
+    print, so the line is only redrawn when the percentage changes. Carriage-return output works in
+    terminals and notebooks alike, and needs no extra dependency.
+
+    The generation total in the payload is the backend's own estimate, and it overestimates when
+    DREAM runs more chains than the estimate assumes, so a finished run can stop short of 100%. The
+    line is therefore closed with an explicit done marker rather than trusting the estimate.
+    """
+
+    def __init__(self) -> None:
+        self._last_percent = -1
+        self._line_length = 0
+        self._printed = False
+
+    def __call__(self, payload: dict[str, Any]) -> None:
+        """
+        Handle one progress callback from the sampler.
+
+        Parameters
+        ----------
+        payload : dict[str, Any]
+            The sampler's progress payload. ``iteration`` carries the DREAM generation and
+            ``total_steps``, when present, the estimated total number of generations.
+        """
+        iteration = payload.get('iteration')
+        if iteration is None:
+            return
+        total = payload.get('total_steps')
+        if total:
+            # Clamped, so the line never reports more than 100% when the run outlives the
+            # backend's estimate of its own length.
+            percent = min(100, int(100 * iteration / total))
+            if percent == self._last_percent:
+                return
+            self._last_percent = percent
+            line = f'Sampling: {percent:3d}% ({iteration}/{total} generations)'
+        else:
+            line = f'Sampling: generation {iteration}'
+        self._write(line)
+
+    def close(self, completed: bool) -> None:
+        """
+        End the progress line, so any later output starts on a line of its own.
+
+        Parameters
+        ----------
+        completed : bool
+            Whether the run finished. A finished run gets a done marker; a failed one only has its
+            line terminated, so the exception is not decorated with a claim of success.
+        """
+        if not self._printed:
+            return
+        if completed:
+            self._write('Sampling: done')
+        sys.stdout.write('\n')
+        sys.stdout.flush()
+
+    def _write(self, line: str) -> None:
+        """
+        Redraw the progress line in place.
+
+        Parameters
+        ----------
+        line : str
+            The text to show, padded so it fully overwrites a longer previous line.
+        """
+        sys.stdout.write(f'\r{line.ljust(self._line_length)}')
+        sys.stdout.flush()
+        self._line_length = max(self._line_length, len(line))
+        self._printed = True
 
 
 def _raised_inside_bumps(error: BaseException) -> bool:
