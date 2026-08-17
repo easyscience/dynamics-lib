@@ -1423,6 +1423,81 @@ class TestMultiQPosteriorSampler:
         with pytest.raises(NotImplementedError, match='single dataset only'):
             multi_q_analysis.bayesian.plot_posterior_predictive()
 
+    def test_predictive_q_index_plots_that_q_alone(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_posterior_predictive(Q_index=1, n_draws=3)
+
+        # EXPECT a single matplotlib figure from that Q's own chain
+        assert len(figure.axes) == 1
+        labels = [text.get_text() for text in figure.axes[0].get_legend().get_texts()]
+        assert 'Data' in labels
+        assert any('credible band' in label for label in labels)
+
+    def test_predictive_offers_a_plopp_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN the per-Q predictive data is assembled and handed to the plopp-backed slider
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
+
+        # EXPECT one row per sampled Q on the common energy grid, each Q's own data in its row,
+        # a band that encloses its median, and the labelling of plot_data_and_model
+        kwargs = slicer.call_args.kwargs
+        n_energy = len(multi_q_analysis.energy.values)
+        assert kwargs['y'].shape == (len(Q_VALUES), n_energy)
+        assert list(kwargs['q_values']) == pytest.approx(Q_VALUES)
+        for row, analysis1d in enumerate(multi_q_analysis.analysis_list):
+            _, y, _ = analysis1d._sampling_data()
+            assert kwargs['y'][row] == pytest.approx(np.asarray(y))
+        assert np.all(kwargs['lower'] <= kwargs['median'])
+        assert np.all(kwargs['median'] <= kwargs['upper'])
+        assert kwargs['y_variances'].shape == (len(Q_VALUES), n_energy)
+        assert kwargs['energy_unit'] == 'meV'
+        assert kwargs['q_unit'] == '1/Å'
+        assert kwargs['ylabel'].startswith('Intensity')
+        assert kwargs['title'] == multi_q_analysis.display_name
+
+    def test_predictive_pads_a_masked_point_with_nan(self, multi_q_analysis):
+        # WHEN one Q's data has a NaN point, so its masked grid is shorter than the common grid
+        multi_q_analysis.experiment.binned_data.values[1, 4] = np.nan
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
+
+        # EXPECT the gap stays NaN in every per-Q array, and only there
+        kwargs = slicer.call_args.kwargs
+        for key in ('y', 'lower', 'median', 'upper'):
+            assert np.isnan(kwargs[key][1, 4])
+            assert np.isfinite(np.delete(kwargs[key], 4, axis=1)).all()
+
+    def test_predictive_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive()
+
+    def test_predictive_rejects_a_bad_draw_count(self, multi_q_analysis):
+        # THEN EXPECT the count is checked before any chain is looked up
+        with pytest.raises(ValueError, match='positive integer'):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=0)
+
     #############
     # Discoverability
     #############
@@ -1444,7 +1519,7 @@ class TestMultiQPosteriorSampler:
         # THEN EXPECT anything that genuinely needs a single chain says where the chains
         # actually are, rather than claiming none exist
         with pytest.raises(RuntimeError, match='analysis_list'):
-            multi_q_analysis.bayesian.plot_posterior_predictive()
+            multi_q_analysis.bayesian.predictions()
 
     def test_untouched_analysis_still_reports_no_samples(self, multi_q_analysis):
         # THEN EXPECT the plain message when nothing has been sampled anywhere
@@ -1527,19 +1602,36 @@ class TestMultiQPosteriorSampler:
         with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
             widget = multi_q_analysis.bayesian.plot_corner()
 
-        # EXPECT a slider over the sampled Q indices, and a panel that actually holds a figure.
-        # The obvious way to build this captures nothing and leaves the panel blank beside the
-        # slider, so an empty panel is the regression worth guarding. Which mime type arrives
-        # depends on the environment: a live kernel renders a PNG, plain pytest only the repr.
-        # The figure comes first and the slider sits under it, where plopp puts its controls.
-        panel, slider = widget.children
+        # EXPECT a slider over the sampled Q indices, and an image that actually holds a
+        # pre-rendered figure: every chain is rendered to PNG bytes once, up front, so an empty
+        # image is the regression worth guarding. The figure comes first and the slider sits
+        # under it, where plopp puts its controls.
+        image, slider = widget.children
         assert list(slider.options) == list(range(len(Q_VALUES)))
-        assert panel.outputs, 'the initial chain was not drawn'
-        assert 'Figure' in str(panel.outputs[0]['data'])
+        assert bytes(image.value).startswith(b'\x89PNG'), 'the initial chain was not rendered'
 
         slider.value = 2
-        assert panel.outputs, 'changing Q did not redraw'
-        assert 'Figure' in str(panel.outputs[0]['data'])
+        assert bytes(image.value).startswith(b'\x89PNG'), 'changing Q did not swap in a rendering'
+
+    def test_the_corner_slider_swaps_bytes_without_redrawing(self, multi_q_analysis):
+        # WHEN every chain's figure was rendered once, at construction
+        self._sample_independently(multi_q_analysis)
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_corner()
+        image, slider = widget.children
+        first_bytes = image.value
+
+        # THEN the slider moves with matplotlib rendering forbidden
+        with patch('easydynamics.utils.posterior_plotting.plot_corner') as render:
+            slider.value = 1
+            changed_bytes = image.value
+            slider.value = 0
+
+        # EXPECT the callback only swapped stored bytes: nothing was drawn on a move, the image
+        # followed the slider, and coming back restored the identical rendering
+        render.assert_not_called()
+        assert changed_bytes != first_bytes
+        assert image.value == first_bytes
 
     def test_corner_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
         # WHEN
@@ -1572,13 +1664,166 @@ class TestMultiQPosteriorSampler:
         # EXPECT the slider cannot land on a Q with nothing to draw
         assert list(widget.children[1].options) == [2]
 
-    def test_trace_points_at_the_individual_chains(self, multi_q_analysis):
+    #############
+    # Per-Q sliders for trace, marginal and correlations
+    #############
+
+    def test_trace_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_trace(Q_index=1)
+
+        # EXPECT that Q's own trace: one panel per parameter plus the log-posterior
+        n_parameters = len(multi_q_analysis.analysis_list[1].get_free_parameters())
+        assert len(figure.axes) == n_parameters + 1
+
+    def test_trace_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_trace()
+
+        # EXPECT the pre-rendered image-and-slider box, offering every sampled Q index
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_trace_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_trace()
+
+    def test_marginal_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_marginal('Gaussian width', Q_index=2)
+
+        # EXPECT a single-axis marginal under the parameter's plain per-Q label
+        assert len(figure.axes) == 1
+        assert figure.axes[0].get_xlabel() == 'Gaussian width (meV)'
+
+    def test_marginal_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_marginal('Gaussian width')
+
+        # EXPECT
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_marginal_slider_resolves_a_parameter_object_across_q(self, multi_q_analysis):
+        # WHEN the Parameter object belongs to one Q's model only
+        self._sample_independently(multi_q_analysis)
+        parameters = multi_q_analysis.analysis_list[1].get_free_parameters()
+        target = next(p for p in parameters if p.name == 'Gaussian width')
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_marginal(target)
+
+        # EXPECT the slider still covers every Q, through the shared display name
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_marginal_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
         # WHEN
         self._sample_independently(multi_q_analysis)
 
         # THEN EXPECT
-        with pytest.raises(RuntimeError, match='no single trace'):
-            multi_q_analysis.bayesian.plot_trace()
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_marginal('Gaussian width')
+
+    def test_correlations_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_correlations(Q_index=0)
+
+        # EXPECT that Q's own matrix and its colorbar, under the plain per-Q labels
+        assert len(figure.axes) == 2
+        labels = [text.get_text() for text in figure.axes[0].get_xticklabels()]
+        assert 'Gaussian width' in labels
+        assert all('Q_index=' not in label for label in labels)
+
+    def test_correlations_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_correlations()
+
+        # EXPECT
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_correlations_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_correlations()
+
+    def test_chain_figure_q_indices_are_validated(self, multi_q_analysis):
+        # THEN EXPECT both ends of the range are checked before any chain is looked up
+        for plot in (
+            multi_q_analysis.bayesian.plot_trace,
+            multi_q_analysis.bayesian.plot_correlations,
+        ):
+            with pytest.raises(IndexError, match='non-negative'):
+                plot(Q_index=-1)
+            with pytest.raises(IndexError, match='out of bounds'):
+                plot(Q_index=99)
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.plot_marginal('Gaussian width', Q_index=-1)
+        with pytest.raises(IndexError, match='out of bounds'):
+            multi_q_analysis.bayesian.plot_posterior_predictive(Q_index=99)
+
+    def test_a_simultaneous_chain_serves_marginal_and_correlations(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN
+        marginal = multi_q_analysis.bayesian.plot_marginal('Gaussian width (Q_index=0)')
+        correlations = multi_q_analysis.bayesian.plot_correlations()
+
+        # EXPECT single figures over the joint chain, under its Q-qualified labels
+        assert len(marginal.axes) == 1
+        assert marginal.axes[0].get_xlabel().startswith('Gaussian width (Q_index=0)')
+        labels = [text.get_text() for text in correlations.axes[0].get_xticklabels()]
+        assert len(labels) == len(parameters)
+        assert all('Q_index=' in label for label in labels)
 
     def test_a_simultaneous_chain_still_takes_precedence(self, multi_q_analysis):
         # WHEN a simultaneous run follows an independent one

@@ -29,6 +29,7 @@ from easydynamics.analysis.posterior import parameters_at_bounds
 from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.analysis.posterior import unbounded_parameters
+from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
@@ -40,9 +41,9 @@ if TYPE_CHECKING:
     from easyscience.variable import Parameter
     from ipywidgets import VBox
     from matplotlib.figure import Figure
+    from plopp.backends.matplotlib.figure import InteractiveFigure
 
     from easydynamics.analysis.posterior import BoundsSuggestions
-    from easydynamics.analysis.posterior_labels import ParameterLabels
 
 # Suffix of the sidecar mapping chain columns to stable labels, written next to the BUMPS chain
 # files by save().
@@ -1435,35 +1436,410 @@ class MultiQPosteriorSampler(PosteriorSampler):
             }
         return corner_with_slider(chains, title=self._analysis.display_name, **kwargs)
 
-    def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
+    def plot_trace(self, Q_index: int | None = None, **kwargs: dict[str, Any]) -> Figure | VBox:
         """
         Plot the chain trace of each sampled parameter.
 
-        Only available for a simultaneous chain, since the per-Q chains are separate runs of
-        different lengths rather than one trace.
+        A simultaneous chain is one trace and is drawn directly. After independent sampling each
+        Q index has its own chain, so the traces are stepped through one at a time: pick one with
+        ``Q_index``, or leave it out in a notebook to get a slider.
 
         Parameters
         ----------
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, which is a single trace already.
         **kwargs : dict[str, Any]
             Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_trace`.
 
         Returns
         -------
-        Figure
-            The matplotlib Figure.
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is negative or out of range.
+        RuntimeError
+            If a slider is asked for outside a notebook, or nothing has been sampled yet.
+        TypeError
+            If Q_index is not an int or None.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_trace(**kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_trace(**kwargs)
+        self._require_notebook_for_slider(per_q)
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_trace(**kwargs)
+        )
+
+    def plot_marginal(
+        self,
+        parameter: Parameter | str,
+        Q_index: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> Figure | VBox:
+        """
+        Plot the marginal posterior distribution of a single sampled parameter.
+
+        A simultaneous chain holds every Q's parameters under Q-qualified labels, so the label
+        picks the Q as well (``'Gaussian width (Q_index=1)'``). After independent sampling the
+        chains are per-Q and the parameter goes by its plain label in each; pick a chain with
+        ``Q_index``, or leave it out in a notebook to step through the Q values with a slider.
+
+        Parameters
+        ----------
+        parameter : Parameter | str
+            The parameter to plot, as a Parameter object or its label. On the slider path a
+            Parameter object is resolved to its display name first, so the matching parameter of
+            every Q is shown even though the object itself belongs to one Q.
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, whose labels carry the Q index already.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_marginal`.
+
+        Returns
+        -------
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is negative or out of range.
+        RuntimeError
+            If a slider is asked for outside a notebook, or nothing has been sampled yet.
+        TypeError
+            If Q_index is not an int or None.
+        ValueError
+            If the parameter matches no sampled chain column.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_marginal(parameter, **kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_marginal(parameter, **kwargs)
+        self._require_notebook_for_slider(per_q)
+        # Resolved to a display name up front, because a Parameter object belongs to one Q only
+        # and every chain must find its own copy under the shared name.
+        label = (
+            parameter
+            if isinstance(parameter, str)
+            else self._shared_display_name(parameter, per_q)
+        )
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_marginal(label, **kwargs)
+        )
+
+    def plot_correlations(
+        self, Q_index: int | None = None, **kwargs: dict[str, Any]
+    ) -> Figure | VBox:
+        """
+        Plot the Pearson correlation matrix of the sampled parameters.
+
+        A simultaneous chain gives one matrix over every Q's parameters at once. After
+        independent sampling no draw pairs one Q with another, so there is one matrix per chain:
+        pick one with ``Q_index``, or leave it out in a notebook to get a slider.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, which already covers every Q.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_correlations`.
+
+        Returns
+        -------
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is negative or out of range.
+        RuntimeError
+            If a slider is asked for outside a notebook, or nothing has been sampled yet.
+        TypeError
+            If Q_index is not an int or None.
+        """
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_correlations(**kwargs)
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_correlations(**kwargs)
+        self._require_notebook_for_slider(per_q)
+        return self._figures_with_q_slider(
+            per_q, lambda analysis1d: analysis1d.bayesian.plot_correlations(**kwargs)
+        )
+
+    def plot_posterior_predictive(
+        self,
+        n_draws: int = 200,
+        credible_interval: float = 68.0,
+        Q_index: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> Figure | InteractiveFigure:
+        """
+        Plot the data against the credible band implied by the posterior.
+
+        After independent sampling each Q has its own chain, and its own band: pick one with
+        ``Q_index`` for a single matplotlib figure, or leave it out in a notebook to get a plopp
+        figure with a Q slider, looking and handling exactly like
+        ``Analysis.plot_data_and_model``. Plopp draws no filled band, so the slider view shows
+        the posterior median with a dashed line along each band edge instead of a shaded band.
+
+        Parameters
+        ----------
+        n_draws : int, default=200
+            How many posterior draws to evaluate the model for, per Q on the slider path. Each
+            costs a full model evaluation.
+        credible_interval : float, default=68.0
+            Width of the credible band, as a percentage.
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_posterior_predictive`
+            for a single figure, or to
+            :func:`easydynamics.utils.posterior_plotting.predictive_with_slider` for the slider.
+
+        Returns
+        -------
+        Figure | InteractiveFigure
+            The matplotlib Figure for one Q, or the plopp figure with a Q slider.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is negative or out of range.
+        NotImplementedError
+            If the latest chain is simultaneous: it binds every dataset at once, and no per-Q
+            chain exists for Q_index to pick out.
+        RuntimeError
+            If a slider is asked for outside a notebook, or nothing has been sampled yet.
+        TypeError
+            If Q_index is not an int or None.
+        ValueError
+            If n_draws is not a positive integer, or credible_interval is out of range.
+        """
+        if not isinstance(n_draws, int) or isinstance(n_draws, bool) or n_draws < 1:
+            raise ValueError(f'n_draws must be a positive integer. Got {n_draws}.')
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
+        per_q = self.results_per_q
+        if self._results is not None or per_q is None:
+            return super().plot_posterior_predictive(
+                n_draws=n_draws, credible_interval=credible_interval, **kwargs
+            )
+        if Q_index is not None:
+            return self._per_q()[Q_index].bayesian.plot_posterior_predictive(
+                n_draws=n_draws, credible_interval=credible_interval, **kwargs
+            )
+        self._require_notebook_for_slider(per_q)
+        return self._predictive_with_q_slider(per_q, n_draws, credible_interval, **kwargs)
+
+    #############
+    # Sliders over the independent per-Q chains
+    #############
+
+    def _require_notebook_for_slider(self, per_q: list[SamplingResults | None]) -> None:
+        """
+        Refuse the slider path outside a notebook, naming the sampled Q indices.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
 
         Raises
         ------
         RuntimeError
-            If only independent per-Q chains exist.
+            If not running in a Jupyter notebook.
         """
-        if self._results is None and self.results_per_q is not None:
-            raise RuntimeError(
-                'Each Q index has its own chain, so there is no single trace to draw. Use '
-                'analysis.analysis_list[Q_index].bayesian.plot_trace() for one of them, or sample '
-                "with fit_method='simultaneous'."
+        if _in_notebook():
+            return
+        sampled = [index for index, result in enumerate(per_q) if result is not None]
+        raise RuntimeError(
+            f'Each Q index has its own chain, and the slider needs a Jupyter notebook. '
+            f'Pass Q_index to plot one of them; sampled Q indices are {sampled}.'
+        )
+
+    def _figures_with_q_slider(
+        self,
+        per_q: list[SamplingResults | None],
+        plot_one: Callable[[object], Figure],
+    ) -> VBox:
+        """
+        Render one figure per sampled Q index and put them behind a slider.
+
+        Only the Q indices that actually hold a chain get a figure, so the slider cannot land on
+        an empty position. Each figure carries its per-Q Analysis' own display name, which names
+        the Q index.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+        plot_one : Callable[[object], Figure]
+            Renders the figure for one per-Q Analysis.
+
+        Returns
+        -------
+        VBox
+            An ipywidgets box with the pre-rendered figures behind a Q slider.
+        """
+        from easydynamics.utils.posterior_plotting import figures_with_slider
+
+        figures = {}
+        for analysis1d, result in zip(self._per_q(), per_q, strict=True):
+            if result is None:
+                continue
+            figures[analysis1d.Q_index] = plot_one(analysis1d)
+        return figures_with_slider(figures)
+
+    def _shared_display_name(
+        self,
+        parameter: Parameter,
+        per_q: list[SamplingResults | None],
+    ) -> str:
+        """
+        Find the display name a Parameter goes by within its own Q's chain.
+
+        The same model is repeated per Q, so the name one chain reports a parameter under is the
+        name every other chain reports its own copy under. Resolving through it lets a slider
+        show the matching marginal at every Q even though the Parameter object belongs to one.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to resolve.
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+
+        Returns
+        -------
+        str
+            The display name of the chain column holding the parameter's draws.
+
+        Raises
+        ------
+        ValueError
+            If no sampled chain holds draws of the parameter.
+        """
+        for analysis1d, result in zip(self._per_q(), per_q, strict=True):
+            if result is None:
+                continue
+            # The same labels that Q's own sampler reports its chain under: its free parameters,
+            # unqualified, since a single Q has one copy of each.
+            labels = ParameterLabels(analysis1d.get_free_parameters())
+            if any(
+                candidate.unique_name == parameter.unique_name for candidate in labels.parameters
+            ):
+                return labels.label(parameter)
+        name = getattr(parameter, 'name', '?')
+        raise ValueError(f'No sampled parameter named {name!r} in any per-Q chain.')
+
+    def _predictive_with_q_slider(
+        self,
+        per_q: list[SamplingResults | None],
+        n_draws: int,
+        credible_interval: float,
+        **kwargs: dict[str, Any],
+    ) -> InteractiveFigure:
+        """
+        Build the posterior-predictive figure with a Q slider from the per-Q chains.
+
+        Each sampled Q contributes its data, median prediction and band edges, computed from its
+        own chain with the same machinery the single-Q figure uses. Rows are laid out on the
+        experiment's common energy grid; a Q's masked-away points stay NaN, leaving a gap rather
+        than inventing a value there.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The per-Q chains, None where a Q index has not been sampled.
+        n_draws : int
+            How many posterior draws to evaluate the model for, per Q.
+        credible_interval : float
+            Width of the credible band, as a percentage.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.predictive_with_slider`.
+
+        Returns
+        -------
+        InteractiveFigure
+            The plopp figure with its Q slider.
+
+        Raises
+        ------
+        ValueError
+            If credible_interval is not between 0 and 100.
+        """
+        from easydynamics.utils.posterior_plotting import predictive_with_slider
+
+        if not 0 < credible_interval < 100:
+            raise ValueError(
+                f'credible_interval must be between 0 and 100. Got {credible_interval}.'
             )
-        return super().plot_trace(**kwargs)
+
+        energy = self._analysis.energy
+        q = self._analysis.Q
+        energy_values = np.asarray(energy.values, dtype=float)
+
+        # As in the single-Q figure: without variances the weights are all-ones placeholders, and
+        # inverting them would fabricate error bars the data never had.
+        experiment = getattr(self._analysis, 'experiment', None)
+        has_variances = experiment is None or getattr(experiment, 'has_variances', True)
+        sample_model = getattr(self._analysis, 'sample_model', None)
+        y_unit = None if sample_model is None else getattr(sample_model, 'y_unit', None)
+        kwargs.setdefault('ylabel', 'Intensity' if y_unit is None else f'Intensity ({y_unit})')
+
+        sampled = [
+            analysis1d
+            for analysis1d, result in zip(self._per_q(), per_q, strict=True)
+            if result is not None
+        ]
+        shape = (len(sampled), len(energy_values))
+        data = np.full(shape, np.nan)
+        variances = np.full(shape, np.nan) if has_variances else None
+        lower = np.full(shape, np.nan)
+        median = np.full(shape, np.nan)
+        upper = np.full(shape, np.nan)
+        tail = (100.0 - credible_interval) / 2.0
+        for row, analysis1d in enumerate(sampled):
+            _, y, weights, mask = analysis1d.experiment.extract_x_y_weights_only_finite(
+                Q_index=analysis1d.Q_index
+            )
+            predictions = analysis1d.bayesian.predictions(n_draws)
+            # The mask places every finite point back on the common grid, so the padding stays
+            # NaN wherever a point was masked away.
+            data[row, mask] = np.asarray(y)
+            if variances is not None:
+                variances[row, mask] = 1.0 / np.asarray(weights) ** 2
+            lower[row, mask], median[row, mask], upper[row, mask] = np.percentile(
+                predictions, [tail, 50.0, 100.0 - tail], axis=0
+            )
+
+        return predictive_with_slider(
+            energy=energy_values,
+            q_values=np.asarray([float(q.values[a.Q_index]) for a in sampled]),
+            y=data,
+            lower=lower,
+            median=median,
+            upper=upper,
+            y_variances=variances,
+            energy_unit=str(energy.unit),
+            q_unit=str(q.unit),
+            title=self._analysis.display_name,
+            credible_interval=credible_interval,
+            **kwargs,
+        )
 
     def _require_results(self) -> SamplingResults:
         """
