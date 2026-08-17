@@ -8972,7 +8972,9 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
 
         <p>Map each parameter's <code>unique_name</code> to its label.</p>
 <p>Saved alongside a chain, because unique names are per-session: without this a reloaded
-chain cannot be matched back to any parameter.</p>
+chain cannot be matched back to any parameter. Where two parameters share a display label,
+the recorded labels carry a deterministic positional suffix (<code>width [1]</code>, <code>width [2]</code>)
+so each column can be matched back to exactly one parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8993,7 +8995,7 @@ chain cannot be matched back to any parameter.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Mapping of unique name to label.</p>
+                <p>Mapping of unique name to label, collision-free.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9532,7 +9534,7 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.sample&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.sample">sample</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.sample&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.sample">sample</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Draw samples from the posterior distribution of the free parameters.</p>
@@ -9543,7 +9545,7 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;additional_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.extend&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.extend">extend</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;additional_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.extend&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.extend">extend</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Continue the existing chain with additional samples.</p>
@@ -9613,6 +9615,28 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               <td>
                 <div class="doc-md-description">
                   <p>Plot the marginal and pairwise posterior distributions.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_marginal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.plot_marginal&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.plot_marginal">plot_marginal</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Plot the marginal posterior distribution of a single sampled parameter.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_correlations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.PosteriorSampler.plot_correlations&lt;/code&gt;)" href="#easydynamics.analysis.PosteriorSampler.plot_correlations">plot_correlations</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Plot the Pearson correlation matrix of the sampled parameters.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9993,7 +10017,8 @@ the value carries the natural scale.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any free parameter has an infinite lower or upper bound.</p>
+                <p>If any free parameter has an infinite lower or upper bound, or finite bounds that
+enclose no range (<code>min &gt;= max</code>).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10012,7 +10037,7 @@ the value carries the natural scale.</p>
 
 
 <h5 id="easydynamics.analysis.PosteriorSampler.sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
 
 </h5>
 
@@ -10140,6 +10165,27 @@ will be too narrow if the parameters are correlated. The default samples everyth
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>progress</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print a progress line, redrawn in place as the sampler advances and closed with a done
+marker when the run finishes. Off by default so scripted runs stay quiet; a
+<code>progress_callback</code> given in <code>sampler_options</code> takes precedence over it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**sampler_options</code>
             </td>
             <td>
@@ -10187,6 +10233,20 @@ will be too narrow if the parameters are correlated. The default samples everyth
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state and
+the underlying EasyScience Sampler exposes no seed control, so two identical calls return
+two different chains. Their summaries should nevertheless agree to well within the reported
+credible intervals; if they do not, the chain is too short to have converged.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -10195,7 +10255,7 @@ will be too narrow if the parameters are correlated. The default samples everyth
 
 
 <h5 id="easydynamics.analysis.PosteriorSampler.extend" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">additional_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">additional_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
 
 </h5>
 
@@ -10279,6 +10339,25 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>progress</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print a progress line, redrawn in place as the sampler advances, as in :meth:<code>sample</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**sampler_options</code>
             </td>
             <td>
@@ -10341,7 +10420,7 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If there is no chain to extend.</p>
+                <p>If there is no chain to extend, or the previous run failed and left no results.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10351,6 +10430,20 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
       </tbody>
     </table>
 
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>ValueError</code> propagates from the run guards if the model or data changed since the
+chain was started, or if this run's parameters differ from the ones the chain holds.</p>
+<p>Like :meth:<code>sample</code>, extensions are not reproducible: the sampler draws from NumPy's global
+random state and exposes no seed control.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
 
     </div>
 
@@ -10756,6 +10849,192 @@ names BUMPS stores are per-session and cannot be matched up again on their own.<
             <td>
               <div class="doc-md-description">
                 <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_corner</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.figure.Figure">Figure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The matplotlib Figure.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.analysis.PosteriorSampler.plot_marginal" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_marginal</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the marginal posterior distribution of a single sampled parameter.</p>
+<p>Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
+and 84th percentiles marked -- the same 68% credible interval :meth:<code>summary</code> reports.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The parameter to plot, as a Parameter object or its label.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_marginal</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.figure.Figure">Figure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The matplotlib Figure.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.analysis.PosteriorSampler.plot_correlations" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_correlations</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the Pearson correlation matrix of the sampled parameters.</p>
+<p>A strongly correlated pair cannot be determined separately from this data. The matrix
+condenses what the off-diagonal panels of :meth:<code>plot_corner</code> show, one number per pair,
+which scales better to many parameters.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_correlations</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -22287,6 +22566,17 @@ can be unit-tested on their own and reused by every Analysis class.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;degenerate_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior.degenerate_parameters&lt;/code&gt;)" href="#easydynamics.analysis.posterior.degenerate_parameters">degenerate_parameters</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Find parameters whose finite bounds enclose no range at all.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;parameters_at_bounds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters_by_column&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior.parameters_at_bounds&lt;/code&gt;)" href="#easydynamics.analysis.posterior.parameters_at_bounds">parameters_at_bounds</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -23967,6 +24257,90 @@ but neither the uncertainty nor the value carries it.</p>
 <div class="doc doc-object doc-function">
 
 
+<h5 id="easydynamics.analysis.posterior.degenerate_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">degenerate_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Find parameters whose finite bounds enclose no range at all.</p>
+<p>A zero-width range (<code>min &gt;= max</code>) gives DREAM nothing to explore: as the prior it has zero
+volume, and letting it through surfaces only as NaNs deep inside the sampler, far from the
+cause.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The parameters to check.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Those parameters whose bounds are both finite with <code>min &gt;= max</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h5 id="easydynamics.analysis.posterior.parameters_at_bounds" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">parameters_at_bounds</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">parameters_by_column</span><span class="p">)</span></code>
 
@@ -24052,9 +24426,11 @@ when two parameters are degenerate and the pair drifts until it is stopped by a 
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Mapping of parameter name to the fraction of draws sitting in the outer
+                <p>Mapping of the parameter's <code>unique_name</code> -- <code>name</code> is not used as the key because two
+same-named parameters would collide -- to the fraction of draws sitting in the outer
 <code>BOUND_EDGE_FRACTION</code> of its allowed range, for those parameters where that fraction
-exceeds <code>BOUND_OCCUPANCY_THRESHOLD</code>.</p>
+exceeds <code>BOUND_OCCUPANCY_THRESHOLD</code>. The caller resolves the unique names back to
+readable labels where the result is reported.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24615,7 +24991,9 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
 
         <p>Map each parameter's <code>unique_name</code> to its label.</p>
 <p>Saved alongside a chain, because unique names are per-session: without this a reloaded
-chain cannot be matched back to any parameter.</p>
+chain cannot be matched back to any parameter. Where two parameters share a display label,
+the recorded labels carry a deterministic positional suffix (<code>width [1]</code>, <code>width [2]</code>)
+so each column can be matched back to exactly one parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24636,7 +25014,7 @@ chain cannot be matched back to any parameter.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Mapping of unique name to label.</p>
+                <p>Mapping of unique name to label, collision-free.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -25253,7 +25631,7 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.sample&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.sample">sample</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.sample&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.sample">sample</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Draw samples from the posterior distribution of the free parameters.</p>
@@ -25264,7 +25642,7 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;additional_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.extend&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.extend">extend</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;additional_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sampler_options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.extend&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.extend">extend</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Continue the existing chain with additional samples.</p>
@@ -25334,6 +25712,28 @@ the prior. :meth:<code>suggest_bounds</code> proposes bounds for any parameter s
               <td>
                 <div class="doc-md-description">
                   <p>Plot the marginal and pairwise posterior distributions.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_marginal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_marginal&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_marginal">plot_marginal</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Plot the marginal posterior distribution of a single sampled parameter.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_correlations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_correlations&lt;/code&gt;)" href="#easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_correlations">plot_correlations</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Plot the Pearson correlation matrix of the sampled parameters.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -25714,7 +26114,8 @@ the value carries the natural scale.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any free parameter has an infinite lower or upper bound.</p>
+                <p>If any free parameter has an infinite lower or upper bound, or finite bounds that
+enclose no range (<code>min &gt;= max</code>).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -25733,7 +26134,7 @@ the value carries the natural scale.</p>
 
 
 <h7 id="easydynamics.analysis.posterior_sampling.PosteriorSampler.sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
 
 </h7>
 
@@ -25861,6 +26262,27 @@ will be too narrow if the parameters are correlated. The default samples everyth
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>progress</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print a progress line, redrawn in place as the sampler advances and closed with a done
+marker when the run finishes. Off by default so scripted runs stay quiet; a
+<code>progress_callback</code> given in <code>sampler_options</code> takes precedence over it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**sampler_options</code>
             </td>
             <td>
@@ -25908,6 +26330,20 @@ will be too narrow if the parameters are correlated. The default samples everyth
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state and
+the underlying EasyScience Sampler exposes no seed control, so two identical calls return
+two different chains. Their summaries should nevertheless agree to well within the reported
+credible intervals; if they do not, the chain is too short to have converged.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -25916,7 +26352,7 @@ will be too narrow if the parameters are correlated. The default samples everyth
 
 
 <h7 id="easydynamics.analysis.posterior_sampling.PosteriorSampler.extend" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">additional_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">additional_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">sampler_options</span><span class="p">)</span></code>
 
 </h7>
 
@@ -26000,6 +26436,25 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>progress</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print a progress line, redrawn in place as the sampler advances, as in :meth:<code>sample</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**sampler_options</code>
             </td>
             <td>
@@ -26062,7 +26517,7 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If there is no chain to extend.</p>
+                <p>If there is no chain to extend, or the previous run failed and left no results.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -26072,6 +26527,20 @@ since BUMPS resumes from a stored chain whose columns are fixed.</p>
       </tbody>
     </table>
 
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>ValueError</code> propagates from the run guards if the model or data changed since the
+chain was started, or if this run's parameters differ from the ones the chain holds.</p>
+<p>Like :meth:<code>sample</code>, extensions are not reproducible: the sampler draws from NumPy's global
+random state and exposes no seed control.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
 
     </div>
 
@@ -26477,6 +26946,192 @@ names BUMPS stores are per-session and cannot be matched up again on their own.<
             <td>
               <div class="doc-md-description">
                 <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_corner</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.figure.Figure">Figure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The matplotlib Figure.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_marginal" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_marginal</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the marginal posterior distribution of a single sampled parameter.</p>
+<p>Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
+and 84th percentiles marked -- the same 68% credible interval :meth:<code>summary</code> reports.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The parameter to plot, as a Parameter object or its label.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_marginal</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="matplotlib.figure.Figure">Figure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The matplotlib Figure.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.analysis.posterior_sampling.PosteriorSampler.plot_correlations" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_correlations</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Plot the Pearson correlation matrix of the sampled parameters.</p>
+<p>A strongly correlated pair cannot be determined separately from this data. The matrix
+condenses what the off-diagonal panels of :meth:<code>plot_corner</code> show, one number per pair,
+which scales better to many parameters.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forwarded to :func:<code>easydynamics.utils.posterior_plotting.plot_correlations</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
