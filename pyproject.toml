@@ -24,6 +24,10 @@ classifiers = [
 requires-python = '>=3.12'
 dependencies = [
   'easyscience>=2.5.1', # The base library of the EasyScience framework. 2.5.1 adds fitting.Sampler
+  'numpy',              # Numerical arrays (used directly throughout the library)
+  'scipy',              # Numerical routines (convolution, interpolation, special functions)
+  'scipp',              # Labelled multi-dimensional arrays; backs Experiment data handling
+  'h5py',               # HDF5 backend for scipp's HDF5 I/O (Experiment.load_hdf5)
   'matplotlib',         # Plotting (posterior trace, corner, and predictive plots)
   'pooch',              # Data downloader
   'darkdetect',         # Detecting dark mode (system-level)
@@ -167,7 +171,10 @@ fail_under = 0       # Minimum coverage percentage to pass
 
 [tool.pytest.ini_options]
 addopts = '--import-mode=importlib'
-markers = ['fast: mark test as fast (should be run on every push)']
+markers = [
+  'fast: mark test as fast (should be run on every push)',
+  'network: mark test as downloading data files (deselect with -m "not network" when offline)',
+]
 testpaths = ['tests']
 
 ########################

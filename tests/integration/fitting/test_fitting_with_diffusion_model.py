@@ -3,6 +3,7 @@
 
 import numpy as np
 import pooch
+import pytest
 
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.experiment import Experiment
@@ -18,6 +19,10 @@ from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion 
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
+
+# Every test here downloads its data files through pooch; deselect with -m 'not network'
+# when running offline.
+pytestmark = pytest.mark.network
 
 
 class TestFittingWithDiffusionModel:
@@ -146,7 +151,7 @@ class TestFittingWithDiffusionModel:
 
         pars = diffusion_model.get_all_parameters()
 
-        tol = 10 * pars[0].error
+        tol = 3 * pars[0].error
         assert np.isclose(pars[0].value, 1.1258025622851164e-08, atol=tol)
-        tol = 10 * pars[1].error
+        tol = 3 * pars[1].error
         assert np.isclose(pars[1].value, 0.6937774083152299, atol=tol)

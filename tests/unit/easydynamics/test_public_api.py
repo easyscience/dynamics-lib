@@ -23,6 +23,8 @@ SUB_PACKAGES = [
     'easydynamics.convolution',
     'easydynamics.experiment',
     'easydynamics.sample_model',
+    'easydynamics.sample_model.components',
+    'easydynamics.sample_model.diffusion_model',
     'easydynamics.settings',
     'easydynamics.utils',
 ]
@@ -31,6 +33,10 @@ TUTORIALS = pathlib.Path(__file__).resolve().parents[3] / 'docs' / 'docs' / 'tut
 
 
 class TestFrontDoor:
+    def test_import_easydynamics(self):
+        # WHEN THEN EXPECT: importing raises no error
+        import easydynamics  # ruff: ignore[unused-import]
+
     def test_everything_declared_is_importable(self):
         # THEN EXPECT no name in __all__ that cannot actually be reached
         missing = [name for name in edyn.__all__ if not hasattr(edyn, name)]
