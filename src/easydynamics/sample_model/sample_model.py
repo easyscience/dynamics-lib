@@ -34,15 +34,15 @@ class SampleModel(ModelBase):
     A single component is copied to each Q value automatically:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
     energy = np.linspace(-2, 2, 100)
 
-    sample_model = sm.SampleModel(
+    sample_model = edyn.SampleModel(
         components=[
-            sm.DeltaFunction(display_name='Elastic', area=0.5),
-            sm.Lorentzian(display_name='QE', area=0.5, width=0.3),
+            edyn.DeltaFunction(display_name='Elastic', area=0.5),
+            edyn.Lorentzian(display_name='QE', area=0.5, width=0.3),
         ],
         Q=Q,
     )
@@ -54,11 +54,11 @@ class SampleModel(ModelBase):
     Pass ``temperature`` to apply the detailed balance factor automatically:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    btd = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
-    sample_model = sm.SampleModel(diffusion_models=btd, Q=Q, temperature=10)
+    btd = edyn.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
+    sample_model = edyn.SampleModel(diffusion_models=btd, Q=Q, temperature=10)
     intensity = sample_model.evaluate(np.linspace(-2, 2, 100))
     ```
     """

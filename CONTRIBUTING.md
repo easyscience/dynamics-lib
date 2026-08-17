@@ -193,6 +193,30 @@ git add .
 git commit -m "Improve performance of time integrator for large systems"
 ```
 
+### Imports in Tutorials and Examples
+
+Anything user-facing — the tutorial notebooks and the `python` examples
+in docstrings — reaches EasyDynamics through a single namespace:
+
+```python
+import easydynamics as edyn
+
+experiment = edyn.Experiment('Vanadium')
+model = edyn.SampleModel(components=edyn.Gaussian(width=0.1))
+```
+
+Every public name is re-exported from `easydynamics`, so this always
+works. Please do not mix in `import easydynamics.sample_model as sm`, or
+reach into a module with
+`from easydynamics.analysis.analysis1d import Analysis1d`: a reader then
+has to scroll back to the imports to find out where a name came from.
+
+If something you need is missing from `edyn.`, add it to `__all__` in
+`src/easydynamics/__init__.py` rather than importing around it.
+
+Inside the library itself, keep importing from the specific module that
+defines a name. Only the public front door is flat.
+
 ---
 
 ## 6. Code Quality Checks

@@ -42,10 +42,10 @@ class DeltaLorentz(DiffusionModelBase):
     Set ``allow_Q_variation`` to allow individual parameters to vary with Q:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    model = sm.DeltaLorentz(
+    model = edyn.DeltaLorentz(
         display_name='DiffusionModel',
         scale=1.0,
         mean_u_squared=0.02,

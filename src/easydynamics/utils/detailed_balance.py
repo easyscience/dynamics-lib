@@ -75,9 +75,9 @@ def detailed_balance_factor(
     **Basic usage**
 
     ```python
-    from easydynamics.utils.detailed_balance import detailed_balance_factor
+    import easydynamics as edyn
 
-    dbf = detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
+    dbf = edyn.detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
     ```
 
     **Specifying units and disabling temperature normalisation**

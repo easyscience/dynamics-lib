@@ -33,11 +33,11 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    component1 = sm.Gaussian(name='Gaussian1', area=1.0, width=1.0)
-    component2 = sm.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
-    collection = sm.ComponentCollection(components=[component1, component2])
+    component1 = edyn.Gaussian(name='Gaussian1', area=1.0, width=1.0)
+    component2 = edyn.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
+    collection = edyn.ComponentCollection(components=[component1, component2])
     ```
 
     **Evaluating, appending, and removing components**
@@ -46,7 +46,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     x = np.linspace(-5, 5, 100)
     values = collection.evaluate(x)
 
-    component3 = sm.Gaussian(name='Gaussian2', area=0.5, width=0.8)
+    component3 = edyn.Gaussian(name='Gaussian2', area=0.5, width=0.8)
     collection.append(component3)
 
     collection.remove('Gaussian1')
