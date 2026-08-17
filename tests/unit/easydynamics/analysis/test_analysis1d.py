@@ -1340,7 +1340,9 @@ class TestAnalysis1d:
         # EXPECT
         mock_invalidate.assert_called_once()
 
-    # ───── Regression tests ─────
+    #############
+    # Regression tests
+    #############
 
     @pytest.fixture
     def analysis1d_with_nan(self):
@@ -1401,41 +1403,47 @@ class TestAnalysis1d:
         assert 'display_name=' in repr_str
         assert 'Q_index=' in repr_str
 
+    #############
+    # Change handlers
+    #############
 
-def _coverage_analysis1d():
-    Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
-    energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
-    data = sc.array(
-        dims=['Q', 'energy'],
-        values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
-        variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
-    )
-    data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
-    return Analysis1d(
-        display_name='CoverageAnalysis',
-        experiment=Experiment(data=data_array),
-        sample_model=SampleModel(components=Gaussian()),
-        instrument_model=InstrumentModel(),
-        Q_index=0,
-    )
+    @staticmethod
+    def _coverage_analysis1d():
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+        return Analysis1d(
+            display_name='CoverageAnalysis',
+            experiment=Experiment(data=data_array),
+            sample_model=SampleModel(components=Gaussian()),
+            instrument_model=InstrumentModel(),
+            Q_index=0,
+        )
 
+    def test_on_Q_index_changed_with_none_clears_masked_energy(self):
+        # WHEN an analysis whose Q_index has been cleared
+        analysis1d = self._coverage_analysis1d()
+        analysis1d._Q_index = None
 
-def test_on_Q_index_changed_with_none_clears_masked_energy():
-    # GIVEN an analysis whose Q_index has been cleared
-    analysis1d = _coverage_analysis1d()
-    analysis1d._Q_index = None
-    # WHEN the Q-index-changed handler runs
-    analysis1d._on_Q_index_changed()
-    # EXPECT masked energy cleared and convolver marked dirty
-    assert analysis1d._masked_energy is None
-    assert analysis1d._convolver_is_dirty is True
+        # THEN the Q-index-changed handler runs
+        analysis1d._on_Q_index_changed()
 
+        # EXPECT masked energy cleared and convolver marked dirty
+        assert analysis1d._masked_energy is None
+        assert analysis1d._convolver_is_dirty is True
 
-def test_on_experiment_changed_refreshes_masked_energy_when_Q_index_set():
-    # GIVEN an analysis with a Q_index already set
-    analysis1d = _coverage_analysis1d()
-    # WHEN the experiment-changed handler runs
-    analysis1d._on_experiment_changed()
-    # EXPECT masked energy refreshed and convolver marked dirty
-    assert analysis1d._masked_energy is not None
-    assert analysis1d._convolver_is_dirty is True
+    def test_on_experiment_changed_refreshes_masked_energy_when_Q_index_set(self):
+        # WHEN an analysis with a Q_index already set
+        analysis1d = self._coverage_analysis1d()
+
+        # THEN the experiment-changed handler runs
+        analysis1d._on_experiment_changed()
+
+        # EXPECT masked energy refreshed and convolver marked dirty
+        assert analysis1d._masked_energy is not None
+        assert analysis1d._convolver_is_dirty is True

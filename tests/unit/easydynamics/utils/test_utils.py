@@ -65,6 +65,11 @@ class TestVerifyQIndex:
         with pytest.raises(TypeError, match='Q_index must be an int or None'):
             verify_Q_index(True, None, allow_none=True)
 
+    def test_allow_none_rejects_non_int(self):
+        # WHEN THEN EXPECT: a non-int, non-None Q_index is rejected even when None is allowed
+        with pytest.raises(TypeError, match=r'Q_index must be an int or None'):
+            verify_Q_index('not an int', Q=None, allow_none=True)
+
 
 class TestConvertValueUnit:
     def test_same_unit_returns_value_unchanged(self):
@@ -313,40 +318,37 @@ class TestInNotebook:
         assert _in_notebook() is False
 
 
-def test_verify_Q_index_allow_none_rejects_non_int():
-    # WHEN THEN EXPECT: a non-int, non-None Q_index is rejected even when None is allowed
-    with pytest.raises(TypeError, match=r'Q_index must be an int or None'):
-        verify_Q_index('not an int', Q=None, allow_none=True)
+class TestConvertParameterUnit:
+    def test_dependent_parameter_sets_desired_unit(self):
+        # WHEN converting the unit of a dependent parameter (cannot be converted directly)
+        param = Mock()
+        param.independent = False
+        convert_parameter_unit(param, 'meV')
+
+        # EXPECT the desired unit is recorded instead of an in-place conversion
+        param.set_desired_unit.assert_called_once_with('meV')
+        param.convert_unit.assert_not_called()
 
 
-def test_convert_parameter_unit_dependent_sets_desired_unit():
-    # GIVEN a dependent parameter (cannot be converted directly)
-    param = Mock()
-    param.independent = False
-    # WHEN converting its unit
-    convert_parameter_unit(param, 'meV')
-    # EXPECT the desired unit is recorded instead of an in-place conversion
-    param.set_desired_unit.assert_called_once_with('meV')
-    param.convert_unit.assert_not_called()
+class TestEnergyToScipp:
+    def test_returns_variable_with_unit(self):
+        # THEN
+        result = energy_to_scipp(np.array([1.0, 2.0, 3.0]), 'meV')
+
+        # EXPECT a scipp Variable on the 'energy' dimension with the given unit
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('meV')
+        assert result.dims == ('energy',)
+        np.testing.assert_allclose(result.values, [1.0, 2.0, 3.0])
 
 
-def test_energy_to_scipp_returns_variable_with_unit():
-    # WHEN converting a numpy energy array
-    result = energy_to_scipp(np.array([1.0, 2.0, 3.0]), 'meV')
-    # EXPECT a scipp Variable on the 'energy' dimension with the given unit
-    assert isinstance(result, sc.Variable)
-    assert result.unit == sc.Unit('meV')
-    assert result.dims == ('energy',)
-    np.testing.assert_allclose(result.values, [1.0, 2.0, 3.0])
+class TestAssertValidUnit:
+    def test_rejects_non_unit_type(self):
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
+            _assert_valid_unit(123)
 
-
-def test_assert_valid_unit_rejects_non_unit_type():
-    # WHEN THEN EXPECT
-    with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
-        _assert_valid_unit(123)
-
-
-def test_assert_valid_unit_rejects_invalid_unit_string():
-    # WHEN THEN EXPECT
-    with pytest.raises(ValueError, match=r'is not a valid scipp unit'):
-        _assert_valid_unit('not_a_real_unit')
+    def test_rejects_invalid_unit_string(self):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'is not a valid scipp unit'):
+            _assert_valid_unit('not_a_real_unit')
