@@ -2,20 +2,29 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-Unit tests for the posterior sampler, driven through an Analysis1d, with the EasyScience Sampler
-mocked out.
+Unit tests for the posterior sampler, with the EasyScience Sampler mocked out.
+
+The sampler is driven through the analyses that hold one: an Analysis1d and a ParameterAnalysis
+for PosteriorSampler, and an Analysis for the multi-Q subclass.
 """
 
+import types
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+import matplotlib as mpl
 import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting import AvailableMinimizers
+from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
 
+mpl.use('Agg')
+
+import easydynamics as edyn
+import easydynamics.sample_model as sm
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
@@ -75,9 +84,120 @@ def fake_results(analysis, n_draws=100, values=None):
     )
 
 
+def _bumps_style_index_error():
+    """Build a callable that raises an IndexError from a frame that looks like it is in BUMPS."""
+
+    def raise_index_error(**_kwargs):
+        raise IndexError('index 71 is out of bounds for axis 0 with size 40')
+
+    # The relabelling walks the traceback for a frame belonging to the bumps package, so the
+    # function has to appear to live there.
+    return types.FunctionType(
+        raise_index_error.__code__,
+        {'__name__': 'bumps.dream.state', '__builtins__': __builtins__},
+    )
+
+
 @pytest.fixture
 def analysis():
     return make_analysis()
+
+
+Q_VALUES = [0.5, 1.0, 1.5]
+
+
+def make_multi_q_analysis():
+    energy_values = np.linspace(-5.0, 5.0, 15)
+    rows = [2.0 * np.exp(-0.5 * (energy_values / (0.8 + 0.4 * q**2)) ** 2) for q in Q_VALUES]
+    observed = np.vstack(rows)
+    experiment = edyn.Experiment(
+        data=sc.DataArray(
+            data=sc.array(
+                dims=['Q', 'energy'],
+                values=observed,
+                variances=np.full_like(observed, 0.01),
+            ),
+            coords={
+                'Q': sc.array(dims=['Q'], values=Q_VALUES, unit='1/Angstrom'),
+                'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+            },
+        )
+    )
+    return edyn.Analysis(
+        display_name='TestMultiQ',
+        experiment=experiment,
+        sample_model=sm.SampleModel(components=sm.Gaussian(area=2.0, width=1.0)),
+        instrument_model=sm.InstrumentModel(),
+    )
+
+
+def bound_all_chain(multi_q_analysis, half_width=5.0):
+    for parameter in multi_q_analysis._chain_parameters():
+        parameter.min = float(parameter.value) - half_width
+        parameter.max = float(parameter.value) + half_width
+
+
+def fake_chain_results(parameters, n_draws=50):
+    draws = np.tile([float(p.value) for p in parameters], (n_draws, 1))
+    return SimpleNamespace(
+        draws=draws,
+        param_names=[p.unique_name for p in parameters],
+        logp=np.zeros(n_draws),
+        state=MagicMock(Ngen=10, Npop=4),
+    )
+
+
+@pytest.fixture
+def multi_q_analysis():
+    return make_multi_q_analysis()
+
+
+Q = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0])
+
+
+def make_dataset():
+    widths = 0.10 + 0.35 * Q
+    areas = 2.0 - 0.3 * Q
+    return sc.Dataset({
+        'Lorentzian width': sc.DataArray(
+            data=sc.array(
+                dims=['Q'], values=widths, variances=np.full_like(widths, 1e-4), unit='meV'
+            ),
+            coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
+        ),
+        'Lorentzian area': sc.DataArray(
+            data=sc.array(
+                dims=['Q'], values=areas, variances=np.full_like(areas, 4e-4), unit='meV'
+            ),
+            coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
+        ),
+    })
+
+
+def make_parameter_analysis(two_bindings=True):
+    bindings = [
+        edyn.FitBinding(
+            model=sm.Polynomial(
+                coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Width line'
+            ),
+            targets='Lorentzian width',
+        )
+    ]
+    if two_bindings:
+        bindings.append(
+            edyn.FitBinding(
+                model=sm.Polynomial(
+                    coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Area line'
+                ),
+                targets='Lorentzian area',
+            )
+        )
+    return edyn.ParameterAnalysis(parameters=make_dataset(), bindings=bindings)
+
+
+@pytest.fixture
+def parameter_analysis():
+    return make_parameter_analysis()
 
 
 class TestPosteriorSampler:
@@ -598,6 +718,106 @@ class TestPosteriorSampler:
         with pytest.raises(RuntimeError):
             analysis.bayesian.plot_corner()
 
+    #############
+    # Error paths
+    #############
+
+    def test_bumps_outlier_crash_is_reported_helpfully(self, analysis):
+        # WHEN BUMPS' own outlier removal indexes past the end of its buffer
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = _bumps_style_index_error()
+
+            # THEN EXPECT the bare IndexError is replaced by something actionable, naming both
+            # causes
+            with pytest.raises(RuntimeError, match='degenerate') as raised:
+                analysis.bayesian.sample(samples=10)
+            assert 'short chains' in str(raised.value)
+            assert isinstance(raised.value.__cause__, IndexError)
+
+    def test_an_index_error_of_our_own_is_not_relabelled(self, analysis):
+        # WHEN the IndexError comes from anywhere but BUMPS, it is a bug here and must not be
+        # dressed up as a modelling problem
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = IndexError('list index out of range')
+
+            # THEN EXPECT it propagates untouched
+            with pytest.raises(IndexError, match='list index out of range'):
+                analysis.bayesian.sample(samples=10)
+
+    def test_parameters_entry_of_the_wrong_type_raises(self, analysis):
+        # THEN EXPECT
+        with pytest.raises(TypeError, match='Parameter objects or labels'):
+            analysis.bayesian.sample(samples=10, parameters=[42])
+
+    def test_median_skips_columns_with_no_matching_parameter(self, analysis):
+        # WHEN a chain carries a column this analysis knows nothing about
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            results = fake_results(analysis)
+            results.param_names = [*results.param_names, 'Parameter_does_not_exist']
+            results.draws = np.column_stack([results.draws, np.zeros(results.draws.shape[0])])
+            sampler_class.return_value.sample.return_value = results
+            analysis.bayesian.sample(samples=10)
+
+        # THEN
+        changed = analysis.bayesian.set_parameters_to_median()
+
+        # EXPECT the unknown column is skipped rather than crashing
+        assert len(changed) == len(analysis.get_free_parameters())
+
+    def test_load_chain_uses_the_sidecar_when_present(self, analysis, tmp_path):
+        # WHEN a chain is saved and reloaded into a *different* analysis, whose unique names differ
+        bound_all(analysis)
+        with patch(SAMPLER_PATH) as sampler_class:
+            saved = fake_results(analysis)
+            sampler_class.return_value.sample.return_value = saved
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.save(str(tmp_path / 'chain'))
+
+        fresh = make_analysis()
+        bound_all(fresh)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.load_state.return_value = saved
+            fresh.bayesian.load(str(tmp_path / 'chain'))
+
+        # EXPECT the sidecar maps the old unique names onto the new analysis's parameters
+        summary = fresh.bayesian.summary()
+        assert {entry.name for entry in summary} == {p.name for p in fresh.get_free_parameters()}
+        assert all(np.isfinite(entry.value) for entry in summary)
+
+    #############
+    # Plot rendering
+    #############
+
+    def test_trace_and_corner_render_from_a_chain(self, analysis):
+        # WHEN
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+
+        mpl.use('Agg')
+        bound_all(analysis)
+        n_parameters = len(analysis.get_free_parameters())
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN EXPECT
+        assert len(analysis.bayesian.plot_trace().axes) == n_parameters + 1
+        assert len(analysis.bayesian.plot_corner().axes) == n_parameters**2
+        plt.close('all')
+
+    #############
+    # Predictive error bars
+    #############
+
     def test_predictive_forwards_the_measured_error_bars(self, analysis):
         # WHEN the data carries variances of 0.01, i.e. an uncertainty of 0.1
         bound_all(analysis)
@@ -886,6 +1106,889 @@ class TestPosteriorSampler:
         amplitudes = predictions.max(axis=1)
         expected = draws[[0, 24, 49, 74, 99], column]
         assert amplitudes / amplitudes[0] == pytest.approx(expected / expected[0])
+
+    #############
+    # Extend guards
+    #############
+
+    def test_extending_with_a_different_subset_is_refused(self, analysis):
+        # WHEN a chain is started over all parameters and then extended over one
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+            target = analysis.get_free_parameters()[0]
+
+            # THEN EXPECT refused up front, rather than failing obscurely inside BUMPS, which
+            # resumes from a stored chain whose width is fixed
+            with pytest.warns(UserWarning), pytest.raises(ValueError, match='Cannot extend'):
+                analysis.bayesian.extend(additional_samples=10, parameters=[target.name])
+
+    def test_extending_with_the_same_parameters_is_allowed(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+            # THEN EXPECT: does not raise
+            analysis.bayesian.extend(additional_samples=10)
+
+    #############
+    # Sidecar labels
+    #############
+
+    def test_a_subset_run_records_the_same_labels_a_full_run_would(self, analysis):
+        # WHEN only one parameter is sampled. Inside the run the others are fixed, so nothing looks
+        # ambiguous; the recorded labels must still match what a full run would have written, or
+        # the chain cannot be matched up again on reload.
+        bound_all(analysis)
+        target = analysis.get_free_parameters()[0]
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            with pytest.warns(UserWarning):
+                analysis.bayesian.sample(samples=10, parameters=[target.name])
+
+        # EXPECT
+        assert analysis.bayesian._saved_labels[
+            target.unique_name
+        ] == analysis._parameter_labels().label(target)
+
+    #############
+    # Driven through a ParameterAnalysis
+    #############
+
+    def test_refuses_unbounded_parameters(self, parameter_analysis):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='finite bounds'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+    def test_binds_one_dataset_per_target(self, parameter_analysis):
+        # WHEN
+        bound_all_chain(parameter_analysis)
+        parameters = parameter_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            parameter_analysis.bayesian.sample(samples=10)
+
+        # EXPECT
+        args, kwargs = sampler_class.call_args
+        assert len(args[1]) == 2
+        assert len(kwargs['weights']) == 2
+
+    def test_summary_uses_model_qualified_labels(self, parameter_analysis):
+        # WHEN
+        bound_all_chain(parameter_analysis)
+        parameters = parameter_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            parameter_analysis.bayesian.sample(samples=10)
+
+        # EXPECT
+        names = [entry.name for entry in parameter_analysis.bayesian.summary()]
+        assert len(set(names)) == len(names)
+        assert 'Width line_c0' in names
+
+    def test_restores_parameter_values(self, parameter_analysis):
+        # WHEN
+        bound_all_chain(parameter_analysis)
+        parameters = parameter_analysis._chain_parameters()
+        before = [float(p.value) for p in parameters]
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+
+            def mutate(**_kwargs):
+                for parameter in parameters:
+                    parameter.value = float(parameter.value) + 1.0
+                return fake_chain_results(parameters)
+
+            sampler_class.return_value.sample.side_effect = mutate
+            parameter_analysis.bayesian.sample(samples=10)
+
+        # EXPECT
+        assert [float(p.value) for p in parameters] == pytest.approx(before)
+
+    def test_missing_parameters_dataset_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis()
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No parameters Dataset'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+    def test_missing_bindings_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis(parameters=make_dataset())
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No fit bindings'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+
+class TestMultiQPosteriorSampler:
+    #############
+    # Bounds pre-flight
+    #############
+
+    def test_sampling_refuses_unbounded_parameters(self, multi_q_analysis):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='finite bounds'):
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+    def test_error_names_parameters_by_q_index(self, multi_q_analysis):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'Gaussian width \(Q_index=0\)'):
+            multi_q_analysis.bayesian.check_bounds()
+
+    def test_suggest_bounds_labels_every_q(self, multi_q_analysis):
+        # THEN
+        suggestions = multi_q_analysis.bayesian.suggest_bounds()
+
+        # EXPECT
+        labels = [s.label for s in suggestions]
+        assert len(set(labels)) == len(labels)
+        assert 'Gaussian area (Q_index=1)' in labels
+
+    #############
+    # Simultaneous sampling
+    #############
+
+    def test_binds_one_dataset_per_q_index(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT
+        args, kwargs = sampler_class.call_args
+        assert len(args[1]) == len(Q_VALUES)
+        assert len(args[2]) == len(Q_VALUES)
+        assert len(kwargs['weights']) == len(Q_VALUES)
+
+    def test_returns_a_single_result(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            expected = fake_chain_results(parameters)
+            sampler_class.return_value.sample.return_value = expected
+            returned = multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT
+        assert returned is expected
+        assert multi_q_analysis.bayesian.results is expected
+
+    def test_summary_is_labelled_by_q_index(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT
+        names = [entry.name for entry in multi_q_analysis.bayesian.summary()]
+        assert len(set(names)) == len(names)
+        assert all('Q_index=' in name for name in names)
+
+    def test_refreshes_every_convolver_before_sampling(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            for analysis1d in multi_q_analysis.analysis_list:
+                analysis1d._convolver_is_dirty = True
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT the sampler sees the same prepared convolvers a simultaneous fit would
+        assert all(not a._convolver_is_dirty for a in multi_q_analysis.analysis_list)
+
+    def test_uses_a_multifitter(self, multi_q_analysis):
+        # WHEN
+
+        # EXPECT
+        assert isinstance(multi_q_analysis.fitter, MultiFitter)
+        assert len(multi_q_analysis.fitter.fit_object) == len(Q_VALUES)
+
+    #############
+    # Independent sampling
+    #############
+
+    def test_returns_one_result_per_q_index(self, multi_q_analysis):
+        # WHEN
+        for analysis1d in multi_q_analysis.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameter.min = float(parameter.value) - 5.0
+                parameter.max = float(parameter.value) + 5.0
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                multi_q_analysis.analysis_list[0].get_free_parameters()
+            )
+            results = multi_q_analysis.bayesian.sample(fit_method='independent', samples=10)
+
+        # EXPECT
+        assert isinstance(results, list)
+        assert len(results) == len(Q_VALUES)
+
+    def test_single_q_index_returns_one_result(self, multi_q_analysis):
+        # WHEN
+        target = multi_q_analysis.analysis_list[1]
+        for parameter in target.get_free_parameters():
+            parameter.min = float(parameter.value) - 5.0
+            parameter.max = float(parameter.value) + 5.0
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                target.get_free_parameters()
+            )
+            result = multi_q_analysis.bayesian.sample(
+                fit_method='independent', Q_index=1, samples=10
+            )
+
+        # EXPECT
+        assert not isinstance(result, list)
+        assert result is target.bayesian.results
+
+    def test_invalid_q_index_raises(self, multi_q_analysis):
+        # THEN EXPECT
+        with pytest.raises((ValueError, IndexError)):
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=99, samples=10)
+
+    #############
+    # Validation
+    #############
+
+    def test_invalid_fit_method_raises(self, multi_q_analysis):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Invalid fit method'):
+            multi_q_analysis.bayesian.sample(fit_method='nonsense')
+
+    def test_negative_q_index_raises(self, multi_q_analysis):
+        # THEN EXPECT a refusal, rather than silently wrapping around to the last Q
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=-1, samples=10)
+
+    def test_corner_q_index_is_validated(self, multi_q_analysis):
+        # THEN EXPECT both ends of the range are checked before any chain is looked up
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.plot_corner(Q_index=-1)
+        with pytest.raises(IndexError, match='out of bounds'):
+            multi_q_analysis.bayesian.plot_corner(Q_index=99)
+
+    def test_missing_q_values_raises(self):
+        # WHEN
+        multi_q_analysis = edyn.Analysis(display_name='Empty')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No Q values available'):
+            multi_q_analysis.bayesian.sample()
+
+    #############
+    # Predictive plot
+    #############
+
+    def test_predictive_is_not_supported_for_multiple_datasets(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN EXPECT
+        with pytest.raises(NotImplementedError, match='single dataset only'):
+            multi_q_analysis.bayesian.plot_posterior_predictive()
+
+    def test_predictive_q_index_plots_that_q_alone(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_posterior_predictive(Q_index=1, n_draws=3)
+
+        # EXPECT a single matplotlib figure from that Q's own chain
+        assert len(figure.axes) == 1
+        labels = [text.get_text() for text in figure.axes[0].get_legend().get_texts()]
+        assert 'Data' in labels
+        assert any('credible band' in label for label in labels)
+
+    def test_predictive_offers_a_plopp_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN the per-Q predictive data is assembled and handed to the plopp-backed slider
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
+
+        # EXPECT one row per sampled Q on the common energy grid, each Q's own data in its row,
+        # a band that encloses its median, and the labelling of plot_data_and_model
+        kwargs = slicer.call_args.kwargs
+        n_energy = len(multi_q_analysis.energy.values)
+        assert kwargs['y'].shape == (len(Q_VALUES), n_energy)
+        assert list(kwargs['q_values']) == pytest.approx(Q_VALUES)
+        for row, analysis1d in enumerate(multi_q_analysis.analysis_list):
+            _, y, _ = analysis1d._sampling_data()
+            assert kwargs['y'][row] == pytest.approx(np.asarray(y))
+        assert np.all(kwargs['lower'] <= kwargs['median'])
+        assert np.all(kwargs['median'] <= kwargs['upper'])
+        assert kwargs['y_variances'].shape == (len(Q_VALUES), n_energy)
+        assert kwargs['energy_unit'] == 'meV'
+        assert kwargs['q_unit'] == '1/Å'
+        assert kwargs['ylabel'].startswith('Intensity')
+        assert kwargs['title'] == multi_q_analysis.display_name
+
+    def test_predictive_pads_a_masked_point_with_nan(self, multi_q_analysis):
+        # WHEN one Q's data has a NaN point, so its masked grid is shorter than the common grid
+        multi_q_analysis.experiment.binned_data.values[1, 4] = np.nan
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
+
+        # EXPECT the gap stays NaN in every per-Q array, and only there
+        kwargs = slicer.call_args.kwargs
+        for key in ('y', 'lower', 'median', 'upper'):
+            assert np.isnan(kwargs[key][1, 4])
+            assert np.isfinite(np.delete(kwargs[key], 4, axis=1)).all()
+
+    def test_predictive_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_posterior_predictive()
+
+    def test_predictive_rejects_a_bad_draw_count(self, multi_q_analysis):
+        # THEN EXPECT the count is checked before any chain is looked up
+        with pytest.raises(ValueError, match='positive integer'):
+            multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=0)
+
+    #############
+    # Discoverability
+    #############
+
+    def test_operations_needing_one_chain_point_at_the_per_q_chains(self, multi_q_analysis):
+        # WHEN sampling independently, the chains live on the Analysis1d objects, not here
+        remaining = iter(multi_q_analysis.analysis_list)
+        for analysis1d in multi_q_analysis.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameter.min = float(parameter.value) - 5.0
+                parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                next(remaining).get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', samples=10)
+
+        # THEN EXPECT anything that genuinely needs a single chain says where the chains
+        # actually are, rather than claiming none exist
+        with pytest.raises(RuntimeError, match='analysis_list'):
+            multi_q_analysis.bayesian.predictions()
+
+    def test_untouched_analysis_still_reports_no_samples(self, multi_q_analysis):
+        # THEN EXPECT the plain message when nothing has been sampled anywhere
+        with pytest.raises(RuntimeError, match='No posterior samples yet'):
+            multi_q_analysis.bayesian.summary()
+
+    #############
+    # Aggregating the per-Q chains
+    #############
+
+    def _sample_independently(self, multi_q_analysis):
+        for analysis1d in multi_q_analysis.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameter.min = float(parameter.value) - 5.0
+                parameter.max = float(parameter.value) + 5.0
+
+        # The Q indices sample in order, and each must get a chain over its own parameters.
+        remaining = iter(multi_q_analysis.analysis_list)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                next(remaining).get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', samples=10)
+
+    def test_posterior_results_holds_one_chain_per_q(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # EXPECT
+        assert len(multi_q_analysis.bayesian.results_per_q) == len(Q_VALUES)
+        assert all(result is not None for result in multi_q_analysis.bayesian.results_per_q)
+
+    def test_posterior_results_is_none_before_sampling(self, multi_q_analysis):
+        # EXPECT
+        assert multi_q_analysis.bayesian.results_per_q is None
+
+    def test_summary_gathers_every_q(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        summary = multi_q_analysis.bayesian.summary()
+
+        # EXPECT one entry per free parameter per Q, each labelled by its Q index
+        expected = sum(len(a.get_free_parameters()) for a in multi_q_analysis.analysis_list)
+        names = [entry.name for entry in summary]
+        assert len(summary) == expected
+        assert len(set(names)) == len(names)
+        assert all('Q_index=' in name for name in names)
+
+    def test_median_applies_each_chain_to_its_own_q(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        changed = multi_q_analysis.bayesian.set_parameters_to_median()
+
+        # EXPECT every Q's parameters are set, from that Q's own chain
+        expected = sum(len(a.get_free_parameters()) for a in multi_q_analysis.analysis_list)
+        assert len(changed) == expected
+
+    def test_corner_plots_one_q_at_a_time(self, multi_q_analysis):
+        # WHEN each Q was sampled separately, no draw pairs one Q with another, so a corner plot
+        # can only show one chain at a time
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_corner(Q_index=1)
+
+        # EXPECT that Q's own chain, not a combination across Q
+        n_parameters = len(multi_q_analysis.analysis_list[1].get_free_parameters())
+        assert len(figure.axes) == n_parameters**2
+
+    def test_corner_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_corner()
+
+        # EXPECT a slider over the sampled Q indices, and an image that actually holds a
+        # pre-rendered figure: every chain is rendered to PNG bytes once, up front, so an empty
+        # image is the regression worth guarding. The figure comes first and the slider sits
+        # under it, where plopp puts its controls.
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG'), 'the initial chain was not rendered'
+
+        slider.value = 2
+        assert bytes(image.value).startswith(b'\x89PNG'), 'changing Q did not swap in a rendering'
+
+    def test_the_corner_slider_swaps_bytes_without_redrawing(self, multi_q_analysis):
+        # WHEN every chain's figure was rendered once, at construction
+        self._sample_independently(multi_q_analysis)
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_corner()
+        image, slider = widget.children
+        first_bytes = image.value
+
+        # THEN the slider moves with matplotlib rendering forbidden
+        with patch('easydynamics.utils.posterior_plotting.plot_corner') as render:
+            slider.value = 1
+            changed_bytes = image.value
+            slider.value = 0
+
+        # EXPECT the callback only swapped stored bytes: nothing was drawn on a move, the image
+        # followed the slider, and coming back restored the identical rendering
+        render.assert_not_called()
+        assert changed_bytes != first_bytes
+        assert image.value == first_bytes
+
+    def test_corner_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_corner()
+
+    def test_the_slider_only_offers_q_indices_that_were_sampled(self, multi_q_analysis):
+        # WHEN only one Q index is sampled
+        target = multi_q_analysis.analysis_list[2]
+        for parameter in target.get_free_parameters():
+            parameter.min = float(parameter.value) - 5.0
+            parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                target.get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=2, samples=10)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_corner()
+
+        # EXPECT the slider cannot land on a Q with nothing to draw
+        assert list(widget.children[1].options) == [2]
+
+    #############
+    # Per-Q sliders for trace, marginal and correlations
+    #############
+
+    def test_trace_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_trace(Q_index=1)
+
+        # EXPECT that Q's own trace: one panel per parameter plus the log-posterior
+        n_parameters = len(multi_q_analysis.analysis_list[1].get_free_parameters())
+        assert len(figure.axes) == n_parameters + 1
+
+    def test_trace_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_trace()
+
+        # EXPECT the pre-rendered image-and-slider box, offering every sampled Q index
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_trace_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_trace()
+
+    def test_marginal_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_marginal('Gaussian width', Q_index=2)
+
+        # EXPECT a single-axis marginal under the parameter's plain per-Q label
+        assert len(figure.axes) == 1
+        assert figure.axes[0].get_xlabel() == 'Gaussian width (meV)'
+
+    def test_marginal_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_marginal('Gaussian width')
+
+        # EXPECT
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_marginal_slider_resolves_a_parameter_object_across_q(self, multi_q_analysis):
+        # WHEN the Parameter object belongs to one Q's model only
+        self._sample_independently(multi_q_analysis)
+        parameters = multi_q_analysis.analysis_list[1].get_free_parameters()
+        target = next(p for p in parameters if p.name == 'Gaussian width')
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_marginal(target)
+
+        # EXPECT the slider still covers every Q, through the shared display name
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_marginal_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_marginal('Gaussian width')
+
+    def test_correlations_q_index_plots_that_qs_chain(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        figure = multi_q_analysis.bayesian.plot_correlations(Q_index=0)
+
+        # EXPECT that Q's own matrix and its colorbar, under the plain per-Q labels
+        assert len(figure.axes) == 2
+        labels = [text.get_text() for text in figure.axes[0].get_xticklabels()]
+        assert 'Gaussian width' in labels
+        assert all('Q_index=' not in label for label in labels)
+
+    def test_correlations_offers_a_slider_in_a_notebook(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
+            widget = multi_q_analysis.bayesian.plot_correlations()
+
+        # EXPECT
+        image, slider = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert bytes(image.value).startswith(b'\x89PNG')
+
+    def test_correlations_without_a_notebook_or_q_index_says_what_to_do(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
+            multi_q_analysis.bayesian.plot_correlations()
+
+    def test_chain_figure_q_indices_are_validated(self, multi_q_analysis):
+        # THEN EXPECT both ends of the range are checked before any chain is looked up
+        for plot in (
+            multi_q_analysis.bayesian.plot_trace,
+            multi_q_analysis.bayesian.plot_correlations,
+        ):
+            with pytest.raises(IndexError, match='non-negative'):
+                plot(Q_index=-1)
+            with pytest.raises(IndexError, match='out of bounds'):
+                plot(Q_index=99)
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.plot_marginal('Gaussian width', Q_index=-1)
+        with pytest.raises(IndexError, match='out of bounds'):
+            multi_q_analysis.bayesian.plot_posterior_predictive(Q_index=99)
+
+    def test_a_simultaneous_chain_serves_marginal_and_correlations(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN
+        marginal = multi_q_analysis.bayesian.plot_marginal('Gaussian width (Q_index=0)')
+        correlations = multi_q_analysis.bayesian.plot_correlations()
+
+        # EXPECT single figures over the joint chain, under its Q-qualified labels
+        assert len(marginal.axes) == 1
+        assert marginal.axes[0].get_xlabel().startswith('Gaussian width (Q_index=0)')
+        labels = [text.get_text() for text in correlations.axes[0].get_xticklabels()]
+        assert len(labels) == len(parameters)
+        assert all('Q_index=' in label for label in labels)
+
+    def test_a_simultaneous_chain_still_takes_precedence(self, multi_q_analysis):
+        # WHEN a simultaneous run follows an independent one
+        self._sample_independently(multi_q_analysis)
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT the single chain is summarized, not the stale per-Q ones
+        assert len(multi_q_analysis.bayesian.summary()) == len(parameters)
+        multi_q_analysis.bayesian.plot_corner()
+
+    def test_a_fresh_per_q_chain_wins_after_a_simultaneous_run(self, multi_q_analysis):
+        # WHEN an independent run of one Q follows a simultaneous one
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        target = multi_q_analysis.analysis_list[2]
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                target.get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=2, samples=10)
+
+        # EXPECT the fresh per-Q chain is what summary() reports, not the stale simultaneous one
+        summary = multi_q_analysis.bayesian.summary()
+        assert len(summary) == len(target.get_free_parameters())
+        assert all('Q_index=2' in entry.name for entry in summary)
+
+    def test_gathered_summary_uses_the_per_q_saved_labels(self, multi_q_analysis):
+        # WHEN the per-Q chains look freshly loaded from disk in a new session: foreign column
+        # names, matched to parameters only through each per-Q sampler's saved labels
+        self._sample_independently(multi_q_analysis)
+        for q_index, analysis1d in enumerate(multi_q_analysis.analysis_list):
+            sampler = analysis1d.bayesian
+            name_map = analysis1d._parameter_labels().name_map()
+            foreign = [f'Loaded_{q_index}_{i}' for i in range(len(sampler.results.param_names))]
+            sampler._saved_labels = {
+                foreign_name: name_map[unique_name]
+                for foreign_name, unique_name in zip(
+                    foreign, sampler.results.param_names, strict=True
+                )
+            }
+            sampler.results.param_names = foreign
+
+        # THEN
+        summary = multi_q_analysis.bayesian.summary()
+
+        # EXPECT every column resolves to its parameter: Q-qualified names, real units and finite
+        # values, rather than raw column names with no unit and NaN
+        expected = sum(len(a.get_free_parameters()) for a in multi_q_analysis.analysis_list)
+        assert len(summary) == expected
+        assert all('Q_index=' in entry.name for entry in summary)
+        assert all(entry.unit != '' for entry in summary)
+        assert all(np.isfinite(entry.value) for entry in summary)
+
+    def test_the_slider_path_forwards_plot_kwargs(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.corner_with_slider') as slider,
+        ):
+            multi_q_analysis.bayesian.plot_corner(bins=13)
+
+        # EXPECT the kwargs the docstring promises to forward reach the slider's corner plots
+        assert slider.call_args.kwargs['bins'] == 13
+
+    #############
+    # Extending and persistence
+    #############
+
+    def test_extend_after_an_independent_run_points_at_the_per_q_chains(self, multi_q_analysis):
+        # WHEN an independent run follows a simultaneous one, so this sampler still holds the old
+        # simultaneous chain while the latest chains live per Q
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT the error says where the chains are, rather than extending the stale chain
+        # or misdiagnosing a failed run
+        with pytest.raises(RuntimeError, match=r'analysis_list\[Q_index\]\.bayesian\.extend'):
+            multi_q_analysis.bayesian.extend()
+
+    def test_save_after_an_independent_run_refuses_the_stale_chain(
+        self, multi_q_analysis, tmp_path
+    ):
+        # WHEN an independent run follows a simultaneous one
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+        stale_sampler = sampler_class.return_value
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT save refuses, rather than silently writing the stale simultaneous chain
+        with pytest.raises(RuntimeError, match='no simultaneous chain here to save'):
+            multi_q_analysis.bayesian.save(str(tmp_path / 'chain'))
+        stale_sampler.save.assert_not_called()
+
+    def test_extend_after_a_failed_simultaneous_run_keeps_the_failed_run_message(
+        self, multi_q_analysis
+    ):
+        # WHEN a simultaneous run fails after building the sampler, with no per-Q chains anywhere
+        bound_all_chain(multi_q_analysis)
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = RuntimeError('boom')
+            with pytest.raises(RuntimeError, match='boom'):
+                multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN EXPECT the genuine failed-run diagnosis, not the pointer at per-Q chains
+        with pytest.raises(RuntimeError, match='left no results'):
+            multi_q_analysis.bayesian.extend()
+
+    def test_only_the_sampled_q_indices_are_gathered(self, multi_q_analysis):
+        # WHEN just one Q index is sampled
+        target = multi_q_analysis.analysis_list[1]
+        for parameter in target.get_free_parameters():
+            parameter.min = float(parameter.value) - 5.0
+            parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                target.get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=1, samples=10)
+
+        # THEN
+        summary = multi_q_analysis.bayesian.summary()
+
+        # EXPECT the unsampled Q indices are passed over rather than breaking the aggregation
+        assert len(summary) == len(target.get_free_parameters())
+        assert all('Q_index=1' in entry.name for entry in summary)
+        assert len(multi_q_analysis.bayesian.set_parameters_to_median()) == len(
+            target.get_free_parameters()
+        )
+
+    def test_a_simultaneous_chain_serves_the_median_and_the_trace(self, multi_q_analysis):
+        # WHEN
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # EXPECT both come from the single chain, with no per-Q gathering involved
+        assert len(multi_q_analysis.bayesian.set_parameters_to_median()) == len(parameters)
+        assert len(multi_q_analysis.bayesian.plot_trace().axes) == len(parameters) + 1
 
 
 class warnings_as_errors:

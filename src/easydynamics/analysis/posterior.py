@@ -11,6 +11,7 @@ can be unit-tested on their own and reused by every Analysis class.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -18,6 +19,11 @@ import numpy as np
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
+
+# How many times wider than the parameter's own value a suggested range may be before it is
+# reported as suspicious. A fit that returns an uncertainty this large is describing a flat
+# direction rather than a measurement.
+ABSURD_WIDTH_FACTOR = 1e4
 
 # Fraction of the allowed range at each end that counts as "at the bound" when checking whether
 # the posterior has piled up against a bound.
@@ -41,7 +47,8 @@ class BoundsSuggestion:
     parameter : Parameter
         The parameter the suggestion applies to.
     label : str
-        The name the parameter is reported under, qualified where several share a name.
+        The name the parameter is reported under. For a multi-Q analysis this is qualified by Q,
+        since every Q holds an identically named copy of each parameter.
     suggested_min : float
         The proposed lower bound. Equal to the parameter's current lower bound when that is already
         finite.
@@ -131,7 +138,9 @@ class BoundsSuggestions:
         """
         Set the suggested bounds on every parameter that has a usable suggestion.
 
-        Parameters needing manual attention are skipped rather than guessed at.
+        Parameters needing manual attention are skipped rather than guessed at. A suggestion that
+        is absurdly wide is still applied -- it is what the fit implied -- but warned about, since
+        reading the table first is easy to skip in a script.
 
         Returns
         -------
@@ -139,12 +148,27 @@ class BoundsSuggestions:
             The parameters whose bounds were changed.
         """
         changed = []
+        absurd = []
         for suggestion in self._suggestions:
             if suggestion.needs_attention or not suggestion.changes_bounds:
                 continue
             suggestion.parameter.min = suggestion.suggested_min
             suggestion.parameter.max = suggestion.suggested_max
             changed.append(suggestion.parameter)
+            if _is_absurdly_wide(suggestion):
+                absurd.append(suggestion.label)
+
+        if absurd:
+            warnings.warn(
+                (
+                    f'Applied bounds far wider than the parameter itself for: '
+                    f'{", ".join(absurd)}. That width comes from a very large fitted uncertainty, '
+                    f'which usually means these parameters are degenerate with others, so the '
+                    f'data cannot determine them separately. Sampling explores that whole range.'
+                ),
+                UserWarning,
+                stacklevel=2,
+            )
         return changed
 
     def __len__(self) -> int:
@@ -201,6 +225,29 @@ class BoundsSuggestions:
         return '\n'.join(lines)
 
 
+def _is_absurdly_wide(suggestion: BoundsSuggestion) -> bool:
+    """
+    Check whether a suggested range dwarfs the parameter it describes.
+
+    Parameters
+    ----------
+    suggestion : BoundsSuggestion
+        The suggestion to judge.
+
+    Returns
+    -------
+    bool
+        True when the range is more than ``ABSURD_WIDTH_FACTOR`` times the parameter's magnitude.
+    """
+    scale = abs(float(suggestion.parameter.value))
+    if scale == 0:
+        # No magnitude to compare against, so the ratio would be meaningless rather than alarming.
+        return False
+    width = suggestion.suggested_max - suggestion.suggested_min
+    # An infinite width compares greater than any threshold, so it needs no separate check.
+    return width > ABSURD_WIDTH_FACTOR * scale
+
+
 def suggest_bounds_for_parameters(
     parameters: list[Parameter],
     labels: list[str] | None = None,
@@ -230,7 +277,8 @@ def suggest_bounds_for_parameters(
         The parameters to propose bounds for.
     labels : list[str] | None, default=None
         The name to report each parameter under, one per parameter. Defaults to the parameters' own
-        names.
+        names, which is ambiguous when several share a name, as the per-Q copies of a multi-Q
+        analysis do.
     n_sigma : float, default=10.0
         How many standard deviations of the parameter's fitted uncertainty to allow on each side.
     relative_pad : float, default=0.2
@@ -606,11 +654,12 @@ def summarize_draws(
     parameters_by_column: list[Parameter | None],
 ) -> PosteriorSummary:
     """
-    Summarize posterior draws under the parameters' own names and units.
+    Summarize posterior draws under caller-supplied labels.
 
     The sampler labels its columns with each parameter's ``unique_name`` (``Parameter_4`` and the
-    like), which is not what a user recognises, so columns are reported under ``Parameter.name``
-    wherever a parameter could be matched.
+    like), which is not what a user recognises, so the caller supplies readable labels instead. A
+    plain parameter name is enough for a single dataset, but a multi-Q analysis holds one copy of
+    each parameter per Q, all sharing a name, so those labels have to be qualified by Q.
 
     Parameters
     ----------

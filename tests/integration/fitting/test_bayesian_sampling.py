@@ -4,9 +4,9 @@
 """
 Integration tests running real BUMPS DREAM chains through Analysis1d.
 
-These are slow by nature. They deliberately run with ``sampler_kwargs={'trim': False}``: BUMPS'
-automatic burn-point trimming re-runs a convergence detector on every call and can crash inside its
-own outlier removal on the very short chains used here.
+These are slow by nature. Two BUMPS options are switched off deliberately: its burn-point trimming,
+which re-runs a convergence detector on every call, and its outlier removal, which indexes past the
+end of its own buffer on chains as short as these. Neither affects the sampling itself.
 """
 
 import warnings
@@ -33,7 +33,10 @@ SAMPLE_KWARGS = {
     'samples': 2000,
     'burn': 100,
     'thin': 2,
-    'sampler_kwargs': {'trim': False},
+    # 'trim': BUMPS' burn-point detector re-runs on every call and is not worth paying
+    # for here. 'outliers': its outlier removal indexes past the end of its own buffer on
+    # chains this short, which has failed in CI; the sampling itself is unaffected.
+    'sampler_kwargs': {'trim': False, 'outliers': 'none'},
 }
 
 
@@ -132,15 +135,22 @@ class TestRealChain:
         after = [float(p.value) for p in analysis.get_free_parameters()]
         assert after == pytest.approx(before)
 
-    def test_extend_grows_the_chain(self, sampled_analysis):
-        # WHEN
-        before = int(sampled_analysis.bayesian.results.state.Ngen)
+    def test_extend_grows_the_chain(self):
+        # WHEN a chain of this test's own: extending mutates the sampler state, so running it on
+        # the module-scoped fixture would hand every later test the extended chain
+        analysis = build_analysis()
+        analysis.fit()
+        analysis.bayesian.suggest_bounds().apply()
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            analysis.bayesian.sample(**SAMPLE_KWARGS)
+        before = int(analysis.bayesian.results.state.Ngen)
 
         # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extended = sampled_analysis.bayesian.extend(
-                additional_samples=500, thin=2, sampler_kwargs={'trim': False}
+            extended = analysis.bayesian.extend(
+                additional_samples=500, thin=2, sampler_kwargs={'trim': False, 'outliers': 'none'}
             )
 
         # EXPECT

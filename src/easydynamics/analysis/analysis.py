@@ -14,6 +14,8 @@ from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import MultiQPosteriorSampler
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
@@ -29,6 +31,10 @@ class Analysis(AnalysisBase):
     For analysing two-dimensional data, i.e. intensity as function of energy and Q.
 
     Supports independent fits of each Q value and simultaneous fits of all Q.
+
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.MultiQPosteriorSampler`.
 
     Examples
     --------
@@ -117,6 +123,11 @@ class Analysis(AnalysisBase):
 
         self._analysis_list: list[Analysis1d] = []
         self._analysis_list_is_dirty = True
+        # Rebuilt with the analysis list; see _parameter_owner_index.
+        self._owner_index = None
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -168,6 +179,70 @@ class Analysis(AnalysisBase):
             'analysis_list is read-only. '
             'To change the analysis list, modify the experiment, sample model, '
             'or instrument model.'
+        )
+
+    @property
+    def fitter(self) -> MultiFitter:
+        """
+        The EasyScience MultiFitter covering every Q index, built on first use.
+
+        Returns
+        -------
+        MultiFitter
+            The cached MultiFitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = self._build_fitter()
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> MultiQPosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        MultiQPosteriorSampler
+            The sampler, which can run per Q index or over all of them at once.
+        """
+        if self._bayesian is None:
+            self._bayesian = MultiQPosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+                per_q=lambda: self.analysis_list,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the MultiFitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters, qualified by Q index where needed.
+
+        Every Q index carries its own copy of each model parameter, all sharing a name, so a bare
+        name would produce several identical rows in a summary and could not pick a parameter out.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        owners = self._parameter_owner_index()
+        return ParameterLabels(
+            self._chain_parameters(),
+            qualify=lambda parameter: (
+                None
+                if owners.get(parameter.unique_name) is None
+                else f'Q_index={owners[parameter.unique_name]}'
+            ),
         )
 
     #############
@@ -283,8 +358,9 @@ class Analysis(AnalysisBase):
         Returns
         -------
         FitResults | list[FitResults]
-            A list of FitResults if fitting independently, or a single FitResults object if fitting
-            simultaneously.
+            A single FitResults when a specific Q index was fitted, and otherwise a list holding
+            one FitResults per Q index. A simultaneous fit also reports per-Q results, since the
+            underlying MultiFitter splits its combined result back up by dataset.
         """
 
         if self.Q is None:
@@ -661,6 +737,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_experiment_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_sample_model_changed(self) -> None:
         """
@@ -668,6 +746,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_sample_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
         """
@@ -675,6 +755,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_instrument_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
         """
@@ -682,6 +764,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_convolution_settings_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
@@ -695,6 +779,7 @@ class Analysis(AnalysisBase):
         experiment, sample model, and instrument model.
         """
         self._analysis_list = []
+        self._owner_index = None
         for Q_index in range(len(self.Q)):
             # The ConvolutionSettings object is shared so user changes reach every Q index;
             # plan validity is tracked per convolver, not on the settings object.
@@ -713,6 +798,102 @@ class Analysis(AnalysisBase):
     #############
     # Private methods
     #############
+
+    #############
+    # The contract PosteriorSampler relies on (simultaneous sampling over all Q)
+    #############
+
+    def _build_fitter(self) -> MultiFitter:
+        """
+        Build the MultiFitter covering every Q index.
+
+        Returns
+        -------
+        MultiFitter
+            A MultiFitter over the Analysis1d objects and their fit functions.
+        """
+        return MultiFitter(
+            fit_objects=self.analysis_list,
+            fit_functions=self.get_fit_functions(),
+        )
+
+    def _sampling_data(self) -> tuple[list, list, list]:
+        """
+        Get the per-Q data to bind to the Sampler, as lists of arrays.
+
+        Returns
+        -------
+        tuple[list, list, list]
+            The ``(x, y, weights)`` triple, one entry per Q index.
+        """
+        xs, ys, ws = [], [], []
+        for analysis1d in self.analysis_list:
+            x, y, weight, _ = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            xs.append(x)
+            ys.append(y)
+            ws.append(weight)
+        return xs, ys, ws
+
+    def _chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters across every Q index.
+
+        Each Q index holds its own copy of the model parameters, so the union is taken by
+        ``unique_name``. Parameters shared between Q indices therefore appear only once.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the whole analysis, in Q order and without duplicates.
+        """
+        parameters = {}
+        for analysis1d in self.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameters.setdefault(parameter.unique_name, parameter)
+        return list(parameters.values())
+
+    def _parameter_owner_index(self) -> dict[str, int]:
+        """
+        Map each parameter to the Q index that owns it.
+
+        Built once per analysis list and reused, because scanning the list for every parameter
+        makes labelling a chain quadratic in the parameter count -- seconds, for a dataset with
+        many Q values. Built from all parameters rather than only the free ones, so that fixing a
+        parameter cannot leave the map stale.
+
+        Returns
+        -------
+        dict[str, int]
+            Mapping of parameter ``unique_name`` to owning Q index. Parameters shared by more than
+            one Q index are left out, since no single Q identifies them.
+        """
+        self._ensure_analysis_list_current()
+        if self._owner_index is None:
+            owners: dict[str, int | None] = {}
+            for analysis1d in self._analysis_list:
+                for parameter in analysis1d.get_all_parameters():
+                    if parameter.unique_name in owners:
+                        owners[parameter.unique_name] = None
+                    else:
+                        owners[parameter.unique_name] = analysis1d.Q_index
+            self._owner_index = {
+                name: q_index for name, q_index in owners.items() if q_index is not None
+            }
+        return self._owner_index
+
+    def _prepare_for_sampling(self) -> None:
+        """
+        Rebuild every per-Q convolver against its masked energy grid.
+
+        Mirrors what a simultaneous fit does, so that the model evaluations seen by the sampler
+        match the ones the fit would have made.
+        """
+        for analysis1d in self.analysis_list:
+            _, _, _, mask = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            mask_var = sc.array(dims=['energy'], values=mask)
+            analysis1d.refresh_convolver(
+                energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
+            )
 
     def _fit_single_Q(self, Q_index: int) -> FitResults:
         """

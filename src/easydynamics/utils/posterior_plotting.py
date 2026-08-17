@@ -10,8 +10,10 @@ loaded from disk. The Analysis classes wrap them in convenience methods.
 
 from __future__ import annotations
 
+import io
 import warnings
 from typing import TYPE_CHECKING
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +21,9 @@ from matplotlib import colormaps
 from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
+    from ipywidgets import VBox
     from matplotlib.figure import Figure
+    from plopp.backends.matplotlib.figure import InteractiveFigure
 
 
 def plot_trace(
@@ -290,8 +294,8 @@ def plot_correlations(
 
     Correlations are dimensionless, so the labels carry no units. A constant column has no defined
     correlation with anything; its cells are shown greyed out and marked "n/a" rather than failing.
-    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or
-    is empty, or if ``names`` does not have one entry per column.
+    A ``ValueError`` propagates from the input validation if ``draws`` is not two-dimensional or is
+    empty, or if ``names`` does not have one entry per column.
 
     Parameters
     ----------
@@ -590,3 +594,240 @@ def _verify_draws(draws: np.ndarray, names: list[str]) -> None:
             f'names must have one entry per column of draws. '
             f'Got {len(names)} names for {draws.shape[1]} columns.'
         )
+
+
+def figures_with_slider(figures: dict[int, Figure], description: str = 'Q index') -> VBox:
+    """
+    Show one pre-rendered figure at a time, with a slider choosing which one.
+
+    Every figure is rendered to PNG bytes once, up front, and the slider callback only swaps the
+    stored bytes into an image widget. Moving the slider therefore costs no matplotlib work at all,
+    which keeps it as responsive as the plopp slider on the data plots; re-rendering a figure on
+    every move is what made the previous slider feel sluggish.
+
+    The figures are closed after rendering, so no backend draws them a second time.
+
+    Parameters
+    ----------
+    figures : dict[int, Figure]
+        Mapping of slider position to the matplotlib Figure shown there. Only these positions are
+        offered, so the slider cannot land on an index with nothing to show.
+    description : str, default='Q index'
+        Label shown next to the slider.
+
+    Returns
+    -------
+    VBox
+        An ipywidgets box holding the image and, under it, the slider.
+
+    Raises
+    ------
+    ValueError
+        If no figures are given.
+    """
+    import ipywidgets as widgets
+
+    if not figures:
+        raise ValueError('No figures to show.')
+
+    indices = sorted(figures)
+    rendered = {}
+    for index in indices:
+        figure = figures[index]
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format='png', bbox_inches='tight')
+        rendered[index] = buffer.getvalue()
+        # Rendered to bytes already, so the figure is closed rather than left for a backend to
+        # draw a second time.
+        plt.close(figure)
+
+    image = widgets.Image(value=rendered[indices[0]], format='png')
+    image.layout.max_width = '100%'
+    # Swapping stored bytes is instant, so the image can follow the slider continuously; there is
+    # no need for the release-to-update behaviour an expensive redraw would force.
+    slider = widgets.SelectionSlider(
+        options=indices,
+        value=indices[0],
+        description=description,
+        continuous_update=True,
+    )
+    slider.observe(lambda change: setattr(image, 'value', rendered[change['new']]), names='value')
+    # Slider under the figure, matching where plopp puts its slicer controls.
+    return widgets.VBox([image, slider])
+
+
+def corner_with_slider(
+    chains: dict[int, dict],
+    title: str | None = None,
+    **kwargs: dict[str, Any],
+) -> VBox:
+    """
+    Show one corner plot at a time, with a slider choosing which chain to look at.
+
+    Chains sampled separately share no draws, so there is no joint distribution across them to
+    plot. Stepping through them one at a time shows the correlations that were actually sampled,
+    which is what a single combined figure could not do honestly. The figures are pre-rendered
+    through :func:`figures_with_slider`, so the slider moves without re-drawing anything.
+
+    Parameters
+    ----------
+    chains : dict[int, dict]
+        Mapping of index to a ``{'draws': ..., 'names': ..., 'units': ...}`` description of one
+        chain. ``units`` is optional.
+    title : str | None, default=None
+        Title prefix, extended with the selected index.
+    **kwargs : dict[str, Any]
+        Forwarded to :func:`plot_corner`.
+
+    Returns
+    -------
+    VBox
+        An ipywidgets box holding the figure and the slider.
+
+    Raises
+    ------
+    ValueError
+        If no chains are given.
+    """
+    if not chains:
+        raise ValueError('No chains to plot.')
+
+    figures = {
+        index: plot_corner(
+            draws=chain['draws'],
+            names=chain['names'],
+            units=chain.get('units'),
+            title=title if title is None else f'{title} (Q index {index})',
+            **kwargs,
+        )
+        for index, chain in chains.items()
+    }
+    return figures_with_slider(figures)
+
+
+def predictive_with_slider(
+    energy: np.ndarray,
+    q_values: np.ndarray,
+    y: np.ndarray,
+    lower: np.ndarray,
+    median: np.ndarray,
+    upper: np.ndarray,
+    y_variances: np.ndarray | None = None,
+    energy_unit: str | None = None,
+    q_unit: str | None = None,
+    ylabel: str | None = None,
+    title: str | None = None,
+    credible_interval: float = 68.0,
+    **kwargs: dict[str, Any],
+) -> InteractiveFigure:
+    """
+    Plot per-Q posterior-predictive bands behind a plopp Q slider.
+
+    Built on ``plopp.slicer`` over a scipp DataGroup with a Q dimension, so the figure looks and
+    handles exactly like ``Analysis.plot_data_and_model``: the data with its error bars, the model
+    curves on top, and a Q slider underneath. Plopp draws no filled band for sliced data -- its
+    only spread representation is variance-based error bars -- so the credible band is drawn as the
+    posterior median with a dashed line along each band edge, labelled with the interval.
+
+    Rows are laid out on one common energy grid; where a Q has no point (masked or never measured),
+    NaN leaves a gap in the lines rather than inventing a value.
+
+    Parameters
+    ----------
+    energy : np.ndarray
+        The common energy grid, one column per point.
+    q_values : np.ndarray
+        The Q value of each row, shown on the slider.
+    y : np.ndarray
+        Observed values, shape ``(len(q_values), len(energy))``, NaN where a Q has no point.
+    lower : np.ndarray
+        Lower band edge per Q, same shape as ``y``.
+    median : np.ndarray
+        Posterior median prediction per Q, same shape as ``y``.
+    upper : np.ndarray
+        Upper band edge per Q, same shape as ``y``.
+    y_variances : np.ndarray | None, default=None
+        Variances of the observed values, drawn as error bars when given.
+    energy_unit : str | None, default=None
+        Unit of the energy grid, shown on the horizontal axis.
+    q_unit : str | None, default=None
+        Unit of the Q values, shown beside the slider.
+    ylabel : str | None, default=None
+        Label for the dependent axis.
+    title : str | None, default=None
+        Figure title.
+    credible_interval : float, default=68.0
+        Width of the credible band the edges enclose, as a percentage, used in their labels.
+    **kwargs : dict[str, Any]
+        Forwarded to ``plopp.slicer``, overriding the style defaults.
+
+    Returns
+    -------
+    InteractiveFigure
+        The plopp figure with its Q slider.
+
+    Raises
+    ------
+    ValueError
+        If the arrays do not share the shape ``(len(q_values), len(energy))``, or if
+        ``credible_interval`` is not between 0 and 100.
+    """
+    import plopp as pp
+    import scipp as sc
+
+    if not 0 < credible_interval < 100:
+        raise ValueError(f'credible_interval must be between 0 and 100. Got {credible_interval}.')
+    expected = (len(q_values), len(energy))
+    arrays = {'y': y, 'lower': lower, 'median': median, 'upper': upper}
+    if y_variances is not None:
+        arrays['y_variances'] = y_variances
+    for name, array in arrays.items():
+        if np.asarray(array).shape != expected:
+            raise ValueError(f'{name} must have shape {expected}. Got {np.asarray(array).shape}.')
+
+    coords = {
+        'Q': sc.array(dims=['Q'], values=np.asarray(q_values, dtype=float), unit=q_unit),
+        'energy': sc.array(
+            dims=['energy'], values=np.asarray(energy, dtype=float), unit=energy_unit
+        ),
+    }
+
+    def data_array(values: np.ndarray, variances: np.ndarray | None = None) -> sc.DataArray:
+        return sc.DataArray(
+            data=sc.array(
+                dims=['Q', 'energy'],
+                values=np.asarray(values, dtype=float),
+                variances=None if variances is None else np.asarray(variances, dtype=float),
+            ),
+            coords=coords,
+        )
+
+    lower_key = f'{credible_interval:.0f}% band (lower)'
+    upper_key = f'{credible_interval:.0f}% band (upper)'
+    data_group = sc.DataGroup({
+        'Data': data_array(y, y_variances),
+        'Posterior median': data_array(median),
+        lower_key: data_array(lower),
+        upper_key: data_array(upper),
+    })
+
+    # The same styling plot_data_and_model gives its DataGroup: data as open black circles, the
+    # model curves as lines, with the band edges dashed to read as edges rather than curves.
+    style = {
+        'keep': 'energy',
+        'linestyle': {'Data': 'none', 'Posterior median': '-', lower_key: '--', upper_key: '--'},
+        'marker': {'Data': 'o', 'Posterior median': None, lower_key: None, upper_key: None},
+        'color': {'Data': 'black', 'Posterior median': 'C3', lower_key: 'C3', upper_key: 'C3'},
+        'markerfacecolor': {'Data': 'none'},
+    }
+    if title is not None:
+        style['title'] = title
+    style.update(kwargs)
+
+    fig = pp.slicer(data_group, **style)
+    for widget in fig.bottom_bar[0].controls.values():
+        widget.slider_toggler.value = '-o-'
+    if ylabel is not None:
+        fig.ax.set_ylabel(ylabel)
+    fig.autoscale()
+    return fig

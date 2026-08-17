@@ -322,8 +322,9 @@ class TestSummarizeDraws:
         assert entry.plus == pytest.approx(34.0)
         assert entry.value == pytest.approx(1.5)
 
-    def test_labels_are_reported_verbatim(self):
-        # WHEN a caller supplies a qualified label, as a multi-Q analysis does
+    def test_labels_qualified_by_q_are_kept_verbatim(self):
+        # WHEN a multi-Q analysis supplies Q-qualified labels, since every Q holds a copy of the
+        # same parameter and the bare name would repeat
         parameter = make_parameter(name='Gaussian width')
 
         # THEN
@@ -364,3 +365,56 @@ class TestSummarizeDraws:
         # EXPECT
         assert 'Gaussian area' in text
         assert 'median' in text
+
+
+class TestPosteriorSummaryContainer:
+    def test_len_and_iteration(self):
+        # WHEN
+        parameters = [make_parameter(name='a'), make_parameter(name='b')]
+        summary = summarize_draws(np.zeros((7, 2)), ['a', 'b'], parameters)
+
+        # THEN EXPECT
+        assert len(summary) == 2
+        assert [entry.name for entry in summary] == ['a', 'b']
+        assert len(summary.entries) == 2
+
+    def test_repr_with_no_entries(self):
+        # WHEN THEN EXPECT
+        assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))
+
+
+class TestAbsurdBoundsWarning:
+    def test_applying_a_wildly_wide_bound_warns(self):
+        # WHEN a fit returns an enormous uncertainty, which is what a degenerate parameter looks
+        # like coming out of least squares
+        parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT it is still applied, since it is what the fit implied, but not silently
+        with pytest.warns(UserWarning, match='far wider than the parameter'):
+            changed = suggestions.apply()
+        assert changed == [parameter]
+
+    def test_a_sane_bound_applies_without_warning(self):
+        # WHEN
+        parameter = make_parameter(name='sane', value=10.0, error=0.5)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT
+        import warnings as warnings_module
+
+        with warnings_module.catch_warnings():
+            warnings_module.simplefilter('error')
+            suggestions.apply()
+
+    def test_a_zero_valued_parameter_is_not_called_absurd(self):
+        # WHEN there is no magnitude to compare the width against
+        parameter = make_parameter(name='zero', value=0.0, error=1.0)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # THEN EXPECT no warning, since the ratio is meaningless rather than alarming
+        import warnings as warnings_module
+
+        with warnings_module.catch_warnings():
+            warnings_module.simplefilter('error')
+            suggestions.apply()
