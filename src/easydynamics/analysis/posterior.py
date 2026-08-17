@@ -367,9 +367,19 @@ def _suggest_bounds_for_parameter(
             reason='value is not finite',
         )
 
-    half_width = relative_pad * abs(value)
-    if np.isfinite(error):
-        half_width += n_sigma * error
+    # A NaN uncertainty is exactly the degenerate fit this helper exists to guard against, so it
+    # is flagged rather than silently treated like a zero error, which would yield deceptively
+    # tight bounds of value +/- relative_pad * |value|.
+    if not np.isfinite(error):
+        return BoundsSuggestion(
+            parameter=parameter,
+            label=label,
+            suggested_min=current_min,
+            suggested_max=current_max,
+            reason='fitted uncertainty is not finite',
+        )
+
+    half_width = relative_pad * abs(value) + n_sigma * error
     if absolute_floor is not None:
         half_width = max(half_width, absolute_floor)
 
@@ -412,6 +422,33 @@ def unbounded_parameters(parameters: list[Parameter]) -> list[Parameter]:
     ]
 
 
+def degenerate_parameters(parameters: list[Parameter]) -> list[Parameter]:
+    """
+    Find parameters whose finite bounds enclose no range at all.
+
+    A zero-width range (``min >= max``) gives DREAM nothing to explore: as the prior it has zero
+    volume, and letting it through surfaces only as NaNs deep inside the sampler, far from the
+    cause.
+
+    Parameters
+    ----------
+    parameters : list[Parameter]
+        The parameters to check.
+
+    Returns
+    -------
+    list[Parameter]
+        Those parameters whose bounds are both finite with ``min >= max``.
+    """
+    return [
+        parameter
+        for parameter in parameters
+        if np.isfinite(parameter.min)
+        and np.isfinite(parameter.max)
+        and float(parameter.min) >= float(parameter.max)
+    ]
+
+
 def parameters_at_bounds(
     draws: np.ndarray,
     parameters_by_column: list[Parameter | None],
@@ -433,10 +470,14 @@ def parameters_at_bounds(
     Returns
     -------
     dict[str, float]
-        Mapping of parameter name to the fraction of draws sitting in the outer
+        Mapping of the parameter's ``unique_name`` -- ``name`` is not used as the key because two
+        same-named parameters would collide -- to the fraction of draws sitting in the outer
         ``BOUND_EDGE_FRACTION`` of its allowed range, for those parameters where that fraction
-        exceeds ``BOUND_OCCUPANCY_THRESHOLD``.
+        exceeds ``BOUND_OCCUPANCY_THRESHOLD``. The caller resolves the unique names back to
+        readable labels where the result is reported.
     """
+    if draws.shape[0] == 0:
+        return {}
     piled_up = {}
     for column, parameter in enumerate(parameters_by_column):
         if parameter is None:
@@ -450,7 +491,7 @@ def parameters_at_bounds(
         at_edge = (values <= low + edge) | (values >= high - edge)
         fraction = float(np.count_nonzero(at_edge)) / len(values)
         if fraction > BOUND_OCCUPANCY_THRESHOLD:
-            piled_up[parameter.name] = fraction
+            piled_up[parameter.unique_name] = fraction
     return piled_up
 
 

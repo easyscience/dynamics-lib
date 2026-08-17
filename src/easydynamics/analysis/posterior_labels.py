@@ -47,7 +47,23 @@ class ParameterLabels:
         self._qualify = qualify
         self._counts = Counter(parameter.name for parameter in self._parameters)
         self._by_unique_name = {p.unique_name: p for p in self._parameters}
-        self._by_label = {self.label(p): p for p in self._parameters}
+        # Display labels can still collide after qualification -- two same-named parameters with
+        # no qualifier, or one that declines. A colliding label cannot round-trip through a saved
+        # chain: both columns would silently resolve to whichever parameter was registered last.
+        # So the labels used as lookup keys, and written to the sidecar by name_map(), carry a
+        # deterministic positional suffix wherever they collide, while label() keeps the bare
+        # display name.
+        label_counts = Counter(self.label(p) for p in self._parameters)
+        occurrence: Counter = Counter()
+        self._storage_labels: dict[str, str] = {}
+        for p in self._parameters:
+            base = self.label(p)
+            if label_counts[base] > 1:
+                occurrence[base] += 1
+                self._storage_labels[p.unique_name] = f'{base} [{occurrence[base]}]'
+            else:
+                self._storage_labels[p.unique_name] = base
+        self._by_label = {self._storage_labels[p.unique_name]: p for p in self._parameters}
 
     @property
     def parameters(self) -> list[Parameter]:
@@ -85,14 +101,16 @@ class ParameterLabels:
         Map each parameter's ``unique_name`` to its label.
 
         Saved alongside a chain, because unique names are per-session: without this a reloaded
-        chain cannot be matched back to any parameter.
+        chain cannot be matched back to any parameter. Where two parameters share a display
+        label, the recorded labels carry a deterministic positional suffix (``width [1]``,
+        ``width [2]``) so each column can be matched back to exactly one parameter.
 
         Returns
         -------
         dict[str, str]
-            Mapping of unique name to label.
+            Mapping of unique name to label, collision-free.
         """
-        return {p.unique_name: self.label(p) for p in self._parameters}
+        return dict(self._storage_labels)
 
     def resolve(
         self,

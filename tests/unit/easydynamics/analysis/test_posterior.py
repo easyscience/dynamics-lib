@@ -7,6 +7,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.analysis.posterior import BoundsSuggestion
 from easydynamics.analysis.posterior import BoundsSuggestions
+from easydynamics.analysis.posterior import degenerate_parameters
 from easydynamics.analysis.posterior import parameters_at_bounds
 from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
@@ -94,6 +95,18 @@ class TestSuggestBounds:
         assert not suggestion.needs_attention
         assert suggestion.suggested_min == pytest.approx(-0.5)
         assert suggestion.suggested_max == pytest.approx(0.5)
+
+    def test_non_finite_error_is_flagged_not_silently_narrowed(self):
+        # WHEN a degenerate fit reports a NaN uncertainty
+        parameter = make_parameter(value=5.0)
+        parameter.variance = np.nan
+
+        # THEN
+        suggestion = suggest_bounds_for_parameters([parameter]).suggestions[0]
+
+        # EXPECT a flag, rather than deceptively tight bounds from the relative pad alone
+        assert suggestion.needs_attention
+        assert 'uncertainty is not finite' in suggestion.reason
 
     def test_non_finite_value_is_flagged(self):
         # WHEN
@@ -187,6 +200,29 @@ class TestUnboundedParameters:
         assert result == [half_open]
 
 
+class TestDegenerateParameters:
+    def test_finds_zero_width_ranges(self):
+        # WHEN one parameter's finite bounds enclose no range at all. The setters refuse identical
+        # bounds, but a deserialized or hand-built parameter can still carry them, so the internal
+        # state is written directly.
+        healthy = make_parameter(name='healthy', minimum=0.0, maximum=2.0)
+        degenerate = make_parameter(name='degenerate', value=1.0, minimum=0.0, maximum=1.0)
+        degenerate._min.value = 1.0
+
+        # THEN
+        result = degenerate_parameters([healthy, degenerate])
+
+        # EXPECT
+        assert result == [degenerate]
+
+    def test_infinite_bounds_are_not_reported_as_degenerate(self):
+        # WHEN a bound is infinite, that is unboundedness rather than degeneracy
+        parameter = make_parameter()
+
+        # THEN EXPECT
+        assert degenerate_parameters([parameter]) == []
+
+
 class TestParametersAtBounds:
     def test_uniform_posterior_across_the_bounds_is_reported(self):
         # WHEN a posterior fills its whole allowed range, the bound is setting the interval
@@ -197,8 +233,8 @@ class TestParametersAtBounds:
         result = parameters_at_bounds(draws, [parameter])
 
         # EXPECT
-        assert parameter.name in result
-        assert result[parameter.name] == pytest.approx(0.1, abs=0.01)
+        assert parameter.unique_name in result
+        assert result[parameter.unique_name] == pytest.approx(0.1, abs=0.01)
 
     def test_posterior_well_inside_its_bounds_is_not_reported(self):
         # WHEN
@@ -221,7 +257,7 @@ class TestParametersAtBounds:
         result = parameters_at_bounds(draws, [parameter])
 
         # EXPECT
-        assert parameter.name in result
+        assert parameter.unique_name in result
 
     def test_posterior_pinned_at_one_bound_is_reported(self):
         # WHEN
@@ -232,7 +268,7 @@ class TestParametersAtBounds:
         result = parameters_at_bounds(draws, [parameter])
 
         # EXPECT
-        assert result[parameter.name] > 0.9
+        assert result[parameter.unique_name] > 0.9
 
     def test_unmatched_and_unbounded_columns_are_skipped(self):
         # WHEN
@@ -244,6 +280,27 @@ class TestParametersAtBounds:
 
         # EXPECT
         assert result == {}
+
+    def test_same_named_parameters_do_not_collide(self):
+        # WHEN two parameters share a name and both posteriors are pinned at a bound
+        first = make_parameter(name='width', minimum=0.0, maximum=1.0)
+        second = make_parameter(name='width', minimum=0.0, maximum=1.0)
+        draws = np.zeros((100, 2))
+
+        # THEN
+        result = parameters_at_bounds(draws, [first, second])
+
+        # EXPECT one entry per parameter, keyed so they cannot overwrite each other
+        assert len(result) == 2
+        assert set(result) == {first.unique_name, second.unique_name}
+
+    def test_zero_row_draws_return_nothing_rather_than_dividing_by_zero(self):
+        # WHEN
+        parameter = make_parameter(minimum=0.0, maximum=1.0)
+        draws = np.zeros((0, 1))
+
+        # THEN EXPECT
+        assert parameters_at_bounds(draws, [parameter]) == {}
 
 
 class TestSummarizeDraws:

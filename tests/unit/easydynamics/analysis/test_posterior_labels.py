@@ -89,6 +89,34 @@ class TestChainColumns:
         assert labels.display_names(['Parameter_999']) == ['Parameter_999']
         assert labels.units(['Parameter_999']) == ['']
 
+    def test_colliding_labels_get_distinct_sidecar_entries(self):
+        # WHEN two parameters end up with the same display label
+        first, second = make_parameter('width'), make_parameter('width')
+
+        # THEN
+        labels = ParameterLabels([first, second])
+
+        # EXPECT deterministic positional suffixes in the sidecar mapping, rather than a silent
+        # last-write-wins, while the display label stays bare
+        assert labels.name_map() == {
+            first.unique_name: 'width [1]',
+            second.unique_name: 'width [2]',
+        }
+        assert labels.label(first) == 'width'
+
+    def test_colliding_labels_round_trip_to_their_own_parameters(self):
+        # WHEN a chain of two same-labelled parameters was saved in another session
+        old_first, old_second = make_parameter('width'), make_parameter('width')
+        saved = ParameterLabels([old_first, old_second]).name_map()
+        new_first, new_second = make_parameter('width'), make_parameter('width')
+
+        # THEN
+        labels = ParameterLabels([new_first, new_second])
+        resolved = labels.resolve([old_first.unique_name, old_second.unique_name], saved)
+
+        # EXPECT each column finds its own parameter, not both the same one
+        assert resolved == [new_first, new_second]
+
     def test_name_map_records_labels_against_unique_names(self):
         # WHEN
         first, second = make_parameter('width'), make_parameter('width')

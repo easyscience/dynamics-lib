@@ -83,6 +83,19 @@ def simultaneously_sampled():
     return analysis
 
 
+@pytest.fixture(scope='module')
+def independently_sampled():
+    """One independent DREAM run shared by every test that only reads the per-Q chains."""
+    analysis = build_analysis()
+    analysis.fit(fit_method='independent')
+    for analysis1d in analysis.analysis_list:
+        analysis1d.bayesian.suggest_bounds().apply()
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        results = analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
+    return analysis, results
+
+
 class TestSimultaneousChain:
     def test_chain_covers_every_q_index(self, simultaneously_sampled):
         # THEN
@@ -143,34 +156,20 @@ class TestSimultaneousChain:
 
 
 class TestIndependentChains:
-    def test_one_chain_per_q_index(self):
-        # WHEN
-        analysis = build_analysis()
-        analysis.fit(fit_method='independent')
-        for analysis1d in analysis.analysis_list:
-            analysis1d.bayesian.suggest_bounds().apply()
-
+    def test_one_chain_per_q_index(self, independently_sampled):
         # THEN
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            results = analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
+        analysis, results = independently_sampled
 
         # EXPECT
         assert len(results) == len(Q_VALUES)
         for analysis1d, result in zip(analysis.analysis_list, results, strict=True):
             assert result.draws.shape[1] == len(analysis1d.get_free_parameters())
 
-    def test_independent_and_simultaneous_agree_on_the_widths(self, simultaneously_sampled):
-        # WHEN
-        analysis = build_analysis()
-        analysis.fit(fit_method='independent')
-        for analysis1d in analysis.analysis_list:
-            analysis1d.bayesian.suggest_bounds().apply()
-
-        # THEN the same data is sampled per-Q instead of all at once
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
+    def test_independent_and_simultaneous_agree_on_the_widths(
+        self, simultaneously_sampled, independently_sampled
+    ):
+        # THEN the same data sampled per-Q is compared with the single simultaneous chain
+        analysis, _ = independently_sampled
 
         # EXPECT both routes land on the same widths, since nothing is shared across Q here
         for q_index, analysis1d in enumerate(analysis.analysis_list):
@@ -206,13 +205,12 @@ class TestParameterAnalysisChain:
             bindings=edyn.FitBinding(model=model, targets='Gaussian width'),
         )
         analysis.fit()
-
         # The linear coefficient sits at exactly zero with a vanishing uncertainty, so the sigma
         # rule has no scale to work from and flags it rather than inventing one. absolute_floor
-        # supplies the scale the data cannot.
+        # supplies the scale the data cannot; the asserts guard that this setup really leaves
+        # every coefficient bounded before sampling.
         flagged = analysis.bayesian.suggest_bounds().needing_attention
         assert [s.label for s in flagged] == ['Width model_c1']
-
         analysis.bayesian.suggest_bounds(absolute_floor=1.0).apply()
         assert not analysis.bayesian.suggest_bounds().needing_attention
 
@@ -221,25 +219,27 @@ class TestParameterAnalysisChain:
             warnings.simplefilter('ignore')
             results = analysis.bayesian.sample(**SAMPLE_KWARGS)
 
-        # EXPECT a column per polynomial coefficient, and a readable summary
+        # EXPECT the posterior recovers the generating polynomial within a few posterior
+        # standard deviations (a 68% interval would exclude the truth too often to be strict),
+        # with a column per coefficient and a readable, collision-free summary
+        summary = analysis.bayesian.summary()
+        for name, truth in (
+            ('Width model_c0', 0.8),
+            ('Width model_c1', 0.0),
+            ('Width model_c2', 0.4),
+        ):
+            entry = summary[name]
+            spread = max(entry.minus, entry.plus)
+            assert abs(entry.median - truth) < 4 * spread
         assert results.draws.shape[1] == len(analysis._chain_parameters())
-        names = [entry.name for entry in analysis.bayesian.summary()]
+        names = [entry.name for entry in summary]
         assert len(set(names)) == len(names)
 
 
 class TestAggregatedIndependentChains:
-    def test_summary_gathers_the_real_per_q_chains(self):
-        # WHEN each Q is sampled on its own
-        analysis = build_analysis()
-        analysis.fit(fit_method='independent')
-        for analysis1d in analysis.analysis_list:
-            analysis1d.bayesian.suggest_bounds().apply()
-
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
-
+    def test_summary_gathers_the_real_per_q_chains(self, independently_sampled):
         # THEN
+        analysis, _ = independently_sampled
         summary = analysis.bayesian.summary()
 
         # EXPECT one table covering every Q, and the widths still recovered
@@ -249,22 +249,23 @@ class TestAggregatedIndependentChains:
             spread = max(entry.minus, entry.plus)
             assert abs(entry.median - true_width(Q_VALUES[q_index])) < 4 * spread
 
-    def test_median_applies_each_chain_to_its_own_q(self):
-        # WHEN
-        analysis = build_analysis()
-        analysis.fit(fit_method='independent')
-        for analysis1d in analysis.analysis_list:
-            analysis1d.bayesian.suggest_bounds().apply()
+    def test_median_applies_each_chain_to_its_own_q(self, independently_sampled):
+        # WHEN the fixture is module-scoped, so the values moved here are restored afterwards
+        analysis, _ = independently_sampled
+        parameters = [p for a in analysis.analysis_list for p in a.get_free_parameters()]
+        saved_values = [(p, float(p.value)) for p in parameters]
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
+        try:
+            # THEN
+            changed = analysis.bayesian.set_parameters_to_median()
 
-        # THEN
-        changed = analysis.bayesian.set_parameters_to_median()
-
-        # EXPECT every Q's parameters land on that Q's own median
-        assert len(changed) == sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
-        summary = analysis.bayesian.summary()
-        for entry in summary:
-            assert entry.value == pytest.approx(entry.median, rel=1e-6)
+            # EXPECT every Q's parameters land on that Q's own median
+            assert len(changed) == sum(
+                len(a.get_free_parameters()) for a in analysis.analysis_list
+            )
+            summary = analysis.bayesian.summary()
+            for entry in summary:
+                assert entry.value == pytest.approx(entry.median, rel=1e-6)
+        finally:
+            for parameter, value in saved_values:
+                parameter.value = value
