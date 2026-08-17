@@ -37,8 +37,8 @@ def plot_trace(
     excursions. A visible trend means the chain has not reached the typical set and needs a longer
     burn-in.
 
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional, or if ``names`` does not have
-    one entry per column.
+    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
+    not have one entry per column, or if ``logp`` does not have one entry per draw.
 
     Parameters
     ----------
@@ -47,7 +47,7 @@ def plot_trace(
     names : list[str]
         One label per column of ``draws``.
     logp : np.ndarray | None, default=None
-        Log-posterior values, plotted in an extra panel when given.
+        Log-posterior values, one per draw, plotted in an extra panel when given.
     units : list[str] | None, default=None
         Unit of each column, appended to its label. Entries that are empty or dimensionless are
         skipped, since a bare "dimensionless" only adds clutter.
@@ -63,6 +63,13 @@ def plot_trace(
     """
     draws = np.asarray(draws)
     _verify_draws(draws, names)
+    if logp is not None:
+        logp = np.asarray(logp)
+        if logp.ndim != 1 or logp.shape[0] != draws.shape[0]:
+            raise ValueError(
+                f'logp must have one entry per draw. '
+                f'Got shape {logp.shape} for {draws.shape[0]} draws.'
+            )
 
     n_panels = draws.shape[1] + (1 if logp is not None else 0)
     if figsize is None:
@@ -74,10 +81,13 @@ def plot_trace(
     for axis, column, name in zip(axes, range(draws.shape[1]), names, strict=False):
         axis.plot(draws[:, column], lw=0.5)
         axis.set_ylabel(_with_unit(name, units, column), fontsize=8)
-        axis.set_xlim(0, len(draws) - 1)
+        # A single draw would make (0, len - 1) a zero-width range; matplotlib's autoscaling
+        # handles that case better than an explicit degenerate limit would.
+        if len(draws) > 1:
+            axis.set_xlim(0, len(draws) - 1)
 
     if logp is not None:
-        axes[-1].plot(np.asarray(logp), lw=0.5, color='C4')
+        axes[-1].plot(logp, lw=0.5, color='C4')
         axes[-1].set_ylabel('log-posterior', fontsize=8)
 
     axes[-1].set_xlabel('sample index')
@@ -102,8 +112,8 @@ def plot_corner(
     distribution of a pair: a compact blob means the two are independent, while a narrow diagonal
     ridge means they are correlated and cannot be determined separately from this data.
 
-    A ``ValueError`` is raised if ``draws`` is not two-dimensional, or if ``names`` does not have
-    one entry per column.
+    A ``ValueError`` is raised if ``draws`` is not two-dimensional or is empty, if ``names`` does
+    not have one entry per column, or if any column contains non-finite values.
 
     Parameters
     ----------
@@ -129,10 +139,21 @@ def plot_corner(
     draws = np.asarray(draws)
     _verify_draws(draws, names)
 
+    # Caught up front, because numpy would otherwise report it as an obscure
+    # "range [nan, nan]" error from inside the histogram.
+    finite_columns = np.isfinite(draws).all(axis=0)
+    if not finite_columns.all():
+        bad = ', '.join(name for name, ok in zip(names, finite_columns, strict=True) if not ok)
+        raise ValueError(f'draws contain non-finite values (NaN or infinity) in: {bad}.')
+
     n = draws.shape[1]
     if figsize is None:
         side = max(4.0, 2.0 * n)
         figsize = (side, side)
+
+    # One shared limit per column, applied to the diagonal histogram and every hexbin panel below
+    # it, so the ticks of a column line up instead of each panel autoscaling on its own.
+    limits = _column_limits(draws)
 
     fig, axes = plt.subplots(n, n, figsize=figsize, squeeze=False)
     for row in range(n):
@@ -146,6 +167,8 @@ def plot_corner(
                 axis.set_yticks([])
             else:
                 axis.hexbin(draws[:, col], draws[:, row], gridsize=30, cmap='Blues', mincnt=1)
+                axis.set_ylim(limits[row])
+            axis.set_xlim(limits[col])
             if row == n - 1:
                 axis.set_xlabel(names[col], fontsize=8)
             else:
@@ -270,6 +293,28 @@ def plot_posterior_predictive(
     return fig
 
 
+def _column_limits(draws: np.ndarray) -> list[tuple[float, float]]:
+    """
+    Compute one shared axis range per column of a corner plot.
+
+    Parameters
+    ----------
+    draws : np.ndarray
+        Posterior draws, shape ``(n_draws, n_parameters)``, all finite.
+
+    Returns
+    -------
+    list[tuple[float, float]]
+        A padded ``(low, high)`` range per column, widened to a usable span when a column is
+        constant.
+    """
+    lows = draws.min(axis=0)
+    highs = draws.max(axis=0)
+    spans = highs - lows
+    pads = np.where(spans > 0, 0.05 * spans, 0.05 * np.maximum(np.abs(highs), 1.0))
+    return [(float(low), float(high)) for low, high in zip(lows - pads, highs + pads, strict=True)]
+
+
 def _unit_for(units: list[str] | None, column: int) -> str:
     """
     Get the unit to show for a column, if it is worth showing.
@@ -367,6 +412,10 @@ def _verify_draws(draws: np.ndarray, names: list[str]) -> None:
     """
     if draws.ndim != 2:
         raise ValueError(f'draws must be two-dimensional. Got shape {draws.shape}.')
+    if draws.shape[0] == 0:
+        raise ValueError('draws is empty: there are no samples to plot.')
+    if draws.shape[1] == 0:
+        raise ValueError('draws has no columns: there are no parameters to plot.')
     if draws.shape[1] != len(names):
         raise ValueError(
             f'names must have one entry per column of draws. '

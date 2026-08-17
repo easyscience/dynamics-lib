@@ -23,6 +23,7 @@ from easyscience.fitting import AvailableMinimizers
 from easyscience.fitting import Sampler
 
 from easydynamics.analysis.posterior import PosteriorSummary
+from easydynamics.analysis.posterior import degenerate_parameters
 from easydynamics.analysis.posterior import parameters_at_bounds
 from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
@@ -198,18 +199,27 @@ class PosteriorSampler:
         Raises
         ------
         ValueError
-            If any free parameter has an infinite lower or upper bound.
+            If any free parameter has an infinite lower or upper bound, or finite bounds that
+            enclose no range (``min >= max``).
         """
         labels = self._labels()
         unbounded = unbounded_parameters(labels.parameters)
-        if not unbounded:
-            return
-        names = ', '.join(labels.label(parameter) for parameter in unbounded)
-        raise ValueError(
-            f'Bayesian sampling requires finite bounds on every free parameter, because the '
-            f'bounds act as the prior. These parameters are unbounded: {names}. '
-            f'Set their min and max, or call suggest_bounds() to propose values.'
-        )
+        if unbounded:
+            names = ', '.join(labels.label(parameter) for parameter in unbounded)
+            raise ValueError(
+                f'Bayesian sampling requires finite bounds on every free parameter, because the '
+                f'bounds act as the prior. These parameters are unbounded: {names}. '
+                f'Set their min and max, or call suggest_bounds() to propose values.'
+            )
+        degenerate = degenerate_parameters(labels.parameters)
+        if degenerate:
+            names = ', '.join(labels.label(parameter) for parameter in degenerate)
+            raise ValueError(
+                f'Bayesian sampling requires min < max on every free parameter, because the '
+                f'bounds act as the prior and a zero-width range leaves the sampler nothing to '
+                f'explore. These parameters have degenerate bounds: {names}. '
+                f'Widen their min and max, or fix them instead of sampling them.'
+            )
 
     #############
     # Sampling
@@ -254,6 +264,13 @@ class PosteriorSampler:
         -------
         SamplingResults
             The sampling results, also stored on :attr:`results`.
+
+        Notes
+        -----
+        Runs are not reproducible. BUMPS' DREAM sampler draws from NumPy's global random state
+        and the underlying EasyScience Sampler exposes no seed control, so two identical calls
+        return two different chains. Their summaries should nevertheless agree to well within the
+        reported credible intervals; if they do not, the chain is too short to have converged.
         """
         return self._run(
             parameters=parameters,
@@ -292,7 +309,15 @@ class PosteriorSampler:
         Raises
         ------
         RuntimeError
-            If there is no chain to extend.
+            If there is no chain to extend, or the previous run failed and left no results.
+        ValueError
+            If the model or data changed since the chain was started, or this run's parameters
+            differ from the ones the chain holds.
+
+        Notes
+        -----
+        Like :meth:`sample`, extensions are not reproducible: the sampler draws from NumPy's
+        global random state and exposes no seed control.
         """
         if self._sampler is None:
             raise RuntimeError('No chain to extend. Call sample() or load() first.')
@@ -337,6 +362,8 @@ class PosteriorSampler:
             than a modelling problem.
         RuntimeError
             If the BUMPS sampler fails while removing outlier chains.
+        ValueError
+            If there are no free parameters to sample.
         """
         held_fixed = self._resolve_parameters_to_hold_fixed(parameters)
         _warn_about_held_parameters(self._labels(), held_fixed)
@@ -346,6 +373,15 @@ class PosteriorSampler:
             self._prepare()
 
             chain_parameters = self._chain_parameters()
+            if not chain_parameters:
+                # Let the analysis raise its own, more specific complaint first — e.g. a
+                # ParameterAnalysis without a parameters Dataset or bindings has no free
+                # parameters either, but "every parameter is fixed" would mislead there.
+                self._sampling_data()
+                raise ValueError(
+                    'There are no free parameters to sample: every parameter is fixed. '
+                    'Free at least one parameter before sampling.'
+                )
             saved_values = [(p, p.value) for p in chain_parameters]
 
             if reuse_sampler:
@@ -386,13 +422,25 @@ class PosteriorSampler:
         Parameters
         ----------
         reuse_sampler : bool
-            Whether to reuse the cached Sampler even if it is marked dirty.
+            Whether to reuse the cached Sampler, as an extension must.
 
         Returns
         -------
         Sampler
             The Sampler to run.
+
+        Raises
+        ------
+        ValueError
+            If the cached Sampler must be reused but the model or data has changed since it was
+            built, so continuing its chain would silently mix draws against different data.
         """
+        if reuse_sampler and self._sampler is not None and self._sampler_is_dirty:
+            raise ValueError(
+                'Cannot extend the chain: the model or data has changed since the chain was '
+                'started, and an extension would mix draws taken against different data. '
+                'Start a fresh chain with sample() instead.'
+            )
         if self._sampler is None or (self._sampler_is_dirty and not reuse_sampler):
             x, y, weights = self._sampling_data()
             self._sampler = Sampler(self._analysis.fitter, x, y, weights=weights)
@@ -401,7 +449,7 @@ class PosteriorSampler:
 
     def _verify_chain_shape_unchanged(self, chain_parameters: list[Parameter]) -> None:
         """
-        Check that an extension keeps the chain's columns.
+        Check that an extension keeps the chain's columns, both in count and in identity.
 
         Parameters
         ----------
@@ -410,11 +458,16 @@ class PosteriorSampler:
 
         Raises
         ------
+        RuntimeError
+            If there are no stored results to continue from, as after a failed run.
         ValueError
-            If the number of parameters differs from the existing chain's.
+            If the number or the identity of the parameters differs from the existing chain's.
         """
         if self._results is None:
-            return
+            raise RuntimeError(
+                'Cannot extend: the previous run failed and left no results to continue from. '
+                'Start a fresh chain with sample() instead.'
+            )
         existing = self._results.draws.shape[1]
         if len(chain_parameters) != existing:
             raise ValueError(
@@ -423,6 +476,28 @@ class PosteriorSampler:
                 f'are fixed, so it needs the same parameters the chain was started with. Start a '
                 f'fresh chain with sample() instead.'
             )
+
+        # An equal count is not enough: the columns must be draws of the same parameters. For a
+        # chain from this session the stored column names are current unique names; for a loaded
+        # chain they are foreign, so they are resolved through the saved labels instead.
+        requested = {parameter.unique_name for parameter in chain_parameters}
+        if set(self._results.param_names) == requested:
+            return
+        resolved = self._resolve(self._results)
+        if (
+            all(parameter is not None for parameter in resolved)
+            and {parameter.unique_name for parameter in resolved} == requested
+        ):
+            return
+        labels = self._labels()
+        chain_names = ', '.join(self._display_names(self._results))
+        run_names = ', '.join(labels.label(parameter) for parameter in chain_parameters)
+        raise ValueError(
+            f'Cannot extend the chain: it holds draws of [{chain_names}], but this run would '
+            f'sample [{run_names}]. An extension continues the stored chain, whose columns are '
+            f'fixed, so it needs the same parameters the chain was started with. Start a fresh '
+            f'chain with sample() instead.'
+        )
 
     def _resolve_parameters_to_hold_fixed(
         self,
@@ -446,7 +521,8 @@ class PosteriorSampler:
         TypeError
             If parameters is not a list of Parameters or strings, or None.
         ValueError
-            If a requested label matches no free parameter, or the subset is empty.
+            If a requested label or Parameter matches no free parameter of this analysis, or the
+            subset is empty.
         """
         if parameters is None:
             return []
@@ -455,6 +531,7 @@ class PosteriorSampler:
 
         labels = self._labels()
         by_label = {labels.label(parameter): parameter for parameter in labels.parameters}
+        by_unique_name = {parameter.unique_name: parameter for parameter in labels.parameters}
         requested = []
         for entry in parameters:
             if isinstance(entry, str):
@@ -465,7 +542,17 @@ class PosteriorSampler:
                     )
                 requested.append(by_label[entry])
             elif hasattr(entry, 'unique_name'):
-                requested.append(entry)
+                # A Parameter object gets the same membership check a label does. Without it a
+                # fixed or foreign parameter slips through, every free parameter ends up held
+                # fixed, and the run dies with a cryptic zero-parameter failure deep in BUMPS.
+                if entry.unique_name not in by_unique_name:
+                    name = getattr(entry, 'name', entry.unique_name)
+                    raise ValueError(
+                        f'Parameter {name!r} is not a free parameter of this analysis, so it '
+                        f'cannot be sampled. It is either fixed or not part of this analysis. '
+                        f'Available: {", ".join(sorted(by_label))}.'
+                    )
+                requested.append(by_unique_name[entry.unique_name])
             else:
                 raise TypeError('parameters must contain Parameter objects or labels (strings).')
 
@@ -486,8 +573,13 @@ class PosteriorSampler:
         piled_up = parameters_at_bounds(results.draws, self._resolve(results))
         if not piled_up:
             return
+        labels = self._labels()
+        by_unique_name = {parameter.unique_name: parameter for parameter in labels.parameters}
         details = ', '.join(
-            f'{name} ({fraction:.0%} of draws)' for name, fraction in piled_up.items()
+            f'{labels.label(by_unique_name[unique_name])} ({fraction:.0%} of draws)'
+            if unique_name in by_unique_name
+            else f'{unique_name} ({fraction:.0%} of draws)'
+            for unique_name, fraction in piled_up.items()
         )
         warnings.warn(
             (
@@ -567,6 +659,20 @@ class PosteriorSampler:
         if self._sampler is None:
             raise RuntimeError('No chain to save. Call sample() first.')
         self._sampler.save(path)
+        if not self._saved_labels:
+            # A chain loaded without a sidecar has no labels to record. Writing an empty sidecar
+            # would be worse than none: the next load() would find a "valid" file, warn about
+            # nothing, and report every column under its raw internal name.
+            warnings.warn(
+                (
+                    f'No parameter labels are recorded for this chain, so no parameter-name '
+                    f'sidecar was written next to {path}; the chain was probably loaded without '
+                    f'one. A future load() will report the columns under their internal names.'
+                ),
+                UserWarning,
+                stacklevel=2,
+            )
+            return
         Path(f'{path}{_LABEL_MAP_SUFFIX}').write_text(
             json.dumps(self._saved_labels, indent=2), encoding='utf-8'
         )
@@ -591,15 +697,16 @@ class PosteriorSampler:
         """
         self._prepare()
         sidecar = Path(f'{path}{_LABEL_MAP_SUFFIX}')
-        if sidecar.is_file():
-            self._saved_labels = json.loads(sidecar.read_text(encoding='utf-8'))
-        else:
-            self._saved_labels = {}
+        self._saved_labels = (
+            json.loads(sidecar.read_text(encoding='utf-8')) if sidecar.is_file() else {}
+        )
+        if not self._saved_labels:
+            # An empty sidecar is as unusable as a missing one, so both warn the same way.
             warnings.warn(
                 (
-                    f'No parameter-name sidecar found at {sidecar}. The chain will be reported '
-                    f'under the internal names it was saved with, because those cannot be matched '
-                    f'to this Analysis.'
+                    f'No parameter-name sidecar with usable content found at {sidecar}. The '
+                    f'chain will be reported under the internal names it was saved with, because '
+                    f'those cannot be matched to this Analysis.'
                 ),
                 UserWarning,
                 stacklevel=2,
@@ -720,11 +827,16 @@ class PosteriorSampler:
         kwargs.setdefault('xlabel', None if energy is None else f'Energy ({energy.unit})')
         kwargs.setdefault('ylabel', 'Intensity' if y_unit is None else f'Intensity ({y_unit})')
 
+        # When the data carries no variances the weights are all-ones placeholders, and inverting
+        # them would fabricate error bars of 1.0 that the data never had.
+        experiment = getattr(self._analysis, 'experiment', None)
+        has_variances = experiment is None or getattr(experiment, 'has_variances', True)
+
         return plot_posterior_predictive(
             x=np.asarray(x),
             y=np.asarray(y),
             predictions=self.predictions(n_draws),
-            y_err=None if weights is None else 1.0 / np.asarray(weights),
+            y_err=1.0 / np.asarray(weights) if weights is not None and has_variances else None,
             title=self._analysis.display_name,
             credible_interval=credible_interval,
             **kwargs,
