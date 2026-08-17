@@ -982,9 +982,11 @@ class TestPosteriorSampler:
 
             def run_reporting_progress(**kwargs):
                 for iteration in (1, 5, 10):
-                    kwargs['progress_callback'](
-                        {'iteration': iteration, 'total_steps': 10, 'sampling': True}
-                    )
+                    kwargs['progress_callback']({
+                        'iteration': iteration,
+                        'total_steps': 10,
+                        'sampling': True,
+                    })
                 return fake_results(analysis)
 
             sampler_class.return_value.sample.side_effect = run_reporting_progress
