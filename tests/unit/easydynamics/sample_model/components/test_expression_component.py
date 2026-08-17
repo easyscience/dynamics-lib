@@ -113,6 +113,15 @@ class TestExpressionComponent:
         with pytest.raises(ValueError, match='Unsupported function'):
             ExpressionComponent('A * unknown_func(x)')
 
+    @pytest.mark.parametrize('colliding', ['name', 'expression', 'x_unit'])
+    def test_symbol_colliding_with_attribute_raises(self, colliding):
+        # WHEN a symbol shadows an existing class attribute, attribute reads would resolve to
+        # the class attribute while writes hit the parameter, silently diverging
+
+        # THEN EXPECT the collision is rejected at construction
+        with pytest.raises(ValueError, match='collides with an existing attribute'):
+            ExpressionComponent(f'{colliding} * x', parameters={colliding: 1.0})
+
     @pytest.mark.parametrize(
         'parameters',
         [

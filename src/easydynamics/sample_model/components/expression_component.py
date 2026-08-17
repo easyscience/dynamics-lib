@@ -29,9 +29,15 @@ class ExpressionComponent(ModelComponent):
     Model component defined by a symbolic expression.
 
     The expression must contain ``x`` as the independent variable. All other symbols are treated as
-    free parameters, which can be accessed and set as attributes after construction. Supported
-    functions include ``exp``, ``sin``, ``cos``, ``sqrt``, ``erf``, and others — see the
-    ``_ALLOWED_FUNCS`` class variable for the full list.
+    free parameters, which can be accessed and set as attributes after construction. Symbol names
+    that collide with an existing attribute of the class (e.g. ``name`` or ``evaluate``) are
+    rejected at construction. Supported functions include ``exp``, ``sin``, ``cos``, ``sqrt``,
+    ``erf``, and others — see the ``_ALLOWED_FUNCS`` class variable for the full list.
+
+    .. warning::
+        The expression string is parsed with ``sympy.sympify``, which evaluates the string and
+        can execute arbitrary code. Only pass expression strings from a trusted source — never
+        feed it unsanitized user input.
 
     Examples
     --------
@@ -166,7 +172,10 @@ class ExpressionComponent(ModelComponent):
         expression : str
             The symbolic expression as a string. Must contain 'x' as the independent variable. The
             symbols ``hbar`` and ``kb`` are provided automatically as read-only physical constants
-            (in meV*s and meV/K respectively) unless overridden via *parameters*.
+            (in meV*s and meV/K respectively) unless overridden via *parameters*. The string is
+            parsed with ``sympy.sympify``, which can execute arbitrary code — only use expression
+            strings from a trusted source. Symbol names that collide with an existing attribute
+            of the class (e.g. ``name``, ``evaluate``) are rejected.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values. Parameters that are not given a
             unit are dimensionless.
@@ -189,8 +198,9 @@ class ExpressionComponent(ModelComponent):
         Raises
         ------
         ValueError
-            If the expression is invalid or does not contain 'x', or if parameter_units names a
-            parameter that is not in the expression.
+            If the expression is invalid or does not contain 'x', if a symbol name collides with
+            an existing attribute of the class, or if parameter_units names a parameter that is
+            not in the expression.
         TypeError
             If any parameter value is not numeric, or if parameter_units is not a dictionary.
         """
@@ -266,6 +276,16 @@ class ExpressionComponent(ModelComponent):
         for name in self._symbol_names:
             if name in self._RESERVED_NAMES:
                 continue
+
+            # A symbol shadowing an existing attribute (e.g. 'name', 'evaluate', 'x_unit')
+            # would silently diverge: reads resolve to the class attribute (since __getattr__
+            # only fires when normal lookup fails) while writes hit the parameter. Reject it.
+            if hasattr(type(self), name) or name in self.__dict__:
+                raise ValueError(
+                    f"Symbol '{name}' in the expression collides with an existing attribute "
+                    f'of {type(self).__name__}; it could not be accessed as a parameter. '
+                    f'Rename the symbol in the expression.'
+                )
 
             # Physical constants are provided automatically, unless the user explicitly
             # supplies a parameter with the same name.

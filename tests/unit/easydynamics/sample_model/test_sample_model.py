@@ -517,6 +517,82 @@ class TestSampleModel:
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
             np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]))
 
+    def test_evaluate_scipp_output_with_detailed_balance(self, sample_model):
+        # WHEN the fixture has temperature set, so detailed balance is applied
+        x = np.linspace(-2.0, 2.0, 21)
+
+        # THEN (regression: multiplying an sc.Variable with the numpy DBF used to raise)
+        balanced = sample_model.evaluate(x, output='scipp')
+
+        # EXPECT scipp output matches numpy output, with the model's y_unit kept
+        reference = sample_model.evaluate(x, output='numpy')
+        assert len(balanced) == 3
+        for scipp_values, numpy_values in zip(balanced, reference, strict=True):
+            assert isinstance(scipp_values, sc.Variable)
+            assert scipp_values.unit == sc.Unit('dimensionless')
+            np.testing.assert_allclose(scipp_values.values, numpy_values)
+
+        # THEN disabling detailed balance
+        sample_model.use_detailed_balance = False
+        unbalanced = sample_model.evaluate(x, output='scipp')
+
+        # EXPECT the detailed balance factor really was applied above
+        assert not np.allclose(balanced[0].values, unbalanced[0].values)
+
+    def test_evaluate_dataarray_input_with_and_without_detailed_balance(self, sample_model):
+        # WHEN
+        x = np.linspace(-2.0, 2.0, 21)
+        data_array = sc.DataArray(
+            data=sc.array(dims=['energy'], values=np.zeros_like(x)),
+            coords={'energy': sc.array(dims=['energy'], values=x, unit='meV')},
+        )
+
+        # THEN (regression: detailed balance used to reject DataArray x, which the
+        # component pipeline explicitly supports)
+        with_temperature = sample_model.evaluate(data_array)
+        reference_with = sample_model.evaluate(x)
+
+        sample_model.temperature = None
+        without_temperature = sample_model.evaluate(data_array)
+        reference_without = sample_model.evaluate(x)
+
+        # EXPECT DataArray input matches plain numpy input in both modes
+        for result, reference in zip(with_temperature, reference_with, strict=True):
+            np.testing.assert_allclose(result, reference)
+        for result, reference in zip(without_temperature, reference_without, strict=True):
+            np.testing.assert_allclose(result, reference)
+
+    def test_init_invalid_temperature_does_not_mutate_diffusion_models(self):
+        # WHEN a diffusion model without Q and an invalid temperature
+        diffusion_model = BrownianTranslationalDiffusion()
+
+        # THEN EXPECT construction fails on the temperature validation
+        with pytest.raises(TypeError, match='temperature must be a number or None'):
+            SampleModel(
+                diffusion_models=diffusion_model,
+                Q=np.array([1.0, 2.0]),
+                temperature='cold',
+            )
+
+        # EXPECT the failed construction did not mutate the passed diffusion model
+        assert diffusion_model.Q is None
+        assert diffusion_model.get_component_collections() == []
+
+    def test_temperature_unit_is_normalized_to_str(self, sample_model):
+        # WHEN constructed with a scipp Unit instead of a string
+        model = SampleModel(temperature=10.0, temperature_unit=sc.Unit('K'))
+
+        # EXPECT the stored unit is normalized to a string
+        assert isinstance(model.temperature_unit, str)
+        assert model.temperature_unit == 'K'
+
+        # THEN converting with a scipp Unit
+        sample_model.convert_temperature_unit(sc.Unit('mK'))
+
+        # EXPECT the stored unit is normalized to a string as well
+        assert isinstance(sample_model.temperature_unit, str)
+        assert sample_model.temperature_unit == 'mK'
+
     def test_generate_component_collections(self, sample_model):
         # WHEN THEN
         sample_model._generate_component_collections()

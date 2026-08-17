@@ -237,6 +237,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Create ComponentCollection components for the Brownian translational diffusion model at
         given Q values.
 
+        The created collections are installed on the model (they become the collections returned
+        by ``get_component_collections``), so the returned list is the live one.
+
         Returns
         -------
         list[ComponentCollection]
@@ -295,7 +298,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
             component_collection_list[i].append_component(lorentzian_component)
 
-        return component_collection_list
+        self._component_collections = component_collection_list
+        return self._component_collections
 
     # ------------------------------------------------------------------
     # Private methods

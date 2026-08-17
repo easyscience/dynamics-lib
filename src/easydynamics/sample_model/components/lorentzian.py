@@ -22,7 +22,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2} $$
 
-    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the hald width at half max (HWHM).
+    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half max (HWHM).
     area has unit = x_unit * y_unit; center and width have unit = x_unit.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
@@ -128,10 +128,11 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         ------
         TypeError
             If *value* is not a numeric type.
+        ValueError
+            If *value* violates the area parameter's bounds (e.g. a negative value when the
+            area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -191,13 +192,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         TypeError
             If *value* is not a numeric type.
         ValueError
-            If *value* is not positive.
+            If *value* is not positive, or violates the width parameter's bounds.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
         if float(value) <= 0:
             raise ValueError('width must be positive')
-        self._width.value = value
+        self._set_bounded_parameter_value(self._width, value, 'width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""

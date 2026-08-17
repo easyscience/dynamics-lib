@@ -130,10 +130,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         ------
         TypeError
             If *value* is not a numeric type.
+        ValueError
+            If *value* violates the area parameter's bounds (e.g. a negative value when the
+            area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -193,13 +194,13 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         TypeError
             If *value* is not a numeric type.
         ValueError
-            If *value* is not positive.
+            If *value* is not positive, or violates the width parameter's bounds.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
         if float(value) <= 0:
             raise ValueError('width must be positive')
-        self._width.value = value
+        self._set_bounded_parameter_value(self._width, value, 'width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""

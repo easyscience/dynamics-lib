@@ -565,6 +565,47 @@ class TestDeltaLorentz:
             )
             assert 'A_0' in collection[1].area.dependency_expression
 
+    def test_create_component_collections_installs_and_stays_in_sync(
+        self, delta_lorentz_model_with_Q
+    ):
+        # WHEN
+        model = delta_lorentz_model_with_Q
+
+        # THEN
+        collections = model.create_component_collections()
+
+        # EXPECT the returned collections are the installed (live) ones (regression: they
+        # were returned without being installed, while the per-Q parameter lists were
+        # replaced, desynchronizing calculate_width from the installed components)
+        assert collections is model.get_component_collections()
+
+        # THEN setting a per-Q width parameter
+        model._lorentzian_width_list[0].value = 0.5
+
+        # EXPECT the change is visible in the installed component and in calculate_width
+        assert collections[0][0].width.value == pytest.approx(0.5)
+        assert model.calculate_width()[0] == pytest.approx(0.5)
+
+        # EXPECT the same holds for the per-Q amplitude parameters
+        model._A_0_list[0].value = 0.25
+        assert model.calculate_EISF()[0] == pytest.approx(0.25)
+        assert collections[0][1].area.value == pytest.approx(0.25)
+
+    def test_per_Q_parameter_and_collection_names(self, delta_lorentz_model_with_Q):
+        # WHEN
+        model = delta_lorentz_model_with_Q
+
+        # THEN
+        collections = model.get_component_collections()
+
+        # EXPECT the per-Q amplitudes carry the model name (like the widths carry the
+        # Lorentzian name), and the per-Q collections get a name, not just a display name
+        for a0, a1 in zip(model._A_0_list, model._A_1_list, strict=True):
+            assert a0.name == 'DeltaLorentz A_0'
+            assert a1.name == 'DeltaLorentz A_1'
+        assert collections[0].name == 'DeltaLorentz_Q0.50'
+        assert collections[0].display_name == 'DeltaLorentz_Q0.50'
+
     @pytest.mark.parametrize(
         ('Q_index', 'expected_exception', 'expected_message'),
         [

@@ -96,6 +96,51 @@ class TestDetailedBalanceFactor:
         assert result.shape == (3,)
         np.testing.assert_allclose(result, expected_values, rtol=1e-5)
 
+    def test_dataarray_energy_input(self):
+        # WHEN
+        energy_values = np.array([1.0, 2.0, 3.0])
+        data_array = sc.DataArray(
+            data=sc.array(dims=['energy'], values=np.zeros_like(energy_values)),
+            coords={
+                'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+            },
+        )
+
+        # THEN
+        result = detailed_balance_factor(data_array, 100)
+
+        # EXPECT the DataArray's single coordinate is used as the energy axis
+        expected = detailed_balance_factor(energy_values, 100)
+        np.testing.assert_allclose(result, expected)
+
+    def test_dataarray_energy_with_multiple_coords_raises(self):
+        # WHEN
+        values = np.array([1.0, 2.0, 3.0])
+        data_array = sc.DataArray(
+            data=sc.array(dims=['energy'], values=np.zeros_like(values)),
+            coords={
+                'energy': sc.array(dims=['energy'], values=values, unit='meV'),
+                'other': sc.array(dims=['energy'], values=values, unit='meV'),
+            },
+        )
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='exactly one coordinate'):
+            detailed_balance_factor(data_array, 100)
+
+    def test_two_dimensional_energy_raises(self):
+        # WHEN THEN EXPECT the documented ValueError, not a scipp DimensionError
+        with pytest.raises(ValueError, match='at most one-dimensional'):
+            detailed_balance_factor(np.ones((2, 2)), 100)
+
+    def test_non_scalar_temperature_raises(self):
+        # WHEN
+        temperature = sc.array(dims=['temperature'], values=[100.0, 200.0], unit='K')
+
+        # THEN EXPECT a clear error instead of a failure on `.value`
+        with pytest.raises(ValueError, match='temperature must be a single scalar value'):
+            detailed_balance_factor(np.array([1.0]), temperature)
+
     def test_parameter_temperature(self):
         # When
         energy = np.array([1.0, 2.0, 3.0])
