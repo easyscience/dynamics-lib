@@ -1189,6 +1189,18 @@ class TestMultiQPosteriorSampler:
         with pytest.raises(ValueError, match='Invalid fit method'):
             multi_q_analysis.bayesian.sample(fit_method='nonsense')
 
+    def test_negative_q_index_raises(self, multi_q_analysis):
+        # THEN EXPECT a refusal, rather than silently wrapping around to the last Q
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=-1, samples=10)
+
+    def test_corner_q_index_is_validated(self, multi_q_analysis):
+        # THEN EXPECT both ends of the range are checked before any chain is looked up
+        with pytest.raises(IndexError, match='non-negative'):
+            multi_q_analysis.bayesian.plot_corner(Q_index=-1)
+        with pytest.raises(IndexError, match='out of bounds'):
+            multi_q_analysis.bayesian.plot_corner(Q_index=99)
+
     def test_missing_q_values_raises(self):
         # WHEN
         multi_q_analysis = edyn.Analysis(display_name='Empty')
@@ -1384,6 +1396,119 @@ class TestMultiQPosteriorSampler:
         # EXPECT the single chain is summarized, not the stale per-Q ones
         assert len(multi_q_analysis.bayesian.summary()) == len(parameters)
         multi_q_analysis.bayesian.plot_corner()
+
+    def test_a_fresh_per_q_chain_wins_after_a_simultaneous_run(self, multi_q_analysis):
+        # WHEN an independent run of one Q follows a simultaneous one
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        target = multi_q_analysis.analysis_list[2]
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_chain_results(
+                target.get_free_parameters()
+            )
+            multi_q_analysis.bayesian.sample(fit_method='independent', Q_index=2, samples=10)
+
+        # EXPECT the fresh per-Q chain is what summary() reports, not the stale simultaneous one
+        summary = multi_q_analysis.bayesian.summary()
+        assert len(summary) == len(target.get_free_parameters())
+        assert all('Q_index=2' in entry.name for entry in summary)
+
+    def test_gathered_summary_uses_the_per_q_saved_labels(self, multi_q_analysis):
+        # WHEN the per-Q chains look freshly loaded from disk in a new session: foreign column
+        # names, matched to parameters only through each per-Q sampler's saved labels
+        self._sample_independently(multi_q_analysis)
+        for q_index, analysis1d in enumerate(multi_q_analysis.analysis_list):
+            sampler = analysis1d.bayesian
+            name_map = analysis1d._parameter_labels().name_map()
+            foreign = [f'Loaded_{q_index}_{i}' for i in range(len(sampler.results.param_names))]
+            sampler._saved_labels = {
+                foreign_name: name_map[unique_name]
+                for foreign_name, unique_name in zip(
+                    foreign, sampler.results.param_names, strict=True
+                )
+            }
+            sampler.results.param_names = foreign
+
+        # THEN
+        summary = multi_q_analysis.bayesian.summary()
+
+        # EXPECT every column resolves to its parameter: Q-qualified names, real units and finite
+        # values, rather than raw column names with no unit and NaN
+        expected = sum(len(a.get_free_parameters()) for a in multi_q_analysis.analysis_list)
+        assert len(summary) == expected
+        assert all('Q_index=' in entry.name for entry in summary)
+        assert all(entry.unit != '' for entry in summary)
+        assert all(np.isfinite(entry.value) for entry in summary)
+
+    def test_the_slider_path_forwards_plot_kwargs(self, multi_q_analysis):
+        # WHEN
+        self._sample_independently(multi_q_analysis)
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch('easydynamics.utils.posterior_plotting.corner_with_slider') as slider,
+        ):
+            multi_q_analysis.bayesian.plot_corner(bins=13)
+
+        # EXPECT the kwargs the docstring promises to forward reach the slider's corner plots
+        assert slider.call_args.kwargs['bins'] == 13
+
+    #############
+    # Extending and persistence
+    #############
+
+    def test_extend_after_an_independent_run_points_at_the_per_q_chains(self, multi_q_analysis):
+        # WHEN an independent run follows a simultaneous one, so this sampler still holds the old
+        # simultaneous chain while the latest chains live per Q
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT the error says where the chains are, rather than extending the stale chain
+        # or misdiagnosing a failed run
+        with pytest.raises(RuntimeError, match=r'analysis_list\[Q_index\]\.bayesian\.extend'):
+            multi_q_analysis.bayesian.extend()
+
+    def test_save_after_an_independent_run_refuses_the_stale_chain(
+        self, multi_q_analysis, tmp_path
+    ):
+        # WHEN an independent run follows a simultaneous one
+        bound_all_chain(multi_q_analysis)
+        parameters = multi_q_analysis._chain_parameters()
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_chain_results(parameters)
+            multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+        stale_sampler = sampler_class.return_value
+        self._sample_independently(multi_q_analysis)
+
+        # THEN EXPECT save refuses, rather than silently writing the stale simultaneous chain
+        with pytest.raises(RuntimeError, match='no simultaneous chain here to save'):
+            multi_q_analysis.bayesian.save(str(tmp_path / 'chain'))
+        stale_sampler.save.assert_not_called()
+
+    def test_extend_after_a_failed_simultaneous_run_keeps_the_failed_run_message(
+        self, multi_q_analysis
+    ):
+        # WHEN a simultaneous run fails after building the sampler, with no per-Q chains anywhere
+        bound_all_chain(multi_q_analysis)
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = RuntimeError('boom')
+            with pytest.raises(RuntimeError, match='boom'):
+                multi_q_analysis.bayesian.sample(fit_method='simultaneous', samples=10)
+
+        # THEN EXPECT the genuine failed-run diagnosis, not the pointer at per-Q chains
+        with pytest.raises(RuntimeError, match='left no results'):
+            multi_q_analysis.bayesian.extend()
 
     def test_only_the_sampled_q_indices_are_gathered(self, multi_q_analysis):
         # WHEN just one Q index is sampled

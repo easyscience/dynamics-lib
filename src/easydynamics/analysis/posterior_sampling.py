@@ -12,6 +12,7 @@ three classes. Labelling lives in :mod:`easydynamics.analysis.posterior_labels` 
 
 from __future__ import annotations
 
+import inspect
 import json
 import warnings
 from pathlib import Path
@@ -29,6 +30,7 @@ from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.analysis.posterior import unbounded_parameters
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import verify_Q_index
 
 if TYPE_CHECKING:
     import os
@@ -588,18 +590,25 @@ class PosteriorSampler:
                 f'Widen the bounds, or check whether these parameters are degenerate with others.'
             ),
             UserWarning,
-            stacklevel=4,
+            stacklevel=_stacklevel_above_module(),
         )
 
     #############
     # Results
     #############
 
-    def summary(self) -> PosteriorSummary:
+    def summary(self, labeller: Callable[[Parameter], str] | None = None) -> PosteriorSummary:
         """
         Summarize the marginal posterior of each sampled parameter.
 
         Reports the median and the 68% credible interval under the parameter's own label and unit.
+
+        Parameters
+        ----------
+        labeller : Callable[[Parameter], str] | None, default=None
+            Overrides the label a resolved column is reported under. Used by an Analysis covering
+            several Q values, whose gathered table qualifies each name with its Q index. Columns
+            that resolve to no parameter keep their usual fallback name.
 
         Returns
         -------
@@ -608,10 +617,17 @@ class PosteriorSampler:
         """
         results = self._require_results()
         labels = self._labels()
+        names = labels.display_names(results.param_names, self._saved_labels)
+        parameters = self._resolve(results)
+        if labeller is not None:
+            names = [
+                name if parameter is None else labeller(parameter)
+                for parameter, name in zip(parameters, names, strict=True)
+            ]
         return summarize_draws(
             draws=results.draws,
-            labels=labels.display_names(results.param_names, self._saved_labels),
-            parameters_by_column=self._resolve(results),
+            labels=names,
+            parameters_by_column=parameters,
         )
 
     def set_parameters_to_median(self) -> list[Parameter]:
@@ -670,7 +686,7 @@ class PosteriorSampler:
                     f'one. A future load() will report the columns under their internal names.'
                 ),
                 UserWarning,
-                stacklevel=2,
+                stacklevel=_stacklevel_above_module(),
             )
             return
         Path(f'{path}{_LABEL_MAP_SUFFIX}').write_text(
@@ -1050,6 +1066,10 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
+        IndexError
+            If Q_index is negative or out of range.
+        TypeError
+            If Q_index is not an int or None.
         ValueError
             If fit_method is not "independent" or "simultaneous".
         """
@@ -1060,12 +1080,18 @@ class MultiQPosteriorSampler(PosteriorSampler):
             raise ValueError(
                 'No Q values available for sampling. Please check the experiment data.'
             )
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
         if fit_method == 'simultaneous':
             return super().sample(samples=samples, burn=burn, thin=thin, **sampler_options)
         if Q_index is not None:
-            return per_q[Q_index].bayesian.sample(
+            result = per_q[Q_index].bayesian.sample(
                 samples=samples, burn=burn, thin=thin, **sampler_options
             )
+            # The fresh per-Q chain now outranks any older simultaneous one, exactly as after an
+            # all-Q independent run; keeping the old chain here would make summary() silently
+            # report it instead. Cleared only on success, so a failed run changes nothing.
+            self._results = None
+            return result
         # The per-Q chains live on their own samplers; this one then holds nothing of its own.
         self._results = None
         return [
@@ -1073,13 +1099,102 @@ class MultiQPosteriorSampler(PosteriorSampler):
             for analysis1d in per_q
         ]
 
-    def summary(self) -> PosteriorSummary:
+    def extend(
+        self,
+        additional_samples: int = 5000,
+        thin: int = 10,
+        parameters: list[Parameter] | list[str] | None = None,
+        **sampler_options: dict[str, Any],
+    ) -> SamplingResults:
+        """
+        Continue the existing simultaneous chain with additional samples.
+
+        The chains from independent sampling live on the per-Q samplers, so each is extended
+        there rather than here.
+
+        Parameters
+        ----------
+        additional_samples : int, default=5000
+            Number of additional samples to draw, in the same units as ``samples``.
+        thin : int, default=10
+            Thinning interval for the retained draws.
+        parameters : list[Parameter] | list[str] | None, default=None
+            The same restriction as in :meth:`PosteriorSampler.extend`.
+        **sampler_options : dict[str, Any]
+            Forwarded to the EasyScience Sampler.
+
+        Returns
+        -------
+        SamplingResults
+            The sampling results for the full extended chain.
+
+        Raises
+        ------
+        RuntimeError
+            If the latest sampling ran per Q index, so there is no simultaneous chain here to
+            extend, or if there is no chain at all.
+        ValueError
+            If the model or data changed since the chain was started, or this run's parameters
+            differ from the ones the chain holds.
+        """
+        if self._results is None and self.results_per_q is not None:
+            # Without this check, a stale simultaneous sampler would either be extended silently
+            # or misdiagnosed as a failed run.
+            raise RuntimeError(
+                'The latest sampling ran per Q index, so there is no simultaneous chain here to '
+                'extend. Extend a per-Q chain with '
+                'analysis.analysis_list[Q_index].bayesian.extend(), or start a fresh simultaneous '
+                "chain with sample(fit_method='simultaneous')."
+            )
+        return super().extend(
+            additional_samples=additional_samples,
+            thin=thin,
+            parameters=parameters,
+            **sampler_options,
+        )
+
+    def save(self, path: str | os.PathLike) -> None:
+        """
+        Save the simultaneous MCMC chain to disk.
+
+        The chains from independent sampling live on the per-Q samplers, so each is saved there
+        rather than here.
+
+        Parameters
+        ----------
+        path : str | os.PathLike
+            Path prefix for the chain files.
+
+        Raises
+        ------
+        RuntimeError
+            If the latest sampling ran per Q index -- there is then no simultaneous chain here to
+            save -- or if there is no chain at all.
+        """
+        if self._results is None and self.results_per_q is not None:
+            # Without this check, a stale simultaneous chain would be written to disk as if it
+            # were the latest sampling.
+            raise RuntimeError(
+                'The latest sampling ran per Q index, and those chains live on the per-Q '
+                'samplers; there is no simultaneous chain here to save. Save each with '
+                'analysis.analysis_list[Q_index].bayesian.save(), or sample with '
+                "fit_method='simultaneous' first."
+            )
+        super().save(path)
+
+    def summary(self, labeller: Callable[[Parameter], str] | None = None) -> PosteriorSummary:
         """
         Summarize the posterior, gathering the per-Q chains when sampling was independent.
 
         Every entry is a marginal distribution of one parameter, and a marginal is well defined
         within its own chain, so collecting them into one table is sound even though the chains are
         separate. Labels carry the Q index either way, so the table reads the same.
+
+        Parameters
+        ----------
+        labeller : Callable[[Parameter], str] | None, default=None
+            Overrides the label a resolved column is reported under. The default is this
+            analysis' own Q-qualified labels.
 
         Returns
         -------
@@ -1088,20 +1203,17 @@ class MultiQPosteriorSampler(PosteriorSampler):
         """
         per_q = self.results_per_q
         if self._results is not None or per_q is None:
-            return super().summary()
+            return super().summary(labeller)
 
-        labels = self._labels()
+        # Each chain is summarized by its own per-Q sampler, whose saved labels can match a chain
+        # loaded from disk in a fresh session; this sampler's labels then supply the Q-qualified
+        # display name for every column that resolves to a parameter.
+        qualify = self._labels().label if labeller is None else labeller
         entries = []
-        for result in per_q:
-            if result is None:
+        for analysis1d in self._per_q():
+            if analysis1d.bayesian.results is None:
                 continue
-            entries.extend(
-                summarize_draws(
-                    draws=result.draws,
-                    labels=labels.display_names(result.param_names),
-                    parameters_by_column=labels.resolve(result.param_names),
-                ).entries
-            )
+            entries.extend(analysis1d.bayesian.summary(labeller=qualify).entries)
         return PosteriorSummary(entries)
 
     def set_parameters_to_median(self) -> list[Parameter]:
@@ -1148,11 +1260,16 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Raises
         ------
+        IndexError
+            If Q_index is negative or out of range.
         RuntimeError
             If a slider is asked for outside a notebook.
+        TypeError
+            If Q_index is not an int or None.
         """
         from easydynamics.utils.posterior_plotting import corner_with_slider
 
+        verify_Q_index(Q_index=Q_index, Q=self._analysis.Q, allow_none=True)
         per_q = self.results_per_q
         if self._results is not None or per_q is None:
             return super().plot_corner(**kwargs)
@@ -1181,7 +1298,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
                 'names': [entry.name for entry in entries],
                 'units': [entry.unit for entry in entries],
             }
-        return corner_with_slider(chains, title=self._analysis.display_name)
+        return corner_with_slider(chains, title=self._analysis.display_name, **kwargs)
 
     def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
         """
@@ -1238,6 +1355,29 @@ class MultiQPosteriorSampler(PosteriorSampler):
         return super()._require_results()
 
 
+def _stacklevel_above_module() -> int:
+    """
+    Compute the stacklevel that points a warning at the first frame outside this module.
+
+    The entry points nest to different depths -- ``MultiQPosteriorSampler.sample`` goes through
+    ``PosteriorSampler.sample`` and ``_run``, a plain ``sample`` skips the first hop -- so any
+    fixed stacklevel points warnings at an internal frame on one path or the other. Counting the
+    in-module frames instead lands the warning on the caller's own line either way.
+
+    Returns
+    -------
+    int
+        The stacklevel for a ``warnings.warn`` call made directly by this function's caller.
+    """
+    frame = inspect.currentframe()
+    frame = None if frame is None else frame.f_back
+    level = 1
+    while frame is not None and frame.f_globals.get('__name__') == __name__:
+        frame = frame.f_back
+        level += 1
+    return level
+
+
 def _warn_about_held_parameters(labels: object, held_fixed: list[Parameter]) -> None:
     """
     Warn that holding parameters fixed makes the credible intervals conditional.
@@ -1260,7 +1400,7 @@ def _warn_about_held_parameters(labels: object, held_fixed: list[Parameter]) -> 
             f'parameters are correlated.'
         ),
         UserWarning,
-        stacklevel=4,
+        stacklevel=_stacklevel_above_module(),
     )
 
 
