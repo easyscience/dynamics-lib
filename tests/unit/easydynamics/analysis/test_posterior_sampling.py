@@ -849,6 +849,203 @@ class TestPosteriorSampler:
         # EXPECT no error bars fabricated from the placeholder weights
         assert plot.call_args.kwargs['y_err'] is None
 
+    def test_marginal_forwards_the_resolved_column(self, analysis):
+        # WHEN the width column carries distinctive draws
+        bound_all(analysis)
+        parameters = analysis.get_free_parameters()
+        column = [p.name for p in parameters].index('Gaussian width')
+        draws = np.tile([float(p.value) for p in parameters], (30, 1))
+        draws[:, column] += np.random.default_rng(0).normal(scale=0.01, size=30)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(analysis, values=draws)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN
+        with patch('easydynamics.utils.posterior_plotting.plot_marginal') as plot:
+            analysis.bayesian.plot_marginal('Gaussian width', bins=13)
+
+        # EXPECT the label resolved to that column's draws, name and unit
+        kwargs = plot.call_args.kwargs
+        assert np.array_equal(kwargs['values'], draws[:, column])
+        assert kwargs['name'] == 'Gaussian width'
+        assert kwargs['unit'] == 'meV'
+        assert kwargs['bins'] == 13
+
+    def test_marginal_accepts_a_parameter_object(self, analysis):
+        # WHEN
+        bound_all(analysis)
+        target = analysis.get_free_parameters()[0]
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN
+        with patch('easydynamics.utils.posterior_plotting.plot_marginal') as plot:
+            analysis.bayesian.plot_marginal(target)
+
+        # EXPECT
+        assert plot.call_args.kwargs['name'] == target.name
+
+    def test_marginal_unknown_label_raises_naming_the_available_ones(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No sampled parameter named') as excinfo:
+            analysis.bayesian.plot_marginal('not a parameter')
+        assert 'Gaussian width' in str(excinfo.value)
+
+    def test_marginal_foreign_parameter_raises(self, analysis):
+        # WHEN
+        bound_all(analysis)
+        foreign = Parameter(name='foreign', value=1.0, unit='meV')
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No sampled parameter named'):
+            analysis.bayesian.plot_marginal(foreign)
+
+    def test_marginal_without_sampling_raises(self, analysis):
+        # THEN EXPECT
+        with pytest.raises(RuntimeError, match='No posterior samples yet'):
+            analysis.bayesian.plot_marginal('Gaussian width')
+
+    def test_correlations_use_the_display_names(self, analysis):
+        # WHEN
+        bound_all(analysis)
+        parameters = analysis.get_free_parameters()
+        draws = np.tile([float(p.value) for p in parameters], (30, 1))
+        draws += np.random.default_rng(0).normal(scale=0.01, size=draws.shape)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(analysis, values=draws)
+            analysis.bayesian.sample(samples=10)
+
+        # THEN
+        with patch('easydynamics.utils.posterior_plotting.plot_correlations') as plot:
+            analysis.bayesian.plot_correlations()
+
+        # EXPECT the chain's draws under the parameters' own names
+        kwargs = plot.call_args.kwargs
+        assert np.array_equal(kwargs['draws'], draws)
+        assert kwargs['names'] == [p.name for p in parameters]
+
+    def test_correlations_without_sampling_raise(self, analysis):
+        # THEN EXPECT
+        with pytest.raises(RuntimeError, match='No posterior samples yet'):
+            analysis.bayesian.plot_correlations()
+
+    #############
+    # Progress reporting
+    #############
+
+    def test_progress_is_off_by_default(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+
+        # EXPECT
+        assert 'progress_callback' not in sampler_class.return_value.sample.call_args.kwargs
+
+    def test_progress_installs_a_callback(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10, progress=True)
+
+        # EXPECT
+        kwargs = sampler_class.return_value.sample.call_args.kwargs
+        assert callable(kwargs['progress_callback'])
+
+    def test_progress_reports_and_finishes_the_line(self, analysis, capsys):
+        # WHEN
+        bound_all(analysis)
+
+        # THEN the sampler drives the installed callback, as BUMPS does per generation
+        with patch(SAMPLER_PATH) as sampler_class:
+
+            def run_reporting_progress(**kwargs):
+                for iteration in (1, 5, 10):
+                    kwargs['progress_callback'](
+                        {'iteration': iteration, 'total_steps': 10, 'sampling': True}
+                    )
+                return fake_results(analysis)
+
+            sampler_class.return_value.sample.side_effect = run_reporting_progress
+            results = analysis.bayesian.sample(samples=10, progress=True)
+
+        # EXPECT progress was printed and the line was finished, without breaking the results
+        out = capsys.readouterr().out
+        assert '100%' in out
+        assert 'Sampling: done' in out
+        assert out.endswith('\n')
+        assert analysis.bayesian.results is results
+
+    def test_progress_line_is_not_marked_done_when_sampling_fails(self, analysis, capsys):
+        # WHEN
+        bound_all(analysis)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+
+            def fail_after_progress(**kwargs):
+                kwargs['progress_callback']({'iteration': 1, 'total_steps': 10})
+                raise RuntimeError('boom')
+
+            sampler_class.return_value.sample.side_effect = fail_after_progress
+            with pytest.raises(RuntimeError, match='boom'):
+                analysis.bayesian.sample(samples=10, progress=True)
+
+        # EXPECT the line is terminated but not decorated with a claim of success
+        out = capsys.readouterr().out
+        assert 'done' not in out
+        assert out.endswith('\n')
+
+    def test_progress_defers_to_an_explicit_callback(self, analysis):
+        # WHEN the caller supplies their own callback alongside progress=True
+        bound_all(analysis)
+        explicit = MagicMock()
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10, progress=True, progress_callback=explicit)
+
+        # EXPECT the explicit callback is forwarded untouched
+        kwargs = sampler_class.return_value.sample.call_args.kwargs
+        assert kwargs['progress_callback'] is explicit
+
+    def test_extend_supports_progress(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        # THEN
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.extend(additional_samples=10, progress=True)
+
+        # EXPECT
+        kwargs = sampler_class.return_value.extend.call_args.kwargs
+        assert callable(kwargs['progress_callback'])
+
     #############
     # Predictions
     #############
