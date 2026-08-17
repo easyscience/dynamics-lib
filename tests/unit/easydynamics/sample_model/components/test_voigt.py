@@ -201,6 +201,24 @@ class TestVoigt:
         ):
             voigt.lorentzian_width = -0.7
 
+    def test_area_setter_out_of_bounds_raises(self, voigt: Voigt):
+        # WHEN the fixture's area was created non-negative, so it carries min=0
+        original_area = voigt.area.value
+
+        # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            voigt.area = -1.0
+        assert voigt.area.value == pytest.approx(original_area)
+
+    def test_width_setters_below_minimum_raise(self, voigt: Voigt):
+        # WHEN the width parameters carry an absolute minimum (1e-10)
+
+        # THEN EXPECT tiny positive widths below the bound raise instead of being clamped
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            voigt.gaussian_width = 1e-12
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            voigt.lorentzian_width = 1e-12
+
     def test_center_is_fixed_if_set_to_None(self, voigt: Voigt):
         # WHEN
         assert voigt.center.fixed is False

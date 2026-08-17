@@ -22,7 +22,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2} $$
 
-    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the hald width at half max (HWHM).
+    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half max (HWHM).
     area has unit = x_unit * y_unit; center and width have unit = x_unit.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
@@ -35,9 +35,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    l = sm.Lorentzian(area=1.0, width=0.3)
+    l = edyn.Lorentzian(area=1.0, width=0.3)
     x = np.linspace(-2, 2, 100)
     values = l.evaluate(x)
     ```
@@ -46,9 +46,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     Pass a numeric value for ``center`` to leave it free during fitting:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    l = sm.Lorentzian(area=2.0, center=0.5, width=0.3, name='QE peak')
+    l = edyn.Lorentzian(area=2.0, center=0.5, width=0.3, name='QE peak')
     l.area = 3.0
     l.width = 0.2
     ```
@@ -124,14 +124,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -191,13 +190,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         TypeError
             If *value* is not a numeric type.
         ValueError
-            If *value* is not positive.
+            If *value* is not positive, or violates the width parameter's bounds.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
         if float(value) <= 0:
             raise ValueError('width must be positive')
-        self._width.value = value
+        self._set_bounded_parameter_value(self._width, value, 'width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""

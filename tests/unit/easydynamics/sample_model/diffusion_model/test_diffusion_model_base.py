@@ -355,21 +355,19 @@ class TestDiffusionModelBase:
         # EXPECT
         np.testing.assert_allclose(Q, [1.0, 2.0])
 
+    def test_get_fit_targets_declares_area_and_width(self):
+        # WHEN a diffusion model
+        model = DiffusionModelBase(lorentzian_name='Lorentzian')
+        # THEN
+        targets = model.get_fit_targets()
+        # EXPECT area and width predictions with keys derived from the Lorentzian name
+        assert [t.name for t in targets] == ['area', 'width']
+        assert targets[0].dataset_key == 'Lorentzian area'
+        assert targets[1].dataset_key == 'Lorentzian width'
 
-def test_get_fit_targets_declares_area_and_width():
-    # GIVEN a diffusion model
-    model = DiffusionModelBase(lorentzian_name='Lorentzian')
-    # WHEN
-    targets = model.get_fit_targets()
-    # EXPECT area and width predictions with keys derived from the Lorentzian name
-    assert [t.name for t in targets] == ['area', 'width']
-    assert targets[0].dataset_key == 'Lorentzian area'
-    assert targets[1].dataset_key == 'Lorentzian width'
-
-
-def test_match_Q_indices_raises_when_Q_not_set():
-    # GIVEN a diffusion model with no Q set
-    model = DiffusionModelBase()
-    # WHEN THEN EXPECT
-    with pytest.raises(ValueError, match=r'Q must be set in the model'):
-        model._match_Q_indices(np.array([1.0]))
+    def test_match_Q_indices_raises_when_Q_not_set(self):
+        # WHEN a diffusion model with no Q set
+        model = DiffusionModelBase()
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'Q must be set in the model'):
+            model._match_Q_indices(np.array([1.0]))

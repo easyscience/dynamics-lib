@@ -62,3 +62,6 @@ tutorials.
 - [Analysis](analysis.ipynb) - Learn how to fit a model to your data.
 - [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your
   data at a particular Q.
+- [Bayesian analysis](bayesian.ipynb) - Learn how to map out the full
+  posterior distribution of your parameters, including their
+  correlations, instead of a single best-fit point.

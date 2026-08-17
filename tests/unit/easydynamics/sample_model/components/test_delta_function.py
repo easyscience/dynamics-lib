@@ -136,6 +136,23 @@ class TestDeltaFunction:
         # EXPECT: spike at x=0 with bin width from the sorted grid [0, 1, 2] -> 1.0
         np.testing.assert_allclose(result, [1.0, 0.0, 0.0])
 
+    def test_evaluate_single_point_raises(self):
+        # WHEN: a single x value defines no bin width for the area / bin_width spike
+        delta = DeltaFunction(area=1.0)
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='single x value'):
+            delta.evaluate(0.0)
+
+    def test_area_setter_out_of_bounds_raises(self, delta_function: DeltaFunction):
+        # WHEN the fixture's area was created non-negative, so it carries min=0
+        original_area = delta_function.area.value
+
+        # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            delta_function.area = -1.0
+        assert delta_function.area.value == pytest.approx(original_area)
+
     def test_evaluate_out_of_bounds(self, delta_function: DeltaFunction):
         # WHEN
         x = np.linspace(1, 2, 100)  # center is at 0.5, so out of bounds

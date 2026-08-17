@@ -543,3 +543,76 @@ class TestModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             model_base.convert_y_unit(123)
+
+    #############
+    # State versioning
+    #############
+
+    def test_evaluate_without_Q_names_the_cause(self):
+        "Regression: the error used to claim 'no components' when Q was the missing piece"
+        # WHEN a model with components but no Q
+        model = ModelBase(display_name='M', components=Gaussian(name='G'))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q is not set'):
+            model.evaluate(np.array([0.0, 1.0]))
+
+    def test_state_version_reading_does_not_mutate(self, model_base):
+        # WHEN
+        version = model_base.state_version
+
+        # THEN EXPECT repeated reads return the same value and rebuild nothing
+        assert model_base.state_version == version
+        assert model_base.component_collections_is_dirty is True
+        assert model_base._component_collections == []
+
+    def test_state_version_changes_on_component_and_Q_changes(self, model_base):
+        # WHEN
+        version = model_base.state_version
+
+        # THEN appending a component through the model
+        model_base.append_component(Gaussian(name='SVGaussian'))
+        # EXPECT
+        assert model_base.state_version > version
+        version = model_base.state_version
+
+        # THEN removing a component through the model
+        model_base.remove_component('SVGaussian')
+        # EXPECT
+        assert model_base.state_version > version
+        version = model_base.state_version
+
+        # THEN clearing Q
+        model_base.clear_Q(confirm=True)
+        # EXPECT
+        assert model_base.state_version > version
+
+    def test_state_version_changes_on_in_place_template_mutation(self, model_base):
+        # WHEN collections are current, so the dirty flag alone would report clean
+        _ = model_base.get_component_collection(0)
+        assert model_base.component_collections_is_dirty is False
+        version = model_base.state_version
+
+        # THEN mutating the live template collection in place, bypassing the model's methods
+        model_base.components.append_component(Gaussian(name='LiveGaussian'))
+
+        # EXPECT the mutation is visible without any callback
+        assert model_base.state_version > version
+        assert model_base.component_collections_is_dirty is True
+
+    def test_evaluate_includes_component_appended_to_live_collection(self, model_base):
+        "Regression: components appended via the live template collection were invisible"
+        # WHEN a model whose collections were already built and evaluated
+        x = np.linspace(-5, 5, 101)
+        result_before = model_base.evaluate(x)
+
+        # THEN appending directly to the live template collection and evaluating again
+        model_base.components.append_component(
+            Gaussian(name='LiveGaussian', area=10.0, center=0.0, width=1.0)
+        )
+        result_after = model_base.evaluate(x)
+
+        # EXPECT the new component contributes to the output at every Q
+        extra = Gaussian(name='Reference', area=10.0, center=0.0, width=1.0).evaluate(x)
+        for before, after in zip(result_before, result_after, strict=True):
+            np.testing.assert_allclose(after, before + extra, rtol=1e-10)

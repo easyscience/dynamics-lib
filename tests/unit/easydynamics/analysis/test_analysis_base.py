@@ -378,6 +378,33 @@ class TestAnalysisBase:
         ):
             analysis_base.detailed_balance_settings = 'invalid_settings'
 
+    def test_detailed_balance_settings_calls_on_detailed_balance_settings_changed(
+        self, analysis_base
+    ):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+        with patch.object(
+            analysis_base, '_on_detailed_balance_settings_changed'
+        ) as mock_on_detailed_balance_settings_changed:
+            # THEN
+            analysis_base.detailed_balance_settings = new_settings
+
+            # EXPECT the change hook fires, like every sibling setter's does
+            mock_on_detailed_balance_settings_changed.assert_called_once()
+
+    def test_detailed_balance_settings_setter_invalid_fires_no_hook(self, analysis_base):
+        # WHEN / THEN
+        with (
+            patch.object(analysis_base, '_on_detailed_balance_settings_changed') as mock_hook,
+            pytest.raises(TypeError),
+        ):
+            analysis_base.detailed_balance_settings = 'invalid_settings'
+
+        # EXPECT
+        mock_hook.assert_not_called()
+
     @pytest.mark.parametrize(
         'extra_parameters',
         [
@@ -393,9 +420,6 @@ class TestAnalysisBase:
         ],
     )
     def test_extra_parameters_property(self, analysis_base, extra_parameters):
-        # WHEN
-        analysis_base.extra_parameters = extra_parameters
-
         # THEN
         analysis_base.extra_parameters = extra_parameters
 

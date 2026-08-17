@@ -1,9 +1,11 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import warnings
 from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
@@ -12,6 +14,8 @@ from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.convolution.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
@@ -31,6 +35,10 @@ class Analysis1d(AnalysisBase):
 
     Is used primarily in the Analysis class, but can also be used on its own for simpler analyses.
 
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.PosteriorSampler`.
+
     Examples
     --------
     **Fitting a single Q slice**
@@ -39,8 +47,6 @@ class Analysis1d(AnalysisBase):
     ```python
     import pooch
     import easydynamics as edyn
-    import easydynamics.sample_model as sm
-    from easydynamics.analysis.analysis1d import Analysis1d
 
     file_path = pooch.retrieve(
         url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
@@ -49,15 +55,15 @@ class Analysis1d(AnalysisBase):
     experiment = edyn.Experiment('Vanadium')
     experiment.load_hdf5(filename=file_path)
 
-    sample_model = sm.SampleModel(components=sm.DeltaFunction(area=1))
-    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.1))
-    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
-    instrument_model = sm.InstrumentModel(
+    sample_model = edyn.SampleModel(components=edyn.DeltaFunction(area=1))
+    resolution_model = edyn.ResolutionModel(components=edyn.Gaussian(width=0.1))
+    background_model = edyn.BackgroundModel(components=edyn.Polynomial(coefficients=[0.001]))
+    instrument_model = edyn.InstrumentModel(
         resolution_model=resolution_model,
         background_model=background_model,
     )
 
-    analysis = Analysis1d(
+    analysis = edyn.Analysis1d(
         display_name='Vanadium 1D Analysis',
         experiment=experiment,
         sample_model=sample_model,
@@ -116,6 +122,12 @@ class Analysis1d(AnalysisBase):
         self._fit_result = None
         self._convolver = None
         self._convolver_is_dirty = True
+        # The model state_versions the convolver was built against; None until it is built.
+        # Tracked per Analysis1d so sibling analyses sharing a model each notice a change.
+        self._convolver_model_versions = None
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
 
         super().__init__(
             display_name=display_name,
@@ -245,27 +257,141 @@ class Analysis1d(AnalysisBase):
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
 
-        if (
-            self.sample_model.component_collections_is_dirty
-            or self.instrument_model.resolution_model.component_collections_is_dirty
-        ):
-            self._convolver_is_dirty = True
+        self._prepare_for_sampling()
 
-        self._ensure_convolver_current()
-
-        fitter = EasyScienceFitter(
-            fit_object=self,
-            fit_function=self.as_fit_function(),
-        )
-
-        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
-            Q_index=self._require_Q_index()
-        )
-        fit_result = fitter.fit(x=x, y=y, weights=weights)
+        x, y, weights = self._sampling_data()
+        fit_result = self.fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result
 
         return fit_result
+
+    @property
+    def fitter(self) -> EasyScienceFitter:
+        """
+        The EasyScience Fitter used for fitting and sampling, built on first use.
+
+        Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
+        directly, e.g. ``analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)``.
+
+        Returns
+        -------
+        EasyScienceFitter
+            The cached Fitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = EasyScienceFitter(
+                fit_object=self,
+                fit_function=self.as_fit_function(),
+            )
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> PosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        PosteriorSampler
+            The sampler, which holds any chain that has been run.
+        """
+        if self._bayesian is None:
+            self._bayesian = PosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the Fitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        self._invalidate_bayesian_sampler()
+
+    def _invalidate_bayesian_sampler(self) -> None:
+        """Mark the Sampler as needing a rebuild, the data having changed."""
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    #############
+    # The contract PosteriorSampler relies on
+    #############
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters.
+
+        A single Q index holds one copy of each parameter, so nothing needs qualifying.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        return ParameterLabels(self._chain_parameters())
+
+    def _sampling_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Get the finite data for the chosen Q index, as used by both fitting and sampling.
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, np.ndarray]
+            The ``(x, y, weights)`` triple.
+        """
+        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
+            Q_index=self._require_Q_index()
+        )
+        return x, y, weights
+
+    def _chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters of this Analysis.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters that are free to vary, which are the ones the sampler explores.
+        """
+        return self.get_free_parameters()
+
+    def _prepare_for_sampling(self) -> None:
+        """
+        Rebuild the convolver if anything it depends on has changed.
+
+        The energy grid is fixed for the duration of a fit or a sampling run, so the convolution
+        objects are built once here and reused for every model evaluation.
+
+        Staleness is detected by comparing the models' ``state_version`` against the versions the
+        convolver was built with. Unlike polling the models' dirty flags, reading a version
+        consumes nothing, so every Analysis1d sharing a model notices the change — not just the
+        first one to ask.
+        """
+        current = self._model_state_versions()
+        if None in current or current != self._convolver_model_versions:
+            self._convolver_is_dirty = True
+
+        self._ensure_convolver_current()
+
+    def _model_state_versions(self) -> tuple:
+        """
+        Get the current ``state_version`` of each model the convolver depends on.
+
+        Returns
+        -------
+        tuple
+            The ``(sample_model, resolution_model)`` state versions. ``None`` entries, for models
+            that do not expose ``state_version`` yet, never compare equal to a recorded build
+            version, so the convolver is then conservatively rebuilt.
+        """
+        return (
+            getattr(self.sample_model, 'state_version', None),
+            getattr(self.instrument_model.resolution_model, 'state_version', None),
+        )
 
     def as_fit_function(
         self,
@@ -353,8 +479,6 @@ class Analysis1d(AnalysisBase):
         InteractiveFigure
             A plot of the data and model.
         """
-        import plopp as pp
-
         data_and_model = self.data_and_model_to_datagroup(
             energy=energy,
             add_background=add_background,
@@ -365,7 +489,8 @@ class Analysis1d(AnalysisBase):
         plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
         plot_kwargs_defaults.update(kwargs)
 
-        if plot_residuals:
+        # Residuals may have been omitted (with a warning) for a custom energy grid.
+        if plot_residuals and 'Residuals' in data_and_model:
             fig = slicerplot_with_residuals(
                 data_and_model,
                 residuals_key='Residuals',
@@ -437,9 +562,21 @@ class Analysis1d(AnalysisBase):
             raise ValueError('Q_index must be set to create DataGroup.')
 
         energy = self._verify_energy(energy)
+        custom_energy = energy is not None
 
         if energy is None:
             energy = self._masked_energy
+
+        if include_residuals and custom_energy:
+            # Residuals are data - model on the experiment grid; mixing them with a model on a
+            # custom grid would make the DataGroup internally inconsistent.
+            warnings.warn(
+                'Residuals are computed on the experiment energy grid and are omitted '
+                'when a custom energy grid is given.',
+                UserWarning,
+                stacklevel=2,
+            )
+            include_residuals = False
 
         data_and_model = {
             'Data': self.experiment.get_masked_binned_data(Q_index=self.Q_index),
@@ -483,9 +620,11 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is not None and self.experiment is not None:
             self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
+        self._invalidate_bayesian_sampler()
 
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
         """Refresh the pre-built Convolution object for the current Q index."""
+        self._convolver_model_versions = self._model_state_versions()
         self._convolver = self._create_convolver(energy=energy)
         self._convolver_is_dirty = False
 
@@ -523,10 +662,13 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is None:
             self._masked_energy = None
             self._convolver_is_dirty = True
+            self._invalidate_bayesian_sampler()
             return
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver_is_dirty = True
+        # A different Q index means different data, and the Sampler binds its data at construction.
+        self._invalidate_bayesian_sampler()
 
     def _on_experiment_changed(self) -> None:
         """Mark the convolver as dirty when the experiment changes."""
@@ -535,25 +677,34 @@ class Analysis1d(AnalysisBase):
         if self._Q_index is not None and self.experiment is not None:
             self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
+        self._invalidate_bayesian_sampler()
 
     def _on_sample_model_changed(self) -> None:
         """Mark the convolver as dirty when the sample model changes."""
         super()._on_sample_model_changed()
         self._convolver_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
         """Mark the convolver as dirty when the instrument model changes."""
         super()._on_instrument_model_changed()
         self._convolver_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
         """Mark the convolver as dirty when the convolution settings change."""
         super()._on_convolution_settings_changed()
         self._convolver_is_dirty = True
 
+    def _on_detailed_balance_settings_changed(self) -> None:
+        """Mark the convolver as dirty when the detailed balance settings change."""
+        super()._on_detailed_balance_settings_changed()
+        self._convolver_is_dirty = True
+
     def _ensure_convolver_current(self) -> None:
         """Rebuild the convolver if any dependency has changed since it was last built."""
         if self._convolver_is_dirty:
+            self._convolver_model_versions = self._model_state_versions()
             self._convolver = self._create_convolver()
             self._convolver_is_dirty = False
 

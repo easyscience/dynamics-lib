@@ -29,9 +29,15 @@ class ExpressionComponent(ModelComponent):
     Model component defined by a symbolic expression.
 
     The expression must contain ``x`` as the independent variable. All other symbols are treated as
-    free parameters, which can be accessed and set as attributes after construction. Supported
-    functions include ``exp``, ``sin``, ``cos``, ``sqrt``, ``erf``, and others — see the
-    ``_ALLOWED_FUNCS`` class variable for the full list.
+    free parameters, which can be accessed and set as attributes after construction. Symbol names
+    that collide with an existing attribute of the class (e.g. ``name`` or ``evaluate``) are
+    rejected at construction. Supported functions include ``exp``, ``sin``, ``cos``, ``sqrt``,
+    ``erf``, and others — see the ``_ALLOWED_FUNCS`` class variable for the full list.
+
+    .. warning::
+        The expression string is parsed with ``sympy.sympify``, which evaluates the string and
+        can execute arbitrary code. Only pass expression strings from a trusted source — never
+        feed it unsanitized user input.
 
     Examples
     --------
@@ -41,9 +47,9 @@ class ExpressionComponent(ModelComponent):
     construction:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    expr = sm.ExpressionComponent(
+    expr = edyn.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
         parameters={'A': 10, 'x0': 0, 'sigma': 1},
         x_unit='meV',
@@ -66,9 +72,12 @@ class ExpressionComponent(ModelComponent):
     Parameters are dimensionless by default. Units can be given per parameter at construction, or
     relabelled later with ``set_unit`` (the numeric value is kept as-is). When units are in use,
     the unit of the evaluated expression is derived from the parameter units and x_unit (see
-    ``output_unit``), and a warning is issued if it does not match y_unit:
+    ``output_unit``). A derived unit that differs from y_unit but is convertible to it is handled
+    automatically: the expression is evaluated in a coherent (SI) scale, so parameter units of
+    mixed scales combine correctly, and the result is expressed in y_unit. A warning is issued only
+    when the derived unit is dimensionally incompatible with y_unit:
     ```python
-    expr = sm.ExpressionComponent(
+    expr = edyn.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
         parameters={'A': 10, 'x0': 0, 'sigma': 1},
         parameter_units={'A': '1/meV', 'x0': 'meV', 'sigma': 'meV'},
@@ -82,7 +91,7 @@ class ExpressionComponent(ModelComponent):
     The symbols ``hbar`` (in meV*s) and ``kb`` (in meV/K) are provided automatically as read-only
     constants (DescriptorNumbers) when they appear in the expression:
     ```python
-    boltzmann = sm.ExpressionComponent(
+    boltzmann = edyn.ExpressionComponent(
         'exp(-x / (kb * T))',
         parameters={'T': 300.0},
         parameter_units={'T': 'K'},
@@ -166,15 +175,19 @@ class ExpressionComponent(ModelComponent):
         expression : str
             The symbolic expression as a string. Must contain 'x' as the independent variable. The
             symbols ``hbar`` and ``kb`` are provided automatically as read-only physical constants
-            (in meV*s and meV/K respectively) unless overridden via *parameters*.
+            (in meV*s and meV/K respectively) unless overridden via *parameters*. The string is
+            parsed with ``sympy.sympify``, which can execute arbitrary code — only use expression
+            strings from a trusted source. Symbol names that collide with an existing attribute of
+            the class (e.g. ``name``, ``evaluate``) are rejected.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values. Parameters that are not given a
             unit are dimensionless.
         parameter_units : dict[str, str | sc.Unit] | None, default=None
             Optional units per parameter name. Each entry sets the unit of the named parameter
             without rescaling its value (see :meth:`set_unit`), and takes precedence over the unit
-            of a Parameter instance given in *parameters*. When units are in use, a warning is
-            issued if the expression's output unit does not match y_unit.
+            of a Parameter instance given in *parameters*. When units are in use, an output unit
+            convertible to y_unit rescales the evaluated values into y_unit; a warning is issued
+            only if the output unit is incompatible with y_unit.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.
         y_unit : str | sc.Unit, default='dimensionless'
@@ -189,8 +202,9 @@ class ExpressionComponent(ModelComponent):
         Raises
         ------
         ValueError
-            If the expression is invalid or does not contain 'x', or if parameter_units names a
-            parameter that is not in the expression.
+            If the expression is invalid or does not contain 'x', if a symbol name collides with an
+            existing attribute of the class, or if parameter_units names a parameter that is not in
+            the expression.
         TypeError
             If any parameter value is not numeric, or if parameter_units is not a dictionary.
         """
@@ -266,6 +280,16 @@ class ExpressionComponent(ModelComponent):
         for name in self._symbol_names:
             if name in self._RESERVED_NAMES:
                 continue
+
+            # A symbol shadowing an existing attribute (e.g. 'name', 'evaluate', 'x_unit')
+            # would silently diverge: reads resolve to the class attribute (since __getattr__
+            # only fires when normal lookup fails) while writes hit the parameter. Reject it.
+            if hasattr(type(self), name) or name in self.__dict__:
+                raise ValueError(
+                    f"Symbol '{name}' in the expression collides with an existing attribute "
+                    f'of {type(self).__name__}; it could not be accessed as a parameter. '
+                    f'Rename the symbol in the expression.'
+                )
 
             # Physical constants are provided automatically, unless the user explicitly
             # supplies a parameter with the same name.
@@ -389,16 +413,32 @@ class ExpressionComponent(ModelComponent):
                 f'convert x to {self.x_unit} before evaluating.'
             )
 
+        # When the derived output unit is convertible to y_unit, evaluate in the coherent SI
+        # scale: every symbol's value is scaled by its unit's SI multiplier, so mixed-scale
+        # parameter units combine correctly even inside sums (e.g. 1 + D*x**2*tau with D in m^2/s,
+        # x in 1/angstrom and tau in ps), and the result is expressed in y_unit. Scale-homogeneous
+        # expressions give the same numbers either way.
+        scale_into_si = self._output_converts_to_y_unit()
+
         args = []
         for name in self._symbol_names:
             if name == 'x':
-                args.append(x_vals)
+                value = x_vals
+                unit = self.x_unit
             elif name in self._constants:
-                args.append(self._constants[name].value)
+                value = self._constants[name].value
+                unit = self._constants[name].unit
             else:
-                args.append(self._parameters[name].value)
+                value = self._parameters[name].value
+                unit = self._parameters[name].unit
+            if scale_into_si and unit is not None:
+                value = value * self._si_multiplier(unit)
+            args.append(value)
 
-        return self._func(*args)
+        result = self._func(*args)
+        if scale_into_si:
+            result = result / self._si_multiplier(self.y_unit or 'dimensionless')
+        return result
 
     def get_all_variables(self) -> list[Parameter]:
         """
@@ -417,8 +457,9 @@ class ExpressionComponent(ModelComponent):
 
         This relabels the unit: the numeric value, bounds, and variance are kept as-is. Use
         ``Parameter.convert_unit`` instead to rescale a value into a compatible unit. Issues a
-        warning if the resulting output unit of the expression no longer matches y_unit. Raises the
-        same exceptions as :meth:`_relabel_parameter_unit` on invalid input.
+        warning if the resulting output unit of the expression is incompatible with y_unit (a
+        convertible output unit rescales evaluated values into y_unit instead). Raises the same
+        exceptions as :meth:`_relabel_parameter_unit` on invalid input.
 
         Parameters
         ----------
@@ -661,18 +702,75 @@ class ExpressionComponent(ModelComponent):
             f'Cannot determine units for expression node {node} of type {type(node).__name__}.'
         )
 
+    def _units_in_use(self) -> bool:
+        """
+        Whether the expression carries unit information at all.
+
+        Returns
+        -------
+        bool
+            True when the expression uses physical constants or any parameter has a unit other than
+            dimensionless. Unit-agnostic expressions (all parameters dimensionless) evaluate
+            without any unit handling.
+        """
+        return bool(self._constants) or any(
+            str(parameter.unit) != 'dimensionless' for parameter in self._parameters.values()
+        )
+
+    @staticmethod
+    def _si_multiplier(unit: str | sc.Unit) -> float:
+        """
+        Scale factor from one of *unit* to the coherent SI value of the same dimension.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The unit whose scale to extract, e.g. 1e-10 for angstrom.
+
+        Returns
+        -------
+        float
+            The multiplier relative to the coherent SI base units.
+        """
+        return float(sc.Unit(str(unit)).to_dict().get('multiplier', 1.0))
+
+    def _output_converts_to_y_unit(self) -> bool:
+        """
+        Whether evaluation should run in a coherent scale and express the result in y_unit.
+
+        Returns
+        -------
+        bool
+            True when units are in use and the derived output unit differs from y_unit but is
+            convertible to it. False when units are not in use, the output unit cannot be
+            determined, the units already agree (no conversion needed), or they are dimensionally
+            incompatible (construction warned; values are evaluated raw and labelled as-is).
+        """
+        if not self._units_in_use():
+            return False
+        try:
+            output_unit = sc.Unit(self.output_unit)
+        except sc.UnitError:
+            return False
+        y_unit = sc.Unit(self.y_unit) if self.y_unit is not None else sc.Unit('dimensionless')
+        if output_unit == y_unit:
+            return False
+        try:
+            sc.to_unit(sc.scalar(1.0, unit=output_unit), y_unit)
+        except sc.UnitError:
+            return False
+        return True
+
     def _warn_if_output_unit_mismatch(self) -> None:
         """
-        Warn if the expression's output unit does not match y_unit.
+        Warn if the expression's output unit cannot be expressed in y_unit.
 
         The check only runs when units are in use, i.e. when the expression uses physical constants
         or any parameter has a unit other than dimensionless. Unit-agnostic expressions (all
-        parameters dimensionless) stay silent.
+        parameters dimensionless) stay silent. An output unit that differs from y_unit but is
+        convertible to it does not warn: evaluated values are rescaled into y_unit.
         """
-        units_in_use = bool(self._constants) or any(
-            str(parameter.unit) != 'dimensionless' for parameter in self._parameters.values()
-        )
-        if not units_in_use:
+        if not self._units_in_use():
             return
 
         try:
@@ -686,11 +784,16 @@ class ExpressionComponent(ModelComponent):
             return
 
         y_unit = sc.Unit(self.y_unit) if self.y_unit is not None else sc.Unit('dimensionless')
-        if output_unit != y_unit:
+        if output_unit == y_unit:
+            return
+        try:
+            sc.to_unit(sc.scalar(1.0, unit=output_unit), y_unit)
+        except sc.UnitError:
             warnings.warn(
                 f'The expression evaluates to unit {output_unit}, which does not match '
-                f'y_unit {y_unit}. The evaluated values are labelled with y_unit; adjust the '
-                f'parameter units or y_unit to make them consistent.',
+                f'y_unit {y_unit} and cannot be converted to it. The evaluated values are '
+                f'labelled with y_unit; adjust the parameter units or y_unit to make them '
+                f'consistent.',
                 UserWarning,
                 stacklevel=3,
             )

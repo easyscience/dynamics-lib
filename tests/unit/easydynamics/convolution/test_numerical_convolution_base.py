@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
@@ -621,6 +622,149 @@ class TestNumericalConvolutionBase:
             model_name='ComponentCollection',
         )
 
+    def test_init_with_none_sample_components_raises(self):
+        # WHEN THEN EXPECT: None components fail early with a clear error
+        with pytest.raises(TypeError, match=r'sample_components must be .* not None'):
+            NumericalConvolutionBase(
+                energy=np.linspace(-10, 10, 101),
+                sample_components=None,
+                resolution_components=ComponentCollection(display_name='ResolutionModel'),
+            )
+
+    def test_init_with_none_resolution_components_raises(self):
+        # WHEN THEN EXPECT: None components fail early with a clear error
+        with pytest.raises(TypeError, match=r'resolution_components must be .* not None'):
+            NumericalConvolutionBase(
+                energy=np.linspace(-10, 10, 101),
+                sample_components=ComponentCollection(display_name='ComponentCollection'),
+                resolution_components=None,
+            )
+
+    @pytest.mark.parametrize('upsample_factor', [None, 5], ids=['no_upsampling', 'upsample_5'])
+    def test_single_point_energy_raises_clear_error(self, upsample_factor):
+        """
+        Regression: a single energy point used to hit an IndexError (upsample None) or
+        silently return zeros (default path) instead of the intended ValueError.
+        """
+        # WHEN THEN EXPECT (the grid is built eagerly during construction)
+        with pytest.raises(ValueError, match=r'at least two points'):
+            NumericalConvolutionBase(
+                energy=np.array([1.0]),
+                sample_components=ComponentCollection(display_name='ComponentCollection'),
+                resolution_components=ComponentCollection(display_name='ResolutionModel'),
+                convolution_settings=ConvolutionSettings(upsample_factor=upsample_factor),
+            )
+
+    def test_extension_factor_setter_accepts_none(self, default_numerical_convolution_base):
+        # WHEN
+        default_numerical_convolution_base.upsample_factor = None
+
+        # THEN
+        default_numerical_convolution_base.extension_factor = None
+
+        # EXPECT
+        assert default_numerical_convolution_base.extension_factor is None
+
+    def test_check_width_thresholds_covers_voigt_widths(self, default_numerical_convolution_base):
+        """
+        Regression: width warnings used to gate on 'width' only, silently skipping Voigt
+        components with gaussian_width/lorentzian_width.
+        """
+        # WHEN a Voigt with one very narrow and one very wide width
+        voigt = Voigt(
+            name='NarrowWideVoigt',
+            area=1.0,
+            center=0.0,
+            gaussian_width=1e-6,
+            lorentzian_width=15.0,
+        )
+
+        # THEN EXPECT both widths trigger their warning
+        with pytest.warns(UserWarning) as record:
+            default_numerical_convolution_base._check_width_thresholds(
+                model=voigt,
+                model_name='sample model',
+            )
+        messages = [str(w.message) for w in record]
+        assert any('gaussian width' in m and 'upsample_factor' in m for m in messages)
+        assert any('lorentzian width' in m and 'extension_factor' in m for m in messages)
+
+    #############
+    # Plan invalidation
+    #############
+
+    def test_detailed_balance_flag_toggle_invalidates_plan(
+        self, default_numerical_convolution_base
+    ):
+        "Regression: toggling detailed balance flags used to be silently ignored"
+        # WHEN a convolver with a current plan
+        conv = default_numerical_convolution_base
+        conv._mark_convolution_plan_current()
+        assert conv._convolution_plan_is_current() is True
+
+        # THEN
+        conv.detailed_balance_settings.use_detailed_balance = False
+
+        # EXPECT
+        assert conv._convolution_plan_is_current() is False
+
+    def test_detailed_balance_settings_rebind_invalidates_plan(
+        self, default_numerical_convolution_base
+    ):
+        # WHEN a convolver with a current plan
+        conv = default_numerical_convolution_base
+        conv._mark_convolution_plan_current()
+        assert conv._convolution_plan_is_current() is True
+
+        # THEN
+        conv.detailed_balance_settings = DetailedBalanceSettings()
+
+        # EXPECT
+        assert conv._convolution_plan_is_current() is False
+
+    def test_in_place_collection_mutation_invalidates_plan(
+        self, default_numerical_convolution_base
+    ):
+        "Regression: appending to a live collection used to leave the plan current"
+        # WHEN a convolver with a current plan
+        conv = default_numerical_convolution_base
+        conv._mark_convolution_plan_current()
+        assert conv._convolution_plan_is_current() is True
+
+        # THEN
+        conv.sample_components.append_component(Gaussian(name='LiveGaussian'))
+
+        # EXPECT
+        assert conv._convolution_plan_is_current() is False
+
+    def test_energy_offset_rebind_invalidates_plan(self, default_numerical_convolution_base):
+        "Regression: rebinding energy_offset to a new Parameter used to cause split-brain"
+        # WHEN a convolver with a current plan
+        conv = default_numerical_convolution_base
+        conv._mark_convolution_plan_current()
+
+        # THEN a numeric assignment mutates the shared Parameter: plan stays current
+        conv.energy_offset = 1.5
+        assert conv._convolution_plan_is_current() is True
+
+        # THEN rebinding to a new Parameter object invalidates the plan
+        conv.energy_offset = Parameter(name='energy_offset', value=1.5, unit='meV')
+
+        # EXPECT
+        assert conv._convolution_plan_is_current() is False
+
+    def test_convert_x_unit_invalidates_plan(self, default_numerical_convolution_base):
+        # WHEN a convolver with a current plan
+        conv = default_numerical_convolution_base
+        conv._mark_convolution_plan_current()
+
+        # THEN
+        conv.convert_x_unit('eV')
+
+        # EXPECT
+        assert conv._convolution_plan_is_current() is False
+        assert conv.x_unit == 'eV'
+
     def test_repr(self, default_numerical_convolution_base):
         """
         Test the __repr__ method of NumericalConvolutionBase.
@@ -646,14 +790,14 @@ class TestNumericalConvolutionBase:
         assert 'temperature=None' in repr_str
         assert 'normalize_detailed_balance=True' in repr_str
 
-
-def test_create_energy_grid_raises_when_extension_factor_none_with_upsampling():
-    # GIVEN upsampling enabled but no extension_factor, the dense energy grid cannot be built
-    # WHEN THEN EXPECT (the grid is built eagerly during construction)
-    with pytest.raises(ValueError, match=r'extension_factor must be a number'):
-        NumericalConvolutionBase(
-            energy=np.linspace(-10, 10, 101),
-            sample_components=ComponentCollection(display_name='ComponentCollection'),
-            resolution_components=ComponentCollection(display_name='ResolutionModel'),
-            convolution_settings=ConvolutionSettings(upsample_factor=5, extension_factor=None),
-        )
+    def test_create_energy_grid_raises_when_extension_factor_none_with_upsampling(self):
+        # WHEN upsampling is enabled but there is no extension_factor, the dense energy grid
+        # cannot be built
+        # THEN EXPECT (the grid is built eagerly during construction)
+        with pytest.raises(ValueError, match=r'extension_factor must be a number'):
+            NumericalConvolutionBase(
+                energy=np.linspace(-10, 10, 101),
+                sample_components=ComponentCollection(display_name='ComponentCollection'),
+                resolution_components=ComponentCollection(display_name='ResolutionModel'),
+                convolution_settings=ConvolutionSettings(upsample_factor=5, extension_factor=None),
+            )

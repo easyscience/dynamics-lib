@@ -12,6 +12,7 @@ import scipp as sc
 
 from easydynamics.base_classes.easydynamics_list import EasyDynamicsList
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import convert_units_with_rollback
@@ -33,11 +34,11 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    component1 = sm.Gaussian(name='Gaussian1', area=1.0, width=1.0)
-    component2 = sm.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
-    collection = sm.ComponentCollection(components=[component1, component2])
+    component1 = edyn.Gaussian(name='Gaussian1', area=1.0, width=1.0)
+    component2 = edyn.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
+    collection = edyn.ComponentCollection(components=[component1, component2])
     ```
 
     **Evaluating, appending, and removing components**
@@ -46,7 +47,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     x = np.linspace(-5, 5, 100)
     values = collection.evaluate(x)
 
-    component3 = sm.Gaussian(name='Gaussian2', area=0.5, width=0.8)
+    component3 = edyn.Gaussian(name='Gaussian2', area=0.5, width=0.8)
     collection.append(component3)
 
     collection.remove('Gaussian1')
@@ -69,7 +70,10 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Parameters
         ----------
         components : ModelComponent | list[ModelComponent] | None, default=None
-            Initial model components to add to the ComponentCollection.
+            Initial model components to add to the ComponentCollection. Components are stored by
+            reference (not copied), so their Parameters stay shared with the objects passed in;
+            mutating a component mutates it everywhere it is used. Pass a copy if independent
+            parameters are needed.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis (energy, Q, etc.).
         y_unit : str | sc.Unit, default='dimensionless'
@@ -224,11 +228,15 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Append a model component or the components from another ComponentCollection to this
         ComponentCollection.
 
+        Components are appended by reference (not copied): their Parameters stay shared with the
+        passed-in objects, so a fit through one collection updates the same Parameters seen by any
+        other holder of the component. Pass a copy if independent parameters are needed.
+
         Parameters
         ----------
         component : ModelComponent | ComponentCollection
             The component to append. If a ComponentCollection is provided, all of its components
-            will be appended.
+            will be appended (also by reference).
         """
         if isinstance(component, ComponentCollection):
             self.extend(component)
@@ -281,8 +289,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If there are no components in the model or if the total area is zero or not finite,
-            which would prevent normalization.
+            If there are no components in the model, if any component area is negative, or if the
+            total area is zero, negative or not finite, which would prevent normalization.
         """
         if not self:
             raise ValueError('No components in the model to normalize.')
@@ -307,12 +315,19 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         # units normalize correctly. Dividing each value by the total expressed in the
         # reference unit makes the areas sum to 1 in that unit.
         reference_unit = str(area_params[0].unit)
-        total_area_value = sum(
-            convert_value_unit(p.value, p.unit, reference_unit) for p in area_params
-        )
+        area_values = [convert_value_unit(p.value, p.unit, reference_unit) for p in area_params]
 
-        if total_area_value == 0:
-            raise ValueError('Total area is zero; cannot normalize.')
+        negative = [p.name for p, value in zip(area_params, area_values, strict=True) if value < 0]
+        if negative:
+            raise ValueError(
+                f'Negative area(s) found for {negative}; cannot normalize. '
+                'Areas must be non-negative for normalization to be meaningful.'
+            )
+
+        total_area_value = sum(area_values)
+
+        if total_area_value <= 0:
+            raise ValueError('Total area is not positive; cannot normalize.')
 
         if not np.isfinite(total_area_value):
             raise ValueError('Total area is not finite; cannot normalize.')
@@ -350,18 +365,27 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
+        Raises
+        ------
+        ValueError
+            If output is not 'numpy' or 'scipp'.
+
         Returns
         -------
         np.ndarray | sc.Variable
             Evaluated model values.
         """
         if not self:
+            # Mirror the validation and 1D output shape of the non-empty path.
+            if output not in ('numpy', 'scipp'):
+                raise ValueError(f"output must be 'numpy' or 'scipp', got {output!r}")
             if isinstance(x, (sc.Variable, sc.DataArray)):
-                values = np.zeros_like(x.values, dtype=float)
                 dim = x.dims[0] if x.dims else 'x'
+                raw = x.values if x.dims else x.value
             else:
-                values = np.zeros_like(x, dtype=float)
                 dim = 'x'
+                raw = x
+            values = np.zeros_like(np.atleast_1d(np.asarray(raw, dtype=float)), dtype=float)
             if output == 'scipp':
                 return sc.array(dims=[dim], values=values, unit=self.y_unit)
             return values
@@ -396,6 +420,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             If name is not a string.
         KeyError
             If no component with the given name exists in the collection.
+        AmbiguousNameError
+            If more than one component with the given name exists in the collection.
 
         Returns
         -------
@@ -409,6 +435,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         matches = [comp for comp in self if comp.name == name]
         if not matches:
             raise KeyError(f"No component named '{name}' exists.")
+        if len(matches) > 1:
+            raise AmbiguousNameError(name, matches)
         return matches[0].evaluate(x, output=output)
 
     def fix_all_parameters(self) -> None:
@@ -424,6 +452,30 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _copy_with_items(self, items: list[ModelComponent]) -> ComponentCollection:
+        """
+        Create a new collection of this class containing the given components.
+
+        Used by slicing. Overridden because ComponentCollection's constructor signature differs
+        from EasyDynamicsList's. The new collection carries this collection's units and references
+        the same component objects (no copies).
+
+        Parameters
+        ----------
+        items : list[ModelComponent]
+            The components the new collection should contain.
+
+        Returns
+        -------
+        ComponentCollection
+            A new collection of the same class containing the components.
+        """
+        return self.__class__(
+            components=list(items),
+            x_unit=self.x_unit,
+            y_unit=self.y_unit,
+        )
 
     def _warn_if_duplicate_names(self) -> None:
         """Warn if any two components share the same name."""

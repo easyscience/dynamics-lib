@@ -305,17 +305,60 @@ class TestResolutionModel:
                 **valid_kwargs,
             )
 
-    def test_from_sample_model_invalid_components(self, sample_model):
-        # WHEN
-        invalid_component = DeltaFunction(name='InvalidDelta')
-        sample_model.append_component(invalid_component)
+    def test_from_sample_model_strips_delta_functions(self, sample_model):
+        # WHEN a sample model with the standard QENS elastic delta line
+        sample_model.append_component(DeltaFunction(name='Elastic'))
 
-        # THEN EXPECT
-        with pytest.raises(
-            TypeError,
-            match='cannot be a DeltaFunction',
-        ):
+        # THEN
+        with pytest.warns(UserWarning, match='Stripped'):
+            resolution_model = ResolutionModel.from_sample_model(sample_model)
+
+        # EXPECT no DeltaFunction in the template or the per-Q collections, and the
+        # remaining components still normalized to unit area
+        assert not any(isinstance(c, DeltaFunction) for c in resolution_model.components)
+        for Q_index in range(len(resolution_model.Q)):
+            collection = resolution_model.get_component_collection(Q_index)
+            assert not any(isinstance(c, DeltaFunction) for c in collection)
+            assert sum(c.area.value for c in collection) == pytest.approx(1.0)
+
+    def test_from_sample_model_background_component_raises(self, sample_model):
+        # WHEN a sample model carrying a background component
+        sample_model.append_component(Polynomial(name='Background'))
+
+        # THEN EXPECT backgrounds are rejected, not silently installed as resolution
+        with pytest.raises(TypeError, match='cannot be a Polynomial'):
             ResolutionModel.from_sample_model(sample_model)
+
+    def test_from_sample_model_delta_only_raises(self):
+        # WHEN a sample model whose only component is the elastic delta
+        sample_model = SampleModel(
+            components=DeltaFunction(name='Elastic'),
+            Q=np.array([1.0]),
+        )
+
+        # THEN EXPECT stripping the delta would leave no resolution shape
+        with pytest.raises(ValueError, match='contains only'):
+            ResolutionModel.from_sample_model(sample_model)
+
+    def test_from_sample_model_locks_calibrated_collections(self, sample_model):
+        # WHEN
+        resolution_model = ResolutionModel.from_sample_model(sample_model)
+        calibrated = resolution_model.get_component_collection(0)
+
+        # THEN EXPECT mutations that would rebuild the collections from the unfitted
+        # template fail loudly instead of silently discarding the calibration
+        with pytest.raises(RuntimeError, match='calibrated'):
+            resolution_model.append_component(Gaussian(name='Extra'))
+        with pytest.raises(RuntimeError, match='calibrated'):
+            resolution_model.remove_component('TestGaussian1Name')
+        with pytest.raises(RuntimeError, match='calibrated'):
+            resolution_model.clear_components()
+        with pytest.raises(RuntimeError, match='calibrated'):
+            resolution_model.clear_Q(confirm=True)
+
+        # EXPECT the calibrated collections survive untouched
+        assert resolution_model.get_component_collection(0) is calibrated
+        assert resolution_model._component_collections_is_dirty is False
 
     def test_y_unit_setter_raises(self, resolution_model):
         # WHEN / THEN / EXPECT

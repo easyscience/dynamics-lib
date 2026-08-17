@@ -8,7 +8,11 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.variable import Parameter
 
+import easydynamics as edyn
+import easydynamics.sample_model as sm
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.analysis.parameter_analysis import ParameterAnalysis
@@ -17,7 +21,13 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+    JumpTranslationalDiffusion,
+)
 from easydynamics.utils.fit_target import FitTarget
+
+Q = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0])
 
 
 def make_target(dataset_key, function, label, x_unit=None, y_unit=None, name='value'):
@@ -30,6 +40,51 @@ def make_target(dataset_key, function, label, x_unit=None, y_unit=None, name='va
         x_unit=x_unit,
         y_unit=y_unit,
     )
+
+
+def make_dataset():
+    widths = 0.10 + 0.35 * Q
+    areas = 2.0 - 0.3 * Q
+    return sc.Dataset({
+        'Lorentzian width': sc.DataArray(
+            data=sc.array(
+                dims=['Q'], values=widths, variances=np.full_like(widths, 1e-4), unit='meV'
+            ),
+            coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
+        ),
+        'Lorentzian area': sc.DataArray(
+            data=sc.array(
+                dims=['Q'], values=areas, variances=np.full_like(areas, 4e-4), unit='meV'
+            ),
+            coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
+        ),
+    })
+
+
+def make_analysis(two_bindings=True):
+    bindings = [
+        edyn.FitBinding(
+            model=sm.Polynomial(
+                coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Width line'
+            ),
+            targets='Lorentzian width',
+        )
+    ]
+    if two_bindings:
+        bindings.append(
+            edyn.FitBinding(
+                model=sm.Polynomial(
+                    coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Area line'
+                ),
+                targets='Lorentzian area',
+            )
+        )
+    return edyn.ParameterAnalysis(parameters=make_dataset(), bindings=bindings)
+
+
+@pytest.fixture
+def analysis():
+    return make_analysis()
 
 
 class TestParameterAnalysis:
@@ -523,6 +578,38 @@ class TestParameterAnalysis:
 
         # 6. Return value propagated
         assert result == mock_plot.return_value
+
+    def test_plot_with_empty_names_raises_a_clear_error(self, parameter_analysis):
+        # WHEN / THEN / EXPECT: an empty list is an error, not a bare IndexError
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(ValueError, match='names must not be an empty list'),
+        ):
+            parameter_analysis.plot(names=[])
+
+    def test_plot_evaluates_only_the_bindings_being_plotted(
+        self, parameter_analysis, mock_model_dataset
+    ):
+        # WHEN only the first binding's target is requested
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot'),
+        ):
+            parameter_analysis.plot(names=['parameter1'])
+
+        # EXPECT the diffusion binding is not evaluated for a plot that does not show it
+        parameter_analysis.calculate_model_dataset.assert_called_once_with([
+            parameter_analysis.bindings[0]
+        ])
 
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
@@ -1089,6 +1176,26 @@ class TestParameterAnalysis:
         np.testing.assert_allclose(y, [1.0, 2.0])
         np.testing.assert_allclose(w, [1.0, 1.0])
 
+    def test_get_xyweight_from_dataset_no_variances_filters_nan_values(self, parameter_analysis):
+        # WHEN a dataset without variances contains a NaN value
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, np.nan], unit='meV'),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        # THEN
+        x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+        # EXPECT the NaN row is filtered like on the with-variances path
+        np.testing.assert_allclose(x, [0.1])
+        np.testing.assert_allclose(y, [1.0])
+        np.testing.assert_allclose(w, [1.0])
+
     def test_get_xyweight_from_dataset_all_nan_variances_raises(self, parameter_analysis):
         # WHEN
         Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
@@ -1150,6 +1257,357 @@ class TestParameterAnalysis:
         assert 'parameter_names=' in repr_str
         assert 'bindings=' in repr_str
 
+    #############
+    # The cached fitter
+    #############
+
+    def test_fitter_is_a_cached_multifitter(self, analysis):
+        # EXPECT
+        assert isinstance(analysis.fitter, MultiFitter)
+        assert analysis.fitter is analysis.fitter
+
+    def test_fit_still_returns_per_target_results(self, analysis):
+        # THEN
+        results = analysis.fit()
+
+        # EXPECT one result per fit target, as before
+        assert isinstance(results, list)
+        assert len(results) == 2
+
+    def test_changing_bindings_rebuilds_the_fitter(self, analysis):
+        # WHEN
+        original = analysis.fitter
+
+        # THEN
+        analysis.bindings = analysis.bindings[:1]
+
+        # EXPECT
+        assert analysis.fitter is not original
+
+    def test_changing_parameters_rebuilds_the_fitter(self, analysis):
+        # WHEN
+        original = analysis.fitter
+
+        # THEN
+        analysis.parameters = make_dataset()
+
+        # EXPECT
+        assert analysis.fitter is not original
+
+    def test_changing_the_number_of_targets_rebuilds_the_fitter(self):
+        # WHEN a binding is edited in place so that it resolves to two targets instead of one.
+        # ParameterAnalysis cannot observe this, and the cached fitter would otherwise still hold
+        # one fit function against two datasets, which dies inside the minimizer.
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets={'width': 'Lorentzian width'},
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        assert len(analysis.fit()) == 1
+
+        # THEN
+        binding.targets = {'width': 'Lorentzian width', 'area': 'Lorentzian area'}
+
+        # EXPECT the fit follows the binding rather than failing on a stale fitter
+        assert len(analysis.fit()) == 2
+
+    def test_shrinking_the_targets_also_rebuilds(self):
+        # WHEN
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets={'width': 'Lorentzian width', 'area': 'Lorentzian area'},
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        assert len(analysis.fit()) == 2
+
+        # THEN
+        binding.targets = {'width': 'Lorentzian width'}
+
+        # EXPECT
+        assert len(analysis.fit()) == 1
+
+    def test_swapping_targets_of_the_same_model_rebuilds_the_fitter(self):
+        # WHEN a binding's targets are swapped in place without changing how many there are:
+        # the model list stays identical, so a model-only signature would miss the change and
+        # fit the stale width function against the area data
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets=['width'],
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        analysis.fit()
+        original = analysis._fitter
+
+        # THEN
+        binding.targets = ['area']
+        analysis.fit()
+
+        # EXPECT the fitter was rebuilt for the new target
+        assert analysis._fitter is not original
+
+    def test_append_binding_invalidates_the_fitter(self, analysis):
+        # WHEN
+        original = analysis.fitter
+        new_binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+
+        # THEN
+        analysis.append_binding(new_binding)
+
+        # EXPECT
+        assert analysis.fitter is not original
+
+    def test_clear_bindings_invalidates_the_fitter(self, analysis):
+        # WHEN
+        _ = analysis.fitter
+        assert analysis._fitter_is_dirty is False
+
+        # THEN
+        analysis.clear_bindings()
+
+        # EXPECT
+        assert analysis._fitter_is_dirty is True
+
+    def test_bindings_list_is_copied_from_the_caller(self):
+        # WHEN a caller passes a list and mutates it afterwards
+        binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+        caller_list = [binding]
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=caller_list)
+
+        # THEN
+        caller_list.clear()
+
+        # EXPECT the analysis still holds the binding it was given
+        assert analysis.bindings == [binding]
+
+    #############
+    # The bayesian sampler (the ParameterAnalysis side of the contract)
+    #############
+
+    def test_bayesian_returns_the_cached_sampler(self, analysis):
+        # THEN
+        sampler = analysis.bayesian
+
+        # EXPECT the same object on second access
+        assert sampler is analysis.bayesian
+
+    def test_bayesian_is_invalidated_when_the_parameters_change(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.parameters = make_dataset()
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_the_bindings_change(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.bindings = analysis.bindings[:1]
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_a_binding_is_appended(self, analysis):
+        # WHEN
+        sampler = analysis.bayesian
+        new_binding = edyn.FitBinding(
+            model=sm.Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit='meV'),
+            targets='Lorentzian width',
+        )
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis.append_binding(new_binding)
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_missing_parameters_dataset_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis()
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No parameters Dataset'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+    def test_missing_bindings_raises(self):
+        # WHEN
+        parameter_analysis = edyn.ParameterAnalysis(parameters=make_dataset())
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No fit bindings'):
+            parameter_analysis.bayesian.sample(samples=10)
+
+    #############
+    # Chain parameters and labels
+    #############
+
+    def test_covers_every_binding_model(self, analysis):
+        # THEN
+        parameters = analysis._chain_parameters()
+
+        # EXPECT both Polynomials contribute their two coefficients
+        assert len(parameters) == 4
+        assert len({p.unique_name for p in parameters}) == 4
+
+    def test_labels_are_unique(self, analysis):
+        # THEN
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT
+        assert len(set(labels)) == len(labels)
+
+    def test_model_name_is_not_repeated_in_the_label(self, analysis):
+        # WHEN a model already names its parameters after itself
+
+        # THEN
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT no 'Width line: Width line_c0'
+        assert 'Width line_c0' in labels
+        assert not any(label.count('Width line') > 1 for label in labels)
+
+    def test_colliding_names_are_qualified_by_model(self):
+        # WHEN two bindings use models whose parameters share a name
+        shared_name_model_a = sm.Polynomial(
+            coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Line'
+        )
+        shared_name_model_b = sm.Polynomial(
+            coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Line'
+        )
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(model=shared_name_model_a, targets='Lorentzian width'),
+                edyn.FitBinding(model=shared_name_model_b, targets='Lorentzian area'),
+            ],
+        )
+
+        # THEN
+        parameters = analysis._chain_parameters()
+        names = [p.name for p in parameters]
+        labels = [analysis._parameter_labels().label(p) for p in parameters]
+
+        # EXPECT the bare names collide, and the labels resolve it
+        assert len(set(names)) < len(names)
+        assert len(set(labels)) == len(labels)
+
+    def test_single_binding_keeps_plain_names(self):
+        # WHEN
+        analysis = make_analysis(two_bindings=False)
+
+        # THEN
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT no model prefix, since there is nothing to disambiguate
+        assert labels == ['Width line_c0', 'Width line_c1']
+
+    def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
+        # WHEN a parameter belongs to none of the binding models
+        stranger = Parameter(name='Width line_c0', value=1.0)
+
+        # THEN EXPECT it is returned unqualified rather than mislabelled
+        assert analysis._parameter_labels().label(stranger) == 'Width line_c0'
+
+    def test_models_without_a_display_name_fall_back_to_the_unique_name(self):
+        # WHEN two colliding models have no display name to tell them apart
+        model_a = sm.Polynomial(coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV')
+        model_b = sm.Polynomial(coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV')
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(model=model_a, targets='Lorentzian width'),
+                edyn.FitBinding(model=model_b, targets='Lorentzian area'),
+            ],
+        )
+
+        # THEN
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT still unambiguous, which is what matters
+        assert len(set(labels)) == len(labels)
+
+    def test_colliding_names_with_distinct_models_use_the_display_name(self):
+        # WHEN two diffusion models are bound to different targets. Their parameters are not named
+        # after the model, so the names collide while the model names do not.
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(
+                    model=sm.BrownianTranslationalDiffusion(
+                        name='Diffusion A', diffusion_coefficient=2.4e-9, scale=0.5
+                    ),
+                    targets={'width': 'Lorentzian width'},
+                ),
+                edyn.FitBinding(
+                    model=sm.BrownianTranslationalDiffusion(
+                        name='Diffusion B', diffusion_coefficient=2.4e-9, scale=0.5
+                    ),
+                    targets={'area': 'Lorentzian area'},
+                ),
+            ],
+        )
+
+        # THEN
+        parameters = analysis._chain_parameters()
+        labels = [analysis._parameter_labels().label(p) for p in parameters]
+
+        # EXPECT the model's name resolves the collision
+        assert len({p.name for p in parameters}) < len(parameters)
+        assert len(set(labels)) == len(labels)
+        assert any(label.endswith('(Diffusion A)') for label in labels)
+        assert any(label.endswith('(Diffusion B)') for label in labels)
+
+    def test_ambiguous_name_owned_by_no_model_keeps_its_name(self):
+        # WHEN a parameter shares an ambiguous name but belongs to none of the models
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(
+                    model=sm.Polynomial(
+                        coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Line'
+                    ),
+                    targets='Lorentzian width',
+                ),
+                edyn.FitBinding(
+                    model=sm.Polynomial(
+                        coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Line'
+                    ),
+                    targets='Lorentzian area',
+                ),
+            ],
+        )
+        stranger = Parameter(name='Line_c0', value=1.0)
+
+        # THEN EXPECT it falls back to the plain name rather than claiming an owner
+        assert analysis._parameter_labels().label(stranger) == 'Line_c0'
+
 
 class TestParameterAnalysisWorkflows:
     """End-to-end fits for the standard workflows on synthetic data."""
@@ -1177,8 +1635,6 @@ class TestParameterAnalysisWorkflows:
 
     def test_delta_lorentz_three_target_simultaneous_fit(self):
         # WHEN: synthetic width, area, and delta area curves from a known DeltaLorentz
-        from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
-
         Q = np.linspace(0.4, 2.0, 9)
         truth = DeltaLorentz(scale=2.0, mean_u_squared=0.3, A_0=0.6, lorentzian_width=0.12)
         dataset = self._dataset_from_targets(truth, Q)
@@ -1196,10 +1652,6 @@ class TestParameterAnalysisWorkflows:
 
     def test_jump_diffusion_width_only_fit(self):
         # WHEN: synthetic widths from a known jump diffusion model
-        from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
-            JumpTranslationalDiffusion,
-        )
-
         Q = np.linspace(0.4, 2.0, 9)
         truth = JumpTranslationalDiffusion(diffusion_coefficient=2.4e-9, relaxation_time=2.0)
         dataset = self._dataset_from_targets(truth, Q)

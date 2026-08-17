@@ -4,7 +4,7 @@ site_url: https://easyscience.github.io/dynamics-lib
 
 # Repository
 repo_url: https://github.com/easyscience/dynamics-lib
-edit_uri: edit/develop/docs/
+edit_uri: edit/develop/docs/docs/
 
 # Copyright
 copyright: © 2025-2026 EasyDynamics
@@ -217,6 +217,7 @@ nav:
           - Experiment: tutorials/experiment.ipynb
           - Analysis: tutorials/analysis.ipynb
           - Analysis 1D: tutorials/analysis1d.ipynb
+          - Bayesian analysis: tutorials/bayesian.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
       - analysis: api-reference/analysis.md

@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import warnings
 from copy import copy
 from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
@@ -14,6 +16,8 @@ from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import MultiQPosteriorSampler
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
@@ -30,6 +34,10 @@ class Analysis(AnalysisBase):
 
     Supports independent fits of each Q value and simultaneous fits of all Q.
 
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.MultiQPosteriorSampler`.
+
     Examples
     --------
     **Fitting vanadium data for instrument calibration**
@@ -39,7 +47,6 @@ class Analysis(AnalysisBase):
     ```python
     import pooch
     import easydynamics as edyn
-    import easydynamics.sample_model as sm
 
     file_path = pooch.retrieve(
         url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
@@ -48,10 +55,10 @@ class Analysis(AnalysisBase):
     experiment = edyn.Experiment('Vanadium')
     experiment.load_hdf5(filename=file_path)
 
-    sample_model = sm.SampleModel(components=sm.DeltaFunction(area=1))
-    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.1))
-    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
-    instrument_model = sm.InstrumentModel(
+    sample_model = edyn.SampleModel(components=edyn.DeltaFunction(area=1))
+    resolution_model = edyn.ResolutionModel(components=edyn.Gaussian(width=0.1))
+    background_model = edyn.BackgroundModel(components=edyn.Polynomial(coefficients=[0.001]))
+    instrument_model = edyn.InstrumentModel(
         resolution_model=resolution_model,
         background_model=background_model,
     )
@@ -117,6 +124,11 @@ class Analysis(AnalysisBase):
 
         self._analysis_list: list[Analysis1d] = []
         self._analysis_list_is_dirty = True
+        # Rebuilt with the analysis list; see _parameter_owner_index.
+        self._owner_index = None
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -168,6 +180,70 @@ class Analysis(AnalysisBase):
             'analysis_list is read-only. '
             'To change the analysis list, modify the experiment, sample model, '
             'or instrument model.'
+        )
+
+    @property
+    def fitter(self) -> MultiFitter:
+        """
+        The EasyScience MultiFitter covering every Q index, built on first use.
+
+        Returns
+        -------
+        MultiFitter
+            The cached MultiFitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = self._build_fitter()
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> MultiQPosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        MultiQPosteriorSampler
+            The sampler, which can run per Q index or over all of them at once.
+        """
+        if self._bayesian is None:
+            self._bayesian = MultiQPosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+                per_q=lambda: self.analysis_list,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the MultiFitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters, qualified by Q index where needed.
+
+        Every Q index carries its own copy of each model parameter, all sharing a name, so a bare
+        name would produce several identical rows in a summary and could not pick a parameter out.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        owners = self._parameter_owner_index()
+        return ParameterLabels(
+            self._chain_parameters(),
+            qualify=lambda parameter: (
+                None
+                if owners.get(parameter.unique_name) is None
+                else f'Q_index={owners[parameter.unique_name]}'
+            ),
         )
 
     #############
@@ -224,6 +300,10 @@ class Analysis(AnalysisBase):
             self.instrument_model.clear_Q(confirm=True)
 
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        # The cached MultiFitter holds the old Analysis1d objects, and the Sampler binds its data
+        # at construction, so both are stale after a rebin.
+        self._invalidate_fitter()
 
     def calculate(
         self,
@@ -283,8 +363,9 @@ class Analysis(AnalysisBase):
         Returns
         -------
         FitResults | list[FitResults]
-            A list of FitResults if fitting independently, or a single FitResults object if fitting
-            simultaneously.
+            A single FitResults when a specific Q index was fitted, and otherwise a list holding
+            one FitResults per Q index. A simultaneous fit also reports per-Q results, since the
+            underlying MultiFitter splits its combined result back up by dataset.
         """
 
         if self.Q is None:
@@ -373,11 +454,6 @@ class Analysis(AnalysisBase):
         self._verify_bool(add_background, 'add_background')
         self._verify_bool(plot_residuals, 'plot_residuals')
 
-        if energy is None:
-            energy = self.energy
-
-        import plopp as pp
-
         data_and_model = self.data_and_model_to_datagroup(
             energy=energy,
             add_background=add_background,
@@ -389,7 +465,8 @@ class Analysis(AnalysisBase):
         plot_kwargs_defaults['keep'] = 'energy'
         plot_kwargs_defaults.update(kwargs)
 
-        if plot_residuals:
+        # Residuals may have been omitted (with a warning) for a custom energy grid.
+        if plot_residuals and 'Residuals' in data_and_model:
             fig = slicerplot_with_residuals(
                 data_and_model,
                 residuals_key='Residuals',
@@ -456,7 +533,19 @@ class Analysis(AnalysisBase):
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
 
+        custom_energy = energy is not None
         energy = self._verify_energy(energy) if energy is not None else self.energy
+
+        if include_residuals and custom_energy:
+            # Residuals are data - model on the experiment grid; mixing them with a model on a
+            # custom grid would make the DataGroup internally inconsistent.
+            warnings.warn(
+                'Residuals are computed on the experiment energy grid and are omitted '
+                'when a custom energy grid is given.',
+                UserWarning,
+                stacklevel=2,
+            )
+            include_residuals = False
 
         data_and_model = {
             'Data': self.experiment.binned_data,
@@ -608,8 +697,6 @@ class Analysis(AnalysisBase):
 
         plot_kwargs_defaults.update(kwargs)
 
-        import plopp as pp
-
         return pp.plot(
             data_to_plot,
             **plot_kwargs_defaults,
@@ -661,6 +748,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_experiment_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_sample_model_changed(self) -> None:
         """
@@ -668,6 +757,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_sample_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
         """
@@ -675,6 +766,8 @@ class Analysis(AnalysisBase):
         """
         super()._on_instrument_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
         """
@@ -682,6 +775,20 @@ class Analysis(AnalysisBase):
         """
         super()._on_convolution_settings_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
+
+    def _on_detailed_balance_settings_changed(self) -> None:
+        """
+        Update the detailed balance settings when they change.
+
+        The per-Q analyses hold the settings object they were built with, so replacing it on this
+        Analysis requires rebuilding the list for the new object to reach every Q index.
+        """
+        super()._on_detailed_balance_settings_changed()
+        self._analysis_list_is_dirty = True
+        self._owner_index = None
+        self._invalidate_fitter()
 
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
@@ -695,6 +802,7 @@ class Analysis(AnalysisBase):
         experiment, sample model, and instrument model.
         """
         self._analysis_list = []
+        self._owner_index = None
         for Q_index in range(len(self.Q)):
             # The ConvolutionSettings object is shared so user changes reach every Q index;
             # plan validity is tracked per convolver, not on the settings object.
@@ -713,6 +821,102 @@ class Analysis(AnalysisBase):
     #############
     # Private methods
     #############
+
+    #############
+    # The contract PosteriorSampler relies on (simultaneous sampling over all Q)
+    #############
+
+    def _build_fitter(self) -> MultiFitter:
+        """
+        Build the MultiFitter covering every Q index.
+
+        Returns
+        -------
+        MultiFitter
+            A MultiFitter over the Analysis1d objects and their fit functions.
+        """
+        return MultiFitter(
+            fit_objects=self.analysis_list,
+            fit_functions=self.get_fit_functions(),
+        )
+
+    def _sampling_data(self) -> tuple[list, list, list]:
+        """
+        Get the per-Q data to bind to the Sampler, as lists of arrays.
+
+        Returns
+        -------
+        tuple[list, list, list]
+            The ``(x, y, weights)`` triple, one entry per Q index.
+        """
+        xs, ys, ws = [], [], []
+        for analysis1d in self.analysis_list:
+            x, y, weight, _ = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            xs.append(x)
+            ys.append(y)
+            ws.append(weight)
+        return xs, ys, ws
+
+    def _chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters across every Q index.
+
+        Each Q index holds its own copy of the model parameters, so the union is taken by
+        ``unique_name``. Parameters shared between Q indices therefore appear only once.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the whole analysis, in Q order and without duplicates.
+        """
+        parameters = {}
+        for analysis1d in self.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameters.setdefault(parameter.unique_name, parameter)
+        return list(parameters.values())
+
+    def _parameter_owner_index(self) -> dict[str, int]:
+        """
+        Map each parameter to the Q index that owns it.
+
+        Built once per analysis list and reused, because scanning the list for every parameter
+        makes labelling a chain quadratic in the parameter count -- seconds, for a dataset with
+        many Q values. Built from all parameters rather than only the free ones, so that fixing a
+        parameter cannot leave the map stale.
+
+        Returns
+        -------
+        dict[str, int]
+            Mapping of parameter ``unique_name`` to owning Q index. Parameters shared by more than
+            one Q index are left out, since no single Q identifies them.
+        """
+        self._ensure_analysis_list_current()
+        if self._owner_index is None:
+            owners: dict[str, int | None] = {}
+            for analysis1d in self._analysis_list:
+                for parameter in analysis1d.get_all_parameters():
+                    if parameter.unique_name in owners:
+                        owners[parameter.unique_name] = None
+                    else:
+                        owners[parameter.unique_name] = analysis1d.Q_index
+            self._owner_index = {
+                name: q_index for name, q_index in owners.items() if q_index is not None
+            }
+        return self._owner_index
+
+    def _prepare_for_sampling(self) -> None:
+        """
+        Rebuild every per-Q convolver against its masked energy grid.
+
+        Mirrors what a simultaneous fit does, so that the model evaluations seen by the sampler
+        match the ones the fit would have made.
+        """
+        for analysis1d in self.analysis_list:
+            _, _, _, mask = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            mask_var = sc.array(dims=['energy'], values=mask)
+            analysis1d.refresh_convolver(
+                energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
+            )
 
     def _fit_single_Q(self, Q_index: int) -> FitResults:
         """
@@ -773,16 +977,35 @@ class Analysis(AnalysisBase):
                 energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
             )
 
-        mf = MultiFitter(
-            fit_objects=self.analysis_list,
-            fit_functions=self.get_fit_functions(),
-        )
-
-        return mf.fit(
+        # Use the configured fitter rather than a throwaway MultiFitter, so minimizer and
+        # tolerance settings applied through the ``fitter`` property take effect.
+        return self.fitter.fit(
             x=xs,
             y=ys,
             weights=ws,
         )
+
+    def get_all_variables(self) -> list[Parameter]:
+        """
+        Get all variables used in the analysis, across every Q index.
+
+        Overrides the easyscience fallback, which scans every attribute of the object and would
+        therefore build the MultiFitter and the Sampler as side effects of merely listing variables
+        (and fail outright on an empty analysis).
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all variables, including any extra parameters.
+        """
+        variables = self.sample_model.get_all_variables()
+
+        variables.extend(self.instrument_model.get_all_variables())
+
+        if self._extra_parameters:
+            variables.extend(self._extra_parameters)
+
+        return variables
 
     def get_fit_functions(self) -> list[callable]:
         """
@@ -877,9 +1100,10 @@ class Analysis(AnalysisBase):
     #############
 
     def __repr__(self) -> str:
+        # The property ensures the list is current, so n_analyses is not reported stale.
         return (
             f'{self.__class__.__name__}('
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
-            f'n_analyses={len(self._analysis_list)})'
+            f'n_analyses={len(self.analysis_list)})'
         )

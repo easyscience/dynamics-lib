@@ -420,9 +420,6 @@ class Experiment(EasyDynamicsBase):
                 )
             if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
                 value = int(value)
-                # This line can be removed when scipp resize support
-                # resizing with coordinates
-                dimensions[dim] = value
             if not (isinstance(value, (int, sc.Variable))):
                 raise TypeError(
                     f'Dimension values must be integers or sc.Variable. '
@@ -584,6 +581,21 @@ class Experiment(EasyDynamicsBase):
         y = data.values
         var = data.variances
         return x, y, var
+
+    @property
+    def has_variances(self) -> bool:
+        """
+        Whether the data carries variances.
+
+        When it does not, :meth:`extract_x_y_weights_only_finite` falls back to all-ones weights,
+        which are placeholders for the fit rather than measured uncertainties.
+
+        Returns
+        -------
+        bool
+            True when there is data and it has variances.
+        """
+        return self._binned_data is not None and self._binned_data.variances is not None
 
     def extract_x_y_weights_only_finite(
         self, Q_index: int

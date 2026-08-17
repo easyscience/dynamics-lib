@@ -4,11 +4,13 @@
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
 
 __all__ = [
     'BrownianTranslationalDiffusion',
+    'DeltaLorentz',
     'JumpTranslationalDiffusion',
 ]

@@ -26,9 +26,9 @@ class TestFitBinding:
         model = BrownianTranslationalDiffusion(lorentzian_name='Lorentzian')
         return FitBinding(model=model)
 
-    # ------------------------------------------------------------------
+    #############
     # Initialization and validation
-    # ------------------------------------------------------------------
+    #############
 
     def test_initialization(self, component_binding):
         # WHEN THEN EXPECT
@@ -76,9 +76,9 @@ class TestFitBinding:
         with pytest.raises(TypeError, match='dataset keys'):
             FitBinding(model=model, targets={'width': 123})
 
-    # ------------------------------------------------------------------
+    #############
     # Properties
-    # ------------------------------------------------------------------
+    #############
 
     def test_model_setter_revalidates_targets(self):
         # WHEN: a binding using DeltaLorentz's delta_area prediction
@@ -105,9 +105,9 @@ class TestFitBinding:
         with pytest.raises(ValueError, match='Unknown prediction'):
             diffusion_binding.targets = ['nonsense']
 
-    # ------------------------------------------------------------------
+    #############
     # get_targets
-    # ------------------------------------------------------------------
+    #############
 
     def test_component_target(self, component_binding):
         # WHEN
@@ -241,9 +241,9 @@ class TestFitBinding:
         # EXPECT
         np.testing.assert_allclose(target.function(Q), model.calculate_EISF(Q) * model.scale.value)
 
-    # ------------------------------------------------------------------
+    #############
     # dunder methods
-    # ------------------------------------------------------------------
+    #############
 
     def test_repr(self, diffusion_binding):
         # WHEN THEN
@@ -254,9 +254,9 @@ class TestFitBinding:
         assert 'model=' in repr_str
         assert 'targets=' in repr_str
 
-
-class TestFitBindingWorkflows:
-    """End-to-end regression tests for the standard ParameterAnalysis workflows."""
+    #############
+    # Workflows: end-to-end regression tests for the standard ParameterAnalysis workflows
+    #############
 
     def test_polynomial_targets_gaussian_area(self):
         # WHEN: fitting a Polynomial to a 'Gaussian area' dataset key

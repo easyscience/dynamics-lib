@@ -28,6 +28,9 @@ node_modules
 # Tox
 .tox
 
+# Git worktrees checked out inside the repository
+.worktrees/
+
 # Misc
 .benchmarks
 .cache
