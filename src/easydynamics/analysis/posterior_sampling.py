@@ -230,6 +230,7 @@ class PosteriorSampler:
         thin: int = 10,
         population: int | None = None,
         parameters: list[Parameter] | list[str] | None = None,
+        progress: bool = False,
         **sampler_options: dict[str, Any],
     ) -> SamplingResults:
         """
@@ -255,6 +256,10 @@ class PosteriorSampler:
             free parameters are held fixed for the run. Holding a parameter fixed is not the same
             as marginalizing over it: the resulting intervals are conditional on those values and
             will be too narrow if the parameters are correlated. The default samples everything.
+        progress : bool, default=False
+            Print a progress line, redrawn in place as the sampler advances and closed with a
+            done marker when the run finishes. Off by default so scripted runs stay quiet; a
+            ``progress_callback`` given in ``sampler_options`` takes precedence over it.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler, e.g. ``sampler_kwargs`` or ``progress_callback``.
 
@@ -270,18 +275,28 @@ class PosteriorSampler:
         return two different chains. Their summaries should nevertheless agree to well within the
         reported credible intervals; if they do not, the chain is too short to have converged.
         """
-        return self._run(
-            parameters=parameters,
-            run=lambda sampler: sampler.sample(
-                samples=samples, burn=burn, thin=thin, population=population, **sampler_options
-            ),
-        )
+        reporter = _install_progress_reporter(progress, sampler_options)
+        try:
+            results = self._run(
+                parameters=parameters,
+                run=lambda sampler: sampler.sample(
+                    samples=samples, burn=burn, thin=thin, population=population, **sampler_options
+                ),
+            )
+        except BaseException:
+            if reporter is not None:
+                reporter.close(completed=False)
+            raise
+        if reporter is not None:
+            reporter.close(completed=True)
+        return results
 
     def extend(
         self,
         additional_samples: int = 5000,
         thin: int = 10,
         parameters: list[Parameter] | list[str] | None = None,
+        progress: bool = False,
         **sampler_options: dict[str, Any],
     ) -> SamplingResults:
         """
@@ -296,6 +311,9 @@ class PosteriorSampler:
         parameters : list[Parameter] | list[str] | None, default=None
             The same restriction as in :meth:`sample`. It must leave the chain the same width,
             since BUMPS resumes from a stored chain whose columns are fixed.
+        progress : bool, default=False
+            Print a progress line, redrawn in place as the sampler advances, as in
+            :meth:`sample`.
         **sampler_options : dict[str, Any]
             Forwarded to the EasyScience Sampler.
 
@@ -319,13 +337,22 @@ class PosteriorSampler:
         """
         if self._sampler is None:
             raise RuntimeError('No chain to extend. Call sample() or load() first.')
-        return self._run(
-            parameters=parameters,
-            run=lambda sampler: sampler.extend(
-                additional_samples=additional_samples, thin=thin, **sampler_options
-            ),
-            reuse_sampler=True,
-        )
+        reporter = _install_progress_reporter(progress, sampler_options)
+        try:
+            results = self._run(
+                parameters=parameters,
+                run=lambda sampler: sampler.extend(
+                    additional_samples=additional_samples, thin=thin, **sampler_options
+                ),
+                reuse_sampler=True,
+            )
+        except BaseException:
+            if reporter is not None:
+                reporter.close(completed=False)
+            raise
+        if reporter is not None:
+            reporter.close(completed=True)
+        return results
 
     def _run(
         self,
@@ -772,6 +799,66 @@ class PosteriorSampler:
             **kwargs,
         )
 
+    def plot_marginal(self, parameter: Parameter | str, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot the marginal posterior distribution of a single sampled parameter.
+
+        Shows a density-normalized histogram of the parameter's draws, with the median and the
+        16th and 84th percentiles marked -- the same 68% credible interval :meth:`summary`
+        reports.
+
+        Parameters
+        ----------
+        parameter : Parameter | str
+            The parameter to plot, as a Parameter object or its label.
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_marginal`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+        """
+        from easydynamics.utils.posterior_plotting import plot_marginal
+
+        results = self._require_results()
+        column = self._resolve_column(results, parameter)
+        return plot_marginal(
+            values=results.draws[:, column],
+            name=self._display_names(results)[column],
+            unit=self._units(results)[column],
+            title=self._analysis.display_name,
+            **kwargs,
+        )
+
+    def plot_correlations(self, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot the Pearson correlation matrix of the sampled parameters.
+
+        A strongly correlated pair cannot be determined separately from this data. The matrix
+        condenses what the off-diagonal panels of :meth:`plot_corner` show, one number per pair,
+        which scales better to many parameters.
+
+        Parameters
+        ----------
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_correlations`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+        """
+        from easydynamics.utils.posterior_plotting import plot_correlations
+
+        results = self._require_results()
+        return plot_correlations(
+            draws=results.draws,
+            names=self._display_names(results),
+            title=self._analysis.display_name,
+            **kwargs,
+        )
+
     def plot_posterior_predictive(
         self,
         n_draws: int = 200,
@@ -912,6 +999,54 @@ class PosteriorSampler:
         """
         return self._labels().resolve(results.param_names, self._saved_labels)
 
+    def _resolve_column(self, results: SamplingResults, parameter: Parameter | str) -> int:
+        """
+        Find the chain column holding a parameter's draws.
+
+        Labels are matched against the columns' display names, so the same names the summary and
+        the plots report under are the ones accepted here. Parameter objects are matched through
+        the resolved columns, so a parameter reloaded from a saved chain is found too.
+
+        Parameters
+        ----------
+        results : SamplingResults
+            The results whose columns should be searched.
+        parameter : Parameter | str
+            The parameter to look for, as a Parameter object or its label.
+
+        Returns
+        -------
+        int
+            The index of the column holding the parameter's draws.
+
+        Raises
+        ------
+        TypeError
+            If parameter is neither a Parameter object nor a string.
+        ValueError
+            If the parameter matches no column of the chain.
+        """
+        names = self._display_names(results)
+        if isinstance(parameter, str):
+            matches = [column for column, name in enumerate(names) if name == parameter]
+        elif hasattr(parameter, 'unique_name'):
+            matches = [
+                column
+                for column, candidate in enumerate(self._resolve(results))
+                if candidate is not None and candidate.unique_name == parameter.unique_name
+            ]
+        else:
+            raise TypeError('parameter must be a Parameter object or a label (string).')
+        if not matches:
+            requested = (
+                parameter if isinstance(parameter, str) else getattr(parameter, 'name', '?')
+            )
+            raise ValueError(
+                f'No sampled parameter named {requested!r}. '
+                f'Available: {", ".join(sorted(names))}.'
+            )
+        return matches[0]
+
     def _display_names(self, results: SamplingResults) -> list[str]:
         """
         Get a readable label for each column of a chain.
@@ -987,6 +1122,110 @@ def _warn_about_held_parameters(labels: object, held_fixed: list[Parameter]) -> 
         UserWarning,
         stacklevel=4,
     )
+
+
+def _install_progress_reporter(
+    progress: bool,
+    sampler_options: dict[str, Any],
+) -> _SamplingProgress | None:
+    """
+    Put a progress reporter into the sampler options when one is asked for.
+
+    A ``progress_callback`` the caller supplied themselves is left untouched, since an explicit
+    callback is more specific than the boolean convenience flag.
+
+    Parameters
+    ----------
+    progress : bool
+        Whether a progress line was requested.
+    sampler_options : dict[str, Any]
+        The options about to be forwarded to the EasyScience Sampler, modified in place.
+
+    Returns
+    -------
+    _SamplingProgress | None
+        The installed reporter, which the caller must close after the run, or None when nothing
+        was installed.
+    """
+    if not progress or 'progress_callback' in sampler_options:
+        return None
+    reporter = _SamplingProgress()
+    sampler_options['progress_callback'] = reporter
+    return reporter
+
+
+class _SamplingProgress:
+    """
+    Renders the sampler's per-generation callbacks as a single self-overwriting progress line.
+
+    BUMPS invokes the callback once per DREAM generation, which for a long run is far too often
+    to print, so the line is only redrawn when the percentage changes. Carriage-return output
+    works in terminals and notebooks alike, and needs no extra dependency.
+
+    The generation total in the payload is the backend's own estimate, and it overestimates when
+    DREAM runs more chains than the estimate assumes, so a finished run can stop short of 100%.
+    The line is therefore closed with an explicit done marker rather than trusting the estimate.
+    """
+
+    def __init__(self) -> None:
+        self._last_percent = -1
+        self._line_length = 0
+        self._printed = False
+
+    def __call__(self, payload: dict[str, Any]) -> None:
+        """
+        Handle one progress callback from the sampler.
+
+        Parameters
+        ----------
+        payload : dict[str, Any]
+            The sampler's progress payload. ``iteration`` carries the DREAM generation and
+            ``total_steps``, when present, the estimated total number of generations.
+        """
+        iteration = payload.get('iteration')
+        if iteration is None:
+            return
+        total = payload.get('total_steps')
+        if total:
+            # Clamped, so the line never reports more than 100% when the run outlives the
+            # backend's estimate of its own length.
+            percent = min(100, int(100 * iteration / total))
+            if percent == self._last_percent:
+                return
+            self._last_percent = percent
+            line = f'Sampling: {percent:3d}% ({iteration}/{total} generations)'
+        else:
+            line = f'Sampling: generation {iteration}'
+        self._write(line)
+
+    def close(self, completed: bool) -> None:
+        """
+        End the progress line, so any later output starts on a line of its own.
+
+        Parameters
+        ----------
+        completed : bool
+            Whether the run finished. A finished run gets a done marker; a failed one only has
+            its line terminated, so the exception is not decorated with a claim of success.
+        """
+        if not self._printed:
+            return
+        if completed:
+            self._write('Sampling: done')
+        print(flush=True)
+
+    def _write(self, line: str) -> None:
+        """
+        Redraw the progress line in place.
+
+        Parameters
+        ----------
+        line : str
+            The text to show, padded so it fully overwrites a longer previous line.
+        """
+        print(f'\r{line.ljust(self._line_length)}', end='', flush=True)
+        self._line_length = max(self._line_length, len(line))
+        self._printed = True
 
 
 def _raised_inside_bumps(error: BaseException) -> bool:

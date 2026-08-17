@@ -10,10 +10,12 @@ loaded from disk. The Analysis classes wrap them in convenience methods.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import colormaps
 from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
@@ -201,6 +203,150 @@ def plot_corner(
     return fig
 
 
+def plot_marginal(
+    values: np.ndarray,
+    name: str,
+    unit: str | None = None,
+    title: str | None = None,
+    bins: int = 40,
+    figsize: tuple[float, float] = (8.0, 5.0),
+) -> Figure:
+    """
+    Plot the marginal posterior distribution of a single parameter.
+
+    Shows a density-normalized histogram of the parameter's draws, with the median and the 16th
+    and 84th percentiles marked -- the same 68% credible interval the posterior summary reports.
+
+    Parameters
+    ----------
+    values : np.ndarray
+        The parameter's posterior draws, one-dimensional.
+    name : str
+        The label the parameter is reported under.
+    unit : str | None, default=None
+        The parameter's unit, appended to the axis label. Empty or dimensionless units are
+        skipped, since a bare "dimensionless" only adds clutter.
+    title : str | None, default=None
+        Figure title.
+    bins : int, default=40
+        Number of histogram bins.
+    figsize : tuple[float, float], default=(8.0, 5.0)
+        Figure size in inches.
+
+    Returns
+    -------
+    Figure
+        The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``values`` is not one-dimensional, is empty, or contains non-finite entries.
+    """
+    values = np.asarray(values)
+    if values.ndim != 1:
+        raise ValueError(f'values must be one-dimensional. Got shape {values.shape}.')
+    if values.size == 0:
+        raise ValueError('values is empty: there are no samples to plot.')
+    # Caught up front, because numpy would otherwise report it as an obscure
+    # "range [nan, nan]" error from inside the histogram.
+    if not np.isfinite(values).all():
+        raise ValueError(f'values contain non-finite entries (NaN or infinity) for {name}.')
+
+    lower, median, upper = np.percentile(values, [16.0, 50.0, 84.0])
+
+    fig, axis = plt.subplots(figsize=figsize)
+    axis.hist(values, bins=bins, density=True, color='C0', histtype='stepfilled', alpha=0.7)
+    axis.axvline(median, color='C3', lw=1.5, label='Median')
+    axis.axvline(lower, color='C3', lw=1.0, ls='--', label='68% credible interval')
+    axis.axvline(upper, color='C3', lw=1.0, ls='--')
+    axis.set_xlabel(_with_unit(name, [unit] if unit is not None else None, 0))
+    axis.set_ylabel('Probability density')
+    axis.legend()
+    if title is not None:
+        axis.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
+def plot_correlations(
+    draws: np.ndarray,
+    names: list[str],
+    title: str | None = None,
+    figsize: tuple[float, float] | None = None,
+) -> Figure:
+    """
+    Plot the Pearson correlation matrix of the sampled parameters.
+
+    A strongly correlated pair (an entry near +1 or -1) cannot be determined separately from this
+    data: the chain trades one off against the other. The matrix condenses what the off-diagonal
+    panels of the corner plot show, one number per pair, which scales better to many parameters.
+
+    Correlations are dimensionless, so the labels carry no units. A constant column has no
+    defined correlation with anything; its cells are shown greyed out and marked "n/a" rather
+    than failing.
+
+    Parameters
+    ----------
+    draws : np.ndarray
+        Posterior draws, shape ``(n_draws, n_parameters)``.
+    names : list[str]
+        One label per column of ``draws``.
+    title : str | None, default=None
+        Figure title.
+    figsize : tuple[float, float] | None, default=None
+        Figure size in inches. Defaults to a square that scales with the parameter count, plus
+        room for the colorbar.
+
+    Returns
+    -------
+    Figure
+        The matplotlib Figure.
+
+    Raises
+    ------
+    ValueError
+        If ``draws`` is not two-dimensional or is empty, or if ``names`` does not have one entry
+        per column.
+    """
+    draws = np.asarray(draws)
+    _verify_draws(draws, names)
+
+    matrix = _correlation_matrix(draws)
+    n = draws.shape[1]
+    if figsize is None:
+        side = max(4.0, 0.9 * n + 2.0)
+        figsize = (side + 1.5, side)
+
+    # A diverging map centred on zero, so positive and negative correlations read as two hues
+    # around a neutral midpoint. Cells with no defined correlation are greyed out.
+    colormap = colormaps['RdBu_r'].with_extremes(bad='0.85')
+
+    fig, axis = plt.subplots(figsize=figsize)
+    image = axis.imshow(np.ma.masked_invalid(matrix), cmap=colormap, vmin=-1.0, vmax=1.0)
+    axis.set_xticks(range(n), labels=names, rotation=45, ha='right', fontsize=8)
+    axis.set_yticks(range(n), labels=names, fontsize=8)
+    for row in range(n):
+        for col in range(n):
+            value = matrix[row, col]
+            defined = bool(np.isfinite(value))
+            axis.text(
+                col,
+                row,
+                f'{value:.2f}' if defined else 'n/a',
+                ha='center',
+                va='center',
+                fontsize=8,
+                # Saturated cells at the ends of the map are too dark for black text.
+                color='white' if defined and abs(value) > 0.6 else 'black',
+            )
+    fig.colorbar(image, ax=axis, label='Pearson correlation')
+    if title is not None:
+        axis.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
 def plot_posterior_predictive(
     x: np.ndarray,
     y: np.ndarray,
@@ -311,6 +457,30 @@ def _column_limits(draws: np.ndarray) -> list[tuple[float, float]]:
     spans = highs - lows
     pads = np.where(spans > 0, 0.05 * spans, 0.05 * np.maximum(np.abs(highs), 1.0))
     return [(float(low), float(high)) for low, high in zip(lows - pads, highs + pads, strict=True)]
+
+
+def _correlation_matrix(draws: np.ndarray) -> np.ndarray:
+    """
+    Compute the Pearson correlation matrix of a chain's columns.
+
+    Parameters
+    ----------
+    draws : np.ndarray
+        Posterior draws, shape ``(n_draws, n_parameters)``.
+
+    Returns
+    -------
+    np.ndarray
+        The ``(n_parameters, n_parameters)`` correlation matrix, two-dimensional even for a
+        single-parameter chain, with NaN wherever a column has zero variance. Numpy's
+        division-by-zero warnings for those columns are suppressed, since the NaNs are handled
+        by the caller rather than being a numerical accident.
+    """
+    with np.errstate(invalid='ignore', divide='ignore'), warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        matrix = np.corrcoef(draws, rowvar=False)
+    # np.corrcoef collapses a single-column input to a 0-d scalar; restore the 1x1 matrix.
+    return np.atleast_2d(np.asarray(matrix, dtype=float))
 
 
 def _unit_for(units: list[str] | None, column: int) -> str:

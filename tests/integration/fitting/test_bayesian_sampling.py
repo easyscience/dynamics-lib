@@ -197,6 +197,23 @@ class TestRealChain:
         assert len(predictive.axes) == 1
         plt.close('all')
 
+    def test_marginal_and_correlation_figures_render(self, sampled_analysis):
+        # WHEN
+        import matplotlib.pyplot as plt
+
+        n_parameters = len(sampled_analysis.get_free_parameters())
+
+        # THEN
+        marginal = sampled_analysis.bayesian.plot_marginal('Gaussian width')
+        correlations = sampled_analysis.bayesian.plot_correlations()
+
+        # EXPECT a real chain renders both figures
+        assert len(marginal.axes) == 1
+        matrix = correlations.axes[0].images[0].get_array()
+        assert matrix.shape == (n_parameters, n_parameters)
+        assert np.asarray(np.diag(matrix)) == pytest.approx(np.ones(n_parameters))
+        plt.close('all')
+
     def test_posterior_median_is_close_to_the_least_squares_fit(self):
         # WHEN
         analysis = build_analysis()
