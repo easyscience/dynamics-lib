@@ -641,9 +641,46 @@ class TestExpressionComponentOutputUnit:
             x_unit='meV',
         )
 
-        # THEN EXPECT: relabelling A breaks the output unit
+        # THEN EXPECT: relabelling A to an incompatible dimension breaks the output unit
         with pytest.warns(UserWarning, match='does not match'):
+            expr.set_unit('A', 's/meV')
+
+    def test_set_unit_to_a_convertible_output_unit_rescales_instead_of_warning(self):
+        # WHEN: a consistent expression whose output stays dimensionless-compatible
+        expr = ExpressionComponent(
+            'A * (x - x0)',
+            parameters={'A': 1.0, 'x0': 0.5},
+            parameter_units={'A': '1/meV', 'x0': 'meV'},
+            x_unit='meV',
+        )
+
+        # THEN: relabelling A to 1/ueV makes the output meV/ueV, which converts to dimensionless
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
             expr.set_unit('A', '1/ueV')
+
+        # EXPECT: evaluated values carry the 1000x conversion into y_unit
+        assert expr.evaluate(np.array([1.5]))[0] == pytest.approx(1000.0)
+
+    def test_convertible_output_unit_is_rescaled_into_y_unit(self):
+        # WHEN: the jump-diffusion width in SI-flavoured parameter units, wanted in meV
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            expr = ExpressionComponent(
+                'hbar * D * x**2 / (1 + D * x**2 * tau)',
+                parameters={'D': 1e-9, 'tau': 1.0},
+                parameter_units={'D': 'm^2/s', 'tau': 'ps'},
+                x_unit='1/angstrom',
+                y_unit='meV',
+            )
+
+        # THEN
+        value = expr.evaluate(np.array([1.0]))[0]
+
+        # EXPECT: hbar * D * Q^2 / (1 + D * Q^2 * tau) expressed in meV. With
+        # hbar = 6.582120e-13 meV*s, D = 1e-9 m^2/s = 1e11 angstrom^2/s and tau = 1e-12 s the
+        # denominator is 1 + 0.1 and the numerator 6.582120e-2 meV.
+        assert value == pytest.approx(6.582120e-2 / 1.1, rel=1e-5)
 
 
 class TestExpressionComponentPhysicalConstants:
