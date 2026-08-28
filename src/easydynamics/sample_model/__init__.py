@@ -7,6 +7,9 @@ from easydynamics.sample_model.components.damped_harmonic_oscillator import (
     DampedHarmonicOscillator,
 )
 from easydynamics.sample_model.components.delta_function import DeltaFunction
+from easydynamics.sample_model.components.diffusion_damped_mittag_leffler import (
+    DiffusionDampedMittagLeffler,
+)
 from easydynamics.sample_model.components.exponential import Exponential
 from easydynamics.sample_model.components.expression_component import ExpressionComponent
 from easydynamics.sample_model.components.gaussian import Gaussian
@@ -20,6 +23,9 @@ from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
+    MittagLefflerDiffusion,
+)
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
@@ -31,12 +37,14 @@ __all__ = [
     'DampedHarmonicOscillator',
     'DeltaFunction',
     'DeltaLorentz',
+    'DiffusionDampedMittagLeffler',
     'Exponential',
     'ExpressionComponent',
     'Gaussian',
     'InstrumentModel',
     'JumpTranslationalDiffusion',
     'Lorentzian',
+    'MittagLefflerDiffusion',
     'Polynomial',
     'ResolutionModel',
     'SampleModel',
