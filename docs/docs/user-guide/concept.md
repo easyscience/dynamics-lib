@@ -19,8 +19,8 @@ a list of `ComponentCollection`s (one for each Q) describing the model
 of the measured data. A `ComponentCollection` is essentially a list of
 `ModelComponents`. A `ModelComponent` can be any of `Gaussian`,
 `Lorentzian`, `Voigt` (the convolution of a `Gaussian` and
-`Lorentzian`), `DeltaFunction`, `DampedHarmonicOscillator` and
-`Polynomium`.
+`Lorentzian`), `DeltaFunction`, `DampedHarmonicOscillator`,
+`DiffusionDampedMittagLeffler` and `Polynomium`.
 
 Each `ModelComponent` has a number of `Parameter`s. The `Gaussian`, for
 example, has `area`, `center` and `width`. Each of these `Parameter`s
