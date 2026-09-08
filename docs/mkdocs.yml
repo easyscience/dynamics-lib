@@ -212,6 +212,7 @@ nav:
           - Detailed balance: tutorials/detailed_balance.ipynb
           - DeltaLorentz: tutorials/delta_lorentz.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
+          - Mittag-Leffler relaxation: tutorials/mittag_leffler.ipynb
           - Sample model: tutorials/sample_model.ipynb
           - Instrument model: tutorials/instrument_model.ipynb
           - Experiment: tutorials/experiment.ipynb
