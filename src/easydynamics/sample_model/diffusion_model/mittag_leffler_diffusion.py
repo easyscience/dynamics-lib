@@ -23,6 +23,7 @@ from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+DIFFUSION_COEFFICIENT_MIN = 1e-25  # To avoid division by zero in the diffusion damping calculation
 
 
 class MittagLefflerDiffusion(DiffusionModelBase):
@@ -116,7 +117,8 @@ class MittagLefflerDiffusion(DiffusionModelBase):
             Scale factor K for the model. Must be non-negative. Its unit is ``x_unit * y_unit``.
         diffusion_coefficient : Numeric, default=1.0
             Global translational diffusion coefficient D in m^2/s. Sets the diffusion damping
-            ``epsilon = hbar * D * Q**2`` shared by both components. Must be non-negative.
+            ``epsilon = hbar * D * Q**2`` shared by both components. Must be at least
+            ``DIFFUSION_COEFFICIENT_MIN``.
         A_0 : Numeric, default=0.0
             Elastic incoherent structure factor (EISF), the elastic fraction of the intensity. Must
             lie in [0, 1]. The paper finds it close to zero over most of its Q range.
@@ -131,20 +133,20 @@ class MittagLefflerDiffusion(DiffusionModelBase):
             paper's analysis corresponds to all three being True.
         Q : Q_type | None, default=None
             Q values for the model in 1/angstrom. If None, Q is not set.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis (energy). Must be convertible to meV.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default='MittagLefflerDiffusion'
+        name : str, default="MittagLefflerDiffusion"
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default='Elastic Lorentzian'
+        lorentzian_name : str, default="Elastic Lorentzian"
             Name of the elastic Lorentzian component.
         lorentzian_display_name : str | None, default=None
             Display name of the elastic Lorentzian component. If None, it falls back to
             *lorentzian_name*.
-        mittag_leffler_name : str, default='Mittag-Leffler'
+        mittag_leffler_name : str, default="Mittag-Leffler"
             Name of the Mittag-Leffler component.
         mittag_leffler_display_name : str | None, default=None
             Display name of the Mittag-Leffler component. If None, it falls back to
@@ -238,12 +240,16 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         TypeError
             If diffusion_coefficient is not a number.
         ValueError
-            If diffusion_coefficient is negative.
+            If diffusion_coefficient is smaller than ``DIFFUSION_COEFFICIENT_MIN``.
         """
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
-        if float(diffusion_coefficient) < 0:
-            raise ValueError('diffusion_coefficient must be non-negative.')
+        # Checked here rather than left to the Parameter's own bound, which would silently clamp
+        # a too-small value instead of rejecting it.
+        if float(diffusion_coefficient) < DIFFUSION_COEFFICIENT_MIN:
+            raise ValueError(
+                f'diffusion_coefficient must be at least {DIFFUSION_COEFFICIENT_MIN}.'
+            )
         self._diffusion_coefficient.value = float(diffusion_coefficient)
 
     @property
@@ -904,7 +910,9 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         return {**allow_Q_variation_default, **allow_Q_variation}
 
     @staticmethod
-    def _create_diffusion_coefficient_parameter(diffusion_coefficient: Numeric) -> Parameter:
+    def _create_diffusion_coefficient_parameter(
+        diffusion_coefficient: Numeric,
+    ) -> Parameter:
         """
         Create the global diffusion coefficient parameter.
 
@@ -918,7 +926,7 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         TypeError
             If diffusion_coefficient is not a number.
         ValueError
-            If diffusion_coefficient is negative.
+            If diffusion_coefficient is smaller than ``DIFFUSION_COEFFICIENT_MIN``.
 
         Returns
         -------
@@ -927,14 +935,16 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         """
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
-        if float(diffusion_coefficient) < 0:
-            raise ValueError('diffusion_coefficient must be non-negative.')
+        if float(diffusion_coefficient) < DIFFUSION_COEFFICIENT_MIN:
+            raise ValueError(
+                f'diffusion_coefficient must be at least {DIFFUSION_COEFFICIENT_MIN}.'
+            )
         return Parameter(
             name='diffusion_coefficient',
             value=float(diffusion_coefficient),
             fixed=False,
             unit='m**2/s',
-            min=0.0,
+            min=DIFFUSION_COEFFICIENT_MIN,
         )
 
     @staticmethod

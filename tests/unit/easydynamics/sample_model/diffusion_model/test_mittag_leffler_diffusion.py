@@ -9,6 +9,9 @@ from easyscience.variable import Parameter
 from easydynamics.sample_model import DiffusionDampedMittagLeffler
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import MittagLefflerDiffusion
+from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
+    DIFFUSION_COEFFICIENT_MIN,
+)
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 
@@ -89,7 +92,8 @@ class TestMittagLefflerDiffusion:
         'kwargs, expected_exception, expected_message',
         [
             ({'diffusion_coefficient': 'invalid'}, TypeError, 'must be a number'),
-            ({'diffusion_coefficient': -1.0}, ValueError, 'must be non-negative'),
+            ({'diffusion_coefficient': -1.0}, ValueError, 'must be at least'),
+            ({'diffusion_coefficient': 0.0}, ValueError, 'must be at least'),
             ({'A_0': 'invalid'}, TypeError, 'A_0 must be a number'),
             ({'A_0': 1.5}, ValueError, 'A_0 must be between 0 and 1'),
             ({'relaxation_rate': 'invalid'}, TypeError, 'must be a number'),
@@ -126,6 +130,28 @@ class TestMittagLefflerDiffusion:
         # WHEN: an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match='must be a number'):
             setattr(model, prop, 'invalid')
+
+    def test_diffusion_coefficient_setter_rejects_instead_of_clamping(self, model):
+        # WHEN a diffusion coefficient below the parameter's own bound is assigned
+        original = model.diffusion_coefficient.value
+
+        # THEN EXPECT it raises rather than being silently clamped up to the bound, which would
+        # leave the model holding a value nobody asked for
+        with pytest.raises(ValueError, match='must be at least'):
+            model.diffusion_coefficient = 0.0
+        assert model.diffusion_coefficient.value == pytest.approx(original)
+
+    def test_diffusion_coefficient_bound_keeps_the_damping_positive(self, model_with_Q):
+        # WHEN the smallest allowed diffusion coefficient is used
+        model_with_Q.diffusion_coefficient = DIFFUSION_COEFFICIENT_MIN
+
+        # THEN
+        damping = model_with_Q.calculate_width()
+
+        # EXPECT the damping stays strictly positive, so the lineshapes remain regular at x=0
+        assert np.all(damping > 0)
+        values = model_with_Q.get_component_collections()[0].evaluate(np.linspace(-0.1, 0.1, 21))
+        assert np.all(np.isfinite(values))
 
     def test_A_1_setter_raises(self, model):
         # WHEN THEN EXPECT A_1 is derived from A_0
