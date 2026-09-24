@@ -4,7 +4,7 @@
 r"""
 The stretched exponential (Kohlrausch-Williams-Watts) relaxation, Fourier transformed to energy.
 
-The model is defined in time, as $I(t) = A e^{-(|t| / \tau)^\beta}$. To evalaute the Fourier
+The model is defined in time, as $I(t) = A e^{-(|t| / \tau)^\beta}$. To evaluate the Fourier
 transform, we need to evaluate the following integral:
 
 $$ G_\beta(w) = \int_0^\infty e^{-u^\beta} \cos(w u) \, du $$
@@ -20,17 +20,23 @@ An FFT of the sampled relaxation cannot span that tail at small $\beta$ and, bec
 ``scipy.stats.levy_stable`` is mathematically the same function, but it is 70-100x slower and not
 accurate for $\alpha$ close to 1.
 
-Instad, the integral is evaluated in the complex plane described in :func:`_kww_shape`.
+Instead, the integral is evaluated in the complex plane described in :func:`_kww_shape`.
 
-The two helpers below are module-level functions rather than methods. :func:`_quadrature_nodes`
-must be, because ``@lru_cache`` on a method would key on ``self``: every instance would rebuild its
-own grid and the cache would keep every component ever created alive. :func:`_kww_shape` is a pure
-function of ``(w, beta)`` that touches no component state: area, center and units are applied
-afterwards in ``_evaluate_values``, so it does not belong in the class.
+The four helpers below are module-level functions rather than methods. :func:`_quadrature_nodes`
+and :func:`_reduced_hwhm` must be, because ``@lru_cache`` on a method would key on ``self``: every
+instance would rebuild its own grid and the cache would keep every component ever created alive.
+:func:`_kww_shape` is a pure function of ``(w, beta)`` that touches no component state: area,
+center and units are applied afterwards in ``_evaluate_values``, so it does not belong in the
+class, and :func:`_hwhm_dependency_expression` only assembles a string from module constants.
+
+:func:`_reduced_hwhm` is not on any evaluation path.  It solves the half width exactly, and the
+closed form that ``width`` actually resolves through is fitted to it; it stays here as the
+reference that defines `_HWHM_POLY_COEFFS` and as what the tests check that fit against.
 """
 
 from __future__ import annotations
 
+import contextlib
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -38,6 +44,7 @@ import numpy as np
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
 from scipp import UnitError
+from scipy.optimize import brentq
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -62,6 +69,31 @@ _QUAD_DECADES = 50.0
 # The quadrature holds one (energies x nodes) temporary, so long energy axes are evaluated in
 # blocks to keep that intermediate at a few tens of MB instead of scaling with the axis.
 _MAX_BLOCK_ELEMENTS = 1 << 21
+# The reduced half width spans 1.67 at beta = 2 down to ~7e-27 at beta = 0.05, so it is
+# bracketed in log10(w).  The lower end stays clear of the subnormal range, where the
+# 1 / (w sin theta) rescaling inside _kww_shape would overflow.
+_HWHM_LOG_BRACKET = (-300.0, 3.0)
+
+# The width is exposed as a dependent Parameter, and easyscience resolves a dependency from a
+# string expression, so the root solved by _reduced_hwhm has to be written in closed form.  It
+# very nearly is one: beta * ln(HWHM) - ln(beta) is a small, smooth function of beta alone, so
+# HWHM = exp((ln(beta) + p(beta)) / beta) with p the polynomial below, in ascending powers.  The
+# coefficients are a degree 8 least-squares fit over 400 log-spaced beta in [MINIMUM_BETA,
+# MAXIMUM_BETA], and reproduce _reduced_hwhm to 1.4e-5 relative for beta >= 0.1.  Below that the
+# fit degrades to ~1e-2, but so does the root it is fitted to, and both are tens of orders of
+# magnitude under any energy grid step by then.  Regenerate, or check these against the root they
+# are fitted to, with tools/fit_kww_hwhm_coefficients.py.
+_HWHM_POLY_COEFFS = (
+    -5.5129123891501144e-05,
+    -0.24257355020449564,
+    0.2875849387004671,
+    -0.04773226324334423,
+    -0.04385316873071495,
+    0.11064865473723488,
+    -0.09366816058690182,
+    0.03431170767881221,
+    -0.004659825239152873,
+)
 
 
 @lru_cache(maxsize=8)
@@ -190,6 +222,72 @@ def _kww_shape(w: np.ndarray, beta: float) -> np.ndarray:
     return np.maximum(out, 0.0)
 
 
+@lru_cache(maxsize=128)
+def _reduced_hwhm(beta: float) -> float:
+    r"""
+    Solve for the half width at half maximum of $G_\beta$ in reduced energy $w = x / \Gamma$.
+
+    $\Gamma = \hbar / \tau$ is the HWHM only at $\beta = 1$.  Below that the profile sharpens
+    dramatically: the peak $G_\beta(0)$ grows while the area stays fixed, so the half width
+    collapses far faster than $\Gamma$ suggests -- 0.22 $\Gamma$ at $\beta = 0.5$, 2.7e-4 $\Gamma$
+    at $\beta = 0.2$, 8e-11 $\Gamma$ at $\beta = 0.1$.  There is no closed form, so the crossing of
+    $G_\beta(w) = \tfrac{1}{2} G_\beta(0)$ is bracketed numerically.
+
+    The search runs in $\log_{10} w$ because the root ranges over more than 25 decades across the
+    supported $\beta$; a linear bracket could not resolve the small-$\beta$ end.  Each solve costs
+    a few tens of single-point quadratures, under a millisecond, and the result is cached because
+    it depends on $\beta$ alone.
+
+    The root is well conditioned down to $\beta \approx 0.1$ and increasingly poorly below it: by
+    $\beta = 0.05$ the profile takes some 60 e-folds of $w$ to fall by half, so $G_\beta$ is nearly
+    flat in $\log w$ near the crossing and the result is only good to about a percent.  That is
+    immaterial for the one thing the half width is used for -- comparing against the convolution's
+    energy grid -- because at those $\beta$ it is already tens of orders of magnitude below any
+    grid step, and the comparison lands the same way either way.
+
+    Parameters
+    ----------
+    beta : float
+        Stretching exponent, in ``[MINIMUM_BETA, MAXIMUM_BETA]``.
+
+    Returns
+    -------
+    float
+        The HWHM in units of $\Gamma$.  Multiply by $\Gamma$ to get an energy.
+    """
+    half_peak = 0.5 * _kww_shape(np.array([0.0]), beta)[0]
+
+    def offset(log_w: float) -> float:
+        return _kww_shape(np.array([10.0**log_w]), beta)[0] - half_peak
+
+    return float(10.0 ** brentq(offset, *_HWHM_LOG_BRACKET, xtol=1e-12))
+
+
+def _hwhm_dependency_expression() -> str:
+    r"""
+    Write the half width of :func:`_reduced_hwhm` as an easyscience dependency expression.
+
+    The expression evaluates ``exp((log(beta) + p(beta)) / beta)`` from `_HWHM_POLY_COEFFS`, in
+    Horner form, and multiplies it by $\hbar / \tau$ to turn the reduced half width into an energy.
+
+    ``exp`` and ``log`` are not defined on DescriptorNumbers, so the reduced half width is built
+    from ``b.value`` and is a plain float; the surrounding ``* hbar / tau`` is what makes the whole
+    expression return a DescriptorNumber, as easyscience requires.  Referring to ``b.value`` rather
+    than ``b`` strips beta's uncertainty, which is why the width carries only the relaxation time's
+    contribution. When exp and log of DescriptorNumbers are supported, this can be rewritten to
+    propagate beta's uncertainty too.
+
+    Returns
+    -------
+    str
+        The dependency expression, over the mapped names ``b``, ``hbar`` and ``tau``.
+    """
+    horner = repr(_HWHM_POLY_COEFFS[-1])
+    for coefficient in _HWHM_POLY_COEFFS[-2::-1]:
+        horner = f'({horner}) * b.value + {coefficient!r}'
+    return f'exp((log(b.value) + ({horner})) / b.value) * hbar / tau'
+
+
 class StretchedExponential(CreateParametersMixin, ModelComponent):
     r"""
     Model of a stretched exponential (Kohlrausch-Williams-Watts) relaxation, Fourier transformed
@@ -314,6 +412,20 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             min=MINIMUM_BETA,
             max=MAXIMUM_BETA,
         )
+
+        # hbar has to be in the dependency map, because carrying J*s through the expression is
+        # what lets the unit algebra turn the reduced half width into an energy.  It is a private
+        # copy rather than the shared ``utils.hbar`` deliberately: make_dependent_on attaches the
+        # width as an observer of every mapped variable, so mapping the module-level constant
+        # would append one observer per component to a list that is never emptied, keeping every
+        # StretchedExponential ever built alive and lengthening each of its notifications.
+        self._hbar = DescriptorNumber(name=name + ' hbar', value=hbar.value, unit=str(hbar.unit))
+        # Built here rather than on first access so that get_all_parameters reports the same set
+        # whether or not the width has been read yet.  A non-energy x_unit has no width to build
+        # and must still construct: the UnitError is deferred to the first read, as for evaluate.
+        self._width: Parameter | None = None
+        with contextlib.suppress(UnitError):
+            self._width = self._build_width()
 
     ################################
     # Validation
@@ -490,29 +602,66 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         self._validate_beta(value)
         self._set_bounded_parameter_value(self._beta, value, 'beta')
 
-    @property
-    def width(self) -> DescriptorNumber:
+    def _build_width(self) -> Parameter:
         r"""
-        Get the characteristic half-width $\Gamma = \hbar / \tau$ of the peak.
-
-        This is derived from :attr:`relaxation_time` rather than stored, so it is read-only: fit
-        the relaxation time instead.  It is exposed under the name *width* so the shared
-        width-versus-grid checks in the convolution can see how wide this component is; for $\beta
-        = 1$ it is exactly the HWHM of the resulting Lorentzian.
+        Build the dependent width Parameter in the component's current x_unit.
 
         Returns
         -------
-        DescriptorNumber
-            $\Gamma$ expressed in the component's own x_unit.
+        Parameter
+            A Parameter made dependent on :attr:`beta` and :attr:`relaxation_time`.
+
+        Raises
+        ------
+        UnitError
+            If x_unit is not an energy, so $\hbar / \tau$ cannot be expressed in it.
+        """
+        width = Parameter(name=self.name + ' width', value=1.0, unit=str(self.x_unit))
+        try:
+            # easyscience propagates inf bounds through arithmetic, producing inf/inf=nan as a
+            # transient intermediate; suppress the spurious numpy warnings as elsewhere.
+            with np.errstate(invalid='ignore', divide='ignore'):
+                width.make_dependent_on(
+                    dependency_expression=_hwhm_dependency_expression(),
+                    dependency_map={
+                        'b': self._beta,
+                        'hbar': self._hbar,
+                        'tau': self._relaxation_time,
+                    },
+                    desired_unit=str(self.x_unit),
+                )
+        except UnitError as e:
+            raise UnitError(
+                f'{self.__class__.__name__} needs an energy x_unit so that hbar / '
+                f'relaxation_time can be expressed in it, but got {self.x_unit}.'
+            ) from e
+        return width
+
+    @property
+    def width(self) -> Parameter:
+        r"""
+        Get the half width at half maximum of the peak.
+
+        This is a *dependent* Parameter, derived from :attr:`relaxation_time` and :attr:`beta`. It
+        is accurate to 1.4e-5 relative for $\beta \ge 0.1$. For better accuracy, use
+        :func:`_reduced_hwhm` directly and multiply by $\hbar / \tau$ in the desired unit. Note
+        that the uncertainty of the width may be underestimated, because the dependency expression
+        uses ``b.value`` rather than ``b`` to compute the width, so the uncertainty of beta is not
+        propagated into the width.
+
+        Returns
+        -------
+        Parameter
+            The HWHM expressed in the component's own x_unit.
 
         Notes
         -----
-        A ``UnitError`` propagates from :meth:`_energy_scale` if x_unit is not an energy, so $\hbar
+        A ``UnitError`` propagates from :meth:`_build_width` if x_unit is not an energy, so $\hbar
         / \tau$ cannot be expressed in it.
         """
-        return DescriptorNumber(
-            name='width', value=self._energy_scale(None), unit=str(self.x_unit)
-        )
+        if self._width is None:
+            self._width = self._build_width()
+        return self._width
 
     ################################
     # Evaluation
@@ -600,6 +749,8 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             x_params=[self._center],
             area_param=self._area,
         )
+        # The dependency resolves into the unit it was built with, so rebuild it in the new one.
+        self._width = self._build_width()
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """

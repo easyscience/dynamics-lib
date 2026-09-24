@@ -16,6 +16,7 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import StretchedExponential
 from easydynamics.sample_model.components.stretched_exponential import _kww_shape
+from easydynamics.sample_model.components.stretched_exponential import _reduced_hwhm
 
 # hbar in meV*ps (CODATA), so the tests derive the energy scale independently of the library.
 HBAR_MEV_PS = 0.6582119569509066
@@ -260,6 +261,7 @@ class TestStretchedExponential:
             'StretchedName center',
             'StretchedName relaxation_time',
             'StretchedName beta',
+            'StretchedName width',
         }
 
     def test_copy(self, stretched_exponential: StretchedExponential):
@@ -342,16 +344,94 @@ class TestStretchedExponential:
         assert stretched_exponential.center.value == pytest.approx(0.0)
         assert stretched_exponential.center.fixed is True
 
-    def test_width_is_the_energy_scale(self, stretched_exponential: StretchedExponential):
-        # WHEN width is not stored but derived as Gamma = hbar / tau, in the component's x_unit
-        expected = HBAR_MEV_PS / 3.0
-
+    def test_width_is_the_half_width_at_half_maximum(
+        self, stretched_exponential: StretchedExponential
+    ):
+        # WHEN width is not stored but solved for as the half maximum crossing of the profile
         # THEN
         width = stretched_exponential.width
 
-        # EXPECT
-        assert width.value == pytest.approx(expected)
+        # EXPECT the profile really has fallen to half its peak there, to the accuracy of the
+        # closed-form fit the dependency evaluates rather than to that of the root itself
+        center = stretched_exponential.center.value
+        peak = stretched_exponential.evaluate(np.array([center]))[0]
+        half = stretched_exponential.evaluate(np.array([center + width.value]))[0]
+        assert half == pytest.approx(0.5 * peak, rel=1e-4)
         assert str(width.unit) == 'meV'
+
+    def test_width_is_below_the_energy_scale_for_stretched_profiles(self):
+        # WHEN beta < 1 the peak sharpens well beyond Gamma = hbar / tau, so reporting Gamma would
+        # hide a sub-grid spike from the convolution's width-versus-grid checks
+        gamma = HBAR_MEV_PS / 5.0
+
+        # THEN
+        widths = {
+            beta: StretchedExponential(relaxation_time=5.0, beta=beta).width.value
+            for beta in (1.0, 0.5, 0.2)
+        }
+
+        # EXPECT Gamma only at beta = 1, and orders of magnitude below it further down
+        assert widths[1.0] == pytest.approx(gamma, rel=2e-5)
+        assert widths[0.5] == pytest.approx(0.22355 * gamma, rel=1e-4)
+        assert widths[0.2] == pytest.approx(2.653e-4 * gamma, rel=1e-3)
+
+    def test_width_is_a_dependent_parameter(self, stretched_exponential: StretchedExponential):
+        # WHEN width is resolved from beta and relaxation_time by a dependency expression
+        # THEN
+        width = stretched_exponential.width
+
+        # EXPECT a Parameter, so the usual width attributes resolve, but a dependent one, so a fit
+        # can never pick it up as a free parameter
+        assert isinstance(width, Parameter)
+        assert width.independent is False
+        assert width not in stretched_exponential.get_fittable_parameters()
+
+    def test_width_matches_the_solved_half_width(self):
+        # WHEN the dependency evaluates a closed-form fit rather than the root itself
+        # THEN EXPECT it tracks _reduced_hwhm over the range the fit targets
+        for beta in (2.0, 1.0, 0.7, 0.5, 0.3, 0.2, 0.1):
+            stretched = StretchedExponential(relaxation_time=5.0, beta=beta)
+            expected = _reduced_hwhm(beta) * HBAR_MEV_PS / 5.0
+            assert stretched.width.value == pytest.approx(expected, rel=2e-5)
+
+    def test_width_is_recomputed_after_a_raw_beta_write(
+        self, stretched_exponential: StretchedExponential
+    ):
+        # WHEN a minimizer writes the beta Parameter directly, bypassing the component setter
+        before = stretched_exponential.width.value
+
+        # THEN
+        stretched_exponential.beta.value = 0.2
+
+        # EXPECT the dependency re-evaluates: beta is reached as b.value, but it is still a mapped
+        # variable, so a write to it retriggers the expression
+        assert stretched_exponential.width.value < before
+
+    def test_width_can_be_chained_onto(self, stretched_exponential: StretchedExponential):
+        # WHEN another component's width is made to follow this one
+        lorentzian = Lorentzian(name='Chained', area=1.0, width=0.1)
+        with np.errstate(invalid='ignore', divide='ignore'):
+            lorentzian.width.make_dependent_on(
+                dependency_expression='w * 2',
+                dependency_map={'w': stretched_exponential.width},
+                desired_unit='meV',
+            )
+
+        # THEN
+        stretched_exponential.beta.value = 0.2
+
+        # EXPECT the change reaches the chained parameter, not just this component
+        assert lorentzian.width.value == pytest.approx(2 * stretched_exponential.width.value)
+
+    def test_width_tracks_beta(self, stretched_exponential: StretchedExponential):
+        # WHEN
+        before = stretched_exponential.width.value
+
+        # THEN
+        stretched_exponential.beta = 0.3
+
+        # EXPECT a smaller beta gives a sharper peak, so a smaller half width
+        assert stretched_exponential.width.value < before
 
     def test_width_tracks_the_relaxation_time(self, stretched_exponential: StretchedExponential):
         # WHEN
@@ -370,14 +450,26 @@ class TestStretchedExponential:
 
     def test_width_follows_the_x_unit(self):
         # WHEN the component measures energy in microeV
-        stretched = StretchedExponential(relaxation_time=5.0, beta=0.6, x_unit='ueV')
+        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit='ueV')
 
         # THEN
         width = stretched.width
 
-        # EXPECT Gamma is expressed in that unit too
-        assert width.value == pytest.approx(1e3 * HBAR_MEV_PS / 5.0)
+        # EXPECT the half width is expressed in that unit too
+        assert width.value == pytest.approx(1e3 * HBAR_MEV_PS / 5.0, rel=2e-5)
         assert str(width.unit) == str(sc.Unit('ueV'))
+
+    def test_width_follows_an_x_unit_conversion(self):
+        # WHEN
+        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit='meV')
+        before = stretched.width.value
+
+        # THEN
+        stretched.convert_x_unit('ueV')
+
+        # EXPECT the half width is re-derived in the new unit rather than keeping the old one
+        assert stretched.width.value == pytest.approx(1e3 * before)
+        assert str(stretched.width.unit) == str(sc.Unit('ueV'))
 
     def test_width_with_a_non_energy_x_unit_raises(self):
         # WHEN THEN EXPECT hbar / relaxation_time cannot be expressed in metres
@@ -385,11 +477,13 @@ class TestStretchedExponential:
             _ = StretchedExponential(x_unit='m').width
 
     def test_width_is_the_lorentzian_hwhm_at_beta_one(self):
-        # WHEN beta = 1 the transform is a Lorentzian, whose HWHM should be exactly width
+        # WHEN beta = 1 the transform is a Lorentzian of HWHM Gamma = hbar / tau.  Gamma is used
+        # directly rather than via width, so this pins the profile itself and stays independent of
+        # the closed-form fit the width dependency evaluates.
         stretched = StretchedExponential(area=1.0, relaxation_time=4.0, beta=1.0)
 
         # THEN
-        lorentzian = Lorentzian(area=1.0, width=stretched.width.value)
+        lorentzian = Lorentzian(area=1.0, width=HBAR_MEV_PS / 4.0)
 
         # EXPECT
         x = np.linspace(-2.0, 2.0, 101)
