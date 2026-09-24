@@ -21117,11 +21117,11 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
       &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.StretchedExponential.width&lt;/code&gt;)" href="#easydynamics.sample_model.StretchedExponential.width">width</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
+                <p>Get the half width at half maximum of the peak.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21600,11 +21600,13 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
-<p>This is derived from :attr:<code>relaxation_time</code> rather than stored, so it is read-only: fit
-the relaxation time instead.  It is exposed under the name <em>width</em> so the shared
-width-versus-grid checks in the convolution can see how wide this component is; for <span class="arithmatex">\(\beta
-= 1\)</span> it is exactly the HWHM of the resulting Lorentzian.</p>
+        <p>Get the half width at half maximum of the peak.</p>
+<p>This is a <em>dependent</em> Parameter, derived from :attr:<code>relaxation_time</code> and :attr:<code>beta</code>. It
+is accurate to 1.4e-5 relative for <span class="arithmatex">\(\beta \ge 0.1\)</span>. For better accuracy, use
+:func:<code>_reduced_hwhm</code> directly and multiply by <span class="arithmatex">\(\hbar / \tau\)</span> in the desired unit. Note
+that the uncertainty of the width may be underestimated, because the dependency expression
+uses <code>b.value</code> rather than <code>b</code> to compute the width, so the uncertainty of beta is not
+propagated into the width.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21621,11 +21623,11 @@ width-versus-grid checks in the convolution can see how wide this component is; 
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><span class="arithmatex">\(\Gamma\)</span> expressed in the component's own x_unit.</p>
+                <p>The HWHM expressed in the component's own x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21641,7 +21643,7 @@ width-versus-grid checks in the convolution can see how wide this component is; 
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end --></summary>
-  <p>A <code>UnitError</code> propagates from :meth:<code>_energy_scale</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
+  <p>A <code>UnitError</code> propagates from :meth:<code>_build_width</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
 / \tau\)</span> cannot be expressed in it.</p>
 <!-- prettier-ignore-start -->
 
@@ -58993,11 +58995,11 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
       &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.components.StretchedExponential.width&lt;/code&gt;)" href="#easydynamics.sample_model.components.StretchedExponential.width">width</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
+                <p>Get the half width at half maximum of the peak.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -59476,11 +59478,13 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
-<p>This is derived from :attr:<code>relaxation_time</code> rather than stored, so it is read-only: fit
-the relaxation time instead.  It is exposed under the name <em>width</em> so the shared
-width-versus-grid checks in the convolution can see how wide this component is; for <span class="arithmatex">\(\beta
-= 1\)</span> it is exactly the HWHM of the resulting Lorentzian.</p>
+        <p>Get the half width at half maximum of the peak.</p>
+<p>This is a <em>dependent</em> Parameter, derived from :attr:<code>relaxation_time</code> and :attr:<code>beta</code>. It
+is accurate to 1.4e-5 relative for <span class="arithmatex">\(\beta \ge 0.1\)</span>. For better accuracy, use
+:func:<code>_reduced_hwhm</code> directly and multiply by <span class="arithmatex">\(\hbar / \tau\)</span> in the desired unit. Note
+that the uncertainty of the width may be underestimated, because the dependency expression
+uses <code>b.value</code> rather than <code>b</code> to compute the width, so the uncertainty of beta is not
+propagated into the width.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -59497,11 +59501,11 @@ width-versus-grid checks in the convolution can see how wide this component is; 
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><span class="arithmatex">\(\Gamma\)</span> expressed in the component's own x_unit.</p>
+                <p>The HWHM expressed in the component's own x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -59517,7 +59521,7 @@ width-versus-grid checks in the convolution can see how wide this component is; 
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end --></summary>
-  <p>A <code>UnitError</code> propagates from :meth:<code>_energy_scale</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
+  <p>A <code>UnitError</code> propagates from :meth:<code>_build_width</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
 / \tau\)</span> cannot be expressed in it.</p>
 <!-- prettier-ignore-start -->
 
@@ -77244,7 +77248,7 @@ unit for the computation without mutating the parameters.</p>
     <div class="doc doc-contents ">
 
         <p>The stretched exponential (Kohlrausch-Williams-Watts) relaxation, Fourier transformed to energy.</p>
-<p>The model is defined in time, as <span class="arithmatex">\(I(t) = A e^{-(|t| / \tau)^\beta}\)</span>. To evalaute the Fourier
+<p>The model is defined in time, as <span class="arithmatex">\(I(t) = A e^{-(|t| / \tau)^\beta}\)</span>. To evaluate the Fourier
 transform, we need to evaluate the following integral:</p>
 <div class="arithmatex">\[ G_\beta(w) = \int_0^\infty e^{-u^\beta} \cos(w u) \, du \]</div>
 <p>The problem is that <span class="arithmatex">\(\cos(w u)\)</span> oscillates forever at constant amplitude, and <span class="arithmatex">\(e^{-u^\beta}\)</span> decays
@@ -77256,12 +77260,16 @@ stretches the tail over more decades, so the range must be huge.</p>
 \tau)^\beta}\)</span> has a cusp at <span class="arithmatex">\(t = 0\)</span>, converges only as <span class="arithmatex">\((\Delta t)^{1 + \beta}\)</span>.
 <code>scipy.stats.levy_stable</code> is mathematically the same function, but it is 70-100x slower and not
 accurate for <span class="arithmatex">\(\alpha\)</span> close to 1.</p>
-<p>Instad, the integral is evaluated in the complex plane described in :func:<code>_kww_shape</code>.</p>
-<p>The two helpers below are module-level functions rather than methods. :func:<code>_quadrature_nodes</code>
-must be, because <code>@lru_cache</code> on a method would key on <code>self</code>: every instance would rebuild its
-own grid and the cache would keep every component ever created alive. :func:<code>_kww_shape</code> is a pure
-function of <code>(w, beta)</code> that touches no component state: area, center and units are applied
-afterwards in <code>_evaluate_values</code>, so it does not belong in the class.</p>
+<p>Instead, the integral is evaluated in the complex plane described in :func:<code>_kww_shape</code>.</p>
+<p>The four helpers below are module-level functions rather than methods. :func:<code>_quadrature_nodes</code>
+and :func:<code>_reduced_hwhm</code> must be, because <code>@lru_cache</code> on a method would key on <code>self</code>: every
+instance would rebuild its own grid and the cache would keep every component ever created alive.
+:func:<code>_kww_shape</code> is a pure function of <code>(w, beta)</code> that touches no component state: area,
+center and units are applied afterwards in <code>_evaluate_values</code>, so it does not belong in the
+class, and :func:<code>_hwhm_dependency_expression</code> only assembles a string from module constants.</p>
+<p>:func:<code>_reduced_hwhm</code> is not on any evaluation path.  It solves the half width exactly, and the
+closed form that <code>width</code> actually resolves through is fitted to it; it stays here as the
+reference that defines <code>_HWHM_POLY_COEFFS</code> and as what the tests check that fit against.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77840,11 +77848,11 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
       &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.components.stretched_exponential.StretchedExponential.width&lt;/code&gt;)" href="#easydynamics.sample_model.components.stretched_exponential.StretchedExponential.width">width</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
+                <p>Get the half width at half maximum of the peak.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78184,11 +78192,13 @@ center is stored in this unit. area_unit = x_unit * y_unit.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get the characteristic half-width <span class="arithmatex">\(\Gamma = \hbar / \tau\)</span> of the peak.</p>
-<p>This is derived from :attr:<code>relaxation_time</code> rather than stored, so it is read-only: fit
-the relaxation time instead.  It is exposed under the name <em>width</em> so the shared
-width-versus-grid checks in the convolution can see how wide this component is; for <span class="arithmatex">\(\beta
-= 1\)</span> it is exactly the HWHM of the resulting Lorentzian.</p>
+        <p>Get the half width at half maximum of the peak.</p>
+<p>This is a <em>dependent</em> Parameter, derived from :attr:<code>relaxation_time</code> and :attr:<code>beta</code>. It
+is accurate to 1.4e-5 relative for <span class="arithmatex">\(\beta \ge 0.1\)</span>. For better accuracy, use
+:func:<code>_reduced_hwhm</code> directly and multiply by <span class="arithmatex">\(\hbar / \tau\)</span> in the desired unit. Note
+that the uncertainty of the width may be underestimated, because the dependency expression
+uses <code>b.value</code> rather than <code>b</code> to compute the width, so the uncertainty of beta is not
+propagated into the width.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78205,11 +78215,11 @@ width-versus-grid checks in the convolution can see how wide this component is; 
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><span class="arithmatex">\(\Gamma\)</span> expressed in the component's own x_unit.</p>
+                <p>The HWHM expressed in the component's own x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78225,7 +78235,7 @@ width-versus-grid checks in the convolution can see how wide this component is; 
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end --></summary>
-  <p>A <code>UnitError</code> propagates from :meth:<code>_energy_scale</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
+  <p>A <code>UnitError</code> propagates from :meth:<code>_build_width</code> if x_unit is not an energy, so <span class="arithmatex">\(\hbar
 / \tau\)</span> cannot be expressed in it.</p>
 <!-- prettier-ignore-start -->
 
