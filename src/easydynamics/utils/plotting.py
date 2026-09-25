@@ -4,7 +4,7 @@
 
 import plopp as pp
 import scipp as sc
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 from plopp.plotting._slicer import SlicerPlot
 from plopp.plotting._slicer import _maybe_reduce_dim
 from plopp.widgets import slice_dims
@@ -17,7 +17,7 @@ def slicerplot_with_residuals(
     keep: list[str] | str | None = None,
     operation: str = 'sum',
     **kwargs: object,
-) -> InteractiveFigure:
+) -> WidgetFigure:
     """
     Create a SlicerPlot with an additional subplot for residuals.
 
@@ -56,7 +56,7 @@ def slicerplot_with_residuals(
 
     Returns
     -------
-    InteractiveFigure
+    WidgetFigure
         A figure containing the SlicerPlot and the residuals subplot.
 
     Raises
