@@ -11,7 +11,7 @@ from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.analysis.posterior_labels import ParameterLabels
@@ -452,7 +452,7 @@ class Analysis1d(AnalysisBase):
         plot_residuals: bool = False,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Plot the experimental data and the model prediction for the chosen Q index. Optionally also
         plot the individual components of the model.
@@ -476,7 +476,7 @@ class Analysis1d(AnalysisBase):
 
         Returns
         -------
-        InteractiveFigure
+        WidgetFigure
             A plot of the data and model.
         """
         data_and_model = self.data_and_model_to_datagroup(
