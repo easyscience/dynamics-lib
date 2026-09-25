@@ -23,7 +23,7 @@ from matplotlib.ticker import MaxNLocator
 if TYPE_CHECKING:
     from ipywidgets import VBox
     from matplotlib.figure import Figure
-    from plopp.backends.matplotlib.figure import InteractiveFigure
+    from plopp.backends.matplotlib.figure import WidgetFigure
 
 
 def plot_trace(
@@ -719,7 +719,7 @@ def predictive_with_slider(
     title: str | None = None,
     credible_interval: float = 68.0,
     **kwargs: dict[str, Any],
-) -> InteractiveFigure:
+) -> WidgetFigure:
     """
     Plot per-Q posterior-predictive bands behind a plopp Q slider.
 
@@ -763,7 +763,7 @@ def predictive_with_slider(
 
     Returns
     -------
-    InteractiveFigure
+    WidgetFigure
         The plopp figure with its Q slider.
 
     Raises
