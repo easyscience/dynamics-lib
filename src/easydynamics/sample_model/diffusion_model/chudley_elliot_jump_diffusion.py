@@ -18,13 +18,38 @@ from easydynamics.utils.utils import hbar
 
 class ChudleyElliotJumpDiffusion(DiffusionModelBase):
     r"""
-    WIP
+    Model of Chudley-Elliot jump diffusion.
 
-    NB:
-    - jump_length l takes units of inverse Q, i.e., angstroms.
-    - gamma take units of energy: if residence_time tau has units of ps, then gamma has units of meV;
-      if residence_time tau has units of ns, then gamma has units of µeV.
+    The model consists of a Lorentzian function for each Q-value, where the width is given by
+
+    $$ \Gamma(Q) = \frac{\hbar}{\tau} \left( 1 - \frac{\sin(Q l)}{Q l} \right) $$
+
+    where $\tau$ is the residence time and $l$ is the jump length. $Q$ is assumed to have units of
+    1/angstrom. Creates ComponentCollections with Lorentzian components for given Q-values.
+
+    Examples
+    --------
+    **Creating a ChudleyElliotJumpDiffusion model**
+
+    Pass the residence time (in ps) and jump length (in angstroms) along with Q values:
+    ```python
+    import numpy as np
+    import easydynamics as edyn
+
+    Q = np.linspace(0.5, 2, 7)
+    diffusion_model = edyn.ChudleyElliotJumpDiffusion(
+        scale=1.0,
+        residence_time=1.0,
+        jump_length=1.5,
+        Q=Q,
+    )
+    component_collections = diffusion_model.create_component_collections()
+    ```
     """
+
+    # TODO(markbujehein): Add tutorials # ruff: ignore[line-contains-todo,missing-todo-link]
+    # 1a. add tutorial notebook for this model
+    # 1b. add `See also the tutorials.` remark to bottom of docstring.
 
     def __init__(
         self,
@@ -47,9 +72,9 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
         ----------
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
-        residence_time : Numeric, optional
+        residence_time : Numeric, default=1.0
             Residence time parameter tau, by default 1.0
-        jump_length : Numeric, optional
+        jump_length : Numeric, default=1.0
             Jump length parameter l, by default 1.0
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
@@ -70,6 +95,13 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
+
+        Raises
+        ------
+        TypeError
+            If ``residence_time`` or ``jump_length`` is not a number.
+        ValueError
+            If ``residence_time`` or ``jump_length`` is negative.
         """
         super().__init__(
             Q=Q,
@@ -200,8 +232,9 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
 
     def calculate_width(self, Q: Q_type | None = None) -> np.ndarray:
         r"""
-        Calculate the half-width at half-maximum (HWHM) for the diffusion model. $\Gamma(Q) =
-        \hbar / \tau * ( 1 - \sin(Q * l) / Q * l )$, where $tau$ is the residence time and $l$ is the jump length.
+        Calculate the half-width at half-maximum (HWHM) for the diffusion model. $\Gamma(Q) = \hbar
+        / \tau * ( 1 - \sin(Q * l) / Q * l )$, where $tau$ is the residence time and $l$ is the
+        jump length.
 
         Parameters
         ----------
@@ -215,29 +248,6 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
             HWHM values in the unit of the model (e.g., meV).
         """
 
-        """ ... """
-
-        Q = self._ensure_Q(Q)
-
-        ## v1 code
-        """ conversion_factor = self.jump_length / self._angstrom
-        conversion_factor.convert_unit('dimensionless')
-
-        prefactor = self._hbar / self.residence_time
-        prefactor.convert_unit(self.x_unit)
-
-        argument = Q * conversion_factor
-        """
-
-        # Problem:
-        # np.sinc() expects each element to implement .sin().
-        # Since Parameter lacks a .sin() method, execution fail
-
-        ## v2 code
-        # Extract value (or scipp variable) from parameter attributes
-        #jump_length_val = self.jump_length.value if hasattr(self.jump_length, 'value') else self.jump_length
-        #residence_time_val = self.residence_time.value if hasattr(self.residence_time, 'value') else self.residence_time
-
         Q = self._ensure_Q(Q)
 
         conversion_factor = self._jump_length / self._angstrom
@@ -247,10 +257,8 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
         prefactor.convert_unit(self.x_unit)
 
         argument = Q * conversion_factor.value
-        
 
         return prefactor.value * (1 - np.sinc(argument / np.pi))
-        
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """
