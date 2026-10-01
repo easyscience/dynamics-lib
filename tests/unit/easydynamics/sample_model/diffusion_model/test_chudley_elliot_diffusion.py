@@ -27,7 +27,6 @@ class TestChudleyElliotJumpDiffusion:
         assert chudley_elliot_model.residence_time.value == pytest.approx(1.0)
         assert chudley_elliot_model.jump_length.value == pytest.approx(1.0)
 
-
     @pytest.mark.parametrize(
         'kwargs,expected_exception, expected_message',
         [
@@ -181,7 +180,6 @@ class TestChudleyElliotJumpDiffusion:
 
         np.testing.assert_allclose(widths, expected_widths.values, rtol=1e-5)
 
-
     def test_calculate_width_sinc_stability(self, chudley_elliot_model):
         """
         Cross-check the calculate_width result (which uses np.sinc)
@@ -190,7 +188,7 @@ class TestChudleyElliotJumpDiffusion:
         """
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
-        
+
         residence_time_sc = chudley_elliot_model.residence_time.value * sc.Unit(
             chudley_elliot_model.residence_time.unit
         )
@@ -201,13 +199,12 @@ class TestChudleyElliotJumpDiffusion:
         # Model uses np.sinc():
         model_widths = chudley_elliot_model.calculate_width(Q_values)
 
-
         # THEN
         # Calculate explicitly using sin(x) / x
         argument = Q_values * jump_length_sc
         prefactor = scipp_hbar / residence_time_sc
-        
-        # sc.sin() strictly requires rad or deg unit. 
+
+        # sc.sin() strictly requires rad or deg unit.
         # Multiply by 1 rad to give the dimensionless argument the correct unit.
         argument_rad = argument * sc.scalar(1.0, unit='rad')
 
@@ -216,11 +213,9 @@ class TestChudleyElliotJumpDiffusion:
         expected_widths_sin = prefactor * (1 - explicit_sinc)
         expected_widths_sin = expected_widths_sin.to(unit=chudley_elliot_model.x_unit)
 
-
         # EXPECT
         # Both mathematical approaches yield the same result
         np.testing.assert_allclose(model_widths, expected_widths_sin.values, rtol=1e-5)
-
 
     def test_calculate_EISF(self, chudley_elliot_model):
         # WHEN
@@ -302,9 +297,7 @@ class TestChudleyElliotJumpDiffusion:
         expression = chudley_elliot_model._write_width_dependency_expression(0.5)
 
         # EXPECT
-        expected_expression = (
-            '(hbar / tau) * (1 - sin(0.5 * l.value) / (0.5 * l.value) )'
-        )
+        expected_expression = '(hbar / tau) * (1 - sin(0.5 * l.value) / (0.5 * l.value) )'
         assert expression == expected_expression
 
     def test_write_width_dependency_map_expression(self, chudley_elliot_model):
