@@ -16,9 +16,9 @@ from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 
 
-class ChudleyElliotJumpDiffusion(DiffusionModelBase):
+class ChudleyElliottJumpDiffusion(DiffusionModelBase):
     r"""
-    Model of Chudley-Elliot jump diffusion.
+    Model of Chudley-Elliott jump diffusion.
 
     The model consists of a Lorentzian function for each Q-value, where the width is given by
 
@@ -29,7 +29,7 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
 
     Examples
     --------
-    **Creating a ChudleyElliotJumpDiffusion model**
+    **Creating a ChudleyElliottJumpDiffusion model**
 
     Pass the residence time (in ps) and jump length (in angstroms) along with Q values:
     ```python
@@ -37,7 +37,7 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
     import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    diffusion_model = edyn.ChudleyElliotJumpDiffusion(
+    diffusion_model = edyn.ChudleyElliottJumpDiffusion(
         scale=1.0,
         residence_time=1.0,
         jump_length=1.5,
@@ -59,14 +59,14 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
         Q: Q_type | None = None,
         x_unit: str | sc.Unit = 'meV',
         y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'ChudleyElliotJumpDiffusion',
-        display_name: str | None = 'ChudleyElliotJumpDiffusion',
+        name: str = 'ChudleyElliottJumpDiffusion',
+        display_name: str | None = 'ChudleyElliottJumpDiffusion',
         lorentzian_name: str | None = None,
         lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
-        Initialize a new ChudleyElliotJumpDiffusion model.
+        Initialize a new ChudleyElliottJumpDiffusion model.
 
         Parameters
         ----------
@@ -82,9 +82,9 @@ class ChudleyElliotJumpDiffusion(DiffusionModelBase):
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default='ChudleyElliotJumpDiffusion'
+        name : str, default='ChudleyElliottJumpDiffusion'
             Name of the diffusion model.
-        display_name : str | None, default='ChudleyElliotJumpDiffusion'
+        display_name : str | None, default='ChudleyElliottJumpDiffusion'
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion

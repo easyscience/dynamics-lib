@@ -21,8 +21,8 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
-from easydynamics.sample_model.diffusion_model.chudley_elliot_jump_diffusion import (
-    ChudleyElliotJumpDiffusion,
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
+    ChudleyElliottJumpDiffusion,
 )
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
@@ -1704,14 +1704,14 @@ class TestParameterAnalysisWorkflows:
         # EXPECT: the diffusion coefficient is recovered despite the unit differences
         assert fit_model.diffusion_coefficient.value == pytest.approx(2.4e-9, rel=1e-3)
 
-    def test_chudley_elliot_diffusion_width_only_fit(self):
-        # WHEN: synthetic widths from a known chudley-elliot diffusion model
+    def test_chudley_elliott_diffusion_width_only_fit(self):
+        # WHEN: synthetic widths from a known chudley-elliott diffusion model
         Q = np.linspace(0.4, 2.0, 9)
-        truth = ChudleyElliotJumpDiffusion(residence_time=2.0, jump_length=2.0)
+        truth = ChudleyElliottJumpDiffusion(residence_time=2.0, jump_length=2.0)
         dataset = self._dataset_from_targets(truth, Q)
 
         # THEN: fit only the width prediction
-        fit_model = ChudleyElliotJumpDiffusion(residence_time=1.0, jump_length=1.0)
+        fit_model = ChudleyElliottJumpDiffusion(residence_time=1.0, jump_length=1.0)
         fit_model.scale.fixed = True
         pa = ParameterAnalysis(
             parameters=dataset, bindings=FitBinding(model=fit_model, targets=['width'])
