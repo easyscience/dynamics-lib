@@ -25,6 +25,7 @@ from easydynamics.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import BackgroundModel
 from easydynamics.sample_model import BrownianTranslationalDiffusion
+from easydynamics.sample_model import ChudleyElliottJumpDiffusion
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import DampedHarmonicOscillator
 from easydynamics.sample_model import DeltaFunction
@@ -55,6 +56,7 @@ __all__ = [
     'BoundsSuggestion',
     'BoundsSuggestions',
     'BrownianTranslationalDiffusion',
+    'ChudleyElliottJumpDiffusion',
     'ComponentCollection',
     'Convolution',
     'ConvolutionSettings',

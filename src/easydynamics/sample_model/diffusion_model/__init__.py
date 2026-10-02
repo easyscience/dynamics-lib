@@ -4,6 +4,9 @@
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
+    ChudleyElliottJumpDiffusion,
+)
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
@@ -11,6 +14,7 @@ from easydynamics.sample_model.diffusion_model.jump_translational_diffusion impo
 
 __all__ = [
     'BrownianTranslationalDiffusion',
+    'ChudleyElliottJumpDiffusion',
     'DeltaLorentz',
     'JumpTranslationalDiffusion',
 ]
