@@ -10,6 +10,7 @@ from easydynamics.sample_model.components.expression_component import Expression
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.components.polynomial import Polynomial
+from easydynamics.sample_model.components.stretched_exponential import StretchedExponential
 from easydynamics.sample_model.components.voigt import Voigt
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     'Gaussian',
     'Lorentzian',
     'Polynomial',
+    'StretchedExponential',
     'Voigt',
 ]

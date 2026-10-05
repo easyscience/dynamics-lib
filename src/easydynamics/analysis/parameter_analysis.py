@@ -11,7 +11,7 @@ from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
 from matplotlib import rcParams
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
@@ -412,9 +412,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
 
-    def plot(
-        self, names: str | list[str] | None = None, **kwargs: dict[str, Any]
-    ) -> InteractiveFigure:
+    def plot(self, names: str | list[str] | None = None, **kwargs: dict[str, Any]) -> WidgetFigure:
         """
         Plot the parameters and fit results.
 
@@ -427,7 +425,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         Returns
         -------
-        InteractiveFigure
+        WidgetFigure
             An interactive figure containing the plots of the parameters and fit results.
 
         Raises
