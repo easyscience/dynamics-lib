@@ -179,6 +179,24 @@ class TestValidateAndConvertQ:
     @pytest.mark.parametrize(
         'Q_input',
         [
+            -1.0,
+            0.0,
+            [1.0, 0.0],
+            [1.0, -2.0],
+            np.array([0.0, 1.0]),
+            sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom'),
+            sc.array(dims=['Q'], values=[-1.0, 1.0], unit='1/nm'),
+        ],
+    )
+    def test_validate_and_convert_Q_non_positive(self, Q_input):
+        # WHEN THEN EXPECT zero is rejected along with negative Q: models derive their widths
+        # from Q**2, so a zero Q collapses them
+        with pytest.raises(ValueError, match='Q values must be positive'):
+            _validate_and_convert_Q(Q_input)
+
+    @pytest.mark.parametrize(
+        'Q_input',
+        [
             'invalid',
             {'a': 1},
             (1, 2),

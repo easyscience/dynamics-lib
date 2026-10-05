@@ -183,7 +183,7 @@ def _validate_and_convert_Q(
         If Q is not a number, list, numpy array, or scipp Variable.
     ValueError
         If Q is a numpy array with more than 1 dimension, or if Q is a scipp Variable that does not
-        have a single dimension named 'Q'.
+        have a single dimension named 'Q', or if Q is not positive.
 
     Returns
     -------
@@ -209,6 +209,9 @@ def _validate_and_convert_Q(
         if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
         Q = Q.to(unit=CANONICAL_Q_UNIT)
+
+    if (Q.values <= 0).any():
+        raise ValueError('Q values must be positive.')
     return Q
 
 

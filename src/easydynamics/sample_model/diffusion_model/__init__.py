@@ -11,10 +11,14 @@ from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
+    MittagLefflerDiffusion,
+)
 
 __all__ = [
     'BrownianTranslationalDiffusion',
     'ChudleyElliottJumpDiffusion',
     'DeltaLorentz',
     'JumpTranslationalDiffusion',
+    'MittagLefflerDiffusion',
 ]
