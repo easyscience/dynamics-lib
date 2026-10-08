@@ -62,9 +62,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self,
         center: Numeric | None = None,
         area: Numeric = 1.0,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'DeltaFunction',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "DeltaFunction",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -130,7 +130,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
         (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        self._set_bounded_parameter_value(self._area, value, 'area')
+        self._set_bounded_parameter_value(self._area, value, "area")
 
     @property
     def center(self) -> Parameter:
@@ -162,7 +162,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
@@ -189,8 +189,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Raises
         ------
         ValueError
-            If x_vals contains a single point. A delta function's evaluated height is
-            ``area / bin_width``, and a single point defines no bin width.
+            If x_vals contains a single point. A delta function's evaluated height is ``area /
+            bin_width``, and a single point defines no bin width.
 
         Notes
         -----
@@ -200,9 +200,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
         if x_vals.size == 1:
             raise ValueError(
-                'A DeltaFunction cannot be evaluated at a single x value: its evaluated height '
-                'is area / bin_width, and a single point defines no bin width. Evaluate on a '
-                'grid of at least two x values.'
+                "A DeltaFunction cannot be evaluated at a single x value: its evaluated height "
+                "is area / bin_width, and a single point defines no bin width. Evaluate on a "
+                "grid of at least two x values."
             )
 
         center = self._resolve_param_value(self._center, eval_unit)
@@ -272,8 +272,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             A string representation of the Delta function.
         """
         return (
-            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center})'
+            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
+            f"x_unit = {self.x_unit}, y_unit = {self.y_unit},\n"
+            f"    area = {self.area},\n"
+            f"    center = {self.center})"
         )
