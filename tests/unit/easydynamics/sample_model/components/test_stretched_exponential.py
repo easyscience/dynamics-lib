@@ -54,15 +54,23 @@ def naive_fft_transform(
     dt = t_max / n_time
     time = np.arange(n_time) * dt
     intensity = area * np.exp(-((time / tau) ** beta))
-    spectrum = (np.real(np.fft.rfft(intensity)) - 0.5 * intensity[0]) * dt / (np.pi * HBAR_MEV_PS)
+    spectrum = (
+        (np.real(np.fft.rfft(intensity)) - 0.5 * intensity[0])
+        * dt
+        / (np.pi * HBAR_MEV_PS)
+    )
     energy = 2.0 * np.pi * HBAR_MEV_PS * np.arange(spectrum.size) / (n_time * dt)
     return energy, spectrum
 
 
-def fft_comparison(beta: float, n_time: int, tau: float = 5.0, area: float = 1.0) -> float:
+def fft_comparison(
+    beta: float, n_time: int, tau: float = 5.0, area: float = 1.0
+) -> float:
     """Largest relative gap between the component and the FFT, over the resolvable region."""
     # Reach far enough in time that exp(-(t / tau)**beta) has fallen by exp(-40).
-    energy, reference = naive_fft_transform(area, tau, beta, n_time, tau * 40.0 ** (1.0 / beta))
+    energy, reference = naive_fft_transform(
+        area, tau, beta, n_time, tau * 40.0 ** (1.0 / beta)
+    )
     inside = (energy > 0.0) & (energy < 2.0)
     energy, reference = energy[inside], reference[inside]
 
@@ -72,7 +80,9 @@ def fft_comparison(beta: float, n_time: int, tau: float = 5.0, area: float = 1.0
     # Below a thousandth of the peak the FFT reference is dominated by its own truncation error,
     # so comparing there would measure the reference rather than the implementation.
     resolvable = values > 1e-3 * stretched.evaluate(np.array([0.0]))[0]
-    return float(np.max(np.abs(values[resolvable] - reference[resolvable]) / values[resolvable]))
+    return float(
+        np.max(np.abs(values[resolvable] - reference[resolvable]) / values[resolvable])
+    )
 
 
 #####################################
@@ -81,7 +91,7 @@ def fft_comparison(beta: float, n_time: int, tau: float = 5.0, area: float = 1.0
 
 
 @pytest.mark.parametrize(
-    'beta, rel',
+    "beta, rel",
     # The smallest supported beta spreads exp(-u**beta) over so many decades that the grid only
     # just reaches its tail, which costs a few digits; everything above it is at machine precision.
     [
@@ -126,7 +136,7 @@ def test_kww_shape_matches_gaussian_at_beta_two():
     np.testing.assert_allclose(value, expected, atol=1e-14)
 
 
-@pytest.mark.parametrize('beta', [0.3, 0.6, 0.9])
+@pytest.mark.parametrize("beta", [0.3, 0.6, 0.9])
 def test_kww_shape_matches_the_large_w_asymptote(beta):
     # WHEN the leading term of the large-w expansion is
     # gamma(beta + 1) sin(pi beta / 2) / w**(beta + 1).  The next term is smaller by w**-beta, so
@@ -141,7 +151,7 @@ def test_kww_shape_matches_the_large_w_asymptote(beta):
     np.testing.assert_allclose(value, expected, rtol=3e-3)
 
 
-@pytest.mark.parametrize('beta', [0.3, 0.5, 0.8, 1.0, 1.6, 2.0])
+@pytest.mark.parametrize("beta", [0.3, 0.5, 0.8, 1.0, 1.6, 2.0])
 def test_kww_shape_is_even_and_non_negative(beta):
     # WHEN
     w = sinh_grid(1e6, n_points=2001)
@@ -154,7 +164,7 @@ def test_kww_shape_is_even_and_non_negative(beta):
     assert np.all(value >= 0.0)
 
 
-@pytest.mark.parametrize('beta', [0.3, 0.5, 0.8, 1.0, 1.6, 2.0])
+@pytest.mark.parametrize("beta", [0.3, 0.5, 0.8, 1.0, 1.6, 2.0])
 def test_kww_shape_integrates_to_pi(beta):
     # WHEN the transform of a function that is 1 at t = 0 integrates to pi over w
 
@@ -182,13 +192,13 @@ class TestStretchedExponential:
     @pytest.fixture
     def stretched_exponential(self):
         return StretchedExponential(
-            name='StretchedName',
-            display_name='TestStretched',
+            name="StretchedName",
+            display_name="TestStretched",
             area=2.0,
             center=0.5,
             relaxation_time=3.0,
             beta=0.7,
-            x_unit='meV',
+            x_unit="meV",
         )
 
     #############
@@ -200,20 +210,20 @@ class TestStretchedExponential:
         stretched = StretchedExponential()
 
         # EXPECT
-        assert stretched.display_name == 'StretchedExponential'
+        assert stretched.display_name == "StretchedExponential"
         assert stretched.area.value == pytest.approx(1.0)
         assert stretched.center.value == pytest.approx(0.0)
         assert stretched.relaxation_time.value == pytest.approx(1.0)
         assert stretched.beta.value == pytest.approx(1.0)
-        assert stretched.x_unit == 'meV'
-        assert stretched.y_unit == 'dimensionless'
-        assert stretched.relaxation_time.unit == 'ps'
-        assert stretched.beta.unit == 'dimensionless'
+        assert stretched.x_unit == "meV"
+        assert stretched.y_unit == "dimensionless"
+        assert stretched.relaxation_time.unit == "ps"
+        assert stretched.beta.unit == "dimensionless"
         assert stretched.center.fixed is True
 
     def test_initialization(self, stretched_exponential: StretchedExponential):
         # WHEN THEN EXPECT
-        assert stretched_exponential.display_name == 'TestStretched'
+        assert stretched_exponential.display_name == "TestStretched"
         assert stretched_exponential.area.value == pytest.approx(2.0)
         assert stretched_exponential.center.value == pytest.approx(0.5)
         assert stretched_exponential.relaxation_time.value == pytest.approx(3.0)
@@ -221,34 +231,36 @@ class TestStretchedExponential:
         assert stretched_exponential.center.fixed is False
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message, expected_error',
+        "kwargs, expected_message, expected_error",
         [
-            ({'area': 'invalid'}, 'area must be a number', TypeError),
-            ({'center': 'invalid'}, 'center must be None or a number', TypeError),
+            ({"area": "invalid"}, "area must be a number", TypeError),
+            ({"center": "invalid"}, "center must be None or a number", TypeError),
             (
-                {'relaxation_time': 'invalid'},
-                'relaxation_time must be a number',
+                {"relaxation_time": "invalid"},
+                "relaxation_time must be a number",
                 TypeError,
             ),
-            ({'beta': 'invalid'}, 'beta must be a number', TypeError),
-            ({'x_unit': 123}, 'unit must be None, a string', UnitError),
-            ({'y_unit': 123}, 'unit must be None, a string', UnitError),
+            ({"beta": "invalid"}, "beta must be a number", TypeError),
+            ({"x_unit": 123}, "unit must be None, a string", UnitError),
+            ({"y_unit": 123}, "unit must be None, a string", UnitError),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
+    def test_input_type_validation_raises(
+        self, kwargs, expected_message, expected_error
+    ):
         # WHEN THEN EXPECT
         with pytest.raises(expected_error, match=expected_message):
             StretchedExponential(**kwargs)
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        "kwargs, expected_message",
         [
-            ({'relaxation_time': 0.0}, 'relaxation_time must be greater than zero'),
-            ({'relaxation_time': -1.0}, 'relaxation_time must be greater than zero'),
-            ({'relaxation_time': np.inf}, 'relaxation_time must be a finite number'),
-            ({'beta': 0.0}, 'beta must be between'),
-            ({'beta': 2.5}, 'beta must be between'),
-            ({'beta': np.nan}, 'beta must be a finite number'),
+            ({"relaxation_time": 0.0}, "relaxation_time must be greater than zero"),
+            ({"relaxation_time": -1.0}, "relaxation_time must be greater than zero"),
+            ({"relaxation_time": np.inf}, "relaxation_time must be a finite number"),
+            ({"beta": 0.0}, "beta must be between"),
+            ({"beta": 2.5}, "beta must be between"),
+            ({"beta": np.nan}, "beta must be a finite number"),
         ],
     )
     def test_input_value_validation_raises(self, kwargs, expected_message):
@@ -258,7 +270,7 @@ class TestStretchedExponential:
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
-        with pytest.warns(UserWarning, match='may not be physically meaningful'):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
             StretchedExponential(area=-2.0)
 
     def test_get_all_parameters(self, stretched_exponential: StretchedExponential):
@@ -268,11 +280,11 @@ class TestStretchedExponential:
         # EXPECT
         assert all(isinstance(param, Parameter) for param in params)
         assert {param.name for param in params} == {
-            'StretchedName area',
-            'StretchedName center',
-            'StretchedName relaxation_time',
-            'StretchedName beta',
-            'StretchedName width',
+            "StretchedName area",
+            "StretchedName center",
+            "StretchedName relaxation_time",
+            "StretchedName beta",
+            "StretchedName width",
         }
 
     def test_copy(self, stretched_exponential: StretchedExponential):
@@ -284,7 +296,10 @@ class TestStretchedExponential:
         assert stretched_copy.display_name == stretched_exponential.display_name
         assert stretched_copy.area.value == stretched_exponential.area.value
         assert stretched_copy.center.value == stretched_exponential.center.value
-        assert stretched_copy.relaxation_time.value == stretched_exponential.relaxation_time.value
+        assert (
+            stretched_copy.relaxation_time.value
+            == stretched_exponential.relaxation_time.value
+        )
         assert stretched_copy.beta.value == stretched_exponential.beta.value
         assert stretched_copy.x_unit == stretched_exponential.x_unit
 
@@ -293,21 +308,21 @@ class TestStretchedExponential:
         repr_str = repr(stretched_exponential)
 
         # EXPECT
-        assert 'StretchedExponential' in repr_str
-        assert 'name = StretchedName' in repr_str
-        assert 'x_unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
-        assert 'relaxation_time =' in repr_str
-        assert 'beta =' in repr_str
+        assert "StretchedExponential" in repr_str
+        assert "name = StretchedName" in repr_str
+        assert "x_unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "relaxation_time =" in repr_str
+        assert "beta =" in repr_str
 
     #############
     # Parameters
     #############
 
     @pytest.mark.parametrize(
-        'prop, valid_value',
-        [('area', 3.0), ('center', 0.6), ('relaxation_time', 4.0), ('beta', 0.9)],
+        "prop, valid_value",
+        [("area", 3.0), ("center", 0.6), ("relaxation_time", 4.0), ("beta", 0.9)],
     )
     def test_property_setters(
         self, stretched_exponential: StretchedExponential, prop, valid_value
@@ -318,33 +333,41 @@ class TestStretchedExponential:
         assert getattr(stretched_exponential, prop).value == valid_value
 
         # WHEN: set an invalid value — THEN EXPECT
-        with pytest.raises(TypeError, match=' must be a number'):
-            setattr(stretched_exponential, prop, 'invalid')
+        with pytest.raises(TypeError, match=" must be a number"):
+            setattr(stretched_exponential, prop, "invalid")
 
-    def test_relaxation_time_must_be_positive(self, stretched_exponential: StretchedExponential):
+    def test_relaxation_time_must_be_positive(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='relaxation_time must be greater than zero'):
+        with pytest.raises(
+            ValueError, match="relaxation_time must be greater than zero"
+        ):
             stretched_exponential.relaxation_time = -1.0
         assert stretched_exponential.relaxation_time.value == pytest.approx(3.0)
 
-    @pytest.mark.parametrize('value', [0.01, 2.5])
+    @pytest.mark.parametrize("value", [0.01, 2.5])
     def test_beta_outside_the_supported_range_raises(
         self, stretched_exponential: StretchedExponential, value
     ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='beta must be between'):
+        with pytest.raises(ValueError, match="beta must be between"):
             stretched_exponential.beta = value
         assert stretched_exponential.beta.value == pytest.approx(0.7)
 
-    def test_area_setter_out_of_bounds_raises(self, stretched_exponential: StretchedExponential):
+    def test_area_setter_out_of_bounds_raises(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN the fixture's area was created non-negative, so it carries min=0
 
         # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
-        with pytest.raises(ValueError, match='violates the parameter bounds'):
+        with pytest.raises(ValueError, match="violates the parameter bounds"):
             stretched_exponential.area = -1.0
         assert stretched_exponential.area.value == pytest.approx(2.0)
 
-    def test_center_is_fixed_if_set_to_None(self, stretched_exponential: StretchedExponential):
+    def test_center_is_fixed_if_set_to_None(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN
         assert stretched_exponential.center.fixed is False
 
@@ -368,7 +391,7 @@ class TestStretchedExponential:
         peak = stretched_exponential.evaluate(np.array([center]))[0]
         half = stretched_exponential.evaluate(np.array([center + width.value]))[0]
         assert half == pytest.approx(0.5 * peak, rel=1e-4)
-        assert str(width.unit) == 'meV'
+        assert str(width.unit) == "meV"
 
     def test_width_is_below_the_energy_scale_for_stretched_profiles(self):
         # WHEN beta < 1 the peak sharpens well beyond Gamma = hbar / tau, so reporting Gamma would
@@ -386,7 +409,9 @@ class TestStretchedExponential:
         assert widths[0.5] == pytest.approx(0.22355 * gamma, rel=1e-4)
         assert widths[0.2] == pytest.approx(2.653e-4 * gamma, rel=1e-3)
 
-    def test_width_is_a_dependent_parameter(self, stretched_exponential: StretchedExponential):
+    def test_width_is_a_dependent_parameter(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN width is resolved from beta and relaxation_time by a dependency expression
         # THEN
         width = stretched_exponential.width
@@ -418,21 +443,25 @@ class TestStretchedExponential:
         # variable, so a write to it retriggers the expression
         assert stretched_exponential.width.value < before
 
-    def test_width_can_be_chained_onto(self, stretched_exponential: StretchedExponential):
+    def test_width_can_be_chained_onto(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN another component's width is made to follow this one
-        lorentzian = Lorentzian(name='Chained', area=1.0, width=0.1)
-        with np.errstate(invalid='ignore', divide='ignore'):
+        lorentzian = Lorentzian(name="Chained", area=1.0, width=0.1)
+        with np.errstate(invalid="ignore", divide="ignore"):
             lorentzian.width.make_dependent_on(
-                dependency_expression='w * 2',
-                dependency_map={'w': stretched_exponential.width},
-                desired_unit='meV',
+                dependency_expression="w * 2",
+                dependency_map={"w": stretched_exponential.width},
+                desired_unit="meV",
             )
 
         # THEN
         stretched_exponential.beta.value = 0.2
 
         # EXPECT the change reaches the chained parameter, not just this component
-        assert lorentzian.width.value == pytest.approx(2 * stretched_exponential.width.value)
+        assert lorentzian.width.value == pytest.approx(
+            2 * stretched_exponential.width.value
+        )
 
     def test_width_tracks_beta(self, stretched_exponential: StretchedExponential):
         # WHEN
@@ -444,7 +473,9 @@ class TestStretchedExponential:
         # EXPECT a smaller beta gives a sharper peak, so a smaller half width
         assert stretched_exponential.width.value < before
 
-    def test_width_tracks_the_relaxation_time(self, stretched_exponential: StretchedExponential):
+    def test_width_tracks_the_relaxation_time(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN
         before = stretched_exponential.width.value
 
@@ -461,31 +492,31 @@ class TestStretchedExponential:
 
     def test_width_follows_the_x_unit(self):
         # WHEN the component measures energy in microeV
-        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit='ueV')
+        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit="ueV")
 
         # THEN
         width = stretched.width
 
         # EXPECT the half width is expressed in that unit too
         assert width.value == pytest.approx(1e3 * HBAR_MEV_PS / 5.0, rel=2e-5)
-        assert str(width.unit) == str(sc.Unit('ueV'))
+        assert str(width.unit) == str(sc.Unit("ueV"))
 
     def test_width_follows_an_x_unit_conversion(self):
         # WHEN
-        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit='meV')
+        stretched = StretchedExponential(relaxation_time=5.0, beta=1.0, x_unit="meV")
         before = stretched.width.value
 
         # THEN
-        stretched.convert_x_unit('ueV')
+        stretched.convert_x_unit("ueV")
 
         # EXPECT the half width is re-derived in the new unit rather than keeping the old one
         assert stretched.width.value == pytest.approx(1e3 * before)
-        assert str(stretched.width.unit) == str(sc.Unit('ueV'))
+        assert str(stretched.width.unit) == str(sc.Unit("ueV"))
 
     def test_width_with_a_non_energy_x_unit_raises(self):
         # WHEN THEN EXPECT hbar / relaxation_time cannot be expressed in metres
-        with pytest.raises(UnitError, match='needs an energy x_unit'):
-            _ = StretchedExponential(x_unit='m').width
+        with pytest.raises(UnitError, match="needs an energy x_unit"):
+            _ = StretchedExponential(x_unit="m").width
 
     def test_width_is_the_lorentzian_hwhm_at_beta_one(self):
         # WHEN beta = 1 the transform is a Lorentzian of HWHM Gamma = hbar / tau.  Gamma is used
@@ -498,7 +529,9 @@ class TestStretchedExponential:
 
         # EXPECT
         x = np.linspace(-2.0, 2.0, 101)
-        np.testing.assert_allclose(stretched.evaluate(x), lorentzian.evaluate(x), rtol=1e-12)
+        np.testing.assert_allclose(
+            stretched.evaluate(x), lorentzian.evaluate(x), rtol=1e-12
+        )
 
     #############
     # Evaluation
@@ -552,7 +585,7 @@ class TestStretchedExponential:
         # EXPECT
         np.testing.assert_allclose(left, right, rtol=1e-12)
 
-    @pytest.mark.parametrize('beta', [0.5, 0.7, 1.0, 1.5])
+    @pytest.mark.parametrize("beta", [0.5, 0.7, 1.0, 1.5])
     def test_area_matches_parameter(self, beta):
         # WHEN the transform integrates to the area parameter over the whole axis
         stretched = StretchedExponential(area=2.0, relaxation_time=5.0, beta=beta)
@@ -582,11 +615,11 @@ class TestStretchedExponential:
         x = np.linspace(-5, 5, 50)
 
         # THEN
-        result = stretched_exponential.evaluate(x, output='scipp')
+        result = stretched_exponential.evaluate(x, output="scipp")
 
         # EXPECT
         assert isinstance(result, sc.Variable)
-        assert result.unit == sc.Unit('dimensionless')
+        assert result.unit == sc.Unit("dimensionless")
         np.testing.assert_allclose(result.values, stretched_exponential.evaluate(x))
 
     def test_evaluate_with_scipp_x_in_another_energy_unit(
@@ -597,21 +630,23 @@ class TestStretchedExponential:
 
         # THEN
         result = stretched_exponential.evaluate(
-            sc.array(dims=['energy'], values=x * 1e3, unit='microeV')
+            sc.array(dims=["energy"], values=x * 1e3, unit="microeV")
         )
 
         # EXPECT the same profile, since the output carries y_unit either way
-        np.testing.assert_allclose(result, stretched_exponential.evaluate(x), rtol=1e-12)
+        np.testing.assert_allclose(
+            result, stretched_exponential.evaluate(x), rtol=1e-12
+        )
 
     def test_evaluate_with_a_non_energy_x_unit_raises(self):
         # WHEN hbar / relaxation_time cannot be expressed in the x unit
-        stretched = StretchedExponential(x_unit='m')
+        stretched = StretchedExponential(x_unit="m")
 
         # THEN EXPECT
-        with pytest.raises(UnitError, match='needs an energy x_unit'):
+        with pytest.raises(UnitError, match="needs an energy x_unit"):
             stretched.evaluate(np.array([0.0, 1.0]))
 
-    @pytest.mark.parametrize('beta', [0.6, 0.8, 1.0, 1.5, 2.0])
+    @pytest.mark.parametrize("beta", [0.6, 0.8, 1.0, 1.5, 2.0])
     def test_evaluate_matches_a_naive_fft_transform(self, beta):
         # WHEN the same physics is computed the obvious way, by FFT-ing the sampled relaxation
 
@@ -639,66 +674,76 @@ class TestStretchedExponential:
 
     def test_convert_x_unit(self, stretched_exponential: StretchedExponential):
         # WHEN THEN
-        stretched_exponential.convert_x_unit('microeV')
+        stretched_exponential.convert_x_unit("microeV")
 
         # EXPECT the time and the exponent are untouched: they carry no x unit
-        assert stretched_exponential.x_unit == 'microeV'
+        assert stretched_exponential.x_unit == "microeV"
         assert stretched_exponential.area.value == pytest.approx(2.0 * 1e3)
         assert stretched_exponential.center.value == pytest.approx(0.5 * 1e3)
         assert stretched_exponential.relaxation_time.value == pytest.approx(3.0)
-        assert stretched_exponential.relaxation_time.unit == 'ps'
+        assert stretched_exponential.relaxation_time.unit == "ps"
         assert stretched_exponential.beta.value == pytest.approx(0.7)
 
-    def test_convert_x_unit_keeps_the_profile(self, stretched_exponential: StretchedExponential):
+    def test_convert_x_unit_keeps_the_profile(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN
         x = np.linspace(-2.0, 2.0, 51)
         before = stretched_exponential.evaluate(x)
 
         # THEN
-        stretched_exponential.convert_x_unit('microeV')
+        stretched_exponential.convert_x_unit("microeV")
 
         # EXPECT the same curve, read off the rescaled axis
-        np.testing.assert_allclose(stretched_exponential.evaluate(x * 1e3), before, rtol=1e-12)
+        np.testing.assert_allclose(
+            stretched_exponential.evaluate(x * 1e3), before, rtol=1e-12
+        )
 
-    def test_convert_x_unit_invalid_type_raises(self, stretched_exponential: StretchedExponential):
+    def test_convert_x_unit_invalid_type_raises(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+        with pytest.raises(TypeError, match=r"x_unit must be a string or sc\.Unit"):
             stretched_exponential.convert_x_unit(123)
 
-    def test_convert_x_unit_rollback_on_failure(self, stretched_exponential: StretchedExponential):
+    def test_convert_x_unit_rollback_on_failure(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN THEN
         with pytest.raises(UnitError):
-            stretched_exponential.convert_x_unit('m')
+            stretched_exponential.convert_x_unit("m")
 
         # EXPECT: state rolled back
-        assert stretched_exponential.x_unit == 'meV'
+        assert stretched_exponential.x_unit == "meV"
         assert stretched_exponential.area.value == pytest.approx(2.0)
         assert stretched_exponential.center.value == pytest.approx(0.5)
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
-        stretched = StretchedExponential(area=1.0, x_unit='meV', y_unit='1/meV')
+        stretched = StretchedExponential(area=1.0, x_unit="meV", y_unit="1/meV")
 
         # THEN: convert y_unit to '1/eV' (same dimension, different scale)
-        stretched.convert_y_unit('1/eV')
+        stretched.convert_y_unit("1/eV")
 
         # EXPECT: y_unit updated and area value rescaled (1e3 factor)
-        assert stretched.y_unit == '1/eV'
+        assert stretched.y_unit == "1/eV"
         assert stretched.area.value == pytest.approx(1e3)
 
-    def test_convert_y_unit_invalid_type_raises(self, stretched_exponential: StretchedExponential):
+    def test_convert_y_unit_invalid_type_raises(
+        self, stretched_exponential: StretchedExponential
+    ):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             stretched_exponential.convert_y_unit(123)
 
     def test_convert_y_unit_rollback_on_failure(self):
         # WHEN
-        stretched = StretchedExponential(area=1.0, x_unit='meV')
+        stretched = StretchedExponential(area=1.0, x_unit="meV")
 
         # THEN
         with pytest.raises(UnitError):
-            stretched.convert_y_unit('K')
+            stretched.convert_y_unit("K")
 
         # EXPECT: state rolled back
-        assert stretched.y_unit == 'dimensionless'
+        assert stretched.y_unit == "dimensionless"
         assert stretched.area.value == pytest.approx(1.0)
