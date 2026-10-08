@@ -45,19 +45,22 @@ class TestExponential:
         assert exponential.x_unit == 'meV'
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
             (
                 {'amplitude': 'invalid', 'center': 0.5, 'rate': 1.0, 'x_unit': 'meV'},
                 'amplitude must be a number',
+                TypeError,
             ),
             (
                 {'amplitude': 2.0, 'center': 'invalid', 'rate': 1.0, 'x_unit': 'meV'},
                 'center must be None or a number',
+                TypeError,
             ),
             (
                 {'amplitude': 2.0, 'center': 0.5, 'rate': 'invalid', 'x_unit': 'meV'},
                 'rate must be a number',
+                TypeError,
             ),
             (
                 {
@@ -68,11 +71,12 @@ class TestExponential:
                     'y_unit': 123,
                 },
                 'unit must be None, a string',
+                UnitError,
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
-        with pytest.raises(TypeError, match=expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
+        with pytest.raises(expected_error, match=expected_message):
             Exponential(display_name='TestExponential', **kwargs)
 
     @pytest.mark.parametrize(

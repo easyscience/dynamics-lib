@@ -7,6 +7,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from scipp import UnitError
 
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Polynomial
@@ -115,7 +116,7 @@ class TestInstrumentModel:
             ),
             (
                 {'x_unit': 123},
-                TypeError,
+                UnitError,
                 'unit must be',
             ),
         ],

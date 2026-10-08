@@ -73,19 +73,19 @@ class TestDiffusionDampedMittagLeffler:
         assert mittag_leffler.damping.unit == 'meV'
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
-            ({'scale': 'invalid'}, 'scale must be a number'),
-            ({'alpha': 'invalid'}, 'alpha must be a number'),
-            ({'width': 'invalid'}, 'width must be a number'),
-            ({'damping': 'invalid'}, 'damping must be a number'),
-            ({'x_unit': 123}, 'unit must be None, a string'),
-            ({'y_unit': 123}, 'unit must be None, a string'),
+            ({'scale': 'invalid'}, 'scale must be a number', TypeError),
+            ({'alpha': 'invalid'}, 'alpha must be a number', TypeError),
+            ({'width': 'invalid'}, 'width must be a number', TypeError),
+            ({'damping': 'invalid'}, 'damping must be a number', TypeError),
+            ({'x_unit': 123}, 'unit must be None, a string', UnitError),
+            ({'y_unit': 123}, 'unit must be None, a string', UnitError),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=expected_message):
+        with pytest.raises(expected_error, match=expected_message):
             DiffusionDampedMittagLeffler(**kwargs)
 
     @pytest.mark.parametrize(
