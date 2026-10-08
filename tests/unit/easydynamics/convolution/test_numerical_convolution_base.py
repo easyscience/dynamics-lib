@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import StretchedExponential
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.convolution_settings import ConvolutionSettings
@@ -602,6 +603,30 @@ class TestNumericalConvolutionBase:
         ):
             default_numerical_convolution_base._check_width_thresholds(
                 model=narrow_gaussian,
+                model_name='ComponentCollection',
+            )
+
+    def test_check_width_small_threshold_for_stretched_exponential(
+        self, default_numerical_convolution_base
+    ):
+        """
+        Regression: a stretched exponential at small beta is far narrower than its energy scale
+        hbar / tau, and used to report that scale as its width. The spike then fell between the
+        grid points with no warning at all.
+        """
+        # WHEN tau = 5 ps puts hbar / tau at 0.13 meV, well above the grid step, while the true
+        # half width at beta = 0.2 is 3.5e-5 meV, well below it
+        narrow_kww = StretchedExponential(
+            name='ComponentCollection', area=1.0, relaxation_time=5.0, beta=0.2
+        )
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match='Increase upsample_factor to improve',
+        ):
+            default_numerical_convolution_base._check_width_thresholds(
+                model=narrow_kww,
                 model_name='ComponentCollection',
             )
 

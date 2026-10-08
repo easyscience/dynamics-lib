@@ -11,7 +11,7 @@ import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
@@ -391,7 +391,7 @@ class Analysis(AnalysisBase):
         plot_residuals: bool = False,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Plot the experimental data and the model prediction.
 
@@ -426,8 +426,8 @@ class Analysis(AnalysisBase):
 
         Returns
         -------
-        InteractiveFigure
-            A Plopp InteractiveFigure containing the plot of the data and model.
+        WidgetFigure
+            A Plopp WidgetFigure containing the plot of the data and model.
         """
         verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is not None:
@@ -647,7 +647,7 @@ class Analysis(AnalysisBase):
         self,
         names: str | list[str] | None = None,
         **kwargs: dict[str, Any],
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Plot fitted parameters as a function of Q.
 
@@ -668,8 +668,8 @@ class Analysis(AnalysisBase):
 
         Returns
         -------
-        InteractiveFigure
-            A Plopp InteractiveFigure containing the plot of the parameters.
+        WidgetFigure
+            A Plopp WidgetFigure containing the plot of the parameters.
         """
 
         ds = self.parameters_to_dataset()
