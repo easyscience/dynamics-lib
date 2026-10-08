@@ -38,7 +38,6 @@ from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model import ResolutionModel
 from easydynamics.sample_model import SampleModel
-from easydynamics.sample_model import StretchedExponential
 from easydynamics.sample_model import Voigt
 from easydynamics.settings import ConvolutionSettings
 from easydynamics.settings import DetailedBalanceSettings
@@ -82,7 +81,6 @@ __all__ = [
     'PosteriorSummary',
     'ResolutionModel',
     'SampleModel',
-    'StretchedExponential',
     'Voigt',
     'detailed_balance_factor',
     'hbar',
