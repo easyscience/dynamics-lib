@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from easyscience.variable import Parameter
     from ipywidgets import VBox
     from matplotlib.figure import Figure
-    from plopp.backends.matplotlib.figure import InteractiveFigure
+    from plopp.backends.matplotlib.figure import WidgetFigure
 
     from easydynamics.analysis.posterior import BoundsSuggestions
 
@@ -1584,7 +1584,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
         credible_interval: float = 68.0,
         Q_index: int | None = None,
         **kwargs: dict[str, Any],
-    ) -> Figure | InteractiveFigure:
+    ) -> Figure | WidgetFigure:
         """
         Plot the data against the credible band implied by the posterior.
 
@@ -1610,7 +1610,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Returns
         -------
-        Figure | InteractiveFigure
+        Figure | WidgetFigure
             The matplotlib Figure for one Q, or the plopp figure with a Q slider.
 
         Raises
@@ -1748,7 +1748,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
         n_draws: int,
         credible_interval: float,
         **kwargs: dict[str, Any],
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Build the posterior-predictive figure with a Q slider from the per-Q chains.
 
@@ -1770,7 +1770,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
 
         Returns
         -------
-        InteractiveFigure
+        WidgetFigure
             The plopp figure with its Q slider.
 
         Raises
