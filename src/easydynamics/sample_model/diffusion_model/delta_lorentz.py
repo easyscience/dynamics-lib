@@ -599,9 +599,9 @@ class DeltaLorentz(DiffusionModelBase):
         """
         Get the fittable predictions of the DeltaLorentz model as FitTargets.
 
-        Extends the base ``'area'`` and ``'width'`` predictions with ``'delta_area'``
-        (``scale * EISF(Q)``, the delta function's weight), whose default dataset key is derived
-        from the delta component's name.
+        Extends the base ``'area'`` and ``'width'`` predictions with ``'delta_area'`` (``scale *
+        EISF(Q)``, the delta function's weight), whose default dataset key is derived from the
+        delta component's name.
 
         Returns
         -------
