@@ -84,7 +84,14 @@ def fft_comparison(beta: float, n_time: int, tau: float = 5.0, area: float = 1.0
     'beta, rel',
     # The smallest supported beta spreads exp(-u**beta) over so many decades that the grid only
     # just reaches its tail, which costs a few digits; everything above it is at machine precision.
-    [(0.05, 1e-8), (0.1, 1e-11), (0.3, 1e-12), (0.5, 1e-12), (1.0, 1e-12), (2.0, 1e-12)],
+    [
+        (0.05, 1e-8),
+        (0.1, 1e-11),
+        (0.3, 1e-12),
+        (0.5, 1e-12),
+        (1.0, 1e-12),
+        (2.0, 1e-12),
+    ],
 )
 def test_kww_shape_at_zero(beta, rel):
     # WHEN G(0) is the integral of exp(-u**beta), which is gamma(1 + 1/beta)
@@ -214,19 +221,23 @@ class TestStretchedExponential:
         assert stretched_exponential.center.fixed is False
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
-            ({'area': 'invalid'}, 'area must be a number'),
-            ({'center': 'invalid'}, 'center must be None or a number'),
-            ({'relaxation_time': 'invalid'}, 'relaxation_time must be a number'),
-            ({'beta': 'invalid'}, 'beta must be a number'),
-            ({'x_unit': 123}, 'unit must be None, a string'),
-            ({'y_unit': 123}, 'unit must be None, a string'),
+            ({'area': 'invalid'}, 'area must be a number', TypeError),
+            ({'center': 'invalid'}, 'center must be None or a number', TypeError),
+            (
+                {'relaxation_time': 'invalid'},
+                'relaxation_time must be a number',
+                TypeError,
+            ),
+            ({'beta': 'invalid'}, 'beta must be a number', TypeError),
+            ({'x_unit': 123}, 'unit must be None, a string', UnitError),
+            ({'y_unit': 123}, 'unit must be None, a string', UnitError),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=expected_message):
+        with pytest.raises(expected_error, match=expected_message):
             StretchedExponential(**kwargs)
 
     @pytest.mark.parametrize(

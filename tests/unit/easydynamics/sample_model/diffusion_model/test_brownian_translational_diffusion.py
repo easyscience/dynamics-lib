@@ -86,7 +86,7 @@ class TestBrownianTranslationalDiffusion:
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                 },
-                TypeError,
+                UnitError,
                 None,
             ),
             (

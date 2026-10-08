@@ -51,7 +51,7 @@ class TestVoigt:
         assert voigt.x_unit == 'meV'
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
             (
                 {
@@ -62,6 +62,7 @@ class TestVoigt:
                     'x_unit': 'meV',
                 },
                 'area must be a number',
+                TypeError,
             ),
             (
                 {
@@ -72,6 +73,7 @@ class TestVoigt:
                     'x_unit': 'meV',
                 },
                 'center must be None',
+                TypeError,
             ),
             (
                 {
@@ -82,6 +84,7 @@ class TestVoigt:
                     'x_unit': 'meV',
                 },
                 'gaussian_width must be a number',
+                TypeError,
             ),
             (
                 {
@@ -92,6 +95,7 @@ class TestVoigt:
                     'x_unit': 'meV',
                 },
                 'lorentzian_width must be a number',
+                TypeError,
             ),
             (
                 {
@@ -102,6 +106,7 @@ class TestVoigt:
                     'x_unit': 123,
                 },
                 'unit must be None, a string',
+                UnitError,
             ),
             (
                 {
@@ -113,12 +118,13 @@ class TestVoigt:
                     'y_unit': 123,
                 },
                 'unit must be None, a string',
+                UnitError,
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=expected_message):
+        with pytest.raises(expected_error, match=expected_message):
             Voigt(display_name='TestVoigt', **kwargs)
 
     def test_negative_gaussian_width_raises(self):
