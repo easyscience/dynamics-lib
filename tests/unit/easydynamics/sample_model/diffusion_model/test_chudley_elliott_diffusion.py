@@ -47,10 +47,6 @@ class TestChudleyElliottJumpDiffusion:
                     'residence_time': 1.0,
                     'jump_length': 1.0,
                 },
-                # causes a UnitError in scipp. Why?
-                # Why does Unit check work for for x_unit, but not for y_unit?
-                # UnitError,
-                # 'Invalid unit',
                 TypeError,
                 None,
             ),
@@ -120,10 +116,10 @@ class TestChudleyElliottJumpDiffusion:
             ChudleyElliottJumpDiffusion(display_name='ChudleyElliottJumpDiffusion', **kwargs)
 
     def test_residence_time_setter(self, chudley_elliott_model):
-        # WHEN
+        # WHEN THEN
         chudley_elliott_model.residence_time = 3.0
 
-        # THEN EXPECT
+        # EXPECT
         assert chudley_elliott_model.residence_time.value == pytest.approx(3.0)
 
     def test_residence_time_setter_raises(self, chudley_elliott_model):
@@ -137,10 +133,10 @@ class TestChudleyElliottJumpDiffusion:
             chudley_elliott_model.residence_time = -1.0  # Invalid negative value
 
     def test_jump_length_setter(self, chudley_elliott_model):
-        # WHEN
+        # WHEN THEN
         chudley_elliott_model.jump_length = 2.5
 
-        # THEN EXPECT
+        # EXPECT
         assert chudley_elliott_model.jump_length.value == pytest.approx(2.5)
 
     def test_jump_length_setter_raises(self, chudley_elliott_model):
@@ -163,12 +159,8 @@ class TestChudleyElliottJumpDiffusion:
         'instead of our Parameters'
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
-        residence_time_sc = chudley_elliott_model.residence_time.value * sc.Unit(
-            chudley_elliott_model.residence_time.unit
-        )
-        jump_length_sc = chudley_elliott_model.jump_length.value * sc.Unit(
-            chudley_elliott_model.jump_length.unit
-        )
+        residence_time_sc = chudley_elliott_model.residence_time.full_value
+        jump_length_sc = chudley_elliott_model.jump_length.full_value
 
         # THEN
         widths = chudley_elliott_model.calculate_width(Q_values)
@@ -189,24 +181,21 @@ class TestChudleyElliottJumpDiffusion:
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
 
-        residence_time_sc = chudley_elliott_model.residence_time.value * sc.Unit(
-            chudley_elliott_model.residence_time.unit
-        )
-        jump_length_sc = chudley_elliott_model.jump_length.value * sc.Unit(
-            chudley_elliott_model.jump_length.unit
-        )
+        residence_time_sc = chudley_elliott_model.residence_time.full_value
+        jump_length_sc = chudley_elliott_model.jump_length.full_value
 
+        # THEN
         # Model uses np.sinc():
         model_widths = chudley_elliott_model.calculate_width(Q_values)
 
-        # THEN
+        # EXPECT
         # Calculate explicitly using sin(x) / x
         argument = Q_values * jump_length_sc
         prefactor = scipp_hbar / residence_time_sc
 
         # sc.sin() strictly requires rad or deg unit.
         # Multiply by 1 rad to give the dimensionless argument the correct unit.
-        argument_rad = argument * sc.scalar(1.0, unit='rad')
+        argument_rad = argument * sc.Unit('rad')
 
         explicit_sinc = sc.sin(argument_rad) / argument
 
@@ -214,7 +203,7 @@ class TestChudleyElliottJumpDiffusion:
         expected_widths_sin = expected_widths_sin.to(unit=chudley_elliott_model.x_unit)
 
         # EXPECT
-        # Both mathematical approaches yield the same result
+        # Both mathematical approaches to yield the same result
         np.testing.assert_allclose(model_widths, expected_widths_sin.values, rtol=1e-5)
 
     def test_calculate_EISF(self, chudley_elliott_model):
