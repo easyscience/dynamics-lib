@@ -9,6 +9,7 @@ import scipp as sc
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
 from numpy.typing import ArrayLike
+from scipp import UnitError
 from scipp.constants import hbar as scipp_hbar
 from scipp.constants import k as scipp_k
 
@@ -226,7 +227,7 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
 
     Raises
     ------
-    TypeError
+    UnitError
         If unit is not None, a string, or a scipp Unit.
 
     Returns
@@ -236,7 +237,7 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
+        raise UnitError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
     # if isinstance(unit, str):
     #     unit = sc.Unit(unit)
 

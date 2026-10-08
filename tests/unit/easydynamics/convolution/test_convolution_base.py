@@ -74,7 +74,7 @@ class TestConvolutionBase:
         assert convolution_base._resolution_components is None
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
             (
                 {
@@ -85,6 +85,7 @@ class TestConvolutionBase:
                     'energy_offset': 0,
                 },
                 'Energy must be',
+                TypeError,
             ),
             (
                 {
@@ -98,6 +99,7 @@ class TestConvolutionBase:
                     '`sample_components` is an instance of str, '
                     'but must be a ComponentCollection or ModelComponent.'
                 ),
+                TypeError,
             ),
             (
                 {
@@ -111,6 +113,7 @@ class TestConvolutionBase:
                     '`resolution_components` is an instance of str, '
                     'but must be a ComponentCollection or ModelComponent.'
                 ),
+                TypeError,
             ),
             (
                 {
@@ -121,6 +124,7 @@ class TestConvolutionBase:
                     'energy_offset': 0,
                 },
                 'unit must be ',
+                UnitError,
             ),
             (
                 {
@@ -131,6 +135,7 @@ class TestConvolutionBase:
                     'energy_offset': 0,
                 },
                 'unit must be ',
+                UnitError,
             ),
             (
                 {
@@ -141,12 +146,13 @@ class TestConvolutionBase:
                     'energy_offset': 'invalid',
                 },
                 'Energy_offset must be ',
+                TypeError,
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=expected_message):
+        with pytest.raises(expected_error, match=expected_message):
             ConvolutionBase(**kwargs)
 
     @pytest.mark.parametrize(

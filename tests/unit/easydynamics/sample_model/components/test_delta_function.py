@@ -43,28 +43,28 @@ class TestDeltaFunction:
         assert delta_function.x_unit == 'meV'
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
             (
                 {'area': 'invalid', 'center': 0.5, 'x_unit': 'meV'},
                 'area must be a number',
+                TypeError,
             ),
             (
                 {'area': 2.0, 'center': 'invalid', 'x_unit': 'meV'},
                 'center must be ',
+                TypeError,
             ),
-            (
-                {'area': 2.0, 'center': 0.5, 'x_unit': 123},
-                'unit must be ',
-            ),
+            ({'area': 2.0, 'center': 0.5, 'x_unit': 123}, 'unit must be ', UnitError),
             (
                 {'area': 2.0, 'center': 0.5, 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
+                UnitError,
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
-        with pytest.raises(TypeError, match=expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
+        with pytest.raises(expected_error, match=expected_message):
             DeltaFunction(display_name='TestDeltaFunction', **kwargs)
 
     def test_negative_area_warns(self):

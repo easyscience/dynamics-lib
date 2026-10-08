@@ -39,33 +39,30 @@ class TestPolynomial:
         assert polynomial.coefficients[2].value == pytest.approx(3.0)
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
-            (
-                {'coefficients': 'invalid'},
-                'coefficients must be ',
-            ),
+            ({'coefficients': 'invalid'}, 'coefficients must be ', TypeError),
             (
                 {'coefficients': [1.0, 'invalid', 3.0]},
                 'Each coefficient must be ',
+                TypeError,
             ),
             (
                 {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 123},
                 'unit must be ',
+                UnitError,
             ),
             (
                 {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
+                UnitError,
             ),
-            (
-                {'coefficients': None},
-                'coefficients must be ',
-            ),
+            ({'coefficients': None}, 'coefficients must be ', TypeError),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=expected_message):
+        with pytest.raises(expected_error, match=expected_message):
             Polynomial(display_name='TestPolynomial', **kwargs)
 
     def test_init_no_coefficients_raises(self):

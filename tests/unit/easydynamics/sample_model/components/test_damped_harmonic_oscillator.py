@@ -46,23 +46,27 @@ class TestDampedHarmonicOscillator:
         assert dho.x_unit == 'meV'
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        'kwargs, expected_message, expected_error',
         [
             (
                 {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
+                TypeError,
             ),
             (
                 {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
                 'center must be ',
+                TypeError,
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
+                TypeError,
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
                 'unit must be None, a string',
+                UnitError,
             ),
             (
                 {
@@ -73,11 +77,12 @@ class TestDampedHarmonicOscillator:
                     'y_unit': 123,
                 },
                 'unit must be None, a string',
+                UnitError,
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
-        with pytest.raises(TypeError, match=expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
+        with pytest.raises(expected_error, match=expected_message):
             DampedHarmonicOscillator(display_name='DampedHarmonicOscillator', **kwargs)
 
     def test_negative_width_raises(self):

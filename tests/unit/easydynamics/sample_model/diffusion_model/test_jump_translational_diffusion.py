@@ -47,7 +47,7 @@ class TestJumpTranslationalDiffusion:
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 1.0,
                 },
-                TypeError,
+                UnitError,
                 None,
             ),
             (

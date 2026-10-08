@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import _in_notebook
@@ -271,7 +272,7 @@ class TestValidateUnit:
     )
     def test_validate_unit_invalid_type(self, unit_input):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='unit must be None, a string, or a scipp Unit'):
+        with pytest.raises(UnitError, match='unit must be None, a string, or a scipp Unit'):
             _validate_unit(unit_input)
 
 

@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.exceptions import AmbiguousNameError
@@ -111,7 +112,7 @@ class TestComponentCollection:
 
     def test_init_with_invalid_unit_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='unit must be'):
+        with pytest.raises(UnitError, match='unit must be'):
             ComponentCollection(x_unit=123)
 
     #############
@@ -359,7 +360,8 @@ class TestComponentCollection:
     def test_convert_x_unit_rollback_skipped_when_old_unit_none(self):
         # WHEN: a collection without an x_unit of its own
         collection = ComponentCollection(
-            components=Gaussian(name='G', area=1.0, width=0.5, x_unit='meV'), x_unit=None
+            components=Gaussian(name='G', area=1.0, width=0.5, x_unit='meV'),
+            x_unit=None,
         )
 
         # THEN: an incompatible unit fails; the outer rollback is skipped (no old unit to
