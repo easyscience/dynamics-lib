@@ -189,14 +189,14 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Raises
         ------
         ValueError
-            If x_vals contains a single point. A delta function's evaluated height is ``area /
-            bin_width``, and a single point defines no bin width.
+            If x_vals contains a single point. A delta function's evaluated height is
+            ``area / bin_width``, and a single point defines no bin width.
 
         Notes
         -----
-        When ``center`` falls within the x range, the bin nearest to ``center`` receives ``area /
-        bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an identity
-        element (handled by the Convolution class).
+        When ``center`` falls within the x range, the bin nearest to ``center`` receives
+        ``area / bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an
+        identity element (handled by the Convolution class).
         """
         if x_vals.size == 1:
             raise ValueError(
