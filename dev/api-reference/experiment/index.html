@@ -1818,7 +1818,7 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyExperiment&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.Experiment">Experiment</a></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyExperiment&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.Experiment">Experiment</a></code></td>
             <td>
               <div class="doc-md-description">
                 <p>Holds data from an experiment as a sc.DataArray along with metadata.</p>
@@ -1852,7 +1852,7 @@
 
 
 <h3 id="easydynamics.experiment.Experiment" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">'MyExperiment'</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -1875,16 +1875,16 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
 <span class="n">file_path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">=</span><span class="s1">'https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5'</span><span class="p">,</span>
-    <span class="n">known_hash</span><span class="o">=</span><span class="s1">'16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873'</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5&#39;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s1">&#39;16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">'Vanadium'</span><span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Vanadium&#39;</span><span class="p">)</span>
 <span class="n">experiment</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
 </code></pre></div></p>
 <p><strong>Rebinning and plotting</strong></p>
 <p>After loading, rebin to reduce the number of bins along each dimension before plotting:
-<div class="language-python highlight"><pre><span></span><code><span class="n">experiment</span><span class="o">.</span><span class="n">rebin</span><span class="p">({</span><span class="s1">'Q'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'energy'</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">experiment</span><span class="o">.</span><span class="n">rebin</span><span class="p">({</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
 <span class="n">experiment</span><span class="o">.</span><span class="n">plot_data</span><span class="p">()</span>
 </code></pre></div></p>
 <!-- prettier-ignore-start -->
@@ -3821,7 +3821,7 @@ with NaNs and Infs removed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyExperiment&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyExperiment&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3881,7 +3881,7 @@ with NaNs and Infs removed.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyExperiment&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyExperiment&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code></td>
             <td>
               <div class="doc-md-description">
                 <p>Holds data from an experiment as a sc.DataArray along with metadata.</p>
@@ -3915,7 +3915,7 @@ with NaNs and Infs removed.</p>
 
 
 <h5 id="easydynamics.experiment.experiment.Experiment" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">'MyExperiment'</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -3938,16 +3938,16 @@ with NaNs and Infs removed.</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 
 <span class="n">file_path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">=</span><span class="s1">'https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5'</span><span class="p">,</span>
-    <span class="n">known_hash</span><span class="o">=</span><span class="s1">'16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873'</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5&#39;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s1">&#39;16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">'Vanadium'</span><span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Vanadium&#39;</span><span class="p">)</span>
 <span class="n">experiment</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
 </code></pre></div></p>
 <p><strong>Rebinning and plotting</strong></p>
 <p>After loading, rebin to reduce the number of bins along each dimension before plotting:
-<div class="language-python highlight"><pre><span></span><code><span class="n">experiment</span><span class="o">.</span><span class="n">rebin</span><span class="p">({</span><span class="s1">'Q'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'energy'</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">experiment</span><span class="o">.</span><span class="n">rebin</span><span class="p">({</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
 <span class="n">experiment</span><span class="o">.</span><span class="n">plot_data</span><span class="p">()</span>
 </code></pre></div></p>
 <!-- prettier-ignore-start -->
@@ -5687,7 +5687,7 @@ with NaNs and Infs removed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyExperiment&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Experiment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyExperiment&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment">Experiment</a></code>
             </td>
             <td>
               <div class="doc-md-description">
