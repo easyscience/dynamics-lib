@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import plopp as pp
 import scipp as sc
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
 
@@ -440,7 +440,7 @@ class Experiment(EasyDynamicsBase):
         slicer: bool = False,
         transpose_axes: bool = False,
         **kwargs: dict,
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
@@ -456,7 +456,7 @@ class Experiment(EasyDynamicsBase):
 
         Returns
         -------
-        InteractiveFigure
+        WidgetFigure
             A plot of the data and model.
 
         Raises
