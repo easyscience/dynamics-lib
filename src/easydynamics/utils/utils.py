@@ -44,14 +44,15 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
     Raises
     ------
     TypeError
-        If Q_index is not an int (or not an int or None when allow_none=True).
+        If Q_index is not an int (or not an int or None when allow_none=True). Booleans are
+        rejected explicitly, since ``True`` would otherwise silently mean index 1.
     IndexError
         If Q_index is negative, or out of range when Q is available.
     """
     if allow_none and Q_index is None:
         return
 
-    if Q_index is None or not isinstance(Q_index, int):
+    if Q_index is None or isinstance(Q_index, bool) or not isinstance(Q_index, int):
         if allow_none:
             raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
         raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
@@ -182,7 +183,7 @@ def _validate_and_convert_Q(
         If Q is not a number, list, numpy array, or scipp Variable.
     ValueError
         If Q is a numpy array with more than 1 dimension, or if Q is a scipp Variable that does not
-        have a single dimension named 'Q'.
+        have a single dimension named 'Q', or if Q is not positive.
 
     Returns
     -------
@@ -208,6 +209,9 @@ def _validate_and_convert_Q(
         if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
         Q = Q.to(unit=CANONICAL_Q_UNIT)
+
+    if (Q.values <= 0).any():
+        raise ValueError('Q values must be positive.')
     return Q
 
 
@@ -275,6 +279,8 @@ def _in_notebook() -> bool:
         True if in a Jupyter notebook, False otherwise.
     """
     try:
+        # Imported here deliberately: IPython may be absent at runtime, and the except
+        # clause below turns that into the answer "not a notebook".
         from IPython import get_ipython
 
         shell = get_ipython().__class__.__name__

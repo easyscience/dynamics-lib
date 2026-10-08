@@ -17,29 +17,29 @@ kB_meV_per_K = sc.to_unit(kB, 'meV/K').value
 class TestDetailedBalanceFactor:
     # Input validation tests
     def test_energy_unit_not_string_error(self):
-        # When
+        # WHEN
         energy = 2.0
         T = 100
         energy_unit = 5
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(TypeError, match=r'energy_unit must be a string.'):
             detailed_balance_factor(energy, T, energy_unit=energy_unit)
 
     @pytest.mark.parametrize('temperature_unit', [5, 5.0, {}, []])
     def test_temperature_unit_not_string_error(self, temperature_unit):
-        # When
+        # WHEN
         energy = 2.0
         T = 100
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(TypeError, match=r'temperature_unit must be a string.'):
             detailed_balance_factor(energy, T, temperature_unit=temperature_unit)
 
     def test_divide_by_temperature_not_bool_error(self):
-        # When
+        # WHEN
         energy = 2.0
         T = 100
         divide_by_temperature = 'yes'
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(TypeError, match=r'divide_by_temperature must be True or False.'):
             detailed_balance_factor(energy, T, divide_by_temperature=divide_by_temperature)
 
@@ -61,11 +61,11 @@ class TestDetailedBalanceFactor:
         ],
     )
     def test_energy_inputs(self, energy):
-        # When
+        # WHEN
         T = 100
-        # Then
+        # THEN
         result = detailed_balance_factor(energy, T)
-        # Expect
+        # EXPECT
         if isinstance(energy, (np.ndarray)):
             energy_array = energy
         elif isinstance(energy, list):
@@ -80,12 +80,12 @@ class TestDetailedBalanceFactor:
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     def test_scipp_variable_input(self):
-        # When
+        # WHEN
         energy = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='meV')
         T = sc.scalar(value=100, unit='K')
-        # Then
+        # THEN
         result = detailed_balance_factor(energy, T)
-        # Expect
+        # EXPECT
         expected_values = (
             np.array([1.0, 2.0, 3.0])
             / (1 - np.exp(-np.array([1.0, 2.0, 3.0]) / (kB_meV_per_K * 100)))
@@ -96,13 +96,58 @@ class TestDetailedBalanceFactor:
         assert result.shape == (3,)
         np.testing.assert_allclose(result, expected_values, rtol=1e-5)
 
+    def test_dataarray_energy_input(self):
+        # WHEN
+        energy_values = np.array([1.0, 2.0, 3.0])
+        data_array = sc.DataArray(
+            data=sc.array(dims=['energy'], values=np.zeros_like(energy_values)),
+            coords={
+                'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+            },
+        )
+
+        # THEN
+        result = detailed_balance_factor(data_array, 100)
+
+        # EXPECT the DataArray's single coordinate is used as the energy axis
+        expected = detailed_balance_factor(energy_values, 100)
+        np.testing.assert_allclose(result, expected)
+
+    def test_dataarray_energy_with_multiple_coords_raises(self):
+        # WHEN
+        values = np.array([1.0, 2.0, 3.0])
+        data_array = sc.DataArray(
+            data=sc.array(dims=['energy'], values=np.zeros_like(values)),
+            coords={
+                'energy': sc.array(dims=['energy'], values=values, unit='meV'),
+                'other': sc.array(dims=['energy'], values=values, unit='meV'),
+            },
+        )
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='exactly one coordinate'):
+            detailed_balance_factor(data_array, 100)
+
+    def test_two_dimensional_energy_raises(self):
+        # WHEN THEN EXPECT the documented ValueError, not a scipp DimensionError
+        with pytest.raises(ValueError, match='at most one-dimensional'):
+            detailed_balance_factor(np.ones((2, 2)), 100)
+
+    def test_non_scalar_temperature_raises(self):
+        # WHEN
+        temperature = sc.array(dims=['temperature'], values=[100.0, 200.0], unit='K')
+
+        # THEN EXPECT a clear error instead of a failure on `.value`
+        with pytest.raises(ValueError, match='temperature must be a single scalar value'):
+            detailed_balance_factor(np.array([1.0]), temperature)
+
     def test_parameter_temperature(self):
-        # When
+        # WHEN
         energy = np.array([1.0, 2.0, 3.0])
         T_param = Parameter(name='T', value=150, unit='K')
-        # Then
+        # THEN
         result = detailed_balance_factor(energy, T_param)
-        # Expect
+        # EXPECT
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * 150))) / (kB_meV_per_K * 150)
 
         assert isinstance(result, np.ndarray)
@@ -111,76 +156,76 @@ class TestDetailedBalanceFactor:
 
     # Physical edge cases
     def test_zero_temperature(self):
-        # When
+        # WHEN
         temperature = 0
         energy = np.array([-1.0, 0.0, 1.0])
-        # Then
+        # THEN
         result = detailed_balance_factor(energy, temperature, divide_by_temperature=False)
-        # Expect
+        # EXPECT
         expected = np.maximum(energy, 0.0)
         np.testing.assert_array_equal(result, expected)
 
     def test_zero_temperature_divide_by_T_error(self):
-        # When
+        # WHEN
         temperature = 0
         energy = np.array([-1.0, 0.0, 1.0])
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(ZeroDivisionError, match='Cannot divide by T when T = 0'):
             detailed_balance_factor(energy, temperature, divide_by_temperature=True)
 
     def test_zero_temperature_single_value(self):
-        # When
+        # WHEN
         temperature = 0
         energy = 2.0
-        # Then
+        # THEN
         result = detailed_balance_factor(energy, temperature, divide_by_temperature=False)
-        # Expect
+        # EXPECT
         expected = 2.0
         assert result == expected
 
     def test_negative_temperature_raises(self):
-        # When Then Expect
+        # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Temperature must be non-negative'):
             detailed_balance_factor(1.0, -10)
 
     # Numerical tests
     def test_small_energy_limit(self):
-        # When
+        # WHEN
         T = 300
         energy = np.array([1e-5, 1e-6, 1e-7, 1e-8, 1e-9])
-        # Then
+        # THEN
         result = detailed_balance_factor(energy=energy, temperature=T, divide_by_temperature=False)
-        # Expect
+        # EXPECT
         x = energy / (kB_meV_per_K * T)
         expected = (1 + x / 2 + x**2 / 12) * (kB_meV_per_K * T)
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     def test_large_energy_limit(self):
-        # When
+        # WHEN
         energy = np.linspace(1e2, 1e3, 5)
         T = 1
-        # Then
+        # THEN
         result = detailed_balance_factor(energy=energy, temperature=T, divide_by_temperature=False)
-        # Expect
+        # EXPECT
         np.testing.assert_allclose(result, energy, atol=1e-10)
 
     def test_intermediate_energy(self):
-        # When
+        # WHEN
         energy = np.linspace(1, 10, 100)
         T = 100
-        # Then
+        # THEN
         result = detailed_balance_factor(energy=energy, temperature=T, divide_by_temperature=False)
-        # Expect
+        # EXPECT
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * T)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     @pytest.mark.parametrize('divide_by_T', [True, False])
     def test_detailed_balance_is_fulfilled(self, divide_by_T):
         # Detailed balance means DBF(E)/DBF(-E) = exp(E/(kB*T))
-        # When
+        # WHEN
         T = 10
         energy = np.linspace(0.01, 100, 101)
-        # Then
+        # THEN
         detailed_balance_positive = detailed_balance_factor(
             energy=energy, temperature=T, divide_by_temperature=divide_by_T
         )
@@ -189,7 +234,7 @@ class TestDetailedBalanceFactor:
         )
         ratio = detailed_balance_positive / detailed_balance_negative
 
-        # Expect
+        # EXPECT
         expected_ratio = np.exp(energy / (kB_meV_per_K * T))
         np.testing.assert_allclose(ratio, expected_ratio, rtol=1e-5)
 
@@ -197,27 +242,27 @@ class TestDetailedBalanceFactor:
         'energy_unit', ['microeV', sc.Unit('microeV')], ids=['str', 'scipp.Unit']
     )
     def test_energy_unit(self, energy_unit):
-        # When
+        # WHEN
         energy = np.linspace(1e3, 10 * 1e3, 100)
         T = 100
-        # Then
+        # THEN
         result = detailed_balance_factor(
             energy=energy,
             temperature=T,
             divide_by_temperature=False,
             energy_unit=energy_unit,
         )
-        # Expect
+        # EXPECT
         expected = energy / (1 - np.exp(-energy / 1000 / (kB_meV_per_K * T)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     def test_energy_unit_warning(self):
-        # When
+        # WHEN
         energy = sc.linspace('energy', 1e3, 10 * 1e3, num=100, unit='microeV')
         energy_unit = 'meV'
         T = 100
 
-        # Then
+        # THEN
         with pytest.warns(
             UserWarning,
             match='Input energy has unit [µμ]eV, but energy_unit was set to meV. Using [µμ]eV.',
@@ -228,33 +273,33 @@ class TestDetailedBalanceFactor:
                 divide_by_temperature=False,
                 energy_unit=energy_unit,
             )
-        # Expect
+        # EXPECT
         expected = energy.values / (1 - np.exp(-energy.values / 1000 / (kB_meV_per_K * T)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     @pytest.mark.parametrize('temperature_unit', ['mK', sc.Unit('mK')], ids=['str', 'scipp.Unit'])
     def test_temperature_unit(self, temperature_unit):
-        # When
+        # WHEN
         energy = np.linspace(1, 10, 100)
         temperature = 100 * 1000
         temperature_unit = 'mK'
-        # Then
+        # THEN
         result = detailed_balance_factor(
             energy=energy,
             temperature=temperature,
             temperature_unit=temperature_unit,
             divide_by_temperature=False,
         )
-        # Expect
+        # EXPECT
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * temperature / 1000)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     def test_temperature_unit_warning(self):
-        # When
+        # WHEN
         energy = np.linspace(1, 10, 100)
         temperature = sc.scalar(value=100, unit='mK')
         temperature_unit = 'K'
-        # Then
+        # THEN
         with pytest.warns(
             UserWarning,
             match='Input temperature has unit mK, but temperature_unit was set to K. Using mK.',
@@ -265,18 +310,18 @@ class TestDetailedBalanceFactor:
                 temperature_unit=temperature_unit,
                 divide_by_temperature=False,
             )
-        # Expect
+        # EXPECT
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * 0.1)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     def test_incompatible_energy_unit_raises(self):
-        # When
+        # WHEN
         energy = 2.0
         T = 100
         energy_unit = 'm'
         temperature_unit = 'K'
 
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(
             UnitError,
             match='The unit of energy is wrong',
@@ -289,13 +334,13 @@ class TestDetailedBalanceFactor:
             )
 
     def test_incompatible_temperature_unit_raises(self):
-        # When
+        # WHEN
         energy = 2.0
         T = 100
         energy_unit = 'meV'
         temperature_unit = 's'
 
-        # Then Expect
+        # THEN EXPECT
         with pytest.raises(
             UnitError,
             match='The unit of temperature is wrong',

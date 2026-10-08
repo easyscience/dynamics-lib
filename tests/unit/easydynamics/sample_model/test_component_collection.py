@@ -9,6 +9,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 from scipy.integrate import simpson
 
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
@@ -113,7 +114,9 @@ class TestComponentCollection:
         with pytest.raises(TypeError, match='unit must be'):
             ComponentCollection(x_unit=123)
 
-    # ───── Component Management ─────
+    #############
+    # Component Management
+    #############
 
     def test_append_component(self, component_collection):
         # WHEN
@@ -308,7 +311,9 @@ class TestComponentCollection:
         ):
             component_collection.evaluate_component(x, 123)
 
-    # ───── Utilities ─────
+    #############
+    # Utilities
+    #############
 
     def test_normalize_area(self, component_collection):
         # WHEN THEN
@@ -676,7 +681,95 @@ class TestComponentCollection:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('1/meV')
 
-    # ───── Regression tests ─────
+    #############
+    # Versioning
+    #############
+
+    def test_version_starts_at_zero_and_bumps_on_mutation(self):
+        # WHEN a freshly constructed collection with initial components
+        collection = ComponentCollection(components=[Gaussian(name='G1'), Lorentzian(name='L1')])
+
+        # EXPECT it starts at version 0
+        assert collection.version == 0
+
+        # THEN structural mutations bump the version
+        collection.append_component(Gaussian(name='G2'))
+        assert collection.version == 1
+        collection.pop('G2')
+        assert collection.version == 2
+
+    #############
+    # Slicing
+    #############
+
+    def test_getitem_slice_returns_working_collection(self, component_collection):
+        "Regression: slicing used to crash because the base slice path called the wrong ctor"
+        # WHEN THEN
+        sliced = component_collection[:1]
+
+        # EXPECT a working collection of the same class, carrying the units, sharing the
+        # component objects
+        assert type(sliced) is ComponentCollection
+        assert len(sliced) == 1
+        assert sliced[0] is component_collection[0]
+        assert sliced.x_unit == component_collection.x_unit
+        assert sliced.y_unit == component_collection.y_unit
+
+        # EXPECT the slice is usable
+        x = np.linspace(-5, 5, 11)
+        np.testing.assert_allclose(sliced.evaluate(x), component_collection[0].evaluate(x))
+
+    #############
+    # Regression tests
+    #############
+
+    def test_normalize_area_negative_area_raises(self, component_collection):
+        "Regression: negative areas used to be silently clamped by normalization"
+        # WHEN
+        component_collection[0].area.min = -10.0
+        component_collection[0].area = -2.0
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'Negative area'):
+            component_collection.normalize_area()
+
+    def test_evaluate_empty_invalid_output_raises(self):
+        "Regression: the empty-collection path used to skip output validation"
+        # WHEN
+        collection = ComponentCollection(display_name='EmptyModel')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r"output must be 'numpy' or 'scipp'"):
+            collection.evaluate(np.linspace(-1, 1, 5), output='invalid')
+
+    def test_evaluate_empty_scalar_shape_matches_non_empty_path(self):
+        "Regression: empty and non-empty paths must agree on the output shape for scalar x"
+        # WHEN an empty and a non-empty collection evaluated at a scalar
+        empty = ComponentCollection(display_name='EmptyModel')
+        non_empty = ComponentCollection(components=Gaussian(name='G'))
+
+        # THEN
+        empty_result = empty.evaluate(0.5)
+        non_empty_result = non_empty.evaluate(0.5)
+
+        # EXPECT both return 1D arrays of the same shape
+        assert empty_result.shape == non_empty_result.shape == (1,)
+        assert np.all(empty_result == pytest.approx(0.0))
+
+    def test_evaluate_component_ambiguous_name_raises(self):
+        "Regression: duplicate names used to silently evaluate the first match"
+        # WHEN a collection with two components sharing a name
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            collection = ComponentCollection(
+                components=[
+                    Gaussian(name='SameName', area=1.0),
+                    Gaussian(name='SameName', area=2.0),
+                ]
+            )
+
+        # THEN EXPECT
+        with pytest.raises(AmbiguousNameError, match=r"Ambiguous name 'SameName'"):
+            collection.evaluate_component(np.linspace(-1, 1, 5), 'SameName')
 
     def test_evaluate_scipp_output_multi_component_does_not_raise(self, component_collection):
         # WHEN: collection with two components (Gaussian + Lorentzian)

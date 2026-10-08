@@ -13,7 +13,9 @@ class TestCreateParametersMixin:
     def dummy_model(self):
         return CreateParametersMixin()
 
-    # ------------- Area----------------------
+    #############
+    # Area
+    #############
     @pytest.mark.parametrize('unit', ['meV', 'eV'])
     @pytest.mark.parametrize('area_input', [2, 2.0])
     def test_create_area_parameter_from_numeric(self, dummy_model, area_input, unit):
@@ -53,7 +55,40 @@ class TestCreateParametersMixin:
 
         assert area_param.min == -float('inf')  # No min constraint for negative area
 
-    # ------------- Center----------------------
+    #############
+    # Bounded value assignment
+    #############
+    def test_set_bounded_parameter_value_within_bounds(self, dummy_model):
+        # WHEN
+        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+
+        # THEN
+        dummy_model._set_bounded_parameter_value(param, 1.5, 'p')
+
+        # EXPECT
+        assert param.value == pytest.approx(1.5)
+
+    @pytest.mark.parametrize('out_of_bounds', [-1.0, 3.0], ids=['below_min', 'above_max'])
+    def test_set_bounded_parameter_value_out_of_bounds_raises(self, dummy_model, out_of_bounds):
+        # WHEN
+        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+
+        # THEN EXPECT the assignment raises instead of silently clamping, leaving the value
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            dummy_model._set_bounded_parameter_value(param, out_of_bounds, 'p')
+        assert param.value == pytest.approx(1.0)
+
+    def test_set_bounded_parameter_value_invalid_type_raises(self, dummy_model):
+        # WHEN
+        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+
+        # THEN EXPECT
+        with pytest.raises(TypeError, match='p must be a number'):
+            dummy_model._set_bounded_parameter_value(param, 'invalid', 'p')
+
+    #############
+    # Center
+    #############
     @pytest.mark.parametrize('unit', ['meV', 'eV'])
     @pytest.mark.parametrize('center_input', [0, 0.0])
     def test_create_center_parameter_from_numeric(self, dummy_model, center_input, unit):

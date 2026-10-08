@@ -35,9 +35,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
     fixed at 0:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    v = sm.Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
+    v = edyn.Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
     x = np.linspace(-2, 2, 100)
     values = v.evaluate(x)
     ```
@@ -47,9 +47,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
     Pass a numeric value for ``center`` to leave it free during fitting, and use the property
     setters to adjust the two width components after construction:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    v = sm.Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
+    v = edyn.Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
     v.gaussian_width = 0.1
     v.lorentzian_width = 0.2
     ```
@@ -57,10 +57,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        area: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter | None = None,
-        gaussian_width: Numeric | Parameter = 1.0,
-        lorentzian_width: Numeric | Parameter = 1.0,
+        area: Numeric = 1.0,
+        center: Numeric | None = None,
+        gaussian_width: Numeric = 1.0,
+        lorentzian_width: Numeric = 1.0,
         x_unit: str | sc.Unit = 'meV',
         y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Voigt',
@@ -72,13 +72,13 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric | Parameter, default=1.0
+        area : Numeric, default=1.0
             Integrated area under the Voigt profile.  Unit is ``x_unit * y_unit``.
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
-        gaussian_width : Numeric | Parameter, default=1.0
+        gaussian_width : Numeric, default=1.0
             Gaussian component standard deviation (sigma) in x_unit.  Must be strictly positive.
-        lorentzian_width : Numeric | Parameter, default=1.0
+        lorentzian_width : Numeric, default=1.0
             Lorentzian component HWHM (gamma) in x_unit.  Must be strictly positive.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center, gaussian_width, and lorentzian_width are stored in this
@@ -139,14 +139,13 @@ class Voigt(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -213,7 +212,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             raise TypeError('gaussian_width must be a number')
         if float(value) <= 0:
             raise ValueError('gaussian_width must be positive')
-        self._gaussian_width.value = value
+        self._set_bounded_parameter_value(self._gaussian_width, value, 'gaussian_width')
 
     @property
     def lorentzian_width(self) -> Parameter:
@@ -247,7 +246,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             raise TypeError('lorentzian_width must be a number')
         if float(value) <= 0:
             raise ValueError('lorentzian_width must be positive')
-        self._lorentzian_width.value = value
+        self._set_bounded_parameter_value(self._lorentzian_width, value, 'lorentzian_width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         """

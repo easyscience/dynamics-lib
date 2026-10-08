@@ -257,3 +257,118 @@ class TestEasyDynamicsList:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Index must be an int, slice, or str'):
             easy_dynamics_list[1.5]
+
+    #############
+    # Item assignment
+    #############
+
+    def test_setitem(self, easy_dynamics_list):
+        """Test assigning an item by index replaces it and nothing else."""
+        # WHEN
+        new_gaussian = Gaussian(name='ReplacementGaussian')
+
+        # THEN
+        easy_dynamics_list[0] = new_gaussian
+
+        # EXPECT
+        assert easy_dynamics_list[0] is new_gaussian
+        assert len(easy_dynamics_list) == 2
+
+    def test_setitem_invalid_type_raises(self, easy_dynamics_list):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            easy_dynamics_list[0] = 'Not a ModelComponent'
+
+    def test_setitem_repeated_component_warns(self, easy_dynamics_list):
+        """Test that item assignment warns and ignores like append/insert do."""
+        # WHEN THEN EXPECT assigning an item already in the list warns and is ignored
+        with pytest.warns(UserWarning, match=r'already in EasyDynamicsList'):
+            easy_dynamics_list[1] = easy_dynamics_list[0]
+
+        assert easy_dynamics_list[1] is not easy_dynamics_list[0]
+
+    #############
+    # Versioning
+    #############
+
+    def test_version_starts_at_zero(self, easy_dynamics_list):
+        # WHEN a freshly constructed list, even with initial items
+        # THEN EXPECT version is 0
+        assert easy_dynamics_list.version == 0
+
+    def test_version_is_read_only(self, easy_dynamics_list):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            easy_dynamics_list.version = 5
+
+    def test_version_bumps_on_every_mutator(self, easy_dynamics_list):
+        """Every mutating operation increments version; reads do not."""
+        # WHEN
+        version = easy_dynamics_list.version
+
+        # THEN append
+        easy_dynamics_list.append(Gaussian(name='V1'))
+        # EXPECT
+        assert easy_dynamics_list.version == version + 1
+
+        # THEN insert
+        easy_dynamics_list.insert(0, Gaussian(name='V2'))
+        # EXPECT
+        assert easy_dynamics_list.version == version + 2
+
+        # THEN extend (one bump per item)
+        easy_dynamics_list.extend([Gaussian(name='V3'), Gaussian(name='V4')])
+        # EXPECT
+        assert easy_dynamics_list.version == version + 4
+
+        # THEN item assignment
+        easy_dynamics_list[0] = Gaussian(name='V5')
+        # EXPECT
+        assert easy_dynamics_list.version == version + 5
+
+        # THEN pop by index and by name
+        easy_dynamics_list.pop(0)
+        easy_dynamics_list.pop('V1')
+        # EXPECT
+        assert easy_dynamics_list.version == version + 7
+
+        # THEN remove and del
+        item = easy_dynamics_list[0]
+        easy_dynamics_list.remove(item)
+        del easy_dynamics_list[0]
+        # EXPECT
+        assert easy_dynamics_list.version == version + 9
+
+        # THEN sort
+        easy_dynamics_list.sort(key=lambda c: c.name)
+        # EXPECT
+        assert easy_dynamics_list.version == version + 10
+
+        # THEN clear
+        n_items = len(easy_dynamics_list)
+        easy_dynamics_list.clear()
+        # EXPECT one bump per removed item, and reading version mutates nothing
+        assert easy_dynamics_list.version == version + 10 + n_items
+        assert easy_dynamics_list.version == version + 10 + n_items
+
+    def test_version_does_not_bump_on_ignored_duplicate(self, easy_dynamics_list):
+        # WHEN
+        version = easy_dynamics_list.version
+
+        # THEN an insert that is ignored because the item is already in the list
+        with pytest.warns(UserWarning, match=r'already in EasyDynamicsList'):
+            easy_dynamics_list.insert(1, easy_dynamics_list[0])
+
+        # EXPECT no mutation happened, so no version bump
+        assert easy_dynamics_list.version == version
+
+    def test_version_does_not_bump_on_failed_mutation(self, easy_dynamics_list):
+        # WHEN
+        version = easy_dynamics_list.version
+
+        # THEN EXPECT failed mutations leave the version unchanged
+        with pytest.raises(TypeError):
+            easy_dynamics_list.append('Not a ModelComponent')
+        with pytest.raises(KeyError):
+            easy_dynamics_list.pop('Nonexistent')
+        assert easy_dynamics_list.version == version

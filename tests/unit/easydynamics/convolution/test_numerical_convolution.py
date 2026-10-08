@@ -218,17 +218,17 @@ class TestNumericalConvolution:
         monkeypatch.setattr(
             conv.sample_components,
             'evaluate',
-            lambda x: np.ones_like(dense),  # noqa: ARG005
+            lambda x: np.ones_like(dense),  # ruff: ignore[unused-lambda-argument]
         )
         monkeypatch.setattr(
             conv.resolution_components,
             'evaluate',
-            lambda x: np.ones_like(dense),  # noqa: ARG005
+            lambda x: np.ones_like(dense),  # ruff: ignore[unused-lambda-argument]
         )
 
         db_called = False
 
-        def fake_db(*args, **kwargs):  # noqa: ARG001
+        def fake_db(*args, **kwargs):  # ruff: ignore[unused-function-argument]
             nonlocal db_called
             db_called = True
             return np.ones_like(dense)
@@ -240,12 +240,12 @@ class TestNumericalConvolution:
 
         monkeypatch.setattr(
             'easydynamics.convolution.numerical_convolution.fftconvolve',
-            lambda a, b, mode: np.ones_like(dense),  # noqa: ARG005
+            lambda a, b, mode: np.ones_like(dense),  # ruff: ignore[unused-lambda-argument]
         )
 
         interp_called = False
 
-        def fake_interp(*args, **kwargs):  # noqa: ARG001
+        def fake_interp(*args, **kwargs):  # ruff: ignore[unused-function-argument]
             nonlocal interp_called
             interp_called = True
             return np.ones_like(conv.energy.values)

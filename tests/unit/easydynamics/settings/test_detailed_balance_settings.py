@@ -109,6 +109,36 @@ class TestDetailedBalanceSettings:
         with pytest.raises(expected_exception, match=match):
             default_detailed_balance_settings.normalize_detailed_balance = value
 
+    #############
+    # Plan invalidation
+    #############
+
+    def test_setters_bump_plan_version(self, default_detailed_balance_settings):
+        "Regression: flag toggles used to be invisible to convolvers holding these settings"
+        # WHEN
+        settings = default_detailed_balance_settings
+        version_before = settings._plan_version
+
+        # THEN toggling each flag
+        settings.use_detailed_balance = False
+        settings.normalize_detailed_balance = False
+
+        # EXPECT one bump per changed flag
+        assert settings._plan_version == version_before + 2
+
+    def test_invalidate_plan_bumps_version(self, default_detailed_balance_settings):
+        # WHEN
+        settings = default_detailed_balance_settings
+        version_before = settings._plan_version
+
+        # THEN
+        settings._invalidate_plan()
+
+        # EXPECT
+        assert settings._plan_version == version_before + 1
+        assert settings._plan_valid_for(version_before) is False
+        assert settings._plan_valid_for(settings._plan_version) is True
+
     def test_repr_default(self, default_detailed_balance_settings):
         # WHEN
         repr_str = repr(default_detailed_balance_settings)

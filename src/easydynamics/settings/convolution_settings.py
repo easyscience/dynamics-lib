@@ -140,44 +140,51 @@ class ConvolutionSettings(EasyDynamicsBase):
         self._invalidate_plan()
 
     @property
-    def extension_factor(self) -> float:
+    def extension_factor(self) -> float | None:
         """
         Get the extension factor.
 
         The extension factor determines how much the energy range is extended on both sides before
-        convolution. 0.2 means extending by 20% of the original energy span on each side
+        convolution. 0.2 means extending by 20% of the original energy span on each side. None is
+        only valid while upsampling is disabled (upsample_factor=None).
 
         Returns
         -------
-        float
-            The extension factor.
+        float | None
+            The extension factor, or None if unset.
         """
 
         return self._extension_factor
 
     @extension_factor.setter
-    def extension_factor(self, factor: Numeric) -> None:
+    def extension_factor(self, factor: Numeric | None) -> None:
         """
         Set the extension factor and recreate the dense grid.
 
         The extension factor determines how much the energy range is extended on both sides before
-        convolution. 0.2 means extending by 20% of the original energy span on each side.
+        convolution. 0.2 means extending by 20% of the original energy span on each side. None is
+        accepted (matching the constructor), but convolvers require a numeric extension factor
+        whenever upsample_factor is set.
 
         Parameters
         ----------
-        factor : Numeric
+        factor : Numeric | None
             The new extension factor.
 
         Raises
         ------
         TypeError
-            If factor is not a number.
+            If factor is neither a number nor None.
         ValueError
             If factor is negative.
         """
+        if factor is None:
+            self._extension_factor = None
+            self._invalidate_plan()
+            return
 
         if not isinstance(factor, Numeric):
-            raise TypeError('Extension factor must be a number.')
+            raise TypeError('Extension factor must be a number or None.')
         if factor < 0.0:
             raise ValueError('Extension factor must be non-negative.')
 

@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import plopp as pp
 import scipp as sc
-from plopp.backends.matplotlib.figure import InteractiveFigure
+from plopp.backends.matplotlib.figure import WidgetFigure
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
 
@@ -404,7 +404,9 @@ class Experiment(EasyDynamicsBase):
             )
         if self._data is None:
             raise ValueError('No data to rebin. Please load data first.')
-        binned_data = self._data.copy()
+        # sc.bin cannot handle multi-dimensional dense data with bin-edge
+        # coordinates, so convert them to bin centers first.
+        binned_data = self._convert_to_bin_centers(self._data.copy())
         dim_copy = dimensions.copy()
         for dim, value in dim_copy.items():
             if not isinstance(dim, str):
@@ -418,9 +420,6 @@ class Experiment(EasyDynamicsBase):
                 )
             if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
                 value = int(value)
-                # This line can be removed when scipp resize support
-                # resizing with coordinates
-                dimensions[dim] = value
             if not (isinstance(value, (int, sc.Variable))):
                 raise TypeError(
                     f'Dimension values must be integers or sc.Variable. '
@@ -441,7 +440,7 @@ class Experiment(EasyDynamicsBase):
         slicer: bool = False,
         transpose_axes: bool = False,
         **kwargs: dict,
-    ) -> InteractiveFigure:
+    ) -> WidgetFigure:
         """
         Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
@@ -457,7 +456,7 @@ class Experiment(EasyDynamicsBase):
 
         Returns
         -------
-        InteractiveFigure
+        WidgetFigure
             A plot of the data and model.
 
         Raises
@@ -582,6 +581,21 @@ class Experiment(EasyDynamicsBase):
         y = data.values
         var = data.variances
         return x, y, var
+
+    @property
+    def has_variances(self) -> bool:
+        """
+        Whether the data carries variances.
+
+        When it does not, :meth:`extract_x_y_weights_only_finite` falls back to all-ones weights,
+        which are placeholders for the fit rather than measured uncertainties.
+
+        Returns
+        -------
+        bool
+            True when there is data and it has variances.
+        """
+        return self._binned_data is not None and self._binned_data.variances is not None
 
     def extract_x_y_weights_only_finite(
         self, Q_index: int

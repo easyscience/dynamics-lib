@@ -34,9 +34,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     (at ±center) are captured by the model:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    dho = sm.DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
+    dho = edyn.DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
     x = np.linspace(-20, 20, 200)
     values = dho.evaluate(x)
     ```
@@ -44,9 +44,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     **Modifying parameters after construction**
 
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    dho = sm.DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
+    dho = edyn.DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
     dho.area = 3.0
     dho.center = 8.0
     dho.width = 0.3
@@ -130,14 +130,13 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         value : Numeric
             New area value (in current area unit = x_unit * y_unit).
 
-        Raises
-        ------
-        TypeError
-            If *value* is not a numeric type.
+        Notes
+        -----
+        A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
+        and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
+        (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
-        self._area.value = value
+        self._set_bounded_parameter_value(self._area, value, 'area')
 
     @property
     def center(self) -> Parameter:
@@ -203,7 +202,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             raise TypeError('width must be a number')
         if float(value) <= 0:
             raise ValueError('width must be positive')
-        self._width.value = value
+        self._set_bounded_parameter_value(self._width, value, 'width')
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""

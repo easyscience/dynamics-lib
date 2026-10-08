@@ -238,6 +238,36 @@ class TestExperiment:
         assert rebinned_data.sizes['Q'] == 6
         assert rebinned_data.sizes['energy'] == 7
 
+    def test_rebin_with_bin_edge_coordinate(self):
+        "Test rebinning data whose energy coordinate is at bin edges"
+        # WHEN
+        Q = sc.linspace('Q', 0.5, 1.5, num=10, unit='1/Angstrom')
+        energy_edges = sc.linspace('energy', -5, 5, num=12, unit='meV')
+        values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 11)))
+        data = sc.DataArray(data=values, coords={'Q': Q, 'energy': energy_edges})
+        experiment = Experiment(data=data)
+
+        # THEN
+        experiment.rebin({'energy': 7})
+
+        # EXPECT
+        rebinned_data = experiment.binned_data
+        assert rebinned_data.sizes['Q'] == 10
+        assert rebinned_data.sizes['energy'] == 7
+
+    def test_rebin_does_not_mutate_the_callers_dimensions_dict(self, experiment):
+        "Regression: rebin must not write int-converted values back into the caller's dict"
+        # WHEN
+        dimensions = {'Q': 6.0, 'energy': 7}
+        original = dict(dimensions)
+
+        # THEN
+        experiment.rebin(dimensions)
+
+        # EXPECT the caller's dict is unchanged (6.0 not silently replaced by 6)
+        assert dimensions == original
+        assert isinstance(dimensions['Q'], float)
+
     def test_rebin_no_data_raises(self):
         "Test rebinning data when no data is present"
         # WHEN
@@ -619,6 +649,19 @@ class TestExperiment:
         assert np.array_equal(y, experiment_with_data.data.values[Q_index])
         assert np.array_equal(weights, np.ones_like(y))
         assert np.array_equal(mask, np.isfinite(y) & np.isfinite(x))
+
+    def test_has_variances_true_when_the_data_carries_them(self, experiment_with_data):
+        # WHEN THEN EXPECT
+        assert experiment_with_data.has_variances
+
+    def test_has_variances_false_when_the_data_has_none(self, experiment):
+        # WHEN THEN EXPECT the fixture's data has no variances, so the all-ones weights that
+        # extract_x_y_weights_only_finite falls back to are recognisable as placeholders
+        assert not experiment.has_variances
+
+    def test_has_variances_false_without_data(self):
+        # WHEN THEN EXPECT
+        assert not Experiment().has_variances
 
     ##############
     # test dunder methods

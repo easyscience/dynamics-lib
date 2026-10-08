@@ -21,6 +21,42 @@ class CreateParametersMixin:
     area_unit = x_unit * y_unit, so when y_unit='dimensionless', area_unit = x_unit.
     """
 
+    @staticmethod
+    def _set_bounded_parameter_value(param: Parameter, value: Numeric, label: str) -> None:
+        """
+        Assign a value to a bounded parameter, raising instead of silently clamping.
+
+        easyscience's ``Parameter.value`` setter silently clamps out-of-bounds values to the
+        nearest bound, which corrupts the parameter (e.g. assigning -1.0 to an area with ``min=0``
+        stores 0.0). Component setters route assignments through this helper so a bounds violation
+        raises a clear error instead.
+
+        Parameters
+        ----------
+        param : Parameter
+            The parameter to assign to.
+        value : Numeric
+            The new value.
+        label : str
+            Name of the parameter used in error messages (e.g. ``'area'``, ``'width'``).
+
+        Raises
+        ------
+        TypeError
+            If *value* is not a numeric type.
+        ValueError
+            If *value* violates the parameter's bounds.
+        """
+        if not isinstance(value, Numeric):
+            raise TypeError(f'{label} must be a number')
+        value = float(value)
+        if value < param.min or value > param.max:
+            raise ValueError(
+                f'Cannot set {label} to {value}: it violates the parameter bounds '
+                f'[{param.min}, {param.max}]. Adjust the bounds first if this value is intended.'
+            )
+        param.value = value
+
     def _create_area_parameter(
         self,
         area: Numeric,

@@ -33,13 +33,13 @@ class InstrumentModel(NewBase):
 
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.05))
-    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
+    resolution_model = edyn.ResolutionModel(components=edyn.Gaussian(width=0.05))
+    background_model = edyn.BackgroundModel(components=edyn.Polynomial(coefficients=[0.001]))
 
-    instrument_model = sm.InstrumentModel(
+    instrument_model = edyn.InstrumentModel(
         Q=Q,
         resolution_model=resolution_model,
         background_model=background_model,

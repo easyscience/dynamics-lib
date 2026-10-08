@@ -265,9 +265,9 @@ class TestDeltaLorentz:
         with pytest.raises(expected_exception, match=expected_message):
             DeltaLorentz(**kwargs)
 
-    # ------------------------------------------------------------------
+    #############
     # Properties
-    # ------------------------------------------------------------------
+    #############
     @pytest.mark.parametrize(
         ('attribute', 'value', 'expected'),
         [
@@ -418,9 +418,9 @@ class TestDeltaLorentz:
         with pytest.raises(exception, match=message):
             setattr(delta_lorentz_model, attribute, value)
 
-    # ------------------------------------------------------------------
+    #############
     # Other methods
-    # ------------------------------------------------------------------
+    #############
 
     def test_calculate_width_without_Q(self, delta_lorentz_model):
         # WHEN THEN
@@ -564,6 +564,47 @@ class TestDeltaLorentz:
                 in collection[1].area.dependency_expression
             )
             assert 'A_0' in collection[1].area.dependency_expression
+
+    def test_create_component_collections_installs_and_stays_in_sync(
+        self, delta_lorentz_model_with_Q
+    ):
+        # WHEN
+        model = delta_lorentz_model_with_Q
+
+        # THEN
+        collections = model.create_component_collections()
+
+        # EXPECT the returned collections are the installed (live) ones (regression: they
+        # were returned without being installed, while the per-Q parameter lists were
+        # replaced, desynchronizing calculate_width from the installed components)
+        assert collections is model.get_component_collections()
+
+        # THEN setting a per-Q width parameter
+        model._lorentzian_width_list[0].value = 0.5
+
+        # EXPECT the change is visible in the installed component and in calculate_width
+        assert collections[0][0].width.value == pytest.approx(0.5)
+        assert model.calculate_width()[0] == pytest.approx(0.5)
+
+        # EXPECT the same holds for the per-Q amplitude parameters
+        model._A_0_list[0].value = 0.25
+        assert model.calculate_EISF()[0] == pytest.approx(0.25)
+        assert collections[0][1].area.value == pytest.approx(0.25)
+
+    def test_per_Q_parameter_and_collection_names(self, delta_lorentz_model_with_Q):
+        # WHEN
+        model = delta_lorentz_model_with_Q
+
+        # THEN
+        collections = model.get_component_collections()
+
+        # EXPECT the per-Q amplitudes carry the model name (like the widths carry the
+        # Lorentzian name), and the per-Q collections get a name, not just a display name
+        for a0, a1 in zip(model._A_0_list, model._A_1_list, strict=True):
+            assert a0.name == 'DeltaLorentz A_0'
+            assert a1.name == 'DeltaLorentz A_1'
+        assert collections[0].name == 'DeltaLorentz_Q0.50'
+        assert collections[0].display_name == 'DeltaLorentz_Q0.50'
 
     @pytest.mark.parametrize(
         ('Q_index', 'expected_exception', 'expected_message'),
@@ -923,7 +964,9 @@ class TestDeltaLorentz:
         # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
         assert 'x_unit=meV, y_unit=dimensionless' in repr_str
 
-    # ───── Regression tests ─────
+    #############
+    # Regression tests
+    #############
 
     def test_calculate_width_with_Q_subset(self, delta_lorentz_model_with_Q):
         # WHEN: Q-varying widths with distinguishable per-Q values
@@ -972,21 +1015,23 @@ class TestDeltaLorentz:
         with pytest.raises(ValueError, match='Q must be provided'):
             delta_lorentz_model_with_Q.calculate_width()
 
+    #############
+    # Fit targets and Q validation
+    #############
 
-def test_get_fit_targets_includes_delta_area():
-    # GIVEN a DeltaLorentz model
-    model = DeltaLorentz(delta_name='Delta function', lorentzian_name='Lorentzian')
-    # WHEN
-    targets = model.get_fit_targets()
-    # EXPECT base area/width plus the delta_area prediction
-    assert [t.name for t in targets] == ['area', 'width', 'delta_area']
-    delta_area = next(t for t in targets if t.name == 'delta_area')
-    assert delta_area.dataset_key == 'Delta function area'
+    def test_get_fit_targets_includes_delta_area(self):
+        # WHEN a DeltaLorentz model
+        model = DeltaLorentz(delta_name='Delta function', lorentzian_name='Lorentzian')
+        # THEN
+        targets = model.get_fit_targets()
+        # EXPECT base area/width plus the delta_area prediction
+        assert [t.name for t in targets] == ['area', 'width', 'delta_area']
+        delta_area = next(t for t in targets if t.name == 'delta_area')
+        assert delta_area.dataset_key == 'Delta function area'
 
-
-def test_calculate_width_raises_when_Q_variation_enabled_but_Q_unset():
-    # GIVEN Q-variation enabled for the width but Q never set on the model (empty per-Q list)
-    model = DeltaLorentz(lorentzian_width=0.1, allow_Q_variation={'lorentzian_width': True})
-    # WHEN a Q is requested THEN EXPECT the empty per-Q width list to be reported
-    with pytest.raises(ValueError, match=r'Lorentzian width Q-variation list is empty'):
-        model.calculate_width(np.array([1.0]))
+    def test_calculate_width_raises_when_Q_variation_enabled_but_Q_unset(self):
+        # WHEN Q-variation enabled for the width but Q never set on the model (empty per-Q list)
+        model = DeltaLorentz(lorentzian_width=0.1, allow_Q_variation={'lorentzian_width': True})
+        # THEN EXPECT the empty per-Q width list to be reported when a Q is requested
+        with pytest.raises(ValueError, match=r'Lorentzian width Q-variation list is empty'):
+            model.calculate_width(np.array([1.0]))

@@ -114,7 +114,7 @@ class TestAnalyticalConvolution:
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair
-        def mock_convolute_analytic_pair(sample_component, resolution_component):  # noqa: ARG001
+        def mock_convolute_analytic_pair(sample_component, resolution_component):  # ruff: ignore[unused-function-argument]
             return np.full_like(default_analytical_convolution.energy.values, fill_value=1.0)
 
         with patch.object(
@@ -166,7 +166,7 @@ class TestAnalyticalConvolution:
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair
-        def mock_convolute_analytic_pair(sample_component, resolution_component):  # noqa: ARG001
+        def mock_convolute_analytic_pair(sample_component, resolution_component):  # ruff: ignore[unused-function-argument]
             return np.full_like(default_analytical_convolution.energy.values, fill_value=1.0)
 
         with patch.object(

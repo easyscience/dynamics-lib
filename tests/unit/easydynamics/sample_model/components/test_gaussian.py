@@ -131,6 +131,35 @@ class TestGaussian:
         with pytest.raises(ValueError, match='width must be positive'):
             gaussian.width = -0.5
 
+    def test_area_setter_out_of_bounds_raises(self, gaussian: Gaussian):
+        # WHEN the fixture's area was created non-negative, so it carries min=0
+        original_area = gaussian.area.value
+
+        # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            gaussian.area = -1.0
+        assert gaussian.area.value == pytest.approx(original_area)
+
+    def test_area_setter_allows_negative_when_unbounded(self):
+        # WHEN a Gaussian constructed with a negative area gets no lower bound
+        with pytest.warns(UserWarning, match='may not be physically meaningful'):
+            gaussian = Gaussian(area=-2.0)
+
+        # THEN
+        gaussian.area = -1.0
+
+        # EXPECT
+        assert gaussian.area.value == pytest.approx(-1.0)
+
+    def test_width_setter_below_minimum_raises(self, gaussian: Gaussian):
+        # WHEN the width parameter carries an absolute minimum (1e-10)
+        original_width = gaussian.width.value
+
+        # THEN EXPECT a tiny positive width below the bound raises instead of being clamped
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            gaussian.width = 1e-12
+        assert gaussian.width.value == pytest.approx(original_width)
+
     def test_evaluate(self, gaussian: Gaussian):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])

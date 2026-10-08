@@ -32,9 +32,8 @@ class FitBinding(EasyDynamicsBase):
     values):
     ```python
     import easydynamics as edyn
-    import easydynamics.sample_model as sm
 
-    fit_func = sm.Polynomial(
+    fit_func = edyn.Polynomial(
         coefficients=[3.7, -0.5],
         x_unit='1/angstrom',
         y_unit='meV',
@@ -49,7 +48,7 @@ class FitBinding(EasyDynamicsBase):
     ``'delta_area'``). With ``targets=None`` all predictions are fitted against default dataset
     keys derived from the model's component names:
     ```python
-    brownian = sm.BrownianTranslationalDiffusion(
+    brownian = edyn.BrownianTranslationalDiffusion(
         diffusion_coefficient=2.4e-9,
         scale=0.5,
         lorentzian_name='Lorentzian',
@@ -63,7 +62,7 @@ class FitBinding(EasyDynamicsBase):
     ```python
     binding = edyn.FitBinding(model=brownian, targets=['width'])
 
-    delta_lorentz = sm.DeltaLorentz(A_0=0.5, lorentzian_width=0.1)
+    delta_lorentz = edyn.DeltaLorentz(A_0=0.5, lorentzian_width=0.1)
     binding = edyn.FitBinding(
         model=delta_lorentz,
         targets={

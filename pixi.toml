@@ -3,14 +3,13 @@
 ###########
 
 [workspace]
-
 # Supported platforms for the lock file (pixi.lock)
 platforms = [
   'win-64',
   # Set minimum supported version for glibc to be 2.35 to ensure packages
   # like `crysfml` that only have wheels for glibc 2.35+
   # (manylinux_2_35_x86_64) are used.
-  #libc = { family = 'glibc', version = '2.35' }
+  # libc = { family = 'glibc', version = '2.35' }
   { platform = 'linux-64', glibc = '2.35' },
   # Set minimum supported version for macOS to be 14.0 to ensure packages
   # like `scipp` that only have wheels for macOS 14.0+ (macosx_14_0_arm64)
@@ -45,10 +44,10 @@ python = '3.14.*'
 # editable installations.
 
 [feature.dev.dependencies]
-nodejs = '*'      # Required for Prettier (non-Python formatting)
+nodejs = '*'  # Required for Prettier (non-Python formatting)
 jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'     # Interactive Python shell
-pixi-kernel = '*' # Pixi Jupyter kernel
+ipython = '*'  # Interactive Python shell
+pixi-kernel = '*'  # Pixi Jupyter kernel
 
 [feature.dev.pypi-dependencies]
 pip = '*'
@@ -59,8 +58,8 @@ easydynamics = { path = '.', editable = true, extras = ['dev'] }
 
 [feature.user.dependencies]
 jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'     # Interactive Python shell
-pixi-kernel = '*' # Pixi Jupyter kernel
+ipython = '*'  # Interactive Python shell
+pixi-kernel = '*'  # Pixi Jupyter kernel
 
 [feature.user.pypi-dependencies]
 pip = '*'
@@ -71,7 +70,6 @@ easydynamics = '*'
 ##############
 
 [environments]
-
 # The `default` feature is always included in all environments.
 # Additional features can be specified per environment.
 
@@ -92,7 +90,6 @@ user = { features = ['py-max', 'user'] }
 #######
 
 [tasks]
-
 ##################
 # 🧪 Testing Tasks
 ##################
@@ -100,7 +97,13 @@ user = { features = ['py-max', 'user'] }
 unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
 functional-tests = 'python -m pytest tests/functional/ --color=yes -v'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
-notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v'
+# Warm the pooch cache first. Several notebooks fetch the same file, and running them with
+# '-n auto' has the workers race: one writes the file while another opens it, which fails on
+# Windows. Fetching up front leaves the parallel run with nothing to do but read.
+prefetch-tutorial-data = 'python tools/prefetch_tutorial_data.py'
+notebook-tests = { cmd = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v', depends-on = [
+  'prefetch-tutorial-data',
+] }
 
 test = { depends-on = ['unit-tests'] }
 
@@ -113,7 +116,10 @@ docstring-lint-check = 'pydoclint --quiet src/'
 notebook-lint-check = 'nbqa ruff docs/docs/tutorials/'
 py-lint-check = 'ruff check src/ tests/ docs/docs/tutorials/'
 py-format-check = 'ruff format --check src/ tests/ docs/docs/tutorials/'
-nonpy-format-check = 'npx prettier --list-different --config=prettierrc.toml --ignore-unknown .'
+# Refreshes prettier first, so the local version can never drift behind the one CI installs.
+nonpy-format-check = { cmd = 'npx prettier --list-different --config=prettierrc.toml --ignore-unknown .', depends-on = [
+  'prettier-install',
+] }
 nonpy-format-check-modified = 'python tools/nonpy_prettier_modified.py'
 
 check = 'pre-commit run --hook-stage manual --all-files'
@@ -128,7 +134,9 @@ notebook-lint-fix = 'nbqa ruff --fix docs/docs/tutorials/'
 py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
 py-lint-fix-unsafe = 'ruff check --fix --unsafe-fixes src/ tests/ docs/docs/tutorials/'
 py-format-fix = 'ruff format src/ tests/ docs/docs/tutorials/'
-nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
+nonpy-format-fix = { cmd = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .', depends-on = [
+  'prettier-install',
+] }
 nonpy-format-fix-modified = 'python tools/nonpy_prettier_modified.py --write'
 success-message = 'echo "✅ All auto-formatting steps completed successfully!"'
 
@@ -172,14 +180,16 @@ cov = { depends-on = [
 ########################
 
 notebook-convert = 'jupytext docs/docs/tutorials/*.py --from py:percent --to ipynb'
-notebook-strip = 'nbstripout docs/docs/tutorials/*.ipynb'
+notebook-strip = 'nbstripout docs/docs/tutorials/**/*.ipynb'
 notebook-tweak = 'python tools/tweak_notebooks.py docs/docs/tutorials/'
-notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --overwrite --color=yes -n auto -v'
+notebook-exec = { cmd = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --overwrite --color=yes -n auto -v', depends-on = [
+  'prefetch-tutorial-data',
+] }
 
 notebook-prepare = { depends-on = [
-  #'notebook-convert',
+  # 'notebook-convert',
   'notebook-strip',
-  #'notebook-tweak',
+  # 'notebook-tweak',
 ] }
 
 ########################
@@ -264,14 +274,17 @@ default-build = 'python -m build'
 dist-build = 'python -m build --wheel --outdir dist'
 
 npm-config = 'npm config set registry https://registry.npmjs.org/'
-prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
+# --prefix . keeps the install inside this repository: without it, npm walks up the directory
+# tree and a stray package.json in a parent directory can silently pin an old prettier.
+# @latest keeps local runs on the same version CI installs.
+prettier-install = 'npm install --prefix . --no-save --no-audit --no-fund prettier@latest prettier-plugin-toml@latest'
 
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
 
 post-install = { depends-on = [
   'npm-config',
   'prettier-install',
-  #'pre-commit-setup',
+  # 'pre-commit-setup',
 ] }
 
 ##########################

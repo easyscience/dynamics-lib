@@ -53,6 +53,9 @@ tutorials.
 - [DeltaLorentz](delta_lorentz.ipynb) – Learn how to create and use a
   model with a Delta function and a Lorentzian that have a shared
   Debye-Waller-like Q-dependence.
+- [Mittag-Leffler relaxation](mittag_leffler.ipynb) – Learn how to use
+  the multiscale relaxation model of Hassani et al. (2022), both as a
+  single lineshape and as a diffusion model across Q.
 - [Sample model](sample_model.ipynb) – Learn how to create a model of
   the scattering from your sample including model components and
   diffusion models.
@@ -62,3 +65,6 @@ tutorials.
 - [Analysis](analysis.ipynb) - Learn how to fit a model to your data.
 - [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your
   data at a particular Q.
+- [Bayesian analysis](bayesian.ipynb) - Learn how to map out the full
+  posterior distribution of your parameters, including their
+  correlations, instead of a single best-fit point.

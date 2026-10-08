@@ -14,6 +14,9 @@ from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 
+GAUSSIAN_EXPRESSION = 'A / (sigma*sqrt(2*pi)) * exp(-(x - x0)**2 / (2*sigma**2))'
+GAUSSIAN_UNITS = {'A': 'meV', 'x0': 'meV', 'sigma': 'meV'}
+
 
 class TestExpressionComponent:
     @pytest.fixture
@@ -112,6 +115,15 @@ class TestExpressionComponent:
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Unsupported function'):
             ExpressionComponent('A * unknown_func(x)')
+
+    @pytest.mark.parametrize('colliding', ['name', 'expression', 'x_unit'])
+    def test_symbol_colliding_with_attribute_raises(self, colliding):
+        # WHEN a symbol shadows an existing class attribute, attribute reads would resolve to
+        # the class attribute while writes hit the parameter, silently diverging
+
+        # THEN EXPECT the collision is rejected at construction
+        with pytest.raises(ValueError, match='collides with an existing attribute'):
+            ExpressionComponent(f'{colliding} * x', parameters={colliding: 1.0})
 
     @pytest.mark.parametrize(
         'parameters',
@@ -359,22 +371,17 @@ class TestExpressionComponent:
         expected = np.array([-0.84270079, 0.0, 0.84270079])  # erf(-1), erf(0), erf(1)
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
+    def test_evaluate_raises_when_input_unit_differs_from_x_unit(self):
+        # WHEN an ExpressionComponent with x_unit meV
+        expr = ExpressionComponent('A * x', parameters={'A': 2.0}, x_unit='meV')
+        x = sc.array(dims=['x'], values=[1.0, 2.0], unit='ueV')
+        # THEN EXPECT a UnitError when evaluating with x in a different unit
+        with pytest.raises(sc.UnitError, match=r'cannot auto-convert its parameters'):
+            expr.evaluate(x)
 
-def test_evaluate_raises_when_input_unit_differs_from_x_unit():
-    # GIVEN an ExpressionComponent with x_unit meV
-    expr = ExpressionComponent('A * x', parameters={'A': 2.0}, x_unit='meV')
-    x = sc.array(dims=['x'], values=[1.0, 2.0], unit='ueV')
-    # WHEN evaluating with x in a different unit THEN EXPECT a UnitError
-    with pytest.raises(sc.UnitError, match=r'cannot auto-convert its parameters'):
-        expr.evaluate(x)
-
-
-GAUSSIAN_EXPRESSION = 'A / (sigma*sqrt(2*pi)) * exp(-(x - x0)**2 / (2*sigma**2))'
-GAUSSIAN_UNITS = {'A': 'meV', 'x0': 'meV', 'sigma': 'meV'}
-
-
-class TestExpressionComponentUnitCorrectness:
-    """Compare unit-aware expressions against the built-in components."""
+    #############
+    # Unit correctness: comparisons against the built-in components
+    #############
 
     @pytest.fixture
     def gaussian_expr(self):
@@ -459,8 +466,10 @@ class TestExpressionComponentUnitCorrectness:
                 x_unit='meV',
             )
 
+    #############
+    # Output unit
+    #############
 
-class TestExpressionComponentOutputUnit:
     def test_output_unit_gaussian_is_dimensionless(self):
         # WHEN: area in meV divided by sigma in meV
         expr = ExpressionComponent(
@@ -632,12 +641,71 @@ class TestExpressionComponentOutputUnit:
             x_unit='meV',
         )
 
-        # THEN EXPECT: relabelling A breaks the output unit
+        # THEN EXPECT: relabelling A to an incompatible dimension breaks the output unit
         with pytest.warns(UserWarning, match='does not match'):
+            expr.set_unit('A', 's/meV')
+
+    def test_set_unit_to_a_convertible_output_unit_rescales_instead_of_warning(self):
+        # WHEN: a consistent expression whose output stays dimensionless-compatible
+        expr = ExpressionComponent(
+            'A * (x - x0)',
+            parameters={'A': 1.0, 'x0': 0.5},
+            parameter_units={'A': '1/meV', 'x0': 'meV'},
+            x_unit='meV',
+        )
+
+        # THEN: relabelling A to 1/ueV makes the output meV/ueV, which converts to dimensionless
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
             expr.set_unit('A', '1/ueV')
 
+        # EXPECT: evaluated values carry the 1000x conversion into y_unit
+        assert expr.evaluate(np.array([1.5]))[0] == pytest.approx(1000.0)
 
-class TestExpressionComponentPhysicalConstants:
+    def test_convertible_output_unit_is_rescaled_into_y_unit(self):
+        # WHEN: the jump-diffusion width in SI-flavoured parameter units, wanted in meV
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            expr = ExpressionComponent(
+                'hbar * D * x**2 / (1 + D * x**2 * tau)',
+                parameters={'D': 1e-9, 'tau': 1.0},
+                parameter_units={'D': 'm^2/s', 'tau': 'ps'},
+                x_unit='1/angstrom',
+                y_unit='meV',
+            )
+
+        # THEN
+        value = expr.evaluate(np.array([1.0]))[0]
+
+        # EXPECT: hbar * D * Q^2 / (1 + D * Q^2 * tau) expressed in meV. With
+        # hbar = 6.582120e-13 meV*s, D = 1e-9 m^2/s = 1e11 angstrom^2/s and tau = 1e-12 s the
+        # denominator is 1 + 0.1 and the numerator 6.582120e-2 meV.
+        assert value == pytest.approx(6.582120e-2 / 1.1, rel=1e-5)
+
+    def test_conversion_handles_non_si_dimensions_like_counts(self):
+        # WHEN: an intensity-scaled jump-diffusion width, wanted in counts*meV
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            expr = ExpressionComponent(
+                'counts * hbar * D * x**2 / (1 + D * x**2 * tau)',
+                parameters={'counts': 1.0, 'D': 4.6e-10, 'tau': 22.0},
+                parameter_units={'counts': 'counts', 'D': 'm^2/s', 'tau': 'ps'},
+                x_unit='1/angstrom',
+                y_unit='counts*meV',
+            )
+
+        # THEN
+        value = expr.evaluate(np.array([1.0]))[0]
+
+        # EXPECT: counts is a non-SI dimension scipp carries in the unit powers; only the scale
+        # multiplier is converted. D*Q^2*tau = 4.6e-10 m^2/s * 1e20 /m^2 * 22e-12 s = 1.012.
+        expected = 6.582120e-13 * 4.6e-10 * 1e20 / (1.0 + 4.6e-10 * 1e20 * 22e-12)
+        assert value == pytest.approx(expected, rel=1e-5)
+
+    #############
+    # Physical constants
+    #############
+
     def test_kb_constant_value_and_unit(self):
         # WHEN
         expr = ExpressionComponent(

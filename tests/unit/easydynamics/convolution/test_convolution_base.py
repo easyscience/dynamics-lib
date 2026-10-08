@@ -8,6 +8,7 @@ from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
 
@@ -403,3 +404,85 @@ class TestConvolutionBase:
 
         # EXPECT
         assert cb.y_unit == '1/meV'
+
+    #############
+    # Unit-consistency validation
+    #############
+
+    def test_energy_setter_scipp_with_matching_unit(self, convolution_base):
+        # WHEN
+        new_energy = sc.array(dims=['energy'], values=np.linspace(-3, 3, 7), unit='meV')
+
+        # THEN
+        convolution_base.energy = new_energy
+
+        # EXPECT: accepted and x_unit stays a str
+        assert sc.identical(convolution_base.energy, new_energy)
+        assert isinstance(convolution_base.x_unit, str)
+        assert convolution_base.x_unit == 'meV'
+
+    def test_energy_setter_scipp_with_different_unit_raises(self, convolution_base):
+        "Regression: a mismatched scipp energy used to silently overwrite x_unit with sc.Unit"
+        # WHEN
+        new_energy = sc.array(dims=['energy'], values=np.linspace(-3, 3, 7), unit='ueV')
+
+        # THEN EXPECT: unit changes must go through convert_x_unit
+        with pytest.raises(ValueError, match=r'Use convert_x_unit'):
+            convolution_base.energy = new_energy
+
+        # EXPECT: nothing changed
+        assert convolution_base.x_unit == 'meV'
+        assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
+
+    def test_init_sample_components_x_unit_mismatch_raises(self):
+        # WHEN sample components in ueV but the convolver in meV
+        sample = ComponentCollection(components=Gaussian(name='G', x_unit='ueV'), x_unit='ueV')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'sample_components has x_unit'):
+            ConvolutionBase(
+                energy=np.linspace(-10, 10, 100),
+                sample_components=sample,
+                resolution_components=ComponentCollection(),
+                x_unit='meV',
+            )
+
+    def test_init_resolution_components_x_unit_mismatch_raises(self):
+        # WHEN resolution components in ueV but the convolver in meV
+        resolution = ComponentCollection(components=Gaussian(name='R', x_unit='ueV'), x_unit='ueV')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'resolution_components has x_unit'):
+            ConvolutionBase(
+                energy=np.linspace(-10, 10, 100),
+                sample_components=ComponentCollection(),
+                resolution_components=resolution,
+                x_unit='meV',
+            )
+
+    #############
+    # Delta functions in the resolution
+    #############
+
+    def test_init_with_delta_in_resolution_raises(self):
+        # WHEN
+        resolution = ComponentCollection(components=DeltaFunction(name='D'))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'delta functions'):
+            ConvolutionBase(
+                energy=np.linspace(-10, 10, 100),
+                sample_components=ComponentCollection(),
+                resolution_components=resolution,
+            )
+
+    def test_resolution_components_setter_with_delta_raises(self, convolution_base):
+        # WHEN
+        resolution = ComponentCollection(components=DeltaFunction(name='D'))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'delta functions'):
+            convolution_base.resolution_components = resolution
+
+        # EXPECT: the previous resolution model is kept
+        assert convolution_base.resolution_components is not resolution

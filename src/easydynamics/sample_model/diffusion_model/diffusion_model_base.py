@@ -203,8 +203,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
-                'New Q values are not similar to the old ones. '
-                'To change Q values, first run clear_Q().'
+                f'New Q values are not similar to the old ones on diffusion model '
+                f'{self.name!r}. This typically happens when a diffusion model that was '
+                f'previously used with different Q values (e.g. in another SampleModel) is '
+                f'reused. Run clear_Q(confirm=True) on the diffusion model first, then set '
+                f'the new Q values.'
             )
 
     @property
@@ -317,7 +320,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # ruff: ignore[line-too-long]
             ) from e
 
     def convert_x_unit(self, unit: str | sc.Unit) -> None:

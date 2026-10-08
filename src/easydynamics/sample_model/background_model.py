@@ -20,11 +20,11 @@ class BackgroundModel(ModelBase):
     A constant background independent of Q:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
     Q = np.linspace(0.5, 2, 7)
-    background_model = sm.BackgroundModel(
-        components=sm.Polynomial(coefficients=[0.001]),
+    background_model = edyn.BackgroundModel(
+        components=edyn.Polynomial(coefficients=[0.001]),
         Q=Q,
     )
     energy = np.linspace(-2, 2, 100)
@@ -35,10 +35,10 @@ class BackgroundModel(ModelBase):
 
     Higher-order polynomials can model a sloping or curved baseline:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    background_model = sm.BackgroundModel(
-        components=sm.Polynomial(coefficients=[1.0, 0.1, 0.01]),
+    background_model = edyn.BackgroundModel(
+        components=edyn.Polynomial(coefficients=[1.0, 0.1, 0.01]),
     )
     ```
     """

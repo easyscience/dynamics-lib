@@ -4,17 +4,12 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import DescriptorNumber
 from scipp import UnitError
 from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
-
-hbar_1 = DescriptorNumber('hbar', 1.0)
-hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
 
 class TestBrownianTranslationalDiffusion:
@@ -257,6 +252,17 @@ class TestBrownianTranslationalDiffusion:
             assert component.width.independent is False
             # area.unit = area_unit = x_unit * y_unit
             assert component.area.unit == 'meV'
+
+    def test_create_component_collections_installs_collections(self):
+        # WHEN
+        model = BrownianTranslationalDiffusion(Q=np.array([1.0, 2.0]))
+
+        # THEN
+        collections = model.create_component_collections()
+
+        # EXPECT the returned collections are the installed (live) ones, so callers that
+        # follow the docstring get the same objects the model itself uses
+        assert collections is model.get_component_collections()
 
     def test_write_width_dependency_expression(self, brownian_diffusion_model):
         # WHEN THEN

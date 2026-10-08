@@ -76,6 +76,41 @@ class DetailedBalanceSettings(EasyDynamicsBase):
             unique_name=unique_name,
         )
 
+        # Plan-invalidation bookkeeping for convolvers sharing this settings object.
+        # Mirrors ConvolutionSettings: _plan_version is bumped whenever a flag changes;
+        # each convolver records the version it last rebuilt against and rebuilds when the
+        # versions differ.
+        self._plan_version = 0
+
+    # ------------------------------------------------------------------
+    # Plan invalidation
+    # ------------------------------------------------------------------
+
+    def _invalidate_plan(self) -> None:
+        """
+        Invalidate the convolution plan for every convolver sharing these settings.
+
+        Bumps the plan version, so every convolver that recorded an earlier version rebuilds its
+        plan before the next convolution.
+        """
+        self._plan_version += 1
+
+    def _plan_valid_for(self, seen_version: int) -> bool:
+        """
+        Check whether a convolver that last rebuilt at seen_version can skip rebuilding.
+
+        Parameters
+        ----------
+        seen_version : int
+            The plan version the convolver recorded when it last rebuilt its plan.
+
+        Returns
+        -------
+        bool
+            True if no invalidation happened since the convolver's rebuild.
+        """
+        return seen_version == self._plan_version
+
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
@@ -110,6 +145,7 @@ class DetailedBalanceSettings(EasyDynamicsBase):
         if not isinstance(value, bool):
             raise TypeError('use_detailed_balance must be True or False')
         self._use_detailed_balance = value
+        self._invalidate_plan()
 
     @property
     def normalize_detailed_balance(self) -> bool:
@@ -143,6 +179,7 @@ class DetailedBalanceSettings(EasyDynamicsBase):
         if not isinstance(value, bool):
             raise TypeError('normalize_detailed_balance must be True or False')
         self._normalize_detailed_balance = value
+        self._invalidate_plan()
 
     def __repr__(self) -> str:
         """

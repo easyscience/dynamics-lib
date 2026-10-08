@@ -551,36 +551,39 @@ class TestInstrumentModel:
             assert offset.value == new_offset
 
     def test_on_resolution_model_change(self, instrument_model, resolution_model):
-        # WHEN
+        # WHEN a resolution model that does not know the instrument's Q yet
         new_resolution_model = resolution_model
+        assert new_resolution_model.Q is None
 
         # THEN
-        instrument_model._resolution_model = new_resolution_model
-        instrument_model._on_resolution_model_change()
+        instrument_model.resolution_model = new_resolution_model
 
-        # EXPECT
-        assert instrument_model._resolution_model is new_resolution_model
+        # EXPECT the change callback propagated the instrument's Q to the new model
+        assert instrument_model.resolution_model is new_resolution_model
+        np.testing.assert_array_equal(new_resolution_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_on_background_model_change(self, instrument_model, background_model):
-        # WHEN
+        # WHEN a background model that does not know the instrument's Q yet
         new_background_model = background_model
+        assert new_background_model.Q is None
 
         # THEN
-        instrument_model._background_model = new_background_model
-        instrument_model._on_background_model_change()
+        instrument_model.background_model = new_background_model
 
-        # EXPECT
-        assert instrument_model._background_model is new_background_model
+        # EXPECT the change callback propagated the instrument's Q to the new model
+        assert instrument_model.background_model is new_background_model
+        np.testing.assert_array_equal(new_background_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_repr_contains_expected_fields(self, instrument_model):
         # WHEN THEN
         repr_str = repr(instrument_model)
 
-        # EXPECT
+        # EXPECT values pinned from the fixture's known construction inputs, so a wrong
+        # attribute value cannot satisfy its own interpolation
         assert repr_str.startswith('InstrumentModel(')
-        assert f'unique_name={instrument_model.unique_name!r}' in repr_str
-        assert f'x_unit={instrument_model.x_unit}' in repr_str
-        assert 'Q_len=3' in repr_str
-        assert f'resolution_model={instrument_model._resolution_model!r}' in repr_str
-        assert f'background_model={instrument_model._background_model!r}' in repr_str
         assert repr_str.endswith(')')
+        assert "unique_name='" in repr_str
+        assert 'x_unit=meV' in repr_str
+        assert 'Q_len=3' in repr_str
+        assert 'resolution_model=ResolutionModel(' in repr_str
+        assert 'background_model=BackgroundModel(' in repr_str

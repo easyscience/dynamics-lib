@@ -143,6 +143,24 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(ValueError, match='width must be positive'):
             dho.width = -0.5
 
+    def test_area_setter_out_of_bounds_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN the fixture's area was created non-negative, so it carries min=0
+        original_area = dho.area.value
+
+        # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            dho.area = -1.0
+        assert dho.area.value == pytest.approx(original_area)
+
+    def test_width_setter_below_minimum_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN the width parameter carries an absolute minimum (1e-10)
+        original_width = dho.width.value
+
+        # THEN EXPECT a tiny positive width below the bound raises instead of being clamped
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
+            dho.width = 1e-12
+        assert dho.width.value == pytest.approx(original_width)
+
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, 1.5, 3.0])
