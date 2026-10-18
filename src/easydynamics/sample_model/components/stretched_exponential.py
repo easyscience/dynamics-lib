@@ -66,9 +66,13 @@ _QUAD_STEP = 0.03
 _QUAD_HALF_RANGE = 4.3
 # exp(-u**beta) has fallen below exp(-_QUAD_DECADES) at the far end of the grid.
 _QUAD_DECADES = 50.0
-# The quadrature holds one (energies x nodes) temporary, so long energy axes are evaluated in
-# blocks to keep that intermediate at a few tens of MB instead of scaling with the axis.
-_MAX_BLOCK_ELEMENTS = 1 << 21
+# The quadrature works on (energies x nodes) temporaries, so the energy axis is evaluated in
+# blocks.  The work is memory bound rather than limited by exp and cos, so the blocks are sized to
+# keep each temporary (256 kB) in cache: this is 3-4x faster than blocks of a few MB.
+_MAX_BLOCK_ELEMENTS = 1 << 15
+# exp(-x) is exactly 0.0 in double precision for x above ~745.13, so quadrature nodes where the
+# decaying exponent is guaranteed to exceed this contribute exactly nothing and are dropped.
+_EXP_UNDERFLOW = 746.0
 # The reduced half width spans 1.67 at beta = 2 down to ~7e-27 at beta = 0.05, so it is
 # bracketed in log10(w).  The lower end stays clear of the subnormal range, where the
 # 1 / (w sin theta) rescaling inside _kww_shape would overflow.
@@ -194,7 +198,6 @@ def _kww_shape(w: np.ndarray, beta: float) -> np.ndarray:
     half_range = np.arcsinh((2.0 / np.pi) * np.log(_QUAD_DECADES / cos_rotated) / beta)
     half_steps = int(np.ceil(max(half_range, _QUAD_HALF_RANGE) / _QUAD_STEP))
     nodes, weights = _quadrature_nodes(half_steps)
-    nodes_beta = nodes**beta
 
     # Rescale the grid onto whichever of the two exponents in P decays first, so the integrand
     # always falls off around s = 1 and the same node layout serves every w.  beta_scale is where
@@ -204,20 +207,42 @@ def _kww_shape(w: np.ndarray, beta: float) -> np.ndarray:
     w_scale = np.divide(1.0, abs_w * sin_theta, out=np.full(abs_w.shape, np.inf), where=abs_w > 0)
     scale = np.minimum(beta_scale, w_scale)
 
+    # On the rescaled grid P >= min(s, s**beta) for every w: whichever scale was picked turns its
+    # own term into exactly s or s**beta, and the other term is non-negative.  Nodes beyond the
+    # point where that bound underflows exp contribute exactly zero, so dropping them is lossless.
+    # For beta near 1 and above that is a quarter of the grid.
+    nodes_beta = nodes**beta
+    keep = np.minimum(nodes, nodes_beta) <= _EXP_UNDERFLOW
+    nodes, nodes_beta, weights = nodes[keep], nodes_beta[keep], weights[keep]
+
+    # With s = scale * node, P and Q are per-energy coefficients times the two node profiles:
+    #   P = decay_beta * node**beta + decay_w * node
+    #   Q = phase_w * node - phase_beta * node**beta
+    scale_beta = scale**beta
+    decay_beta = (cos_rotated * scale_beta)[:, np.newaxis]
+    phase_beta = (sin_rotated * scale_beta)[:, np.newaxis]
+    decay_w = (abs_w * sin_theta * scale)[:, np.newaxis]
+    phase_w = (abs_w * cos_theta * scale)[:, np.newaxis]
+
     out = np.empty(abs_w.shape)
     block = max(1, _MAX_BLOCK_ELEMENTS // nodes.size)
     for start in range(0, abs_w.size, block):
         stop = start + block
-        block_w = abs_w[start:stop, np.newaxis]
-        block_scale = scale[start:stop, np.newaxis]
+        # In-place updates keep the number of block-sized temporaries, and so the memory traffic,
+        # to a minimum.
+        integrand = decay_beta[start:stop] * nodes_beta
+        integrand += decay_w[start:stop] * nodes
+        np.negative(integrand, out=integrand)
+        np.exp(integrand, out=integrand)
 
-        s = block_scale * nodes
-        s_beta = block_scale**beta * nodes_beta
-        decaying = cos_rotated * s_beta + (block_w * sin_theta) * s
-        oscillating = (block_w * cos_theta) * s - sin_rotated * s_beta
+        phase = phase_w[start:stop] * nodes
+        phase -= phase_beta[start:stop] * nodes_beta
+        phase += theta
+        np.cos(phase, out=phase)
 
-        integral = (np.exp(-decaying) * np.cos(oscillating + theta) * weights).sum(axis=1)
-        out[start:stop] = integral * scale[start:stop]
+        integrand *= phase
+        out[start:stop] = np.einsum('ij,j->i', integrand, weights)
+    out *= scale
 
     return np.maximum(out, 0.0)
 
