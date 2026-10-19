@@ -15,6 +15,8 @@ from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+
 
 class ChudleyElliottJumpDiffusion(DiffusionModelBase):
     r"""
@@ -47,9 +49,7 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
     ```
     """
 
-    # TODO(markbujehein): Add tutorials # ruff: ignore[line-contains-todo,missing-todo-link]
-    # 1a. add tutorial notebook for this model
-    # 1b. add `See also the tutorials.` remark to bottom of docstring.
+    # TODO(markbujehein): Add tutorials #273 # ruff: ignore[line-contains-todo]
 
     def __init__(
         self,
@@ -73,9 +73,9 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
         residence_time : Numeric, default=1.0
-            Residence time parameter tau, by default 1.0
+            Residence time parameter tau in ps.
         jump_length : Numeric, default=1.0
-            Jump length parameter l, by default 1.0
+            Jump length parameter l in angstrom.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
         x_unit : str | sc.Unit, default='meV'
@@ -101,7 +101,9 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         TypeError
             If ``residence_time`` or ``jump_length`` is not a number.
         ValueError
-            If ``residence_time`` or ``jump_length`` is negative.
+            If ``jump_length`` is negative.
+        ValueError
+            If ``residence_time`` is non-positive.
         """
         super().__init__(
             Q=Q,
@@ -118,8 +120,8 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         if not isinstance(residence_time, Numeric):
             raise TypeError('residence_time must be a number.')
 
-        if float(residence_time) < 0:
-            raise ValueError('residence_time must be non-negative.')
+        if float(residence_time) < MINIMUM_WIDTH:
+            raise ValueError(f'residence_time must be at least {MINIMUM_WIDTH}.')
 
         if not isinstance(jump_length, Numeric):
             raise TypeError('jump_length must be a number.')
@@ -133,7 +135,7 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
             value=float(residence_time),
             fixed=False,
             unit='ps',
-            min=0.0,
+            min=MINIMUM_WIDTH,
         )
 
         jump_length = Parameter(
@@ -182,12 +184,13 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         TypeError
             If residence_time is not a number.
         ValueError
-            If residence_time is negative.
+            If residence_time is non-positive.
         """
         if not isinstance(residence_time, Numeric):
             raise TypeError('residence_time must be a number.')
-        if float(residence_time) < 0:
-            raise ValueError('residence_time must be non-negative.')
+        if float(residence_time) < MINIMUM_WIDTH:
+            raise ValueError(f'residence_time must be at least {MINIMUM_WIDTH}.')
+
         self._residence_time.value = float(residence_time)
 
     @property
@@ -398,6 +401,7 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
             raise TypeError('Q must be a float.')
 
         # Q is given as a float, so we need to add the units
+        # TODO(markbujehein): Replace sin(x)/x with sinc once it is supported for Parameters #272 # ruff: ignore[line-contains-todo]
         return f'(hbar / tau) * (1 - sin({Q} * l.value) / ({Q} * l.value) )'
 
     def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:

@@ -7,6 +7,7 @@ import scipp as sc
 from scipp import UnitError
 from scipp.constants import hbar as scipp_hbar
 
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import MINIMUM_WIDTH
 from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
     ChudleyElliottJumpDiffusion,
 )
@@ -78,7 +79,17 @@ class TestChudleyElliottJumpDiffusion:
                     'jump_length': 1.0,
                 },
                 ValueError,
-                'residence_time must be non-negative',
+                'residence_time must be at least',
+            ),
+            (
+                {
+                    'x_unit': 'meV',
+                    'scale': 1.0,
+                    'residence_time': 0.0,
+                    'jump_length': 1.0,
+                },
+                ValueError,
+                'residence_time must be at least',
             ),
             (
                 {
@@ -107,6 +118,7 @@ class TestChudleyElliottJumpDiffusion:
             'invalid_scale_type',
             'invalid_residence_time_type',
             'invalid_residence_time_negative',
+            'invalid_residence_time_zero',
             'invalid_jump_length_type',
             'invalid_jump_length_negative',
         ],
@@ -127,10 +139,17 @@ class TestChudleyElliottJumpDiffusion:
         with pytest.raises(TypeError, match=r'residence_time must be a number.'):
             chudley_elliott_model.residence_time = 'invalid'  # Invalid type
 
-    def test_residence_time_setter_negative_raises(self, chudley_elliott_model):
+    @pytest.mark.parametrize('invalid_value', [-1.0, 0.0, MINIMUM_WIDTH / 10])
+    def test_residence_time_setter_below_minimum_raises(
+        self, chudley_elliott_model, invalid_value
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'residence_time must be non-negative.'):
-            chudley_elliott_model.residence_time = -1.0  # Invalid negative value
+        with pytest.raises(ValueError, match=r'residence_time must be at least'):
+            chudley_elliott_model.residence_time = invalid_value
+
+    def test_residence_time_has_minimum_width(self, chudley_elliott_model):
+        # WHEN THEN EXPECT
+        assert chudley_elliott_model.residence_time.min == MINIMUM_WIDTH
 
     def test_jump_length_setter(self, chudley_elliott_model):
         # WHEN THEN
@@ -159,8 +178,10 @@ class TestChudleyElliottJumpDiffusion:
         'instead of our Parameters'
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
-        residence_time_sc = chudley_elliott_model.residence_time.full_value
-        jump_length_sc = chudley_elliott_model.jump_length.full_value
+        # residence_time_sc = chudley_elliott_model.residence_time.full_value
+        # jump_length_sc = chudley_elliott_model.jump_length.full_value
+        residence_time_sc = chudley_elliott_model.residence_time.value
+        jump_length_sc = chudley_elliott_model.jump_length.value
 
         # THEN
         widths = chudley_elliott_model.calculate_width(Q_values)
@@ -184,12 +205,7 @@ class TestChudleyElliottJumpDiffusion:
         residence_time_sc = chudley_elliott_model.residence_time.full_value
         jump_length_sc = chudley_elliott_model.jump_length.full_value
 
-        # THEN
-        # Model uses np.sinc():
-        model_widths = chudley_elliott_model.calculate_width(Q_values)
-
-        # EXPECT
-        # Calculate explicitly using sin(x) / x
+        # Reference: calculate explicitly using sin(x) / x
         argument = Q_values * jump_length_sc
         prefactor = scipp_hbar / residence_time_sc
 
@@ -201,6 +217,10 @@ class TestChudleyElliottJumpDiffusion:
 
         expected_widths_sin = prefactor * (1 - explicit_sinc)
         expected_widths_sin = expected_widths_sin.to(unit=chudley_elliott_model.x_unit)
+
+        # THEN
+        # Model uses np.sinc()
+        model_widths = chudley_elliott_model.calculate_width(Q_values)
 
         # EXPECT
         # Both mathematical approaches to yield the same result
