@@ -48,8 +48,8 @@ class TestChudleyElliottJumpDiffusion:
                     'residence_time': 1.0,
                     'jump_length': 1.0,
                 },
-                TypeError,
-                None,
+                UnitError,
+                'unit must be None, a string',
             ),
             (
                 {
@@ -178,10 +178,9 @@ class TestChudleyElliottJumpDiffusion:
         'instead of our Parameters'
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
-        # residence_time_sc = chudley_elliott_model.residence_time.full_value
-        # jump_length_sc = chudley_elliott_model.jump_length.full_value
-        residence_time_sc = chudley_elliott_model.residence_time.value
-        jump_length_sc = chudley_elliott_model.jump_length.value
+        # sc.values drops the (zero) variance, which scipp cannot broadcast against Q_values
+        residence_time_sc = sc.values(chudley_elliott_model.residence_time.full_value)
+        jump_length_sc = sc.values(chudley_elliott_model.jump_length.full_value)
 
         # THEN
         widths = chudley_elliott_model.calculate_width(Q_values)
@@ -202,16 +201,19 @@ class TestChudleyElliottJumpDiffusion:
         # WHEN
         Q_values = sc.linspace('Q', 0.5, 1.5, num=6, unit='1/angstrom')
 
-        residence_time_sc = chudley_elliott_model.residence_time.full_value
-        jump_length_sc = chudley_elliott_model.jump_length.full_value
+        # sc.values drops the (zero) variance, which scipp cannot broadcast against Q_values
+        residence_time_sc = sc.values(chudley_elliott_model.residence_time.full_value)
+        jump_length_sc = sc.values(chudley_elliott_model.jump_length.full_value)
 
         # Reference: calculate explicitly using sin(x) / x
         argument = Q_values * jump_length_sc
         prefactor = scipp_hbar / residence_time_sc
 
         # sc.sin() strictly requires rad or deg unit.
-        # Multiply by 1 rad to give the dimensionless argument the correct unit.
-        argument_rad = argument * sc.Unit('rad')
+        # `argument * sc.Unit('rad')` gives a Variable of dtype Variable, which sc.sin rejects.
+        # TODO(markbujehein): update once the easyscience maths module is implemented #272 # ruff: ignore[line-contains-todo]
+        argument_rad = argument.copy()
+        argument_rad.unit = sc.Unit('rad')
 
         explicit_sinc = sc.sin(argument_rad) / argument
 

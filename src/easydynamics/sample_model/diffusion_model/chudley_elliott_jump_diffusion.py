@@ -101,9 +101,7 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         TypeError
             If ``residence_time`` or ``jump_length`` is not a number.
         ValueError
-            If ``jump_length`` is negative.
-        ValueError
-            If ``residence_time`` is non-positive.
+            If ``jump_length`` is negative or ``residence_time`` is below ``MINIMUM_WIDTH``.
         """
         super().__init__(
             Q=Q,
