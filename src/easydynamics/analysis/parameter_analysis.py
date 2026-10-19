@@ -19,6 +19,7 @@ from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
+from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import convert_value_unit
 
@@ -412,14 +413,22 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
 
-    def plot(self, names: str | list[str] | None = None, **kwargs: dict[str, Any]) -> WidgetFigure:
+    def plot(
+        self,
+        names: str | list[str] | None = None,
+        x_axis: str = 'Q',
+        **kwargs: dict[str, Any],
+    ) -> WidgetFigure:
         """
-        Plot the parameters and fit results.
+        Plot the parameters and fit results as a function of Q or Q^2.
 
         Parameters
         ----------
         names : str | list[str] | None, default=None
             The names of the parameters to plot. If None, all parameters with bindings are plotted.
+        x_axis : str, default='Q'
+            Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
+            'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.
         **kwargs : dict[str, Any]
             Additional keyword arguments to pass to the plotting function.
 
@@ -431,7 +440,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If the units of the specified parameters are not consistent.
+            If the units of the specified parameters are not consistent, or if x_axis is not one of
+            the supported axes.
         RuntimeError
             If plot() is called outside of a Jupyter notebook environment.
         """
@@ -482,6 +492,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         markers = itertools.cycle(['o', 's', 'D', '^', 'v', '<', '>'])
 
         plot_kwargs = {
+            'coords': [x_axis],
             'title': self.display_name,
             'linestyle': {},
             'marker': {},
@@ -526,7 +537,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         data_and_model = sc.Dataset(data_arrays)
         data_and_model.update(model_arrays)
 
-        return pp.plot(data_and_model, **plot_kwargs)
+        return pp.plot(add_x_axis_coord(data_and_model, x_axis), **plot_kwargs)
 
     def calculate_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
         """
