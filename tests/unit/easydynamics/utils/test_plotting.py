@@ -180,3 +180,79 @@ class TestSlicerplot_with_residuals:
         mock_fig.ax.xaxis.label.set_visible.assert_called_once_with(False)
         mock_fig.ax.tick_params.assert_called_once_with(labelbottom=False)
         mock_fig.autoscale.assert_called_once()
+
+    @pytest.mark.parametrize(
+        ('figsize', 'expected_figsize'),
+        [
+            (None, (6.0, 6.0)),
+            ((8.0, 5.0), (8.0, 5.0)),
+        ],
+        ids=['Default', 'Custom'],
+    )
+    def test_slicerplot_with_residuals_draws_both_panels_in_one_figure(
+        self, datagroup, figsize, expected_figsize
+    ):
+        # WHEN
+        mock_sp = MagicMock()
+        mock_sp.slicer.keep = ['x']
+        kwargs = {} if figsize is None else {'figsize': figsize}
+
+        with (
+            patch(
+                'easydynamics.utils.plotting.SlicerPlot',
+                return_value=mock_sp,
+            ) as slicer_plot,
+            patch(
+                'easydynamics.utils.plotting.pp.linefigure', return_value=MagicMock()
+            ) as linefigure,
+            patch('easydynamics.utils.plotting.slice_dims'),
+            patch('easydynamics.utils.plotting.pp.Node'),
+        ):
+            # THEN
+            slicerplot_with_residuals(datagroup, **kwargs)
+
+        # EXPECT the data and residuals axes belong to one figure and share their x axis
+        main_ax = slicer_plot.call_args.kwargs['ax']
+        res_ax = linefigure.call_args.kwargs['ax']
+
+        assert main_ax.get_figure() is res_ax.get_figure()
+        assert main_ax.get_shared_x_axes().joined(main_ax, res_ax)
+        assert tuple(main_ax.get_figure().get_size_inches()) == expected_figsize
+        assert 'figsize' not in slicer_plot.call_args.kwargs
+        assert linefigure.call_args.kwargs['hide_log_buttons'] is True
+
+    def test_slicerplot_with_residuals_aligns_data_and_residuals_axes(self):
+        # WHEN the plopp slicer needs an interactive matplotlib backend, switched in for the
+        # test, and the two panels have y tick labels of different widths
+        import matplotlib.pyplot as plt
+
+        energy = sc.linspace('energy', -1.0, 1.0, 11, unit='meV')
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+
+        def data_array(values):
+            return sc.DataArray(
+                sc.array(dims=['Q', 'energy'], values=[values, values]),
+                coords={'energy': energy, 'Q': Q},
+            )
+
+        datagroup = sc.DataGroup(
+            Data=data_array([1000.0 * (i + 1) for i in range(11)]),
+            Residuals=data_array([0.1 * (-1) ** i for i in range(11)]),
+        )
+
+        plt.switch_backend('module://ipympl.backend_nbagg')
+        try:
+            # THEN
+            fig = slicerplot_with_residuals(datagroup, keep='energy')
+            fig.canvas.to_widget()
+
+            # EXPECT the axes span the same x range on screen and in data
+            main_ax, res_ax = fig.canvas.fig.axes
+            main_box = main_ax.get_window_extent()
+            res_box = res_ax.get_window_extent()
+
+            assert main_box.x0 == pytest.approx(res_box.x0)
+            assert main_box.x1 == pytest.approx(res_box.x1)
+            assert main_ax.get_xlim() == res_ax.get_xlim()
+        finally:
+            plt.switch_backend('Agg')
