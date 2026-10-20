@@ -23,6 +23,7 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
@@ -646,17 +647,21 @@ class Analysis(AnalysisBase):
     def plot_parameters(
         self,
         names: str | list[str] | None = None,
+        x_axis: str = 'Q',
         **kwargs: dict[str, Any],
     ) -> WidgetFigure:
         """
-        Plot fitted parameters as a function of Q.
+        Plot fitted parameters as a function of Q or Q^2.
 
         Parameters
         ----------
         names : str | list[str] | None, default=None
             Name(s) of the parameter(s) to plot. If None, plots all parameters.
+        x_axis : str, default='Q'
+            Quantity to plot the parameters against: 'Q' or 'Q^2'. Plotting against 'Q^2' shows,
+            e.g., a Fickian diffusion width (D*Q^2) as a straight line.
         **kwargs : dict[str, Any]
-            Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,
+            Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
             title, linestyle, marker, color).
 
         Raises
@@ -664,7 +669,8 @@ class Analysis(AnalysisBase):
         TypeError
             If names is not a string, list of strings, or None.
         ValueError
-            If any of the specified parameter names are not found in the dataset.
+            If any of the specified parameter names are not found in the dataset, or if x_axis is
+            not one of the supported axes.
 
         Returns
         -------
@@ -672,7 +678,7 @@ class Analysis(AnalysisBase):
             A Plopp WidgetFigure containing the plot of the parameters.
         """
 
-        ds = self.parameters_to_dataset()
+        ds = add_x_axis_coord(self.parameters_to_dataset(), x_axis)
 
         # None or an empty list both mean 'plot all parameters'.
         if not names:
@@ -690,6 +696,7 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
+            'coords': [x_axis],
             'linestyle': dict.fromkeys(names, 'none'),
             'marker': dict.fromkeys(names, 'o'),
             'markerfacecolor': dict.fromkeys(names, 'none'),

@@ -1,13 +1,50 @@
 # SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from collections.abc import Callable
 
 import plopp as pp
 import scipp as sc
 from plopp.backends.matplotlib.figure import WidgetFigure
+from plopp.backends.matplotlib.utils import make_figure
 from plopp.plotting._slicer import SlicerPlot
 from plopp.plotting._slicer import _maybe_reduce_dim
 from plopp.widgets import slice_dims
+
+# x-axes that Q-dependent parameters can be plotted against, each mapped to the function
+# computing it from Q.
+Q_AXIS_TRANSFORMS: dict[str, Callable[[sc.Variable], sc.Variable]] = {
+    'Q': lambda Q: Q,
+    'Q^2': lambda Q: Q**2,
+}
+
+
+def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
+    """
+    Add an x_axis coordinate computed from the Q coordinate, for plotting against it.
+
+    Only the coordinate is transformed; the values at each Q are unchanged.
+
+    Parameters
+    ----------
+    data : sc.Dataset
+        Dataset with a 'Q' coordinate.
+    x_axis : str
+        Name of the axis to add, one of the keys of ``Q_AXIS_TRANSFORMS``.
+
+    Returns
+    -------
+    sc.Dataset
+        A copy of data with the x_axis coordinate added.
+
+    Raises
+    ------
+    ValueError
+        If x_axis is not one of the supported axes.
+    """
+    if x_axis not in Q_AXIS_TRANSFORMS:
+        raise ValueError(f"x_axis must be one of {list(Q_AXIS_TRANSFORMS)}, got '{x_axis}'.")
+    return data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
 
 
 def slicerplot_with_residuals(
@@ -76,10 +113,23 @@ def slicerplot_with_residuals(
     if residuals_key not in dg:
         raise ValueError(f"Residuals key '{residuals_key}' not found in DataGroup")
 
+    # Draw the data and the residuals as two axes of one Matplotlib figure with a shared x axis.
+    # Two separate figures are laid out independently, so their axes only line up when their y
+    # tick labels and y labels happen to be equally wide.
+    figsize = kwargs.pop('figsize', None)
+    mpl_fig = make_figure(figsize=(6.0, 6.0) if figsize is None else figsize)
+    main_ax, res_ax = mpl_fig.subplots(
+        nrows=2,
+        ncols=1,
+        sharex=True,
+        gridspec_kw={'height_ratios': [2, 1]},
+    )
+
     sp = SlicerPlot(
         {k: da for k, da in dg.items() if k != residuals_key},
         keep=keep,
         operation=operation,
+        ax=main_ax,
         **kwargs,
     )
 
@@ -92,15 +142,13 @@ def slicerplot_with_residuals(
     if 'autoscale' in kwargs:
         res_fig_kwargs['autoscale'] = kwargs['autoscale']
 
-    res_fig = pp.linefigure(reduce_res, figsize=(6, 2), **res_fig_kwargs)
-
-    res_fig.layout.margin = '0px'
-    res_fig.layout.padding = '0px'
+    # The log buttons of the main plot also apply to the shared x axis, and a log y axis makes
+    # no sense for residuals, which can be negative.
+    res_fig = pp.linefigure(reduce_res, ax=res_ax, hide_log_buttons=True, **res_fig_kwargs)
 
     fig1 = sp.figure
     for widget in fig1.bottom_bar[0].controls.values():
         widget.slider_toggler.value = '-o-'
-    fig1.bottom_bar.children = [pp.widgets.VBar([res_fig, fig1.bottom_bar.children[0]])]
 
     res_fig.autoscale()
 

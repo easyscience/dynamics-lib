@@ -655,10 +655,14 @@ class TestAnalysis:
             'marker': {'amplitude': 'x', 'width': 's'},
         }
 
-        fake_dataset = {
-            'amplitude': object(),
-            'width': object(),
-        }
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        fake_dataset = sc.Dataset(
+            data={
+                'amplitude': sc.array(dims=['Q'], values=[1.0, 2.0]),
+                'width': sc.array(dims=['Q'], values=[0.1, 0.2], unit='meV'),
+            },
+            coords={'Q': Q},
+        )
 
         analysis.parameters_to_dataset = MagicMock(return_value=fake_dataset)
 
@@ -674,9 +678,13 @@ class TestAnalysis:
 
         dataset_passed = args[0]
 
-        assert dataset_passed == fake_dataset
+        assert list(dataset_passed) == list(fake_dataset)
+        for name, data_array in dataset_passed.items():
+            assert sc.identical(data_array, fake_dataset[name])
 
         # Check default kwargs
+        assert kwargs['coords'] == ['Q']
+
         assert 'linestyle' in kwargs
         assert kwargs['linestyle'] == {
             'amplitude': 'none',
@@ -695,6 +703,24 @@ class TestAnalysis:
 
         # and that we return the figure
         assert result is fake_fig
+
+    def test_plot_parameters_against_Q_squared(self, analysis):
+        # WHEN
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        fake_dataset = sc.Dataset(
+            data={'width': sc.array(dims=['Q'], values=[0.1, 0.2], unit='meV')},
+            coords={'Q': Q},
+        )
+        analysis.parameters_to_dataset = MagicMock(return_value=fake_dataset)
+
+        # THEN
+        with patch('plopp.plot') as mock_plot:
+            analysis.plot_parameters(x_axis='Q^2')
+
+        # EXPECT the parameters are plotted against a Q^2 coordinate
+        args, kwargs = mock_plot.call_args
+        assert kwargs['coords'] == ['Q^2']
+        assert sc.identical(args[0]['width'].coords['Q^2'], Q**2)
 
     def test_fix_and_free_energy_offset(self, analysis):
         # EXPECT

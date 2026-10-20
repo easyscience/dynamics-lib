@@ -15,7 +15,11 @@ from scipy.special import gamma
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import StretchedExponential
+from easydynamics.sample_model.components.stretched_exponential import _HWHM_POLY_COEFFS
+from easydynamics.sample_model.components.stretched_exponential import MAXIMUM_BETA
+from easydynamics.sample_model.components.stretched_exponential import MINIMUM_BETA
 from easydynamics.sample_model.components.stretched_exponential import _kww_shape
+from easydynamics.sample_model.components.stretched_exponential import _kww_shape_interpolated
 from easydynamics.sample_model.components.stretched_exponential import _reduced_hwhm
 
 # hbar in meV*ps (CODATA), so the tests derive the energy scale independently of the library.
@@ -26,6 +30,12 @@ def sinh_grid(reach: float, n_points: int = 20001) -> np.ndarray:
     """A symmetric grid that is dense near zero and reaches *reach*, for the heavy KWW tails."""
     t = np.linspace(-np.arcsinh(reach), np.arcsinh(reach), n_points)
     return np.sinh(t)
+
+
+def reduced_hwhm_closed_form(beta: float) -> float:
+    """The closed-form reduced half width; cheap enough to call once per parametrized beta."""
+    poly = np.polynomial.polynomial.polyval(beta, _HWHM_POLY_COEFFS)
+    return float(np.exp((np.log(beta) + poly) / beta))
 
 
 def naive_fft_transform(
@@ -178,6 +188,85 @@ def test_kww_shape_is_blocked_without_changing_the_result():
     np.testing.assert_array_equal(blocked, reference)
 
 
+##########################################################
+# The interpolated transform: _kww_shape_interpolated
+##########################################################
+
+
+@pytest.mark.parametrize('beta', np.linspace(MINIMUM_BETA, MAXIMUM_BETA, 40))
+def test_kww_shape_interpolated_matches_the_quadrature_relative_to_the_peak(beta):
+    # WHEN w spans the flat top, the half width and the far tail, scaled to where this beta lives
+    w = np.concatenate([[0.0], np.logspace(-8, 8, 1001) * reduced_hwhm_closed_form(beta)])
+    reference = _kww_shape(w, beta)
+
+    # THEN
+    value = _kww_shape_interpolated(w, beta)
+
+    # EXPECT
+    np.testing.assert_allclose(value, reference, rtol=0, atol=3e-7 * reference[0])
+
+
+@pytest.mark.parametrize('beta', [MINIMUM_BETA, 0.1, 0.3, 0.6, 0.8, 1.0])
+def test_kww_shape_interpolated_tracks_the_tail_pointwise_for_beta_up_to_one(beta):
+    # WHEN for beta <= 1 the tail carries most of the area however far below the peak it is, so it
+    # must be right pointwise, not just relative to the peak
+    w = np.concatenate([[0.0], np.logspace(-8, 8, 1001) * reduced_hwhm_closed_form(beta)])
+    w = np.concatenate([w, np.logspace(-4, 8, 1001)])
+    reference = _kww_shape(w, beta)
+
+    # THEN
+    value = _kww_shape_interpolated(w, beta)
+
+    # EXPECT
+    np.testing.assert_allclose(value, reference, rtol=1e-5)
+
+
+def test_kww_shape_interpolated_is_zero_beyond_the_noise_floor_for_beta_above_one():
+    # WHEN beta = 2 is a Gaussian that underflows far out, into the quadrature's rounding noise
+    w = np.array([0.0, 2.0, 100.0, 1e4])
+
+    # THEN
+    value = _kww_shape_interpolated(w, 2.0)
+
+    # EXPECT the noise is not interpolated: the profile is cut to zero once negligible
+    expected = 0.5 * np.sqrt(np.pi) * np.exp(-(w**2) / 4)
+    np.testing.assert_allclose(value, expected, rtol=1e-6)
+    np.testing.assert_array_equal(value[2:], 0.0)
+
+
+def test_kww_shape_interpolated_of_an_empty_axis_is_empty():
+    # WHEN THEN
+    value = _kww_shape_interpolated(np.array([]), 0.6)
+
+    # EXPECT
+    assert value.shape == (0,)
+
+
+def test_kww_shape_interpolated_is_unchanged_by_a_longer_table():
+    # WHEN the same w are evaluated alone and together with w that need a much longer table
+    w = np.linspace(-40.0, 40.0, 201)
+
+    # THEN
+    alone = _kww_shape_interpolated(w, 0.6)
+    together = _kww_shape_interpolated(np.concatenate([w, [1e6]]), 0.6)[:-1]
+
+    # EXPECT the nodes lie on a fixed lattice, so only the far end of the spline differs
+    np.testing.assert_allclose(together, alone, rtol=1e-9)
+
+
+def test_kww_shape_interpolated_is_smooth_in_the_energy_scale():
+    # WHEN a fitter steps the relaxation time, which rescales w by a tiny factor
+    w = np.linspace(-20.0, 20.0, 401)
+    step = 1e-7
+
+    # THEN
+    difference = _kww_shape_interpolated(w * (1 + step), 0.6) - _kww_shape_interpolated(w, 0.6)
+    reference = _kww_shape(w * (1 + step), 0.6) - _kww_shape(w, 0.6)
+
+    # EXPECT the finite difference a Jacobian would see matches the quadrature's
+    np.testing.assert_allclose(difference, reference, rtol=0, atol=1e-5 * np.abs(reference).max())
+
+
 class TestStretchedExponential:
     @pytest.fixture
     def stretched_exponential(self):
@@ -210,6 +299,7 @@ class TestStretchedExponential:
         assert stretched.relaxation_time.unit == 'ps'
         assert stretched.beta.unit == 'dimensionless'
         assert stretched.center.fixed is True
+        assert stretched.interpolate is True
 
     def test_initialization(self, stretched_exponential: StretchedExponential):
         # WHEN THEN EXPECT
@@ -231,6 +321,7 @@ class TestStretchedExponential:
                 TypeError,
             ),
             ({'beta': 'invalid'}, 'beta must be a number', TypeError),
+            ({'interpolate': 1}, 'interpolate must be True or False', TypeError),
             ({'x_unit': 123}, 'unit must be None, a string', UnitError),
             ({'y_unit': 123}, 'unit must be None, a string', UnitError),
         ],
@@ -287,6 +378,17 @@ class TestStretchedExponential:
         assert stretched_copy.relaxation_time.value == stretched_exponential.relaxation_time.value
         assert stretched_copy.beta.value == stretched_exponential.beta.value
         assert stretched_copy.x_unit == stretched_exponential.x_unit
+        assert stretched_copy.interpolate == stretched_exponential.interpolate
+
+    def test_copy_keeps_interpolate(self):
+        # WHEN
+        stretched = StretchedExponential(beta=0.5, interpolate=False)
+
+        # THEN
+        stretched_copy = copy(stretched)
+
+        # EXPECT
+        assert stretched_copy.interpolate is False
 
     def test_repr(self, stretched_exponential: StretchedExponential):
         # WHEN THEN
@@ -300,6 +402,7 @@ class TestStretchedExponential:
         assert 'center =' in repr_str
         assert 'relaxation_time =' in repr_str
         assert 'beta =' in repr_str
+        assert 'interpolate = True' in repr_str
 
     #############
     # Parameters
@@ -320,6 +423,21 @@ class TestStretchedExponential:
         # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=' must be a number'):
             setattr(stretched_exponential, prop, 'invalid')
+
+    def test_interpolate_setter(self, stretched_exponential: StretchedExponential):
+        # WHEN THEN
+        stretched_exponential.interpolate = False
+
+        # EXPECT
+        assert stretched_exponential.interpolate is False
+
+    def test_interpolate_setter_invalid_type_raises(
+        self, stretched_exponential: StretchedExponential
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='interpolate must be True or False'):
+            stretched_exponential.interpolate = 'yes'
+        assert stretched_exponential.interpolate is True
 
     def test_relaxation_time_must_be_positive(self, stretched_exponential: StretchedExponential):
         # WHEN THEN EXPECT
@@ -491,7 +609,9 @@ class TestStretchedExponential:
         # WHEN beta = 1 the transform is a Lorentzian of HWHM Gamma = hbar / tau.  Gamma is used
         # directly rather than via width, so this pins the profile itself and stays independent of
         # the closed-form fit the width dependency evaluates.
-        stretched = StretchedExponential(area=1.0, relaxation_time=4.0, beta=1.0)
+        stretched = StretchedExponential(
+            area=1.0, relaxation_time=4.0, beta=1.0, interpolate=False
+        )
 
         # THEN
         lorentzian = Lorentzian(area=1.0, width=HBAR_MEV_PS / 4.0)
@@ -505,8 +625,12 @@ class TestStretchedExponential:
     #############
 
     def test_evaluate_reduces_to_a_lorentzian_at_beta_one(self):
-        # WHEN beta = 1, the transform is a Lorentzian of HWHM hbar / tau
-        stretched = StretchedExponential(area=2.5, relaxation_time=3.0, beta=1.0)
+        # WHEN beta = 1, the transform is a Lorentzian of HWHM hbar / tau.  The quadrature is
+        # pinned, since this checks it to 1e-10; the interpolation is checked against it
+        # separately.
+        stretched = StretchedExponential(
+            area=2.5, relaxation_time=3.0, beta=1.0, interpolate=False
+        )
         lorentzian = Lorentzian(area=2.5, width=HBAR_MEV_PS / 3.0)
         x = np.linspace(-3.0, 3.0, 401)
 
@@ -518,7 +642,9 @@ class TestStretchedExponential:
 
     def test_evaluate_reduces_to_a_gaussian_at_beta_two(self):
         # WHEN beta = 2, the transform is a Gaussian of standard deviation sqrt(2) hbar / tau
-        stretched = StretchedExponential(area=2.5, relaxation_time=3.0, beta=2.0)
+        stretched = StretchedExponential(
+            area=2.5, relaxation_time=3.0, beta=2.0, interpolate=False
+        )
         gaussian = Gaussian(area=2.5, width=np.sqrt(2) * HBAR_MEV_PS / 3.0)
         x = np.linspace(-3.0, 3.0, 401)
 
@@ -527,6 +653,22 @@ class TestStretchedExponential:
 
         # EXPECT
         np.testing.assert_allclose(result, gaussian.evaluate(x), atol=1e-13)
+
+    @pytest.mark.parametrize('beta', [0.1, 0.4, 0.7, 1.0, 1.5, 2.0])
+    def test_evaluate_with_interpolate_matches_the_quadrature(self, beta):
+        # WHEN
+        direct = StretchedExponential(
+            area=2.0, center=0.1, relaxation_time=3.0, beta=beta, interpolate=False
+        )
+        interpolated = StretchedExponential(area=2.0, center=0.1, relaxation_time=3.0, beta=beta)
+        x = np.linspace(-3.0, 3.0, 401)
+
+        # THEN
+        result = interpolated.evaluate(x)
+
+        # EXPECT
+        reference = direct.evaluate(x)
+        np.testing.assert_allclose(result, reference, rtol=0, atol=3e-7 * reference.max())
 
     def test_evaluate_peak_height(self, stretched_exponential: StretchedExponential):
         # WHEN the peak sits at the center and equals area * gamma(1 + 1/beta) / (pi * Gamma)

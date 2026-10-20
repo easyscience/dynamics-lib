@@ -21,6 +21,9 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
+    ChudleyElliottJumpDiffusion,
+)
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
@@ -610,6 +613,30 @@ class TestParameterAnalysis:
         parameter_analysis.calculate_model_dataset.assert_called_once_with([
             parameter_analysis.bindings[0]
         ])
+
+    def test_plot_against_Q_squared(self, parameter_analysis, mock_model_dataset):
+        # WHEN
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot') as mock_plot,
+        ):
+            parameter_analysis.plot(names=['parameter1'], x_axis='Q^2')
+
+        # EXPECT data and model are plotted unchanged against a Q^2 coordinate
+        args, kwargs = mock_plot.call_args
+        plotted = args[0]
+        assert kwargs['coords'] == ['Q^2']
+        assert sc.identical(plotted.coords['Q^2'], plotted.coords['Q'] ** 2)
+        assert sc.identical(
+            plotted['parameter1'].data, parameter_analysis.parameters['parameter1'].data
+        )
+        assert sc.identical(plotted['Polynomial'].data, mock_model_dataset['Polynomial'].data)
 
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
@@ -1700,3 +1727,21 @@ class TestParameterAnalysisWorkflows:
 
         # EXPECT: the diffusion coefficient is recovered despite the unit differences
         assert fit_model.diffusion_coefficient.value == pytest.approx(2.4e-9, rel=1e-3)
+
+    def test_chudley_elliott_diffusion_width_only_fit(self):
+        # WHEN: synthetic widths from a known chudley-elliott diffusion model
+        Q = np.linspace(0.4, 2.0, 9)
+        truth = ChudleyElliottJumpDiffusion(residence_time=2.0, jump_length=2.0)
+        dataset = self._dataset_from_targets(truth, Q)
+
+        # THEN: fit only the width prediction
+        fit_model = ChudleyElliottJumpDiffusion(residence_time=1.0, jump_length=1.0)
+        fit_model.scale.fixed = True
+        pa = ParameterAnalysis(
+            parameters=dataset, bindings=FitBinding(model=fit_model, targets=['width'])
+        )
+        pa.fit()
+
+        # EXPECT
+        assert fit_model.residence_time.value == pytest.approx(2.0, rel=1e-3)
+        assert fit_model.jump_length.value == pytest.approx(2.0, rel=1e-3)
