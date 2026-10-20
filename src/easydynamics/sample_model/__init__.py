@@ -17,6 +17,7 @@ from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.components.stretched_exponential import StretchedExponential
 from easydynamics.sample_model.components.voigt import Voigt
+from easydynamics.sample_model.diffusion_model import ChudleyElliottJumpDiffusion
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
@@ -34,6 +35,7 @@ from easydynamics.sample_model.sample_model import SampleModel
 __all__ = [
     'BackgroundModel',
     'BrownianTranslationalDiffusion',
+    'ChudleyElliottJumpDiffusion',
     'ComponentCollection',
     'DampedHarmonicOscillator',
     'DeltaFunction',
