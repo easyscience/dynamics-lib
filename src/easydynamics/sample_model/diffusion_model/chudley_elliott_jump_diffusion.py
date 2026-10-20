@@ -29,6 +29,12 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
     where $\tau$ is the residence time and $l$ is the jump length. $Q$ is assumed to have units of
     1/angstrom. Creates ComponentCollections with Lorentzian components for given Q-values.
 
+    References
+    ----------
+    C. T. Chudley and R. J. Elliott, *Neutron Scattering from a Liquid on a Jump Diffusion Model*,
+    Proc. Phys. Soc. **77**, 353 (1961),
+    [doi:10.1088/0370-1328/77/2/319](https://doi.org/10.1088/0370-1328/77/2/319).
+
     Examples
     --------
     **Creating a ChudleyElliottJumpDiffusion model**
@@ -47,9 +53,9 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
     )
     component_collections = diffusion_model.create_component_collections()
     ```
-    """
 
-    # TODO(markbujehein): Add tutorials #273 # ruff: ignore[line-contains-todo]
+    See also the tutorials.
+    """
 
     def __init__(
         self,

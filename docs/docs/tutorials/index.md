@@ -49,7 +49,8 @@ tutorials.
 - [Detailed balance](detailed_balance.ipynb) – Learn about detailed
   balancing.
 - [Diffusion model](diffusion_model.ipynb) – Learn how to create and use
-  a model of diffusion.
+  models of diffusion: Brownian translational, jump translational and
+  Chudley-Elliott jump diffusion.
 - [DeltaLorentz](delta_lorentz.ipynb) – Learn how to create and use a
   model with a Delta function and a Lorentzian that have a shared
   Debye-Waller-like Q-dependence.
