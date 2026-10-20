@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://easyscience.github.io/dynamics-lib/0.11.0.post1/api-reference/analysis/">
+        <link rel="canonical" href="https://easyscience.github.io/dynamics-lib/0.11.0.post2/api-reference/analysis/">
       
       
         <link rel="prev" href="../">
@@ -2832,10 +2832,10 @@ parameters are added.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.Analysis.plot_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis.plot_parameters">plot_parameters</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.Analysis.plot_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis.plot_parameters">plot_parameters</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Plot fitted parameters as a function of Q.</p>
+                  <p>Plot fitted parameters as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5437,14 +5437,14 @@ to the parameter values.</p>
 
 
 <h5 id="easydynamics.analysis.Analysis.plot_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
 
     <div class="doc doc-contents ">
 
-        <p>Plot fitted parameters as a function of Q.</p>
+        <p>Plot fitted parameters as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5482,6 +5482,26 @@ to the parameter values.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>x_axis</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Quantity to plot the parameters against: 'Q' or 'Q^2'. Plotting against 'Q^2' shows,
+e.g., a Fickian diffusion width (D*Q^2) as a straight line.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;Q&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**kwargs</code>
             </td>
             <td>
@@ -5489,7 +5509,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,
+                <p>Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
 title, linestyle, marker, color).</p>
 <!-- prettier-ignore-start -->
 
@@ -5532,7 +5552,8 @@ title, linestyle, marker, color).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the dataset.</p>
+                <p>If any of the specified parameter names are not found in the dataset, or if x_axis is
+not one of the supported axes.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9929,10 +9950,10 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.plot">plot</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.plot">plot</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Plot the parameters and fit results.</p>
+                  <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11076,14 +11097,14 @@ provided, or if a binding names a dataset key that is not in the parameters Data
 
 
 <h5 id="easydynamics.analysis.ParameterAnalysis.plot" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
 
     <div class="doc doc-contents ">
 
-        <p>Plot the parameters and fit results.</p>
+        <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11117,6 +11138,26 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x_axis</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
+'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;Q&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -11183,7 +11224,8 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the units of the specified parameters are not consistent.</p>
+                <p>If the units of the specified parameters are not consistent, or if x_axis is not one of
+the supported axes.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -18217,10 +18259,10 @@ parameters are added.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.plot_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.plot_parameters">plot_parameters</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.plot_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.plot_parameters">plot_parameters</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Plot fitted parameters as a function of Q.</p>
+                  <p>Plot fitted parameters as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20405,14 +20447,14 @@ to the parameter values.</p>
 
 
 <h7 id="easydynamics.analysis.analysis.Analysis.plot_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h7>
 
 
     <div class="doc doc-contents ">
 
-        <p>Plot fitted parameters as a function of Q.</p>
+        <p>Plot fitted parameters as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20450,6 +20492,26 @@ to the parameter values.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>x_axis</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Quantity to plot the parameters against: 'Q' or 'Q^2'. Plotting against 'Q^2' shows,
+e.g., a Fickian diffusion width (D*Q^2) as a straight line.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;Q&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**kwargs</code>
             </td>
             <td>
@@ -20457,7 +20519,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,
+                <p>Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
 title, linestyle, marker, color).</p>
 <!-- prettier-ignore-start -->
 
@@ -20500,7 +20562,8 @@ title, linestyle, marker, color).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the dataset.</p>
+                <p>If any of the specified parameter names are not found in the dataset, or if x_axis is
+not one of the supported axes.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27547,10 +27610,10 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot">plot</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot">plot</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Plot the parameters and fit results.</p>
+                  <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28377,14 +28440,14 @@ provided, or if a binding names a dataset key that is not in the parameters Data
 
 
 <h7 id="easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h7>
 
 
     <div class="doc doc-contents ">
 
-        <p>Plot the parameters and fit results.</p>
+        <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28418,6 +28481,26 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x_axis</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
+'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;Q&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -28484,7 +28567,8 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the units of the specified parameters are not consistent.</p>
+                <p>If the units of the specified parameters are not consistent, or if x_axis is not one of
+the supported axes.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
