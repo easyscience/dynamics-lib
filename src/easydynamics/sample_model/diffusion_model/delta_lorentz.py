@@ -35,6 +35,20 @@ class DeltaLorentz(DiffusionModelBase):
     the same at all $Q$ or be allowed to vary with $Q$.
 
 
+    References
+    ----------
+    1. M. Bée, *Quasielastic Neutron Scattering: Principles and Applications in Solid State
+       Chemistry, Biology and Materials Science*, Adam Hilger, Bristol (1988).
+    2. R. Weinstock, *Inelastic Scattering of Slow Neutrons*, Phys. Rev. **65**, 1 (1944),
+       [doi:10.1103/PhysRev.65.1](https://doi.org/10.1103/PhysRev.65.1).
+    3. A. J. Dianoux, F. Volino and H. Hervet, *Incoherent scattering law for neutron quasi-elastic
+       scattering in liquid crystals*, Mol. Phys. **30**, 1181 (1975),
+       [doi:10.1080/00268977500102721](https://doi.org/10.1080/00268977500102721).
+    4. F. Volino and A. J. Dianoux, *Neutron incoherent scattering law for diffusion in a potential
+       of spherical symmetry: general formalism and application to diffusion inside a sphere*,
+       Mol. Phys. **41**, 271 (1980),
+       [doi:10.1080/00268978000102761](https://doi.org/10.1080/00268978000102761).
+
     Examples
     --------
     **Creating a DeltaLorentz model with Q-dependent parameters**
