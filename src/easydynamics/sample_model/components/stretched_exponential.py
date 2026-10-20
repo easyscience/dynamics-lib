@@ -22,12 +22,18 @@ accurate for $\alpha$ close to 1.
 
 Instead, the integral is evaluated in the complex plane described in :func:`_kww_shape`.
 
-The four helpers below are module-level functions rather than methods. :func:`_quadrature_nodes`
-and :func:`_reduced_hwhm` must be, because ``@lru_cache`` on a method would key on ``self``: every
-instance would rebuild its own grid and the cache would keep every component ever created alive.
-:func:`_kww_shape` is a pure function of ``(w, beta)`` that touches no component state: area,
-center and units are applied afterwards in ``_evaluate_values``, so it does not belong in the
-class, and :func:`_hwhm_dependency_expression` only assembles a string from module constants.
+By default (``interpolate=True``) the component does not run that quadrature at every energy but
+interpolates a cached table of it, see :func:`_kww_shape_interpolated`.  That is many times faster,
+at an accuracy of ~1e-7 of the peak rather than ~1e-11; ``interpolate=False`` evaluates the
+quadrature directly.
+
+The helpers below are module-level functions rather than methods. :func:`_quadrature_nodes`,
+:func:`_interpolation_table` and :func:`_reduced_hwhm` must be, because ``@lru_cache`` on a method
+would key on ``self``: every instance would rebuild its own tables and the cache would keep every
+component ever created alive. :func:`_kww_shape` is a pure function of ``(w, beta)`` that touches
+no component state: area, center and units are applied afterwards in ``_evaluate_values``, so it
+does not belong in the class, and :func:`_hwhm_dependency_expression` only assembles a string from
+module constants.
 
 :func:`_reduced_hwhm` is not on any evaluation path.  It solves the half width exactly, and the
 closed form that ``width`` actually resolves through is fitted to it; it stays here as the
@@ -44,6 +50,7 @@ import numpy as np
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
 from scipp import UnitError
+from scipy.interpolate import CubicSpline
 from scipy.optimize import brentq
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
@@ -66,9 +73,13 @@ _QUAD_STEP = 0.03
 _QUAD_HALF_RANGE = 4.3
 # exp(-u**beta) has fallen below exp(-_QUAD_DECADES) at the far end of the grid.
 _QUAD_DECADES = 50.0
-# The quadrature holds one (energies x nodes) temporary, so long energy axes are evaluated in
-# blocks to keep that intermediate at a few tens of MB instead of scaling with the axis.
-_MAX_BLOCK_ELEMENTS = 1 << 21
+# The quadrature works on (energies x nodes) temporaries, so the energy axis is evaluated in
+# blocks.  The work is memory bound rather than limited by exp and cos, so the blocks are sized to
+# keep each temporary (256 kB) in cache: this is 3-4x faster than blocks of a few MB.
+_MAX_BLOCK_ELEMENTS = 1 << 15
+# exp(-x) is exactly 0.0 in double precision for x above ~745.13, so quadrature nodes where the
+# decaying exponent is guaranteed to exceed this contribute exactly nothing and are dropped.
+_EXP_UNDERFLOW = 746.0
 # The reduced half width spans 1.67 at beta = 2 down to ~7e-27 at beta = 0.05, so it is
 # bracketed in log10(w).  The lower end stays clear of the subnormal range, where the
 # 1 / (w sin theta) rescaling inside _kww_shape would overflow.
@@ -94,6 +105,19 @@ _HWHM_POLY_COEFFS = (
     0.03431170767881221,
     -0.004659825239152873,
 )
+
+# Tuning of the interpolated evaluation (interpolate=True). log(G / G(0)) is tabulated against
+# y = asinh(w / w_ref) at this many nodes per unit of y, which bounds the error at ~1e-7 of the
+# peak for every beta; see test_stretched_exponential.py.
+_INTERP_NODES_PER_UNIT = 20.0
+# The table is extended in steps of this many units of y, so it, and the interpolation error with
+# it, only changes when the requested energy range crosses a step.  That keeps the model smooth
+# under the small parameter steps a finite-difference Jacobian takes.
+_INTERP_Y_STEP = 4.0
+# For beta > 1 the transform underflows into rounding noise around 1e-11 of the peak, so the
+# table stops at 1e-14 of the peak and the profile is zero beyond.  For beta <= 1 the tail is
+# exact and positive however far down it goes, and carries most of the area at small beta.
+_INTERP_LOG_FLOOR = float(np.log(1e-14))
 
 
 @lru_cache(maxsize=8)
@@ -194,7 +218,6 @@ def _kww_shape(w: np.ndarray, beta: float) -> np.ndarray:
     half_range = np.arcsinh((2.0 / np.pi) * np.log(_QUAD_DECADES / cos_rotated) / beta)
     half_steps = int(np.ceil(max(half_range, _QUAD_HALF_RANGE) / _QUAD_STEP))
     nodes, weights = _quadrature_nodes(half_steps)
-    nodes_beta = nodes**beta
 
     # Rescale the grid onto whichever of the two exponents in P decays first, so the integrand
     # always falls off around s = 1 and the same node layout serves every w.  beta_scale is where
@@ -204,22 +227,153 @@ def _kww_shape(w: np.ndarray, beta: float) -> np.ndarray:
     w_scale = np.divide(1.0, abs_w * sin_theta, out=np.full(abs_w.shape, np.inf), where=abs_w > 0)
     scale = np.minimum(beta_scale, w_scale)
 
+    # On the rescaled grid P >= min(s, s**beta) for every w: whichever scale was picked turns its
+    # own term into exactly s or s**beta, and the other term is non-negative.  Nodes beyond the
+    # point where that bound underflows exp contribute exactly zero, so dropping them is lossless.
+    # For beta near 1 and above that is a quarter of the grid.
+    nodes_beta = nodes**beta
+    keep = np.minimum(nodes, nodes_beta) <= _EXP_UNDERFLOW
+    nodes, nodes_beta, weights = nodes[keep], nodes_beta[keep], weights[keep]
+
+    # With s = scale * node, P and Q are per-energy coefficients times the two node profiles:
+    #   P = decay_beta * node**beta + decay_w * node
+    #   Q = phase_w * node - phase_beta * node**beta
+    scale_beta = scale**beta
+    decay_beta = (cos_rotated * scale_beta)[:, np.newaxis]
+    phase_beta = (sin_rotated * scale_beta)[:, np.newaxis]
+    decay_w = (abs_w * sin_theta * scale)[:, np.newaxis]
+    phase_w = (abs_w * cos_theta * scale)[:, np.newaxis]
+
     out = np.empty(abs_w.shape)
     block = max(1, _MAX_BLOCK_ELEMENTS // nodes.size)
     for start in range(0, abs_w.size, block):
         stop = start + block
-        block_w = abs_w[start:stop, np.newaxis]
-        block_scale = scale[start:stop, np.newaxis]
+        # In-place updates keep the number of block-sized temporaries, and so the memory traffic,
+        # to a minimum.
+        integrand = decay_beta[start:stop] * nodes_beta
+        integrand += decay_w[start:stop] * nodes
+        np.negative(integrand, out=integrand)
+        np.exp(integrand, out=integrand)
 
-        s = block_scale * nodes
-        s_beta = block_scale**beta * nodes_beta
-        decaying = cos_rotated * s_beta + (block_w * sin_theta) * s
-        oscillating = (block_w * cos_theta) * s - sin_rotated * s_beta
+        phase = phase_w[start:stop] * nodes
+        phase -= phase_beta[start:stop] * nodes_beta
+        phase += theta
+        np.cos(phase, out=phase)
 
-        integral = (np.exp(-decaying) * np.cos(oscillating + theta) * weights).sum(axis=1)
-        out[start:stop] = integral * scale[start:stop]
+        integrand *= phase
+        out[start:stop] = np.einsum('ij,j->i', integrand, weights)
+    out *= scale
 
     return np.maximum(out, 0.0)
+
+
+def _interpolation_reference_scale(beta: float) -> float:
+    r"""
+    Get the reduced energy below which $G_\beta$ is flat to $10^{-6}$ of its peak.
+
+    This is where the table of :func:`_interpolation_table` switches from linear to logarithmic
+    node spacing.  It sits well below the half width, and further below it the smaller $\beta$ is:
+    a stretched profile starts to fall many decades before it reaches half height.  The half width
+    comes from the closed form behind :attr:`StretchedExponential.width`, and the factor $10^{-3 -
+    0.27 / \beta}$ is a bound on the measured 1e-6 drop point, which lies at $10^{-3.0}$ of the
+    half width at $\beta = 1$ and $10^{-7.9}$ at $\beta = 0.05$.
+
+    Parameters
+    ----------
+    beta : float
+        Stretching exponent, in ``[MINIMUM_BETA, MAXIMUM_BETA]``.
+
+    Returns
+    -------
+    float
+        The reference scale, in reduced energy $w = x / \Gamma$.
+    """
+    poly = np.polynomial.polynomial.polyval(beta, _HWHM_POLY_COEFFS)
+    hwhm = np.exp((np.log(beta) + poly) / beta)
+    return float(hwhm * 10.0 ** (-3.0 - 0.27 / beta))
+
+
+@lru_cache(maxsize=32)
+def _interpolation_table(beta: float, y_end: float) -> tuple[CubicSpline, float, float, bool]:
+    r"""
+    Tabulate $\log(G_\beta(w) / G_\beta(0))$ on $y = \mathrm{asinh}(w / w_{ref})$ up to *y_end*.
+
+    In $y$ the profile is easy to interpolate for every $\beta$: $y$ is linear in $w$ through the
+    flat top, where $G_\beta$ is even and quadratic, and logarithmic beyond $w_{ref}$, where the
+    tail is close to a power law that the logarithm turns into a straight line.  The nodes lie on a
+    fixed lattice in $y$, so tables of different length agree wherever they overlap.
+
+    The table depends on ``(beta, y_end)`` only and is cached: in a fit, the steps in the area,
+    center and relaxation time reuse it, as do all the Q of a model that shares beta.
+
+    Parameters
+    ----------
+    beta : float
+        Stretching exponent, in ``[MINIMUM_BETA, MAXIMUM_BETA]``.
+    y_end : float
+        Extent of the table in $y$, a multiple of ``_INTERP_Y_STEP``.
+
+    Returns
+    -------
+    tuple[CubicSpline, float, float, bool]
+        The spline of $\log(G_\beta / G_\beta(0))$ in $y$, $G_\beta(0)$, the last tabulated $y$,
+        and whether the table was cut short at the noise floor, beyond which the profile is zero.
+    """
+    w_ref = _interpolation_reference_scale(beta)
+    y = np.arange(round(y_end * _INTERP_NODES_PER_UNIT) + 1) / _INTERP_NODES_PER_UNIT
+    shape = _kww_shape(w_ref * np.sinh(y), beta)
+    peak = shape[0]
+
+    truncated = False
+    if beta > 1.0:
+        with np.errstate(divide='ignore'):
+            log_shape = np.log(shape / peak)
+        below = np.nonzero(log_shape < _INTERP_LOG_FLOOR)[0]
+        if below.size:
+            # Keep one node under the floor so the spline still runs downhill at the cut, and
+            # clamp it, since the value there may be log(0).
+            truncated = True
+            y = y[: below[0] + 1]
+            log_shape = np.maximum(log_shape[: below[0] + 1], _INTERP_LOG_FLOOR - 5.0)
+    else:
+        log_shape = np.log(shape / peak)
+
+    # G is even in w, so the profile is flat at y = 0.
+    spline = CubicSpline(y, log_shape, bc_type=((1, 0.0), 'not-a-knot'))
+    return spline, float(peak), float(y[-1]), truncated
+
+
+def _kww_shape_interpolated(w: np.ndarray, beta: float) -> np.ndarray:
+    r"""
+    Evaluate $G_\beta(w)$ by interpolating a cached table instead of by quadrature.
+
+    The result agrees with :func:`_kww_shape` to about 1e-7 of the peak for every $\beta$, and to
+    about 1e-6 pointwise for $\beta \le 1$, at a small fraction of the cost.  See
+    :func:`_interpolation_table` for how the table is laid out.
+
+    Parameters
+    ----------
+    w : np.ndarray
+        Reduced energies.  Only $|w|$ matters: the transform is even in $w$.
+    beta : float
+        Stretching exponent, in ``[MINIMUM_BETA, MAXIMUM_BETA]``.
+
+    Returns
+    -------
+    np.ndarray
+        The transform, non-negative.
+    """
+    y = np.arcsinh(np.abs(w) / _interpolation_reference_scale(beta))
+    if y.size == 0:
+        return np.zeros(y.shape)
+    # Half a unit of padding keeps the not-a-knot end condition away from the requested range.
+    y_end = _INTERP_Y_STEP * np.ceil((float(y.max()) + 0.5) / _INTERP_Y_STEP)
+    spline, peak, y_last, truncated = _interpolation_table(beta, y_end)
+
+    out = peak * np.exp(spline(np.minimum(y, y_last)))
+    if truncated:
+        out[y >= y_last] = 0.0
+    return out
 
 
 @lru_cache(maxsize=128)
@@ -348,6 +502,7 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         center: Numeric | None = None,
         relaxation_time: Numeric = 1.0,
         beta: Numeric = 1.0,
+        interpolate: bool = True,
         x_unit: str | sc.Unit = 'meV',
         y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'StretchedExponential',
@@ -369,6 +524,10 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         beta : Numeric, default=1.0
             Stretching exponent.  Must lie in ``[0.05, 2.0]``; $\beta = 1$ is a Lorentzian and
             $\beta = 2$ a Gaussian.
+        interpolate : bool, default=True
+            If True, evaluate the profile by interpolating a cached table instead of by quadrature.
+            This is many times faster, which matters in fits and sampling, and accurate to ~1e-7 of
+            the peak rather than ~1e-11.  Set it to False for the full quadrature accuracy.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  Must be an energy, since $\hbar / \tau$ is converted into it.
             center is stored in this unit. area_unit = x_unit * y_unit.
@@ -412,6 +571,8 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             min=MINIMUM_BETA,
             max=MAXIMUM_BETA,
         )
+
+        self.interpolate = interpolate
 
         # hbar has to be in the dependency map, because carrying J*s through the expression is
         # what lets the unit algebra turn the reduced half width into an energy.  It is a private
@@ -602,6 +763,38 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         self._validate_beta(value)
         self._set_bounded_parameter_value(self._beta, value, 'beta')
 
+    @property
+    def interpolate(self) -> bool:
+        """
+        Get whether the profile is evaluated by interpolation rather than by quadrature.
+
+        Returns
+        -------
+        bool
+            True if the profile is interpolated from a cached table.
+        """
+        return self._interpolate
+
+    @interpolate.setter
+    def interpolate(self, value: bool) -> None:
+        """
+        Choose whether the profile is evaluated by interpolation rather than by quadrature.
+
+        Parameters
+        ----------
+        value : bool
+            True to interpolate a cached table (faster, ~1e-7 of the peak), False to evaluate the
+            quadrature directly (~1e-11).
+
+        Raises
+        ------
+        TypeError
+            If *value* is not True or False.
+        """
+        if not isinstance(value, bool):
+            raise TypeError('interpolate must be True or False.')
+        self._interpolate = value
+
     def _build_width(self) -> Parameter:
         r"""
         Build the dependent width Parameter in the component's current x_unit.
@@ -725,7 +918,8 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
         energy_scale = self._energy_scale(eval_unit)
 
-        shape = _kww_shape((x_vals - center) / energy_scale, self._beta.value)
+        kww_shape = _kww_shape_interpolated if self._interpolate else _kww_shape
+        shape = kww_shape((x_vals - center) / energy_scale, self._beta.value)
         return area / (np.pi * energy_scale) * shape
 
     ################################
@@ -780,5 +974,6 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             f'    area = {self.area},\n '
             f'    center = {self.center},\n '
             f'    relaxation_time = {self.relaxation_time},\n '
-            f'    beta = {self.beta})'
+            f'    beta = {self.beta},\n '
+            f'    interpolate = {self.interpolate})'
         )
