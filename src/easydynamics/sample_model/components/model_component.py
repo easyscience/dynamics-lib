@@ -7,9 +7,7 @@ from abc import abstractmethod
 from functools import partial
 from typing import TYPE_CHECKING
 
-import numpy as np
 import scipp as sc
-from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
@@ -17,8 +15,10 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import convert_value_unit
+from easydynamics.utils.utils import prepare_x_for_evaluate
 
 if TYPE_CHECKING:
+    import numpy as np
     from easyscience.variable import Parameter
 
 
@@ -99,81 +99,6 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         for p in self.get_fittable_parameters():
             p.fixed = False
-
-    def _prepare_x_for_evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> tuple[np.ndarray, str | None, str]:
-        """
-        Validate x and extract its values, detected unit, and dimension name.
-
-        x is never converted. When x carries a unit, the caller is responsible for resolving
-        parameter values to that unit via _resolve_param_value.
-
-        Parameters
-        ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input x values to validate and extract.
-
-        Returns
-        -------
-        tuple[np.ndarray, str | None, str]
-            x_values : np.ndarray of raw float values (no unit conversion) detected_unit : str unit
-            of x if scipp input, else None dim : scipp dimension name if scipp input, else 'x'
-
-        Raises
-        ------
-        UnitError
-            If x has a unit incompatible with the model's x_unit.
-        ValueError
-            If x contains NaN or infinite values, or if a DataArray has more than one coordinate.
-        """
-        detected_unit: str | None = None
-        dim: str = 'x'
-        dim_from_dataarray: bool = False
-
-        if isinstance(x, sc.DataArray):
-            coords = dict(x.coords)
-            ncoords = len(coords)
-            if ncoords != 1:
-                coord_names = ', '.join(coords.keys())
-                raise ValueError(
-                    f'scipp.DataArray must have exactly one coordinate to be used as input `x`. '
-                    f'Found {ncoords} coordinates: {coord_names}.'
-                )
-            dim, coord_obj = next(iter(coords.items()))
-            x = coord_obj
-            dim_from_dataarray = True
-
-        if isinstance(x, sc.Variable):
-            detected_unit = str(x.unit)
-            if not dim_from_dataarray:
-                dim = x.dims[0] if x.dims else 'x'
-            x_in = x.value if x.sizes == {} else x.values
-
-            # Validate that x's unit is compatible with model's x_unit
-            if self.x_unit is not None and detected_unit != self.x_unit:
-                try:
-                    sc.to_unit(sc.scalar(1.0, unit=detected_unit), self.x_unit)
-                except Exception as e:
-                    raise UnitError(
-                        f'Input x has unit {detected_unit}, which is incompatible with '
-                        f'{self.__class__.__name__} x_unit {self.x_unit}.'
-                    ) from e
-        else:
-            x_in = x
-
-        if isinstance(x_in, Numeric):
-            x_in = np.array([x_in])
-        elif isinstance(x_in, list):
-            x_in = np.array(x_in)
-
-        if any(np.isnan(x_in)):
-            raise ValueError('Input x contains NaN values.')
-
-        if any(np.isinf(x_in)):
-            raise ValueError('Input x contains infinite values.')
-
-        return x_in, detected_unit, dim
 
     def _resolve_param_value(self, param: Parameter, target_unit: str | None) -> float:
         """
@@ -376,7 +301,9 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         if output not in ('numpy', 'scipp'):
             raise ValueError(f"output must be 'numpy' or 'scipp', got {output!r}")
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+        x_vals, detected_unit, dim = prepare_x_for_evaluate(
+            x, self.x_unit, self.__class__.__name__
+        )
         # eval_unit is None when x is already in the component's own x_unit (unitless input is
         # assumed to be), letting _evaluate_values skip all unit resolution in the hot path.
         eval_unit = detected_unit if detected_unit != self.x_unit else None

@@ -164,6 +164,88 @@ def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:
     return sc.array(dims=['energy'], values=energy, unit=unit)
 
 
+def prepare_x_for_evaluate(
+    x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
+    x_unit: str | sc.Unit | None,
+    component_name: str,
+) -> tuple[np.ndarray, str | None, str]:
+    """
+    Validate x and extract its values, detected unit, and dimension name.
+
+    x is never converted. When x carries a unit, the caller is responsible for resolving parameter
+    values to that unit via _resolve_param_value.
+
+    Parameters
+    ----------
+    x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+        Input x values to validate and extract.
+    x_unit : str | sc.Unit | None
+        The unit of the model that will be evaluated. If None, no unit compatibility check is made.
+    component_name : str
+        Name of the model, used in the error message when the units are incompatible.
+
+    Returns
+    -------
+    tuple[np.ndarray, str | None, str]
+        x_values : np.ndarray of raw float values (no unit conversion) detected_unit : str unit of
+        x if scipp input, else None dim : scipp dimension name if scipp input, else 'x'
+
+    Raises
+    ------
+    UnitError
+        If x has a unit incompatible with x_unit.
+    ValueError
+        If x contains NaN or infinite values, or if a DataArray has more than one coordinate.
+    """
+    detected_unit: str | None = None
+    dim: str = 'x'
+    dim_from_dataarray: bool = False
+
+    if isinstance(x, sc.DataArray):
+        coords = dict(x.coords)
+        ncoords = len(coords)
+        if ncoords != 1:
+            coord_names = ', '.join(coords.keys())
+            raise ValueError(
+                f'scipp.DataArray must have exactly one coordinate to be used as input `x`. '
+                f'Found {ncoords} coordinates: {coord_names}.'
+            )
+        dim, coord_obj = next(iter(coords.items()))
+        x = coord_obj
+        dim_from_dataarray = True
+
+    if isinstance(x, sc.Variable):
+        detected_unit = str(x.unit)
+        if not dim_from_dataarray:
+            dim = x.dims[0] if x.dims else 'x'
+        x_in = x.value if x.sizes == {} else x.values
+
+        # Validate that x's unit is compatible with model's x_unit
+        if x_unit is not None and detected_unit != x_unit:
+            try:
+                sc.to_unit(sc.scalar(1.0, unit=detected_unit), x_unit)
+            except Exception as e:
+                raise UnitError(
+                    f'Input x has unit {detected_unit}, which is incompatible with '
+                    f'{component_name} x_unit {x_unit}.'
+                ) from e
+    else:
+        x_in = x
+
+    if isinstance(x_in, Numeric):
+        x_in = np.array([x_in])
+    elif isinstance(x_in, list):
+        x_in = np.array(x_in)
+
+    if any(np.isnan(x_in)):
+        raise ValueError('Input x contains NaN values.')
+
+    if any(np.isinf(x_in)):
+        raise ValueError('Input x contains infinite values.')
+
+    return x_in, detected_unit, dim
+
+
 def _validate_and_convert_Q(
     Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
 ) -> sc.Variable | None:
