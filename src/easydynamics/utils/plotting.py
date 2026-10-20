@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from collections.abc import Callable
 
 import plopp as pp
 import scipp as sc
@@ -8,6 +9,41 @@ from plopp.backends.matplotlib.figure import WidgetFigure
 from plopp.plotting._slicer import SlicerPlot
 from plopp.plotting._slicer import _maybe_reduce_dim
 from plopp.widgets import slice_dims
+
+# x-axes that Q-dependent parameters can be plotted against, each mapped to the function
+# computing it from Q.
+Q_AXIS_TRANSFORMS: dict[str, Callable[[sc.Variable], sc.Variable]] = {
+    'Q': lambda Q: Q,
+    'Q^2': lambda Q: Q**2,
+}
+
+
+def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
+    """
+    Add an x_axis coordinate computed from the Q coordinate, for plotting against it.
+
+    Only the coordinate is transformed; the values at each Q are unchanged.
+
+    Parameters
+    ----------
+    data : sc.Dataset
+        Dataset with a 'Q' coordinate.
+    x_axis : str
+        Name of the axis to add, one of the keys of ``Q_AXIS_TRANSFORMS``.
+
+    Returns
+    -------
+    sc.Dataset
+        A copy of data with the x_axis coordinate added.
+
+    Raises
+    ------
+    ValueError
+        If x_axis is not one of the supported axes.
+    """
+    if x_axis not in Q_AXIS_TRANSFORMS:
+        raise ValueError(f"x_axis must be one of {list(Q_AXIS_TRANSFORMS)}, got '{x_axis}'.")
+    return data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
 
 
 def slicerplot_with_residuals(

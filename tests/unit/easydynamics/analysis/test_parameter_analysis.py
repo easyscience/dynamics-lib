@@ -614,6 +614,30 @@ class TestParameterAnalysis:
             parameter_analysis.bindings[0]
         ])
 
+    def test_plot_against_Q_squared(self, parameter_analysis, mock_model_dataset):
+        # WHEN
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot') as mock_plot,
+        ):
+            parameter_analysis.plot(names=['parameter1'], x_axis='Q^2')
+
+        # EXPECT data and model are plotted unchanged against a Q^2 coordinate
+        args, kwargs = mock_plot.call_args
+        plotted = args[0]
+        assert kwargs['coords'] == ['Q^2']
+        assert sc.identical(plotted.coords['Q^2'], plotted.coords['Q'] ** 2)
+        assert sc.identical(
+            plotted['parameter1'].data, parameter_analysis.parameters['parameter1'].data
+        )
+        assert sc.identical(plotted['Polynomial'].data, mock_model_dataset['Polynomial'].data)
+
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
         [

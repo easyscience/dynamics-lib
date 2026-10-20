@@ -7,7 +7,48 @@ from unittest.mock import patch
 import pytest
 import scipp as sc
 
+from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.plotting import slicerplot_with_residuals
+
+
+class TestAdd_x_axis_coord:
+    @pytest.fixture
+    def dataset(self):
+        return sc.Dataset(
+            data={'width': sc.array(dims=['Q'], values=[0.1, 0.2], unit='meV')},
+            coords={'Q': sc.array(dims=['Q'], values=[0.5, 2.0], unit='1/angstrom')},
+        )
+
+    @pytest.mark.parametrize(
+        'x_axis, expected_values, expected_unit',
+        [
+            ('Q', [0.5, 2.0], '1/angstrom'),
+            ('Q^2', [0.25, 4.0], '1/angstrom**2'),
+        ],
+        ids=['Q', 'Q_squared'],
+    )
+    def test_add_x_axis_coord(self, dataset, x_axis, expected_values, expected_unit):
+        # THEN
+        result = add_x_axis_coord(dataset, x_axis)
+
+        # EXPECT the coordinate is added and the data is unchanged
+        assert sc.identical(
+            result.coords[x_axis],
+            sc.array(dims=['Q'], values=expected_values, unit=expected_unit),
+        )
+        assert sc.identical(result['width'].data, dataset['width'].data)
+
+    def test_add_x_axis_coord_does_not_modify_input(self, dataset):
+        # THEN
+        add_x_axis_coord(dataset, 'Q^2')
+
+        # EXPECT
+        assert 'Q^2' not in dataset.coords
+
+    def test_add_x_axis_coord_invalid_x_axis_raises(self, dataset):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='x_axis must be one of'):
+            add_x_axis_coord(dataset, 'Q^3')
 
 
 class TestSlicerplot_with_residuals:
