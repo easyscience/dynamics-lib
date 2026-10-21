@@ -26,6 +26,17 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     width at half max (``width``). area has unit = x_unit * y_unit; center and width have unit =
     x_unit.
 
+    References
+    ----------
+    1. W. Cochran, *Crystal stability and the theory of ferroelectricity*, Adv. Phys. **9**, 387
+       (1960), [doi:10.1080/00018736000101229](https://doi.org/10.1080/00018736000101229).
+    2. R. A. Cowley, *The lattice dynamics of an anharmonic crystal*, Adv. Phys. **12**, 421
+       (1963), [doi:10.1080/00018736300101333](https://doi.org/10.1080/00018736300101333).
+    3. R. A. Cowley, *Anharmonic crystals*, Rep. Prog. Phys. **31**, 123 (1968),
+       [doi:10.1088/0034-4885/31/1/303](https://doi.org/10.1088/0034-4885/31/1/303).
+    4. S. W. Lovesey, *Theory of Neutron Scattering from Condensed Matter*, Clarendon Press, Oxford
+       (1984).
+
     Examples
     --------
     **Creating a Damped Harmonic Oscillator**

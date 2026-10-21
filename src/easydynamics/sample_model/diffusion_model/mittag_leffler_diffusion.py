@@ -29,12 +29,7 @@ DIFFUSION_COEFFICIENT_MIN = 1e-25  # To avoid division by zero in the diffusion 
 class MittagLefflerDiffusion(DiffusionModelBase):
     r"""
     Multiscale relaxation model of Hassani et al.: Mittag-Leffler internal dynamics damped by
-    global translational diffusion.
-
-    A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
-    relaxation dynamics and diffusion of myelin basic protein in solution studied by quasielastic
-    neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
-    [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
+    global translational diffusion (see References).
 
     The intermediate scattering function is written as an internal relaxation, described by a
     Mittag-Leffler function, times a global diffusion factor (their Eqs. 38-39),
@@ -64,6 +59,13 @@ class MittagLefflerDiffusion(DiffusionModelBase):
     In the paper $\tau_R$, $\alpha$ and the EISF are instead fitted independently at every Q (their
     Fig. 5); pass ``allow_Q_variation={'A_0': True, 'relaxation_rate': True, 'alpha': True}`` to
     reproduce that. Q is assumed to be in 1/angstrom and $D$ in m^2/s.
+
+    References
+    ----------
+    A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
+    relaxation dynamics and diffusion of myelin basic protein in solution studied by quasielastic
+    neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
+    [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
 
     Examples
     --------
@@ -619,6 +621,13 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         ------
         ValueError
             If any requested rate is not strictly positive.
+
+        References
+        ----------
+        A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
+        relaxation dynamics and diffusion of myelin basic protein in solution studied by
+        quasielastic neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
+        [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
         """
         rate = np.atleast_1d(np.asarray(rate, dtype=float))
         if np.any(rate <= 0):
@@ -662,6 +671,13 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         -------
         np.ndarray
             Array of shape ``(len(Q), len(barrier_height))`` holding P(h) for each Q.
+
+        References
+        ----------
+        A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
+        relaxation dynamics and diffusion of myelin basic protein in solution studied by
+        quasielastic neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
+        [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
         """
         barrier_height = np.atleast_1d(np.asarray(barrier_height, dtype=float))
 

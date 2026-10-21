@@ -28,6 +28,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
     Q-values.
 
+    References
+    ----------
+    K. S. Singwi and A. Sjölander, *Diffusive Motions in Water and Cold Neutron Scattering*, Phys.
+    Rev. **119**, 863 (1960),
+    [doi:10.1103/PhysRev.119.863](https://doi.org/10.1103/PhysRev.119.863).
+
     Examples
     --------
     **Creating a JumpTranslationalDiffusion model**
