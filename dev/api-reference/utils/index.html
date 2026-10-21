@@ -6121,6 +6121,17 @@ NaN leaves a gap in the lines rather than inventing a value.</p>
                 </div>
               </td>
             </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;prepare_x_for_evaluate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.utils.prepare_x_for_evaluate&lt;/code&gt;)" href="#easydynamics.utils.utils.prepare_x_for_evaluate">prepare_x_for_evaluate</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Validate x and extract its values, detected unit, and dimension name.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
       </tbody>
     </table>
 
@@ -6645,6 +6656,167 @@ expression is re-evaluated).</p>
             <td>
               <div class="doc-md-description">
                 <p>Energy as sc.Variable.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.utils.utils.prepare_x_for_evaluate" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">prepare_x_for_evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">component_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate x and extract its values, detected unit, and dimension name.</p>
+<p>x is never converted. When x carries a unit, the caller is responsible for resolving parameter
+values to that unit via _resolve_param_value.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="list">list</span> | <a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.DataArray&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray">DataArray</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Input x values to validate and extract.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the model that will be evaluated. If None, no unit compatibility check is made.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the model, used in the error message when the units are incompatible.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a>, <span title="str">str</span> | None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>x_values : np.ndarray of raw float values (no unit conversion) detected_unit : str unit of
+x if scipp input, else None dim : scipp dimension name if scipp input, else 'x'</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;scipp.UnitError&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.UnitError.html#scipp.UnitError">UnitError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If x has a unit incompatible with x_unit.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If x contains NaN or infinite values, or if a DataArray has more than one coordinate.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
