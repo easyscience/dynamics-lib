@@ -22,6 +22,14 @@ from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion 
     BrownianTranslationalDiffusion,
 )
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.equivalent_sites_circle import EquivalentSitesCircle
+from easydynamics.sample_model.diffusion_model.gaussian_model_3d import GaussianModel3D
+from easydynamics.sample_model.diffusion_model.hall_ross_jump_diffusion import (
+    HallRossJumpDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.jump_sites_log_normal_distribution import (
+    JumpSitesLogNormalDistribution,
+)
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
@@ -41,10 +49,14 @@ __all__ = [
     'DeltaFunction',
     'DeltaLorentz',
     'DiffusionDampedMittagLeffler',
+    'EquivalentSitesCircle',
     'Exponential',
     'ExpressionComponent',
     'Gaussian',
+    'GaussianModel3D',
+    'HallRossJumpDiffusion',
     'InstrumentModel',
+    'JumpSitesLogNormalDistribution',
     'JumpTranslationalDiffusion',
     'Lorentzian',
     'MittagLefflerDiffusion',
