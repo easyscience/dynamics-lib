@@ -48,6 +48,7 @@ nodejs = '*'  # Required for Prettier (non-Python formatting)
 jupyterlab = '*'  # Jupyter notebooks
 ipython = '*'  # Interactive Python shell
 pixi-kernel = '*'  # Pixi Jupyter kernel
+numba = '*'  # Optional fast spherical Bessel path (pip extra 'fast')
 
 [feature.dev.pypi-dependencies]
 pip = '*'

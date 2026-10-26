@@ -8,6 +8,18 @@ from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion im
     ChudleyElliottJumpDiffusion,
 )
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.diffusion_in_sphere import DiffusionInSphere
+from easydynamics.sample_model.diffusion_model.equivalent_sites_circle import EquivalentSitesCircle
+from easydynamics.sample_model.diffusion_model.gaussian_model_3d import GaussianModel3D
+from easydynamics.sample_model.diffusion_model.hall_ross_jump_diffusion import (
+    HallRossJumpDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.isotropic_rotational_diffusion import (
+    IsotropicRotationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.jump_sites_log_normal_distribution import (
+    JumpSitesLogNormalDistribution,
+)
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
@@ -19,6 +31,12 @@ __all__ = [
     'BrownianTranslationalDiffusion',
     'ChudleyElliottJumpDiffusion',
     'DeltaLorentz',
+    'DiffusionInSphere',
+    'EquivalentSitesCircle',
+    'GaussianModel3D',
+    'HallRossJumpDiffusion',
+    'IsotropicRotationalDiffusion',
+    'JumpSitesLogNormalDistribution',
     'JumpTranslationalDiffusion',
     'MittagLefflerDiffusion',
 ]

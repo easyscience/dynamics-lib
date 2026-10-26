@@ -31,10 +31,16 @@ from easydynamics.sample_model import DampedHarmonicOscillator
 from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import DeltaLorentz
 from easydynamics.sample_model import DiffusionDampedMittagLeffler
+from easydynamics.sample_model import DiffusionInSphere
+from easydynamics.sample_model import EquivalentSitesCircle
 from easydynamics.sample_model import Exponential
 from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import GaussianModel3D
+from easydynamics.sample_model import HallRossJumpDiffusion
 from easydynamics.sample_model import InstrumentModel
+from easydynamics.sample_model import IsotropicRotationalDiffusion
+from easydynamics.sample_model import JumpSitesLogNormalDistribution
 from easydynamics.sample_model import JumpTranslationalDiffusion
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import MittagLefflerDiffusion
@@ -68,14 +74,20 @@ __all__ = [
     'DeltaLorentz',
     'DetailedBalanceSettings',
     'DiffusionDampedMittagLeffler',
+    'DiffusionInSphere',
     'EasyDynamicsBase',
     'EasyDynamicsModelBase',
+    'EquivalentSitesCircle',
     'Experiment',
     'Exponential',
     'ExpressionComponent',
     'FitBinding',
     'Gaussian',
+    'GaussianModel3D',
+    'HallRossJumpDiffusion',
     'InstrumentModel',
+    'IsotropicRotationalDiffusion',
+    'JumpSitesLogNormalDistribution',
     'JumpTranslationalDiffusion',
     'Lorentzian',
     'MittagLefflerDiffusion',
