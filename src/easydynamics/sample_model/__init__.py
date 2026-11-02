@@ -7,6 +7,7 @@ from easydynamics.sample_model.components.damped_harmonic_oscillator import (
     DampedHarmonicOscillator,
 )
 from easydynamics.sample_model.components.delta_function import DeltaFunction
+from easydynamics.sample_model.components.delta_lorentzian import DeltaLorentzian
 from easydynamics.sample_model.components.diffusion_damped_mittag_leffler import (
     DiffusionDampedMittagLeffler,
 )
@@ -40,6 +41,7 @@ __all__ = [
     'DampedHarmonicOscillator',
     'DeltaFunction',
     'DeltaLorentz',
+    'DeltaLorentzian',
     'DiffusionDampedMittagLeffler',
     'Exponential',
     'ExpressionComponent',
