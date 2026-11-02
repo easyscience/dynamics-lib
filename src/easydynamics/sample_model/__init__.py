@@ -23,6 +23,7 @@ from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion 
     BrownianTranslationalDiffusion,
 )
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.equivalent_sites_circle import EquivalentSitesCircle
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
@@ -43,6 +44,7 @@ __all__ = [
     'DeltaLorentz',
     'DeltaLorentzian',
     'DiffusionDampedMittagLeffler',
+    'EquivalentSitesCircle',
     'Exponential',
     'ExpressionComponent',
     'Gaussian',
