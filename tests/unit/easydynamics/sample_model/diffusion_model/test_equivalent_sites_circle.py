@@ -20,6 +20,13 @@ def j0(x: float | np.ndarray) -> np.ndarray:
     return np.sinc(np.asarray(x) / np.pi)
 
 
+def direct_structure_factor(Q: np.ndarray, radius: float, sites: int, order: int) -> np.ndarray:
+    """A_l(Q) = (1/N) sum_{k=1}^{N} j0(Q d_k) cos(2 pi l k / N), d_k = 2 R sin(pi k / N)."""
+    k = np.arange(1, sites + 1)
+    distance = 2 * radius * np.sin(np.pi * k / sites)
+    return (j0(np.outer(Q, distance)) * np.cos(2 * np.pi * order * k / sites)).sum(axis=1) / sites
+
+
 class TestEquivalentSitesCircle:
     @pytest.fixture
     def model(self):
@@ -134,6 +141,46 @@ class TestEquivalentSitesCircle:
         assert model.calculate_EISF(np.array([0.0]))[0] == pytest.approx(1.0)
         assert model.calculate_QISF(np.array([0.0]))[0] == pytest.approx(0.0, abs=1e-12)
 
+    @pytest.mark.parametrize('sites', [2, 3, 4, 5, 6, 7, 12])
+    def test_structure_factors_match_the_direct_sum(self, sites):
+        # GIVEN: odd and even N; the oracle is the plain sum over all N sites of the derivation
+        radius = 1.3
+        model = EquivalentSitesCircle(radius=radius, number_of_sites=sites)
+        Q = np.array([0.0, 0.2, 0.9, 1.7, 3.1, 6.0])
+
+        # WHEN THEN EXPECT
+        np.testing.assert_allclose(
+            model.calculate_EISF(Q),
+            direct_structure_factor(Q, radius, sites, 0),
+            rtol=1e-10,
+            atol=1e-12,
+        )
+        for order in range(1, sites):
+            np.testing.assert_allclose(
+                model.calculate_QISF_order(Q, order),
+                direct_structure_factor(Q, radius, sites, order),
+                rtol=1e-10,
+                atol=1e-12,
+            )
+
+    @pytest.mark.parametrize('sites', [2, 5, 6])
+    def test_eisf_tends_to_one_over_n_at_large_q(self, sites):
+        # GIVEN: for Q -> infinity only the term with d = 0 survives, j0(Q d) -> 0 otherwise
+        model = EquivalentSitesCircle(radius=1.0, number_of_sites=sites)
+
+        # WHEN THEN EXPECT
+        assert model.calculate_EISF(np.array([500.0]))[0] == pytest.approx(1 / sites, abs=1e-2)
+
+    def test_largest_number_of_sites_works(self):
+        # GIVEN
+        model = EquivalentSitesCircle(number_of_sites=50, Q=np.array([0.7]))
+
+        # WHEN THEN EXPECT: the sum rule still holds and the component has 49 Lorentzians
+        np.testing.assert_allclose(
+            model.calculate_EISF() + model.calculate_QISF(), 1.0, rtol=1e-10
+        )
+        assert model.get_component_collections(0)[0].number_of_lorentzians == 49
+
     def test_widths_of_three_sites(self):
         # GIVEN: Gamma_l = (2 hbar / tau) sin^2(pi l / 3) = 1.5 hbar / tau for l = 1, 2
         model = EquivalentSitesCircle(residence_time=2.0, number_of_sites=3)
@@ -227,6 +274,44 @@ class TestEquivalentSitesCircle:
 
         # EXPECT
         assert model.get_component_collections(0)[0].name == 'Rotor'
+
+    def test_collection_names_follow_q(self):
+        # WHEN
+        model = EquivalentSitesCircle(Q=np.array([0.5, 1.25]))
+
+        # EXPECT
+        assert model.get_component_collections(0).name == 'EquivalentSitesCircle_Q0.50'
+        assert model.get_component_collections(1).name == 'EquivalentSitesCircle_Q1.25'
+
+    def test_component_parameters_are_named_like_the_component_names_them(self):
+        # GIVEN: a component made directly would call its parameters '<name> weight_<l>' ...
+        model = EquivalentSitesCircle(
+            number_of_sites=4, Q=np.array([1.0, 2.0]), lorentzian_name='Rotor'
+        )
+
+        # WHEN THEN EXPECT
+        for i in range(2):
+            component = model.get_component_collections(i)[0]
+            assert [w.name for w in component.weights] == [
+                f'Rotor weight_{order}' for order in range(4)
+            ]
+            assert [w.name for w in component.widths] == [
+                f'Rotor width_{order}' for order in (1, 2, 3)
+            ]
+
+    def test_weights_of_the_component_match_the_direct_sum(self):
+        # GIVEN
+        Q = np.array([0.6, 2.2])
+        model = EquivalentSitesCircle(radius=1.4, number_of_sites=5, Q=Q)
+
+        for i in range(2):
+            component = model.get_component_collections(i)[0]
+
+            # WHEN THEN EXPECT: every weight, delta function first
+            for order, weight in enumerate(component.weights):
+                assert weight.value == pytest.approx(
+                    direct_structure_factor(Q[i : i + 1], 1.4, 5, order)[0], abs=1e-10
+                )
 
     def test_create_component_collections_installs_collections(self):
         # WHEN
@@ -379,6 +464,52 @@ class TestEquivalentSitesCircle:
         # EXPECT: the width is still in micro-eV
         assert component.widths[0].value == pytest.approx(2000 * HBAR_MEV_PS / 4.0, rel=1e-6)
 
+    def test_results_do_not_depend_on_the_unit_of_the_radius(self):
+        # GIVEN: the same circle, 1.5 angstrom = 0.15 nm
+        Q = np.array([0.4, 1.3, 2.6])
+        reference = EquivalentSitesCircle(radius=1.5, number_of_sites=4, Q=Q)
+        converted = EquivalentSitesCircle(radius=1.0, number_of_sites=4, Q=Q)
+        converted.radius.convert_unit('nm')
+
+        # WHEN: the radius is set in nanometre
+        converted.radius.value = 0.15
+
+        # EXPECT: the methods and the linked weights of the component agree with the reference
+        np.testing.assert_allclose(
+            converted.calculate_EISF(), reference.calculate_EISF(), rtol=1e-10
+        )
+        for order in (1, 2, 3):
+            np.testing.assert_allclose(
+                converted.calculate_QISF_order(order=order),
+                reference.calculate_QISF_order(order=order),
+                rtol=1e-10,
+            )
+        for i in range(3):
+            converted_weights = converted.get_component_collections(i)[0].weights
+            reference_weights = reference.get_component_collections(i)[0].weights
+            for got, expected in zip(converted_weights, reference_weights, strict=True):
+                assert got.value == pytest.approx(expected.value, abs=1e-10)
+
+    def test_all_links_work_after_x_unit_conversion(self):
+        # GIVEN
+        Q = np.array([1.1])
+        model = EquivalentSitesCircle(
+            scale=2.0, radius=1.0, residence_time=2.0, number_of_sites=2, Q=Q
+        )
+        component = model.get_component_collections(0)[0]
+        model.convert_x_unit('microeV')
+
+        # WHEN: each model parameter is changed after the conversion
+        model.residence_time.value = 4.0
+        model.radius.value = 2.0
+        model.scale.value = 3000.0
+
+        # EXPECT: widths in microeV, weights (N = 2 closed forms) and area follow
+        assert component.widths[0].value == pytest.approx(2000 * HBAR_MEV_PS / 4.0, rel=1e-6)
+        assert component.weights[0].value == pytest.approx((1 + j0(1.1 * 4.0)) / 2, abs=1e-10)
+        assert component.weights[1].value == pytest.approx((1 - j0(1.1 * 4.0)) / 2, abs=1e-10)
+        assert component.area.value == pytest.approx(3000.0)
+
     def test_y_unit_setter_raises(self, model: EquivalentSitesCircle):
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
@@ -426,10 +557,25 @@ class TestEquivalentSitesCircle:
         )
         np.testing.assert_allclose(targets['width_1'].function(Q), model.calculate_width(Q, 1))
         assert sc.Unit(str(targets['width_1'].y_unit)) == sc.Unit('meV')
+        assert all(target.x_unit == '1/angstrom' for target in targets.values())
         assert sc.Unit(str(targets['area_1'].y_unit)) == sc.Unit(str(model.scale.unit))
 
+    def test_fit_target_dataset_keys(self):
+        # GIVEN
+        model = EquivalentSitesCircle(number_of_sites=3, lorentzian_name='Rotor')
+
+        # WHEN
+        targets = {target.name: target for target in model.get_fit_targets()}
+
+        # EXPECT: widths are parameters of the component, so they have a default key; the
+        # areas are scale * weight and the component has no parameter for them
+        assert targets['width_1'].dataset_key == 'Rotor width_1'
+        assert targets['width_2'].dataset_key == 'Rotor width_2'
+        assert targets['elastic_area'].dataset_key is None
+        assert targets['area_1'].dataset_key is None
+
     # ------------------------------------------------------------------
-    # Integration with the package
+    # Exports
     # ------------------------------------------------------------------
 
     def test_is_exported(self):

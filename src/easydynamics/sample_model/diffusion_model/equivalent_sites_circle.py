@@ -390,7 +390,8 @@ class EquivalentSitesCircle(DiffusionModelBase):
         The model predicts ``'elastic_area'`` (``scale * EISF``) and, for every order from 1 to N -
         1, ``'area_<order>'`` (``scale`` times the QISF of that order) and ``'width_<order>'`` (its
         HWHM). The base class implementation is replaced because there is no single Lorentzian. The
-        targets have no default dataset key; supply it in the FitBinding.
+        widths default to the dataset key of the component's width Parameter; the areas have no
+        Parameter of their own, so supply their key in the FitBinding.
 
         Returns
         -------
@@ -423,7 +424,7 @@ class EquivalentSitesCircle(DiffusionModelBase):
             targets.append(
                 FitTarget(
                     name=f'width_{order}',
-                    dataset_key=None,
+                    dataset_key=f'{self.lorentzian_name} width_{order}',
                     function=lambda Q, model=self, order=order, **_: model.calculate_width(
                         Q, order
                     ),
@@ -438,12 +439,32 @@ class EquivalentSitesCircle(DiffusionModelBase):
     # Private methods
     # ------------------------------------------------------------------
 
+    def _jump_geometry(self) -> tuple[sc.Variable, sc.Variable]:
+        r"""
+        Describe the N sites once, for both the direct and the dependent calculation of $A_l(Q)$.
+
+        Site $k$ lies $k$ places away from site $N$ (the starting site, $k = N$ meaning no jump).
+        Its chord is $d_k = 2R\sin(\pi k / N)$ and it enters the order-$l$ weight with the phase
+        factor $\cos(2\pi l k / N) / N$, so $A_l(Q) = \sum_k j_0(Q d_k)\,\text{phase}_{lk}$.
+
+        Returns
+        -------
+        tuple[sc.Variable, sc.Variable]
+            ``chord``: $d_k / R$ with dims ``('k',)`` for $k = 1 \ldots N$, dimensionless.
+            ``phase``: dims ``('order', 'k')`` for $l = 0 \ldots N - 1$, dimensionless.
+        """
+        N = self.number_of_sites
+        site = sc.arange('k', 1.0, N + 1.0)
+        order = sc.arange('order', 0.0, float(N))
+        turn = sc.scalar(2 * np.pi, unit='rad')
+
+        chord = 2 * sc.sin(turn * site / (2 * N))
+        phase = sc.cos(turn * order * site / N) / N
+        return chord, phase
+
     def _structure_factors(self, Q: np.ndarray) -> sc.Variable:
         r"""
-        Calculate the EISF and the QISF, $A_l(Q)$ for all orders $l = 0 \ldots N - 1$, with Scipp.
-
-        $A_l(Q) = \frac{1}{N} \sum_{k=1}^{N} j_0(Q r_k) \cos(2\pi l k / N)$ with $r_k = 2R\sin(\pi
-        k / N)$.
+        Calculate $A_l(Q)$ for all orders $l = 0 \ldots N - 1$ in one go.
 
         Parameters
         ----------
@@ -455,27 +476,21 @@ class EquivalentSitesCircle(DiffusionModelBase):
         sc.Variable
             Dimensionless $A_l(Q)$ with dims ``('Q', 'order')``; order 0 is the EISF.
         """
-        N = self.number_of_sites
-        site = sc.arange('k', 1.0, N + 1.0)
-        order = sc.arange('order', 0.0, float(N))
-        half_turn = sc.scalar(np.pi, unit='rad')
-
+        chord, phase = self._jump_geometry()
+        # Converting here is what makes the result independent of the unit chosen for the radius.
         radius = sc.scalar(self.radius.value, unit=str(self.radius.unit)).to(unit='angstrom')
-        jump_distance = 2 * radius * sc.sin(half_turn * site / N)
         Q_variable = sc.array(dims=['Q'], values=Q, unit=CANONICAL_Q_UNIT)
 
-        weights = sc.sum(
-            sc.sinc(Q_variable * jump_distance) * sc.cos(2 * half_turn * order * site / N), 'k'
-        )
-        return (weights / N).transpose(['Q', 'order'])
+        overlap = sc.sinc(Q_variable * radius * chord)  # j0(Q d_k), dims (Q, k)
+        return sc.sum(overlap * phase, 'k').transpose(['Q', 'order'])
 
     def _create_weight(self, Q: float, order: int) -> Parameter:
         r"""
-        Create the EISF ($l = 0$) or the QISF of order $l$, $A_l(Q)$, as a dimensionless dependent
-        Parameter that follows the radius.
+        Create $A_l(Q)$ at one Q as a dimensionless dependent Parameter that follows the radius.
 
-        The dependency expressions cannot call Scipp, so the sum over sites is written out with
-        NumPy's sinc, sinc(x) = sin(pi x) / (pi x).
+        A dependency expression cannot call Scipp, so the same sum as in ``_structure_factors`` is
+        written out term by term from the same ``_jump_geometry``. NumPy's ``sinc`` is normalised,
+        $\mathrm{sinc}(x) = \sin(\pi x)/(\pi x)$, hence the division by pi.
 
         Parameters
         ----------
@@ -489,16 +504,16 @@ class EquivalentSitesCircle(DiffusionModelBase):
         Parameter
             The weight.
         """
-        N = self.number_of_sites
-        terms = []
-        for site in range(1, N + 1):
-            # float(): NumPy 2 writes np.float64 as 'np.float64(...)', which asteval cannot parse
-            coefficient = float(np.cos(2 * np.pi * order * site / N) / N)
-            # j0(Q r_k) = sinc(Q r_k / pi) with r_k = 2 R sin(pi k / N)
-            argument = float(Q * 2 * np.sin(np.pi * site / N) / np.pi)
-            terms.append(f'{coefficient!r} * sinc({argument!r} * radius_ratio.value)')
+        chord, phase = self._jump_geometry()
+        # float(): NumPy 2 writes np.float64 as 'np.float64(...)', which asteval cannot parse
+        terms = [
+            f'{float(coefficient)!r} * sinc({float(Q * distance / np.pi)!r} * radius_ratio.value)'
+            for coefficient, distance in zip(
+                phase['order', order].values, chord.values, strict=True
+            )
+        ]
         return Parameter.from_dependency(
-            name=f'weight_l{order}_Q{Q:.2f}',
+            name=f'{self.lorentzian_name} weight_{order}',
             dependency_expression=f'one * ({" + ".join(terms)})',
             dependency_map={'one': self._one, 'radius_ratio': self._radius_over_angstrom},
         )
@@ -520,7 +535,7 @@ class EquivalentSitesCircle(DiffusionModelBase):
         """
         factor = float(2 * np.sin(np.pi * order / self.number_of_sites) ** 2)
         return Parameter.from_dependency(
-            name=f'width_l{order}',
+            name=f'{self.lorentzian_name} width_{order}',
             dependency_expression=f'{factor!r} * hbar / tau',
             dependency_map={'hbar': self._hbar, 'tau': self.residence_time},
             desired_unit=self.x_unit,
