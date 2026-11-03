@@ -453,7 +453,7 @@ class TestDeltaLorentzian:
             component.y_unit = '1/meV'
 
     # ------------------------------------------------------------------
-    # Integration with the rest of the sample model
+    # Equivalence with the separate components
     # ------------------------------------------------------------------
 
     def test_is_exported(self):
