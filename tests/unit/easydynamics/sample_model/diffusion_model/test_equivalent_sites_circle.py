@@ -286,6 +286,22 @@ class TestEquivalentSitesCircle:
                 f'Rotor width_{order}' for order in (1, 2, 3)
             ]
 
+    @pytest.mark.parametrize('sites', [3, 4, 5])
+    def test_component_evaluates_where_rounding_makes_weights_slightly_negative(self, sites):
+        # GIVEN: at tiny Q the weights of orders 1..N-1 are zero up to rounding, and the sums that
+        # give them can come out as -1e-16
+        Q = np.array([1e-12, 1e-8, 1e-4])
+        model = EquivalentSitesCircle(radius=1.0, number_of_sites=sites, Q=Q)
+        x = np.linspace(-2, 2, 101)
+
+        for i in range(len(Q)):
+            component = model.get_component_collections(i)[0]
+
+            # WHEN THEN EXPECT: the component check for non-negative weights is not tripped, and
+            # the weights themselves are not negative
+            component.evaluate(x)
+            assert all(weight.value >= 0 for weight in component.weights)
+
     def test_weights_of_the_component_match_the_direct_sum(self):
         # GIVEN
         Q = np.array([0.6, 2.2])

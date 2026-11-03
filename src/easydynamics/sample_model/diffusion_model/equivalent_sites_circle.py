@@ -480,6 +480,10 @@ class EquivalentSitesCircle(DiffusionModelBase):
         written out term by term from the same ``_jump_geometry``. NumPy's ``sinc`` is normalised,
         $\mathrm{sinc}(x) = \sin(\pi x)/(\pi x)$, hence the division by pi.
 
+        $A_l(Q)$ is never negative, but rounding can leave a sum that is zero in exact arithmetic
+        at about -1e-16 (at small Q, for example), which the weight check of ``DeltaLorentzian``
+        rejects. The expression therefore takes the larger of the sum and zero.
+
         Parameters
         ----------
         Q : float
@@ -502,7 +506,7 @@ class EquivalentSitesCircle(DiffusionModelBase):
         ]
         return Parameter.from_dependency(
             name=f'{self.lorentzian_name} weight_{order}',
-            dependency_expression=f'one * ({" + ".join(terms)})',
+            dependency_expression=f'one * max(0.0, {" + ".join(terms)})',
             dependency_map={'one': self._one, 'radius_ratio': self._radius_over_angstrom},
         )
 
