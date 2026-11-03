@@ -28,10 +28,6 @@ class TestDeltaLorentzian:
             x_unit='meV',
         )
 
-    # ------------------------------------------------------------------
-    # Construction
-    # ------------------------------------------------------------------
-
     def test_init_no_inputs(self):
         # WHEN THEN
         component = DeltaLorentzian()
@@ -129,10 +125,6 @@ class TestDeltaLorentzian:
         assert component.widths[0] is width
         weight1.value = 0.7
         assert component.weights[1].value == pytest.approx(0.7)
-
-    # ------------------------------------------------------------------
-    # Evaluation
-    # ------------------------------------------------------------------
 
     def test_evaluate_lorentzian_part_hand_derived(self, component: DeltaLorentzian):
         # GIVEN: away from the delta bin only the Lorentzian contributes:
@@ -257,10 +249,6 @@ class TestDeltaLorentzian:
         with pytest.raises(ValueError, match="output must be 'numpy' or 'scipp'"):
             component.evaluate(np.linspace(-1, 1, 11), output='invalid')
 
-    # ------------------------------------------------------------------
-    # Parameters
-    # ------------------------------------------------------------------
-
     def test_weights_and_widths_accept_numbers_and_parameters_mixed(self):
         # WHEN
         weight = Parameter(name='w1', value=0.6, unit='dimensionless', min=0.0)
@@ -338,10 +326,6 @@ class TestDeltaLorentzian:
         assert len(set(names)) == len(names)
         assert all(n.startswith('Water') for n in names)
 
-    # ------------------------------------------------------------------
-    # Setters
-    # ------------------------------------------------------------------
-
     def test_area_setter_rejects_negative(self, component: DeltaLorentzian):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='violates the parameter bounds'):
@@ -371,10 +355,6 @@ class TestDeltaLorentzian:
         # THEN EXPECT
         assert component.center.value == pytest.approx(0.0)
         assert component.center.fixed is True
-
-    # ------------------------------------------------------------------
-    # Units
-    # ------------------------------------------------------------------
 
     def test_convert_x_unit(self, component: DeltaLorentzian):
         # WHEN
@@ -451,10 +431,6 @@ class TestDeltaLorentzian:
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
             component.y_unit = '1/meV'
-
-    # ------------------------------------------------------------------
-    # Equivalence with the separate components
-    # ------------------------------------------------------------------
 
     def test_is_exported(self):
         # WHEN THEN EXPECT
