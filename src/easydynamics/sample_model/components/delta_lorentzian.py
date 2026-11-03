@@ -42,15 +42,15 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
 
     This is the component to use at one Q-value for models made of a delta function and several
     Lorentzians. It evaluates as a ``DeltaFunction`` plus ``Lorentzian`` components would, and the
-    delta function is handled as in ``DeltaFunction``. It should not be confused with the
-    diffusion model ``DeltaLorentz``, which has one Lorentzian and handles a range of Q-values.
+    delta function is handled as in ``DeltaFunction``. It should not be confused with the diffusion
+    model ``DeltaLorentz``, which has one Lorentzian and handles a range of Q-values.
 
     Examples
     --------
     **Creating a delta function and two Lorentzians**
 
-    The weights are ordered ``[w0, w1, ..., wn]`` with the delta function first; there is one
-    width per Lorentzian:
+    The weights are ordered ``[w0, w1, ..., wn]`` with the delta function first; there is one width
+    per Lorentzian:
     ```python
     import numpy as np
     import easydynamics as edyn
@@ -225,8 +225,7 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         value : Numeric | None
-            New center value in x_unit. If None, the center is set to 0 and the parameter is
-            fixed.
+            New center value in x_unit. If None, the center is set to 0 and the parameter is fixed.
 
         Raises
         ------
@@ -261,8 +260,8 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         list[Parameter]
-            A shallow copy of the widths ``[G1, ..., Gn]`` with unit ``x_unit``. The Parameters
-            are the model's own; modifying the list does not affect the component.
+            A shallow copy of the widths ``[G1, ..., Gn]`` with unit ``x_unit``. The Parameters are
+            the model's own; modifying the list does not affect the component.
         """
         return list(self._widths)
 
@@ -270,8 +269,8 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         """
         Get all variables of the component.
 
-        The weights and widths are held in lists, which EasyScience does not look into, so they
-        are listed here.
+        The weights and widths are held in lists, which EasyScience does not look into, so they are
+        listed here.
 
         Returns
         -------
