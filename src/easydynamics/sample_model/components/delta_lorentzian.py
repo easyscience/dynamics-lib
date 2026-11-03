@@ -32,26 +32,26 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
 
     where $A$ is the total area, $x_0$ is the center, $w_0$ is the weight of the delta function,
     and $w_j$ and $\Gamma_j$ are the weight and half width at half max (HWHM) of the Lorentzian of
-    order $j$. The weights are relative: the delta function has area $A w_0$ and the Lorentzian of
-    order $j$ has area $A w_j$. The weights need not sum to one.
+    order $j$. The weights are relative and need not sum to one.
 
     area has unit = x_unit * y_unit; center and widths have unit = x_unit; weights are
-    dimensionless. If the center is not provided, it is fixed at 0. The number of Lorentzians is
-    set at construction.
+    dimensionless. If the center is not provided, it is fixed at 0.
 
-    The delta function is a single spike of height $A w_0$ / bin width in the bin nearest the
+    See Also
+    --------
+    DeltaFunction : A single delta function. Lorentzian : A single Lorentzian. DeltaLorentz :
+    Diffusion model with one Lorentzian over a range of Q-values.
+
+    Notes
+    -----
+    The delta function is a single spike of height ``area * w0 / bin_width`` in the bin nearest the
     center, as in ``DeltaFunction``, so its height depends on the grid. Evaluating at a single x
     value raises a ``ValueError``, because one point defines no bin width.
 
-    Numeric weights and widths are checked when the component is created (weights finite and
-    non-negative, widths strictly positive). Parameter instances are used as given and are not
-    checked, so a dependent Parameter that becomes negative gives a negative intensity without an
-    error.
-
-    This is the component to use at one Q-value for models made of a delta function and several
-    Lorentzians. It evaluates as a ``DeltaFunction`` plus ``Lorentzian`` components would, and the
-    delta function is handled as in ``DeltaFunction``. It should not be confused with the diffusion
-    model ``DeltaLorentz``, which has one Lorentzian and handles a range of Q-values.
+    Weights must be finite and non-negative and widths strictly positive. Numbers are checked when
+    the component is created. All weights and widths, including Parameter instances and dependent
+    Parameters, are checked again at every evaluation, which raises a ``ValueError`` if one is out
+    of range.
 
     Examples
     --------
@@ -113,13 +113,13 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
             and the center parameter is fixed.
         weights : Sequence[Numeric | Parameter], default=(0.5, 0.5)
             Relative weights ``[w0, w1, ..., wn]``: the delta function first, then one per
-            Lorentzian. Must have one element more than ``widths``. Numbers must be non-negative
-            and become dimensionless Parameters; Parameter instances are used as they are,
-            unchecked.
+            Lorentzian. Must have one element more than ``widths``. Values must be finite and
+            non-negative. Numbers become dimensionless Parameters; Parameter instances are used as
+            they are.
         widths : Sequence[Numeric | Parameter], default=(1.0,)
             Half widths at half maximum ``[G1, ..., Gn]`` of the Lorentzians in x_unit. Must
-            contain at least one element. Numbers must be strictly positive and become Parameters;
-            Parameter instances are used as they are, unchecked.
+            contain at least one element. Values must be strictly positive. Numbers become
+            Parameters; Parameter instances are used as they are.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis. center and widths are stored in this unit.
         y_unit : str | sc.Unit, default='dimensionless'
@@ -292,8 +292,8 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         """
         Evaluate the delta function and the Lorentzians at x_vals.
 
-        The values of the Parameters are converted to eval_unit for the computation; the
-        Parameters themselves are not changed.
+        The values of the Parameters are converted to eval_unit for the computation; the Parameters
+        themselves are not changed.
 
         Parameters
         ----------
@@ -310,12 +310,20 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         Raises
         ------
         ValueError
-            If x_vals contains a single point, which defines no bin width for the delta function.
+            If a weight is negative or not finite, if a width is not strictly positive, or if
+            x_vals contains a single point, which defines no bin width for the delta function.
         """
         center = self._resolve_param_value(self._center, eval_unit)
         area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
         weights = np.array([weight.value for weight in self._weights])
         widths = np.array([self._resolve_param_value(width, eval_unit) for width in self._widths])
+
+        # Parameter instances given to the constructor, and dependent Parameters, can leave the
+        # allowed range after construction, so the values are checked at every evaluation.
+        if not np.all(np.isfinite(weights)) or np.any(weights < 0):
+            raise ValueError('The weights of a DeltaLorentzian must be finite and non-negative.')
+        if not np.all(widths > 0):
+            raise ValueError('The widths of a DeltaLorentzian must be greater than zero.')
 
         if x_vals.size == 1:
             raise ValueError(

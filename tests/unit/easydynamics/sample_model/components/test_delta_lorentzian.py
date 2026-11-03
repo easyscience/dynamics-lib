@@ -227,6 +227,50 @@ class TestDeltaLorentzian:
         np.testing.assert_allclose(after, expected, rtol=1e-12)
         assert not np.allclose(before, after)
 
+    @pytest.mark.parametrize('bad_value', [-0.5, np.nan, np.inf])
+    def test_evaluate_with_invalid_weight_parameter_raises(self, bad_value):
+        # GIVEN: a weight Parameter given as it is, so the constructor does not check its value
+        weight = Parameter(name='w', value=bad_value, unit='dimensionless')
+        component = DeltaLorentzian(weights=[weight, 1.0], widths=[1.0])
+
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='weights'):
+            component.evaluate(np.linspace(-2, 2, 101))
+
+    @pytest.mark.parametrize('bad_value', [-1.0, 0.0, np.nan])
+    def test_evaluate_with_invalid_width_parameter_raises(self, bad_value):
+        # GIVEN
+        width = Parameter(name='g', value=bad_value, unit='meV')
+        component = DeltaLorentzian(weights=[0.5, 0.5], widths=[width])
+
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='widths'):
+            component.evaluate(np.linspace(-2, 2, 101))
+
+    def test_evaluate_raises_when_a_dependent_weight_becomes_negative(self):
+        # GIVEN: a weight that is 1 - s, valid at first
+        s = Parameter(name='s', value=0.25, unit='dimensionless')
+        weight = Parameter.from_dependency(
+            name='w', dependency_expression='1 - s', dependency_map={'s': s}
+        )
+        component = DeltaLorentzian(weights=[weight, 0.5], widths=[1.0])
+        x = np.linspace(-2, 2, 101)
+        component.evaluate(x)
+
+        # WHEN: the dependency pushes the weight below zero
+        s.value = 1.5
+
+        # EXPECT
+        with pytest.raises(ValueError, match='weights'):
+            component.evaluate(x)
+
+    def test_evaluate_accepts_zero_weights(self):
+        # GIVEN: zero is a valid weight, for example when a component is switched off
+        component = DeltaLorentzian(weights=[0.0, 0.0], widths=[1.0])
+
+        # WHEN THEN EXPECT
+        np.testing.assert_array_equal(component.evaluate(np.linspace(-2, 2, 101)), 0.0)
+
     def test_evaluate_no_delta_spike_when_center_is_outside_the_grid(self):
         # GIVEN: the delta sits at 5 meV, outside the grid
         component = DeltaLorentzian(area=1.0, center=5.0, weights=[1.0, 0.0], widths=[0.1])
