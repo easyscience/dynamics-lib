@@ -33,12 +33,20 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
     where $A$ is the total area, $x_0$ is the center, $w_0$ is the weight of the delta function,
     and $w_j$ and $\Gamma_j$ are the weight and half width at half max (HWHM) of the Lorentzian of
     order $j$. The weights are relative: the delta function has area $A w_0$ and the Lorentzian of
-    order $j$ has area $A w_j$. They need not sum to one, but they do when $A$ is the total
-    scattering of a diffusion model.
+    order $j$ has area $A w_j$. The weights need not sum to one.
 
     area has unit = x_unit * y_unit; center and widths have unit = x_unit; weights are
-    dimensionless. If the center is not provided, it will be centered at 0 and fixed, which is
-    typically what you want in QENS. The number of Lorentzians is set at construction.
+    dimensionless. If the center is not provided, it is fixed at 0. The number of Lorentzians is
+    set at construction.
+
+    The delta function is a single spike of height $A w_0$ / bin width in the bin nearest the
+    center, as in ``DeltaFunction``, so its height depends on the grid. Evaluating at a single x
+    value raises a ``ValueError``, because one point defines no bin width.
+
+    Numeric weights and widths are checked when the component is created (weights finite and
+    non-negative, widths strictly positive). Parameter instances are used as given and are not
+    checked, so a dependent Parameter that becomes negative gives a negative intensity without an
+    error.
 
     This is the component to use at one Q-value for models made of a delta function and several
     Lorentzians. It evaluates as a ``DeltaFunction`` plus ``Lorentzian`` components would, and the
@@ -105,12 +113,13 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
             and the center parameter is fixed.
         weights : Sequence[Numeric | Parameter], default=(0.5, 0.5)
             Relative weights ``[w0, w1, ..., wn]``: the delta function first, then one per
-            Lorentzian. Must have one element more than ``widths`` and be non-negative. Numbers
-            become dimensionless Parameters; Parameter instances are used as they are.
+            Lorentzian. Must have one element more than ``widths``. Numbers must be non-negative
+            and become dimensionless Parameters; Parameter instances are used as they are,
+            unchecked.
         widths : Sequence[Numeric | Parameter], default=(1.0,)
             Half widths at half maximum ``[G1, ..., Gn]`` of the Lorentzians in x_unit. Must
-            contain at least one element, each strictly positive. Numbers become Parameters;
-            Parameter instances are used as they are.
+            contain at least one element. Numbers must be strictly positive and become Parameters;
+            Parameter instances are used as they are, unchecked.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis. center and widths are stored in this unit.
         y_unit : str | sc.Unit, default='dimensionless'
@@ -125,8 +134,8 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         Raises
         ------
         ValueError
-            If widths is empty, if weights does not have one element more than widths, if a weight
-            is negative or not finite, or if a width is not strictly positive.
+            If widths is empty, if weights does not have one element more than widths, if a numeric
+            weight is negative or not finite, or if a numeric width is not strictly positive.
 
         Notes
         -----
@@ -283,8 +292,8 @@ class DeltaLorentzian(CreateParametersMixin, ModelComponent):
         """
         Evaluate the delta function and the Lorentzians at x_vals.
 
-        Parameters in the model's own units are temporarily converted to eval_unit for the
-        computation.
+        The values of the Parameters are converted to eval_unit for the computation; the
+        Parameters themselves are not changed.
 
         Parameters
         ----------

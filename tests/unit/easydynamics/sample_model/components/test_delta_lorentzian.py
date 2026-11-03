@@ -127,9 +127,7 @@ class TestDeltaLorentzian:
         assert component.weights[1].value == pytest.approx(0.7)
 
     def test_evaluate_lorentzian_part_hand_derived(self, component: DeltaLorentzian):
-        # GIVEN: away from the delta bin only the Lorentzian contributes:
-        # area * w1 * (gamma / pi) / ((x - x0)^2 + gamma^2)
-        # = 2 * 0.75 * (0.6 / pi) / (0.6^2 + 0.6^2) = 1.5 / (pi * 1.2)
+        # GIVEN: away from the delta bin only the Lorentzian contributes
         x = np.linspace(-10, 10, 2001)
         i = int(np.argmin(np.abs(x - 1.1)))  # far from the delta bin at x = 0.5
 
@@ -158,14 +156,14 @@ class TestDeltaLorentzian:
         np.testing.assert_allclose(result, reference, rtol=1e-12, atol=0)
 
     def test_evaluate_integral_is_area_times_weights(self):
-        # GIVEN: a narrow-ish model on a wide grid; trapezoid integral of the Lorentzian part
+        # GIVEN: a Lorentzian of width 0.05 on a grid out to +-200, integrated by trapezoid
         component = DeltaLorentzian(area=2.0, weights=[0.0, 1.0], widths=[0.05])
         x = np.linspace(-200, 200, 400001)
 
         # WHEN
         integral = np.trapezoid(component.evaluate(x), x)
 
-        # EXPECT: area * w1 = 2, minus the Lorentzian tail beyond +-200 (2/pi * atan-tail ~ 5e-4)
+        # EXPECT: area * w1, up to the Lorentzian tail outside the grid
         assert integral == pytest.approx(2.0, rel=2e-3)
 
     def test_evaluate_delta_carries_the_delta_weight(self):
@@ -209,7 +207,7 @@ class TestDeltaLorentzian:
         assert component.widths[0].value == pytest.approx(0.6)
 
     def test_evaluate_with_dependent_parameters_follows_the_dependency(self):
-        # GIVEN: a width that is 2 * tau, as the diffusion models will use
+        # GIVEN: a width that is 2 * tau, as a dependent Parameter
         tau = Parameter(name='tau', value=0.5, unit='meV', min=1e-10)
         width = Parameter.from_dependency(
             name='width',
@@ -385,7 +383,7 @@ class TestDeltaLorentzian:
             component.convert_x_unit(1)
 
     def test_convert_y_unit_rescales_area_only(self):
-        # GIVEN: x_unit='meV', y_unit='1/meV' -> area is dimensionless
+        # GIVEN: x_unit='meV', y_unit='1/meV', so the area is dimensionless
         component = DeltaLorentzian(
             area=1.0, weights=[0.25, 0.75], widths=[0.6], x_unit='meV', y_unit='1/meV'
         )
