@@ -181,10 +181,6 @@ class EquivalentSitesCircle(DiffusionModelBase):
 
         self.create_component_collections()
 
-    # ------------------------------------------------------------------
-    # Properties
-    # ------------------------------------------------------------------
-
     @property
     def radius(self) -> Parameter:
         """
@@ -246,10 +242,6 @@ class EquivalentSitesCircle(DiffusionModelBase):
             The number of sites N. Set at construction.
         """
         return self._number_of_sites
-
-    # ------------------------------------------------------------------
-    # Other methods
-    # ------------------------------------------------------------------
 
     def calculate_width(self, Q: Q_type | None = None, order: int = 1) -> np.ndarray:
         r"""
@@ -435,10 +427,6 @@ class EquivalentSitesCircle(DiffusionModelBase):
             )
         return targets
 
-    # ------------------------------------------------------------------
-    # Private methods
-    # ------------------------------------------------------------------
-
     def _jump_geometry(self) -> tuple[sc.Variable, sc.Variable]:
         r"""
         Describe the N sites once, for both the direct and the dependent calculation of $A_l(Q)$.
@@ -605,10 +593,6 @@ class EquivalentSitesCircle(DiffusionModelBase):
             raise TypeError('residence_time must be a number.')
         if float(residence_time) < MINIMUM_WIDTH:
             raise ValueError(f'residence_time must be at least {MINIMUM_WIDTH}.')
-
-    # ------------------------------------------------------------------
-    # dunder methods
-    # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
         """

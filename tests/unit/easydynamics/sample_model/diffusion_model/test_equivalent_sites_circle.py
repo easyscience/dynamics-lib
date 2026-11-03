@@ -32,10 +32,6 @@ class TestEquivalentSitesCircle:
     def model(self):
         return EquivalentSitesCircle(radius=1.5, residence_time=2.0, number_of_sites=3)
 
-    # ------------------------------------------------------------------
-    # Construction
-    # ------------------------------------------------------------------
-
     def test_init_default(self):
         # WHEN THEN
         model = EquivalentSitesCircle()
@@ -94,13 +90,8 @@ class TestEquivalentSitesCircle:
         with pytest.raises(AttributeError):
             model.number_of_sites = 4
 
-    # ------------------------------------------------------------------
-    # Physics, against closed forms
-    # ------------------------------------------------------------------
-
     def test_two_sites_closed_forms(self):
-        # GIVEN: N = 2 is the two-site jump model with jump distance d = 2R:
-        # A0 = (1 + j0(Qd)) / 2, A1 = (1 - j0(Qd)) / 2, Gamma_1 = 2 hbar / tau
+        # GIVEN: N = 2 is the two-site jump model
         radius, tau = 1.2, 3.0
         model = EquivalentSitesCircle(radius=radius, residence_time=tau, number_of_sites=2)
         Q = np.array([0.3, 1.0, 2.5])
@@ -182,7 +173,7 @@ class TestEquivalentSitesCircle:
         assert model.get_component_collections(0)[0].number_of_lorentzians == 49
 
     def test_widths_of_three_sites(self):
-        # GIVEN: Gamma_l = (2 hbar / tau) sin^2(pi l / 3) = 1.5 hbar / tau for l = 1, 2
+        # GIVEN: N = 3, orders 1 and 2
         model = EquivalentSitesCircle(residence_time=2.0, number_of_sites=3)
         Q = np.array([0.5, 1.5])
 
@@ -242,10 +233,6 @@ class TestEquivalentSitesCircle:
 
         # EXPECT: the structure factor still describes the same circle
         np.testing.assert_allclose(model.calculate_EISF(Q), before, rtol=1e-10)
-
-    # ------------------------------------------------------------------
-    # Component collections
-    # ------------------------------------------------------------------
 
     def test_no_collections_without_q(self, model: EquivalentSitesCircle):
         # WHEN THEN EXPECT
@@ -430,10 +417,6 @@ class TestEquivalentSitesCircle:
         with pytest.raises(ValueError, match='clear_Q'):
             model.Q = np.array([0.5, 1.0, 1.5])
 
-    # ------------------------------------------------------------------
-    # Units
-    # ------------------------------------------------------------------
-
     def test_convert_x_unit(self):
         # GIVEN
         model = EquivalentSitesCircle(residence_time=2.0, number_of_sites=2, Q=np.array([1.0]))
@@ -515,10 +498,6 @@ class TestEquivalentSitesCircle:
         with pytest.raises(AttributeError):
             model.y_unit = '1/meV'
 
-    # ------------------------------------------------------------------
-    # Parameters and fit targets
-    # ------------------------------------------------------------------
-
     def test_global_variables(self, model: EquivalentSitesCircle):
         # WHEN
         variables = model.get_global_variables()
@@ -573,10 +552,6 @@ class TestEquivalentSitesCircle:
         assert targets['width_2'].dataset_key == 'Rotor width_2'
         assert targets['elastic_area'].dataset_key is None
         assert targets['area_1'].dataset_key is None
-
-    # ------------------------------------------------------------------
-    # Exports
-    # ------------------------------------------------------------------
 
     def test_is_exported(self):
         # WHEN THEN EXPECT
