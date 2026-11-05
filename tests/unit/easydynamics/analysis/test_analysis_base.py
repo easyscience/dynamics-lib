@@ -7,7 +7,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.experiment import Experiment
@@ -16,6 +15,7 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 
 class TestAnalysisBase:
@@ -93,7 +93,7 @@ class TestAnalysisBase:
 
     def test_init_extra_parameter(self):
         # WHEN
-        extra_parameter = Parameter(name='param1', value=1.0)
+        extra_parameter = Parameter(value=1.0)
 
         # THEN
         analysis = AnalysisBase(extra_parameters=extra_parameter)
@@ -103,8 +103,8 @@ class TestAnalysisBase:
     def test_init_extra_parameters(self):
         # WHEN
         extra_parameters = [
-            Parameter(name='param1', value=1.0),
-            Parameter(name='param2', value=2.0),
+            Parameter(value=1.0),
+            Parameter(value=2.0),
         ]
 
         # THEN
@@ -408,10 +408,10 @@ class TestAnalysisBase:
     @pytest.mark.parametrize(
         'extra_parameters',
         [
-            Parameter(name='param1', value=1.0),
+            Parameter(value=1.0),
             [
-                Parameter(name='param1', value=1.0),
-                Parameter(name='param2', value=2.0),
+                Parameter(value=1.0),
+                Parameter(value=2.0),
             ],
         ],
         ids=[
@@ -434,7 +434,7 @@ class TestAnalysisBase:
         'invalid_extra_parameters',
         [
             'not a parameter',
-            [Parameter(name='param1', value=1.0), 'not a parameter'],
+            [Parameter(value=1.0), 'not a parameter'],
         ],
         ids=[
             'single invalid parameter',

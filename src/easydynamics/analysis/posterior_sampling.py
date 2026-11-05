@@ -21,7 +21,6 @@ from typing import TYPE_CHECKING
 from typing import Any
 
 import numpy as np
-from easyscience.fitting import AvailableMinimizers
 from easyscience.fitting import Sampler
 
 from easydynamics.analysis.posterior import PosteriorSummary
@@ -39,12 +38,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from easyscience.fitting.sampler import SamplingResults
-    from easyscience.variable import Parameter
     from ipywidgets import VBox
     from matplotlib.figure import Figure
     from plopp.backends.matplotlib.figure import WidgetFigure
 
     from easydynamics.analysis.posterior import BoundsSuggestions
+    from easydynamics.variable import Parameter
 
 # Suffix of the sidecar mapping chain columns to stable labels, written next to the BUMPS chain
 # files by save().
@@ -287,7 +286,11 @@ class PosteriorSampler:
             results = self._run(
                 parameters=parameters,
                 run=lambda sampler: sampler.sample(
-                    samples=samples, burn=burn, thin=thin, population=population, **sampler_options
+                    samples=samples,
+                    burn=burn,
+                    thin=thin,
+                    population=population,
+                    **sampler_options,
                 ),
             )
             completed = True
@@ -604,9 +607,11 @@ class PosteriorSampler:
         labels = self._labels()
         by_unique_name = {parameter.unique_name: parameter for parameter in labels.parameters}
         details = ', '.join(
-            f'{labels.label(by_unique_name[unique_name])} ({fraction:.0%} of draws)'
-            if unique_name in by_unique_name
-            else f'{unique_name} ({fraction:.0%} of draws)'
+            (
+                f'{labels.label(by_unique_name[unique_name])} ({fraction:.0%} of draws)'
+                if unique_name in by_unique_name
+                else f'{unique_name} ({fraction:.0%} of draws)'
+            )
             for unique_name, fraction in piled_up.items()
         )
         warnings.warn(
@@ -943,7 +948,7 @@ class PosteriorSampler:
             x=np.asarray(x),
             y=np.asarray(y),
             predictions=self.predictions(n_draws),
-            y_err=1.0 / np.asarray(weights) if weights is not None and has_variances else None,
+            y_err=(1.0 / np.asarray(weights) if weights is not None and has_variances else None),
             title=self._analysis.display_name,
             credible_interval=credible_interval,
             **kwargs,
@@ -1187,7 +1192,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
             Burn-in generations to discard before collecting samples.
         thin : int, default=10
             Thinning interval, which reduces autocorrelation between retained draws.
-        fit_method : str, default='independent'
+        fit_method : str, default="independent"
             Either "independent" (a separate chain per Q index) or "simultaneous" (one chain over
             all Q indices at once).
         Q_index : int | None, default=None

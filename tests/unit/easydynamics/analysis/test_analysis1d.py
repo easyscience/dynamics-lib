@@ -8,8 +8,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.fitting import AvailableMinimizers
-from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
@@ -20,6 +18,7 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 # The per-consumer convolver staleness tracking relies on the ModelBase.state_version contract;
 # until it lands, the conservative fallback rebuilds on every prepare, so 'no rebuild' tests
@@ -293,8 +292,8 @@ class TestAnalysis1d:
 
     def test_get_all_variables(self, analysis1d):
         # WHEN
-        extra_par1 = Parameter(name='extra_par1', value=1.0)
-        extra_par2 = Parameter(name='extra_par2', value=2.0)
+        extra_par1 = Parameter(value=1.0)
+        extra_par2 = Parameter(value=2.0)
         analysis1d._extra_parameters = [extra_par1, extra_par2]
 
         # THEN
@@ -616,7 +615,7 @@ class TestAnalysis1d:
     def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
+        energy_offset = Parameter(value=1.0, unit='m')  # incompatible unit
 
         # THEN / EXPECT
         with pytest.raises(sc.UnitError):

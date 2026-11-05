@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
-from easyscience.variable import Parameter
 
 from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.variable import Parameter
 
 
 def make_parameter(name, unit='meV'):
-    return Parameter(name=name, value=1.0, unit=unit)
+    return Parameter(value=1.0, name=name, unit=unit)
 
 
 class _CountingParameter:

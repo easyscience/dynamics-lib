@@ -4,8 +4,6 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DeltaFunction
@@ -18,6 +16,8 @@ from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
@@ -98,21 +98,21 @@ class DeltaLorentz(DiffusionModelBase):
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default='DeltaLorentz'
+        name : str, default="DeltaLorentz"
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default='Lorentzian'
+        lorentzian_name : str, default="Lorentzian"
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
             model.
         lorentzian_display_name : str | None, default=None
             Display name of the Lorentzian component. If None, it will be set to the display name
             of the diffusion model.
-        delta_name : str, default='Delta function'
+        delta_name : str, default="Delta function"
             Name of the delta function component.
         delta_display_name : str | None, default=None
             Display name of the delta function component. If None, it will be set to the display
@@ -151,7 +151,10 @@ class DeltaLorentz(DiffusionModelBase):
             self._mean_u_squared_over_angstrom_squared = Parameter.from_dependency(
                 name='mean_u_squared_over_angstrom_squared',
                 dependency_expression='mean_u_squared / angstrom**2',
-                dependency_map={'mean_u_squared': self._mean_u_squared, 'angstrom': angstrom},
+                dependency_map={
+                    'mean_u_squared': self._mean_u_squared,
+                    'angstrom': angstrom,
+                },
             )
             self._mean_u_squared_over_angstrom_squared.set_desired_unit('dimensionless')
 

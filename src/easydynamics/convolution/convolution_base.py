@@ -5,7 +5,6 @@ from functools import partial
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
@@ -15,6 +14,7 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import energy_to_scipp
+from easydynamics.variable import Parameter
 
 
 class ConvolutionBase(EasyDynamicsModelBase):
@@ -29,10 +29,10 @@ class ConvolutionBase(EasyDynamicsModelBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
         energy_offset: Numeric | Parameter = 0.0,
-        display_name: str | None = 'MyConvolution',
+        display_name: str | None = "MyConvolution",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -83,18 +83,20 @@ class ConvolutionBase(EasyDynamicsModelBase):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
+            raise TypeError(
+                f"Energy must be a numpy ndarray or a scipp Variable. Got {energy}"
+            )
 
         if isinstance(energy, np.ndarray):
             energy = energy_to_scipp(energy, x_unit)
 
         if isinstance(energy_offset, Numeric):
             energy_offset = Parameter(
-                name='energy_offset', value=float(energy_offset), unit=x_unit
+                name="energy_offset", value=float(energy_offset), unit=x_unit
             )
 
         if not isinstance(energy_offset, Parameter):
-            raise TypeError('Energy_offset must be a number or a Parameter.')
+            raise TypeError("Energy_offset must be a number or a Parameter.")
 
         self._energy = energy
         self._energy_offset = energy_offset
@@ -103,7 +105,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(sample_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # ruff: ignore[line-too-long]
             )
         if isinstance(sample_components, ModelComponent):
             sample_components = ComponentCollection(
@@ -117,7 +119,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(resolution_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # ruff: ignore[line-too-long]
             )
         if isinstance(resolution_components, ModelComponent):
             resolution_components = ComponentCollection(
@@ -157,9 +159,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if resolution_components is None:
             return
-        if any(isinstance(component, DeltaFunction) for component in resolution_components):
+        if any(
+            isinstance(component, DeltaFunction) for component in resolution_components
+        ):
             raise ValueError(
-                'resolution_components contains delta functions. This is not supported.'
+                "resolution_components contains delta functions. This is not supported."
             )
 
     def _validate_component_x_units(self) -> None:
@@ -177,8 +181,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         if self._x_unit is None:
             return
         for label, collection in (
-            ('sample_components', self._sample_components),
-            ('resolution_components', self._resolution_components),
+            ("sample_components", self._sample_components),
+            ("resolution_components", self._resolution_components),
         ):
             if collection is None or collection.x_unit is None:
                 continue
@@ -186,9 +190,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
             # mismatches.
             if sc.Unit(str(collection.x_unit)) != sc.Unit(str(self._x_unit)):
                 raise ValueError(
-                    f'{label} has x_unit {str(collection.x_unit)!r}, which does not match the '
-                    f'convolver x_unit {str(self._x_unit)!r}. Convert the components with '
-                    f'convert_x_unit before constructing the convolver.'
+                    f"{label} has x_unit {str(collection.x_unit)!r}, which does not match the "
+                    f"convolver x_unit {str(self._x_unit)!r}. Convert the components with "
+                    f"convert_x_unit before constructing the convolver."
                 )
 
     @property
@@ -219,7 +223,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             If energy_offset is not a number or a Parameter.
         """
         if not isinstance(energy_offset, Parameter | Numeric):
-            raise TypeError('Energy_offset must be a number or a Parameter.')
+            raise TypeError("Energy_offset must be a number or a Parameter.")
 
         if isinstance(energy_offset, Numeric):
             self._energy_offset.value = float(energy_offset)
@@ -237,7 +241,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         sc.Variable
             The energy values with the offset applied.
         """
-        offset_value = sc.to_unit(self.energy_offset.full_value, self._energy.unit).value
+        offset_value = sc.to_unit(
+            self.energy_offset.full_value, self._energy.unit
+        ).value
         energy_with_offset = self.energy.copy()
         energy_with_offset.values = self.energy.values - offset_value
         return energy_with_offset
@@ -278,7 +284,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError('Energy must be a Number, a numpy ndarray or a scipp Variable.')
+            raise TypeError(
+                "Energy must be a Number, a numpy ndarray or a scipp Variable."
+            )
 
         if isinstance(energy, np.ndarray):
             self._energy = energy_to_scipp(energy, self._energy.unit)
@@ -288,9 +296,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
             # mismatches.
             if self._x_unit is not None and energy.unit != sc.Unit(str(self._x_unit)):
                 raise ValueError(
-                    f'energy has unit {str(energy.unit)!r}, which does not match the convolver '
-                    f'x_unit {str(self._x_unit)!r}. Use convert_x_unit to change the unit, or '
-                    f'provide energy in {str(self._x_unit)!r}.'
+                    f"energy has unit {str(energy.unit)!r}, which does not match the convolver "
+                    f"x_unit {str(self._x_unit)!r}. Use convert_x_unit to change the unit, or "
+                    f"provide energy in {str(self._x_unit)!r}."
                 )
             self._energy = energy
 
@@ -312,7 +320,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             If unit is not a string or scipp unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError('Energy unit must be a string or scipp unit.')
+            raise TypeError("Energy unit must be a string or scipp unit.")
 
         old_x_unit = str(self.x_unit)
         old_offset_unit = str(self.energy_offset.unit)
@@ -324,12 +332,20 @@ class ConvolutionBase(EasyDynamicsModelBase):
 
         conversions = [
             (_convert_energy, unit, old_x_unit),
-            (partial(convert_parameter_unit, self._energy_offset), unit, old_offset_unit),
+            (
+                partial(convert_parameter_unit, self._energy_offset),
+                unit,
+                old_offset_unit,
+            ),
         ]
         if self.sample_components is not None:
-            conversions.append((self.sample_components.convert_x_unit, unit, old_x_unit))
+            conversions.append(
+                (self.sample_components.convert_x_unit, unit, old_x_unit)
+            )
         if self.resolution_components is not None:
-            conversions.append((self.resolution_components.convert_x_unit, unit, old_x_unit))
+            conversions.append(
+                (self.resolution_components.convert_x_unit, unit, old_x_unit)
+            )
         convert_units_with_rollback(conversions)
 
         # Keep the str contract for x_unit even when an sc.Unit was passed.
@@ -354,12 +370,12 @@ class ConvolutionBase(EasyDynamicsModelBase):
             If unit is not a string or scipp unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError('y_unit must be a string or scipp unit.')
+            raise TypeError("y_unit must be a string or scipp unit.")
         old_y_unit = self.y_unit
         if self.sample_components is not None:
-            convert_units_with_rollback([
-                (self.sample_components.convert_y_unit, unit, old_y_unit)
-            ])
+            convert_units_with_rollback(
+                [(self.sample_components.convert_y_unit, unit, old_y_unit)]
+            )
         self._relabel_y_unit(unit)
 
     def _relabel_y_unit(self, unit: str | sc.Unit) -> None:
@@ -390,7 +406,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         return self._sample_components
 
     @sample_components.setter
-    def sample_components(self, sample_components: ComponentCollection | ModelComponent) -> None:
+    def sample_components(
+        self, sample_components: ComponentCollection | ModelComponent
+    ) -> None:
         """
         Set the sample model.
 
@@ -406,7 +424,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # ruff: ignore[line-too-long]
             )
 
         if isinstance(sample_components, ModelComponent):
@@ -454,7 +472,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # ruff: ignore[line-too-long]
             )
 
         if isinstance(resolution_components, ModelComponent):

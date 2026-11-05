@@ -4,19 +4,19 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.variable import Parameter
 
 
 class DummyComponent(ModelComponent):
     def __init__(self):
         super().__init__(display_name='Dummy')
-        self.area = Parameter(name='area', value=1.0, unit='meV', fixed=False)
-        self.center = Parameter(name='center', value=2.0, unit='meV', fixed=True)
-        self.width = Parameter(name='width', value=3.0, unit='meV', fixed=True)
+        self.area = Parameter(value=1.0, name='area', unit='meV', fixed=False)
+        self.center = Parameter(value=2.0, name='center', unit='meV', fixed=True)
+        self.width = Parameter(value=3.0, name='width', unit='meV', fixed=True)
         self._x_unit = 'meV'
 
     def get_all_parameters(self):

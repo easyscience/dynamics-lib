@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 
 class Exponential(CreateParametersMixin, ModelComponent):
@@ -70,11 +70,11 @@ class Exponential(CreateParametersMixin, ModelComponent):
             fixed.
         rate : Numeric, default=1.0
             Exponential rate B in units of ``1/x_unit``.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.  center is stored in this unit; rate is stored in ``1/x_unit``.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).  amplitude is stored in this unit.
-        name : str, default='Exponential'
+        name : str, default="Exponential"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -114,7 +114,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             raise TypeError('rate must be a number.')
         if not np.isfinite(rate):
             raise ValueError('rate must be finite.')
-        self._rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
+        self._rate = Parameter(value=float(rate), name=name + ' rate', unit='1/' + x_unit_str)
 
     @property
     def amplitude(self) -> Parameter:

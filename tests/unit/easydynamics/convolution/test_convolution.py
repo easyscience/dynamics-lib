@@ -8,7 +8,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.convolution import Convolution
@@ -22,6 +21,7 @@ from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 
 class TestConvolution:
@@ -764,7 +764,7 @@ class TestConvolution:
         result_before = conv.convolution()
 
         # THEN rebinding the offset to a brand-new Parameter
-        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        conv.energy_offset = Parameter(value=1.0, name='energy_offset', unit='meV')
         result_after = conv.convolution()
 
         # EXPECT every path (analytical, numerical, delta) sees the new offset, matching a
@@ -885,7 +885,12 @@ class TestConvolution:
         sample_components = ComponentCollection()
         sample_components.append_component(
             DampedHarmonicOscillator(
-                name='DHO', area=1.0, center=1.0, width=0.5, x_unit='meV', y_unit='1/meV'
+                name='DHO',
+                area=1.0,
+                center=1.0,
+                width=0.5,
+                x_unit='meV',
+                y_unit='1/meV',
             )
         )
         resolution_components = ComponentCollection()

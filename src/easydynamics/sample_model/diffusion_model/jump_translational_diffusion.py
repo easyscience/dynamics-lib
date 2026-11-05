@@ -4,8 +4,6 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
@@ -14,6 +12,8 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 
 class JumpTranslationalDiffusion(DiffusionModelBase):
@@ -77,13 +77,13 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Relaxation time t in ps.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default='JumpTranslationalDiffusion'
+        name : str, default="JumpTranslationalDiffusion"
             Name of the diffusion model.
-        display_name : str | None, default='JumpTranslationalDiffusion'
+        display_name : str | None, default="JumpTranslationalDiffusion"
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion

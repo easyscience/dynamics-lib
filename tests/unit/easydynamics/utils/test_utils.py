@@ -6,7 +6,6 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.utils.utils import _assert_valid_unit
@@ -19,6 +18,7 @@ from easydynamics.utils.utils import convert_value_unit
 from easydynamics.utils.utils import energy_to_scipp
 from easydynamics.utils.utils import prepare_x_for_evaluate
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import Parameter
 
 
 class TestVerifyQIndex:
@@ -95,8 +95,8 @@ class TestConvertValueUnit:
 class TestConvertUnitsWithRollback:
     def test_applies_all_conversions(self):
         # WHEN
-        p1 = Parameter(name='p1', value=1.0, unit='meV')
-        p2 = Parameter(name='p2', value=2.0, unit='meV')
+        p1 = Parameter(value=1.0, unit='meV')
+        p2 = Parameter(value=2.0, unit='meV')
 
         # THEN
         convert_units_with_rollback([
@@ -112,8 +112,8 @@ class TestConvertUnitsWithRollback:
 
     def test_rolls_back_on_failure_and_reraises(self):
         # WHEN: the second conversion fails (meV -> K is not valid)
-        p1 = Parameter(name='p1', value=1.0, unit='meV')
-        p2 = Parameter(name='p2', value=2.0, unit='meV')
+        p1 = Parameter(value=1.0, unit='meV')
+        p2 = Parameter(value=2.0, unit='meV')
 
         def fail(_unit):
             raise RuntimeError('conversion failed')
@@ -328,7 +328,7 @@ class TestInNotebook:
         available."""
 
         # WHEN
-        def raise_import_error(*args, **kwargs):  # ruff: ignore[unused-function-argument]
+        def raise_import_error(*args, **kwargs):
             raise ImportError
 
         # THEN

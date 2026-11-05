@@ -18,7 +18,8 @@ EPSILON = 1e-8
 
 if TYPE_CHECKING:
     import scipp as sc
-    from easyscience.variable import Parameter
+
+    from easydynamics.variable import Parameter
 
 
 class DeltaFunction(CreateParametersMixin, ModelComponent):

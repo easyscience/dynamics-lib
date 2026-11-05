@@ -10,9 +10,10 @@ from typing import ClassVar
 
 import scipp as sc
 import sympy as sp
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from scipy.special import erf
+
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 if TYPE_CHECKING:
     import numpy as np
@@ -188,11 +189,11 @@ class ExpressionComponent(ModelComponent):
             of a Parameter instance given in *parameters*. When units are in use, an output unit
             convertible to y_unit rescales the evaluated values into y_unit; a warning is issued
             only if the output unit is incompatible with y_unit.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='Expression'
+        name : str, default="Expression"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

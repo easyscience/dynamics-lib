@@ -10,11 +10,11 @@ from contextlib import suppress
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorBase
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 _CoefficientsInput = Sequence[Numeric | Parameter] | dict[int, Numeric]
 
@@ -93,12 +93,12 @@ class Polynomial(ModelComponent):
             :class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
             present are filled with fixed-to-zero Parameters, and the degree is taken from the
             largest key.  Must contain at least one element.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.  When the x_unit is changed via :meth:`convert_x_unit`, coefficient
             values are rescaled by power-law factors so the evaluated output remains unchanged.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='Polynomial'
+        name : str, default="Polynomial"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -144,9 +144,9 @@ class Polynomial(ModelComponent):
                     raise ValueError('Dict keys (powers) must be non-negative integers.')
             for i in range(max(coefficients) + 1):
                 if i not in coefficients:
-                    param = Parameter(name=f'{name}_c{i}', value=0.0, fixed=True)
+                    param = Parameter(value=0.0, name=f'{name}_c{i}', fixed=True)
                 elif isinstance(coefficients[i], Numeric):
-                    param = Parameter(name=f'{name}_c{i}', value=float(coefficients[i]))
+                    param = Parameter(value=float(coefficients[i]), name=f'{name}_c{i}')
                 else:
                     raise TypeError('Each coefficient value must be a number.')
                 self._coefficients.append(param)
@@ -155,7 +155,7 @@ class Polynomial(ModelComponent):
                 if isinstance(coef, Parameter):
                     param = coef
                 elif isinstance(coef, Numeric):
-                    param = Parameter(name=f'{name}_c{i}', value=float(coef))
+                    param = Parameter(value=float(coef), name=f'{name}_c{i}')
                 else:
                     raise TypeError(
                         'Each coefficient must be either a numeric value or a Parameter.'
@@ -274,7 +274,7 @@ class Polynomial(ModelComponent):
             raise TypeError('value must be a numeric value.')
         new_power = len(self._coefficients)
         self._coefficients.append(
-            Parameter(name=f'{self.name}_c{new_power}', value=float(value), fixed=fixed)
+            Parameter(value=float(value), name=f'{self.name}_c{new_power}', fixed=fixed)
         )
 
     def remove_coefficient(self) -> float:

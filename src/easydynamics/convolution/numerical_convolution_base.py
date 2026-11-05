@@ -5,7 +5,6 @@ import warnings
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.convolution.energy_grid import EnergyGrid
@@ -14,6 +13,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 # The thresholds are illustrated in
 # performance_tests/convolution/convolution_width_thresholds.ipynb
@@ -41,11 +41,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         energy_offset: Numeric | Parameter = 0.0,
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = 'K',
+        temperature_unit: str | sc.Unit = "K",
         detailed_balance_settings: DetailedBalanceSettings | None = None,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        display_name: str | None = 'MyConvolution',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        display_name: str | None = "MyConvolution",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -99,18 +99,20 @@ class NumericalConvolutionBase(ConvolutionBase):
         # convolve without both models — fail early with a clear error.
         if self._sample_components is None:
             raise TypeError(
-                'sample_components must be a ComponentCollection or ModelComponent, not None.'
+                "sample_components must be a ComponentCollection or ModelComponent, not None."
             )
         if self._resolution_components is None:
             raise TypeError(
-                'resolution_components must be a ComponentCollection or ModelComponent, not None.'
+                "resolution_components must be a ComponentCollection or ModelComponent, not None."
             )
 
-        if temperature is not None and not isinstance(temperature, (Numeric, Parameter)):
-            raise TypeError('Temperature must be None, a number or a Parameter.')
+        if temperature is not None and not isinstance(
+            temperature, (Numeric, Parameter)
+        ):
+            raise TypeError("Temperature must be None, a number or a Parameter.")
 
         if not isinstance(temperature_unit, (str, sc.Unit)):
-            raise TypeError('Temperature_unit must be a string or sc.Unit.')
+            raise TypeError("Temperature_unit must be a string or sc.Unit.")
         self._temperature_unit = temperature_unit
         self._temperature = None
         self.temperature = temperature
@@ -123,7 +125,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             detailed_balance_settings = DetailedBalanceSettings()
         if not isinstance(detailed_balance_settings, DetailedBalanceSettings):
             raise TypeError(
-                'detailed_balance_settings must be a DetailedBalanceSettings instance.'
+                "detailed_balance_settings must be a DetailedBalanceSettings instance."
             )
         self._detailed_balance_settings = detailed_balance_settings
 
@@ -150,20 +152,28 @@ class NumericalConvolutionBase(ConvolutionBase):
         bool
             True if the plan does not need to be rebuilt.
         """
-        seen_version = getattr(self, '_plan_seen_version', None)
+        seen_version = getattr(self, "_plan_seen_version", None)
         if seen_version is None:
             return False
-        if not self.convolution_settings._plan_valid_for(seen_version):  # ruff: ignore[private-member-access]
+        if not self.convolution_settings._plan_valid_for(
+            seen_version
+        ):  # ruff: ignore[private-member-access]
             return False
-        seen_db_version = getattr(self, '_plan_seen_db_version', None)
-        if not self.detailed_balance_settings._plan_valid_for(seen_db_version):  # ruff: ignore[private-member-access]
+        seen_db_version = getattr(self, "_plan_seen_db_version", None)
+        if not self.detailed_balance_settings._plan_valid_for(
+            seen_db_version
+        ):  # ruff: ignore[private-member-access]
             return False
-        return getattr(self, '_plan_seen_state', None) == self._plan_state_snapshot()
+        return getattr(self, "_plan_seen_state", None) == self._plan_state_snapshot()
 
     def _mark_convolution_plan_current(self) -> None:
         """Record that this convolver's plan matches its current state and settings."""
-        self._plan_seen_version = self.convolution_settings._plan_version  # ruff: ignore[private-member-access]
-        self._plan_seen_db_version = self.detailed_balance_settings._plan_version  # ruff: ignore[private-member-access]
+        self._plan_seen_version = (
+            self.convolution_settings._plan_version
+        )  # ruff: ignore[private-member-access]
+        self._plan_seen_db_version = (
+            self.detailed_balance_settings._plan_version
+        )  # ruff: ignore[private-member-access]
         self._plan_seen_state = self._plan_state_snapshot()
 
     def _plan_state_snapshot(self) -> tuple:
@@ -217,7 +227,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             If settings is not a ConvolutionSettings instance.
         """
         if not isinstance(settings, ConvolutionSettings):
-            raise TypeError('settings must be a ConvolutionSettings instance.')
+            raise TypeError("settings must be a ConvolutionSettings instance.")
         self._convolution_settings = settings
         # Convolver-local invalidation: other convolvers sharing the new settings object are
         # unaffected.
@@ -351,7 +361,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                 self._temperature.value = float(temp)
             else:
                 self._temperature = Parameter(
-                    name='temperature',
+                    name="temperature",
                     value=float(temp),
                     unit=self._temperature_unit,
                     fixed=True,
@@ -359,7 +369,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         elif isinstance(temp, Parameter):
             self._temperature = temp
         else:
-            raise TypeError('Temperature must be None, a float or a Parameter.')
+            raise TypeError("Temperature must be None, a float or a Parameter.")
 
     @property
     def detailed_balance_settings(self) -> DetailedBalanceSettings:
@@ -389,7 +399,9 @@ class NumericalConvolutionBase(ConvolutionBase):
             If value is not a DetailedBalanceSettings.
         """
         if not isinstance(value, DetailedBalanceSettings):
-            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
+            raise TypeError(
+                "detailed_balance_settings must be a DetailedBalanceSettings"
+            )
         self._detailed_balance_settings = value
         # Convolver-local invalidation: other convolvers sharing the new settings object are
         # unaffected.
@@ -418,7 +430,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         # Validate up front so both the upsampled and the non-upsampled path raise the same
         # clear error (a single point has no spacing, so no grid can be built from it).
         if len(self.energy.values) < 2:
-            raise ValueError('Energy array must have at least two points.')
+            raise ValueError("Energy array must have at least two points.")
 
         if self.upsample_factor is None:
             # Check if the array is uniformly spaced.
@@ -426,7 +438,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
-                    'Input array `energy` must be uniformly spaced if upsample_factor is not given.'  # ruff: ignore[line-too-long]
+                    "Input array `energy` must be uniformly spaced if upsample_factor is not given."  # ruff: ignore[line-too-long]
                 )
             energy_dense = self.energy.values
 
@@ -434,7 +446,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             if self.extension_factor is None:
                 raise ValueError(
-                    'extension_factor must be a number (not None) when upsample_factor is set.'
+                    "extension_factor must be a number (not None) when upsample_factor is set."
                 )
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
@@ -447,7 +459,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_span_dense = extended_max - extended_min
 
         if len(energy_dense) < 2:
-            raise ValueError('Energy array must have at least two points.')
+            raise ValueError("Energy array must have at least two points.")
         energy_dense_step = energy_dense[1] - energy_dense[0]
 
         # Handle offset for even length of energy_dense in convolution.
@@ -460,7 +472,9 @@ class NumericalConvolutionBase(ConvolutionBase):
         # select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by
         # 0.5*dx from the true center at index 3.5.
-        energy_even_length_offset = -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
+        energy_even_length_offset = (
+            -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
+        )
 
         # Handle the case when energy_dense is not symmetric around 0.
         # The resolution is still centered around zero (or close to it),
@@ -505,36 +519,42 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         # Cover plain-width components as well as Voigt-style components with separate
         # gaussian_width/lorentzian_width parameters.
-        width_attribute_names = ('width', 'gaussian_width', 'lorentzian_width')
+        width_attribute_names = ("width", "gaussian_width", "lorentzian_width")
 
         for comp in components:
             for attribute_name in width_attribute_names:
                 width_param = getattr(comp, attribute_name, None)
                 if width_param is None:
                     continue
-                width_label = attribute_name.replace('_', ' ')
-                if width_param.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
+                width_label = attribute_name.replace("_", " ")
+                if (
+                    width_param.value
+                    > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense
+                ):
                     warnings.warn(
                         (
-                            f'The {width_label} of the {model_name} component '
+                            f"The {width_label} of the {model_name} component "
                             f"'{comp.unique_name}' "
-                            f'({width_param.value}) is large compared to the span of the input '
-                            f'array ({self._energy_grid.energy_span_dense}). '
-                            f'This may lead to inaccuracies in the convolution. '
-                            f'Increase extension_factor to improve accuracy.'
+                            f"({width_param.value}) is large compared to the span of the input "
+                            f"array ({self._energy_grid.energy_span_dense}). "
+                            f"This may lead to inaccuracies in the convolution. "
+                            f"Increase extension_factor to improve accuracy."
                         ),
                         UserWarning,
                         stacklevel=3,
                     )
-                if width_param.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
+                if (
+                    width_param.value
+                    < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step
+                ):
                     warnings.warn(
                         (
-                            f'The {width_label} of the {model_name} component '
+                            f"The {width_label} of the {model_name} component "
                             f"'{comp.unique_name}' "
-                            f'({width_param.value}) is small compared to the spacing of the input '
-                            f'array ({self._energy_grid.energy_dense_step}). '
-                            f'This may lead to inaccuracies in the convolution. '
-                            f'Increase upsample_factor to improve accuracy.'
+                            f"({width_param.value}) is small compared to the spacing of the input "
+                            f"array ({self._energy_grid.energy_dense_step}). "
+                            f"This may lead to inaccuracies in the convolution. "
+                            f"Increase upsample_factor to improve accuracy."
                         ),
                         UserWarning,
                         stacklevel=3,
@@ -550,13 +570,13 @@ class NumericalConvolutionBase(ConvolutionBase):
             A string representation of the NumericalConvolutionBase.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'energy=array of shape {self.energy.values.shape},\n '
-            f'sample_components={self.sample_components!r}, \n'
-            f'resolution_components={self.resolution_components!r},\n '
-            f'x_unit={self.x_unit}, y_unit={self.y_unit}, '
-            f'upsample_factor={self.upsample_factor}, '
-            f'extension_factor={self.extension_factor}, '
-            f'temperature={self.temperature}, '
-            f'detailed_balance={self.detailed_balance_settings!r})'
+            f"{self.__class__.__name__}("
+            f"energy=array of shape {self.energy.values.shape},\n "
+            f"sample_components={self.sample_components!r}, \n"
+            f"resolution_components={self.resolution_components!r},\n "
+            f"x_unit={self.x_unit}, y_unit={self.y_unit}, "
+            f"upsample_factor={self.upsample_factor}, "
+            f"extension_factor={self.extension_factor}, "
+            f"temperature={self.temperature}, "
+            f"detailed_balance={self.detailed_balance_settings!r})"
         )

@@ -6,21 +6,22 @@ from collections.abc import Callable
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from numpy.typing import ArrayLike
 from scipp import UnitError
 from scipp.constants import hbar as scipp_hbar
 from scipp.constants import k as scipp_k
+
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 Numeric = float | int
 
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
-hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-kb = DescriptorNumber.from_scipp('kb', scipp_k)
-angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+hbar = DescriptorNumber.from_scipp(full_value=scipp_hbar, name='hbar')
+kb = DescriptorNumber.from_scipp(full_value=scipp_k, name='kb')
+angstrom = DescriptorNumber(value=1e-10, name='angstrom', unit='m')
 
 # The unit all Q values are normalized to and assumed to be in when given as raw numbers.
 CANONICAL_Q_UNIT = '1/angstrom'

@@ -47,8 +47,6 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 
 import numpy as np
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.interpolate import CubicSpline
 from scipy.optimize import brentq
@@ -58,6 +56,8 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_value_unit
 from easydynamics.utils.utils import hbar
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 if TYPE_CHECKING:
     import scipp as sc
@@ -528,12 +528,12 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             If True, evaluate the profile by interpolating a cached table instead of by quadrature.
             This is many times faster, which matters in fits and sampling, and accurate to ~1e-7 of
             the peak rather than ~1e-11.  Set it to False for the full quadrature accuracy.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.  Must be an energy, since $\hbar / \tau$ is converted into it.
             center is stored in this unit. area_unit = x_unit * y_unit.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='StretchedExponential'
+        name : str, default="StretchedExponential"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -809,7 +809,7 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
         UnitError
             If x_unit is not an energy, so $\hbar / \tau$ cannot be expressed in it.
         """
-        width = Parameter(name=self.name + ' width', value=1.0, unit=str(self.x_unit))
+        width = Parameter(value=1.0, name=self.name + ' width', unit=str(self.x_unit))
         try:
             # easyscience propagates inf bounds through arithmetic, producing inf/inf=nan as a
             # transient intermediate; suppress the spurious numpy warnings as elsewhere.

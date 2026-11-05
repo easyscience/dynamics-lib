@@ -13,7 +13,8 @@ from easydynamics.utils.utils import Numeric
 
 if TYPE_CHECKING:
     import scipp as sc
-    from easyscience.variable import Parameter
+
+    from easydynamics.variable import Parameter
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
@@ -61,9 +62,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'Gaussian',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "Gaussian",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -104,7 +105,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         self._center = self._create_center_parameter(
             center=center, name=name, fix_if_none=True, x_unit=self.x_unit
         )
-        self._width = self._create_width_parameter(width=width, name=name, x_unit=self.x_unit)
+        self._width = self._create_width_parameter(
+            width=width, name=name, x_unit=self.x_unit
+        )
 
     @property
     def area(self) -> Parameter:
@@ -132,7 +135,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         and a ``ValueError`` propagates from it if *value* violates the area parameter's bounds
         (e.g. a negative value when the area was created non-negative, giving it ``min=0``).
         """
-        self._set_bounded_parameter_value(self._area, value, 'area')
+        self._set_bounded_parameter_value(self._area, value, "area")
 
     @property
     def center(self) -> Parameter:
@@ -164,7 +167,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     @property
@@ -195,10 +198,10 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             If *value* is not positive, or violates the width parameter's bounds.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('width must be a number')
+            raise TypeError("width must be a number")
         if float(value) <= 0:
-            raise ValueError('width must be positive')
-        self._set_bounded_parameter_value(self._width, value, 'width')
+            raise ValueError("width must be positive")
+        self._set_bounded_parameter_value(self._width, value, "width")
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
@@ -270,9 +273,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             A string representation of the Gaussian.
         """
         return (
-            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center},\n'
-            f'    width = {self.width})'
+            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
+            f"x_unit = {self.x_unit}, y_unit = {self.y_unit},\n"
+            f"    area = {self.area},\n"
+            f"    center = {self.center},\n"
+            f"    width = {self.width})"
         )

@@ -9,8 +9,6 @@ import plopp as pp
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
@@ -27,6 +25,8 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 
 class Analysis1d(AnalysisBase):
@@ -92,7 +92,7 @@ class Analysis1d(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyAnalysis'
+        display_name : str | None, default="MyAnalysis"
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.

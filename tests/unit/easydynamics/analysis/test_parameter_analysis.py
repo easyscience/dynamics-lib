@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting.multi_fitter import MultiFitter
-from easyscience.variable import Parameter
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -29,6 +28,7 @@ from easydynamics.sample_model.diffusion_model.jump_translational_diffusion impo
     JumpTranslationalDiffusion,
 )
 from easydynamics.utils.fit_target import FitTarget
+from easydynamics.variable import Parameter
 
 Q = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0])
 
@@ -51,13 +51,19 @@ def make_dataset():
     return sc.Dataset({
         'Lorentzian width': sc.DataArray(
             data=sc.array(
-                dims=['Q'], values=widths, variances=np.full_like(widths, 1e-4), unit='meV'
+                dims=['Q'],
+                values=widths,
+                variances=np.full_like(widths, 1e-4),
+                unit='meV',
             ),
             coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
         ),
         'Lorentzian area': sc.DataArray(
             data=sc.array(
-                dims=['Q'], values=areas, variances=np.full_like(areas, 4e-4), unit='meV'
+                dims=['Q'],
+                values=areas,
+                variances=np.full_like(areas, 4e-4),
+                unit='meV',
             ),
             coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
         ),
@@ -68,7 +74,10 @@ def make_analysis(two_bindings=True):
     bindings = [
         edyn.FitBinding(
             model=sm.Polynomial(
-                coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Width line'
+                coefficients=[0.1, 0.35],
+                x_unit='1/angstrom',
+                y_unit='meV',
+                name='Width line',
             ),
             targets='Lorentzian width',
         )
@@ -77,7 +86,10 @@ def make_analysis(two_bindings=True):
         bindings.append(
             edyn.FitBinding(
                 model=sm.Polynomial(
-                    coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Area line'
+                    coefficients=[2.0, -0.3],
+                    x_unit='1/angstrom',
+                    y_unit='meV',
+                    name='Area line',
                 ),
                 targets='Lorentzian area',
             )
@@ -856,7 +868,11 @@ class TestParameterAnalysis:
             'get_targets',
             return_value=[
                 make_target(
-                    'param', mock_callable, 'Polynomial', x_unit='1/angstrom', y_unit='meV'
+                    'param',
+                    mock_callable,
+                    'Polynomial',
+                    x_unit='1/angstrom',
+                    y_unit='meV',
                 )
             ],
         ):
@@ -889,7 +905,11 @@ class TestParameterAnalysis:
             'get_targets',
             return_value=[
                 make_target(
-                    'param', mock_callable, 'Polynomial', x_unit='1/angstrom', y_unit='meV'
+                    'param',
+                    mock_callable,
+                    'Polynomial',
+                    x_unit='1/angstrom',
+                    y_unit='meV',
                 )
             ],
         ):
@@ -1557,7 +1577,7 @@ class TestParameterAnalysis:
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
         # WHEN a parameter belongs to none of the binding models
-        stranger = Parameter(name='Width line_c0', value=1.0)
+        stranger = Parameter(value=1.0, name='Width line_c0')
 
         # THEN EXPECT it is returned unqualified rather than mislabelled
         assert analysis._parameter_labels().label(stranger) == 'Width line_c0'
@@ -1618,19 +1638,25 @@ class TestParameterAnalysis:
             bindings=[
                 edyn.FitBinding(
                     model=sm.Polynomial(
-                        coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Line'
+                        coefficients=[0.1, 0.35],
+                        x_unit='1/angstrom',
+                        y_unit='meV',
+                        name='Line',
                     ),
                     targets='Lorentzian width',
                 ),
                 edyn.FitBinding(
                     model=sm.Polynomial(
-                        coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Line'
+                        coefficients=[2.0, -0.3],
+                        x_unit='1/angstrom',
+                        y_unit='meV',
+                        name='Line',
                     ),
                     targets='Lorentzian area',
                 ),
             ],
         )
-        stranger = Parameter(name='Line_c0', value=1.0)
+        stranger = Parameter(value=1.0, name='Line_c0')
 
         # THEN EXPECT it falls back to the plain name rather than claiming an owner
         assert analysis._parameter_labels().label(stranger) == 'Line_c0'

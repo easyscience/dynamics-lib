@@ -14,7 +14,8 @@ from easydynamics.utils.utils import Numeric
 if TYPE_CHECKING:
     import numpy as np
     import scipp as sc
-    from easyscience.variable import Parameter
+
+    from easydynamics.variable import Parameter
 
 
 class Voigt(CreateParametersMixin, ModelComponent):

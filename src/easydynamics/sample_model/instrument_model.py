@@ -5,8 +5,7 @@ from copy import copy
 from functools import partial
 
 import scipp as sc
-from easyscience.base_classes.new_base import NewBase
-from easyscience.variable import Parameter
+from easyscience.base_classes import EasyBase
 
 from easydynamics.sample_model.background_model import BackgroundModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
@@ -18,9 +17,10 @@ from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import Parameter
 
 
-class InstrumentModel(NewBase):
+class InstrumentModel(EasyBase):
     """
     InstrumentModel represents a model of the instrument in an experiment at various Q.
 
@@ -70,7 +70,7 @@ class InstrumentModel(NewBase):
 
         Parameters
         ----------
-        display_name : str, default='MyInstrumentModel'
+        display_name : str, default="MyInstrumentModel"
             The display name of the InstrumentModel.
         unique_name : str | None, default=None
             The unique name of the InstrumentModel.
@@ -86,7 +86,7 @@ class InstrumentModel(NewBase):
         energy_offset : Numeric | None, default=None
             Template energy offset of the instrument. Will be copied to each Q value. If None, the
             energy offset will be 0.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             The unit of the energy axis.
 
         Raises

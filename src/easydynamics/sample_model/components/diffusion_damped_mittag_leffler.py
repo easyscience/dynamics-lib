@@ -5,14 +5,16 @@ from __future__ import annotations
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 MINIMUM_ALPHA = 1e-10  # To avoid a vanishing form parameter
-MAXIMUM_ALPHA = 1.0  # Above 1 the Mittag-Leffler function is no longer a relaxation function
+MAXIMUM_ALPHA = (
+    1.0  # Above 1 the Mittag-Leffler function is no longer a relaxation function
+)
 
 
 class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
@@ -97,9 +99,9 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
         alpha: Numeric = 1.0,
         width: Numeric = 1.0,
         damping: Numeric = 1.0,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'DiffusionDampedMittagLeffler',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "DiffusionDampedMittagLeffler",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -145,9 +147,11 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
         )
         self._alpha = self._create_alpha_parameter(alpha=alpha, name=name)
         # These methods live in CreateParametersMixin
-        self._width = self._create_width_parameter(width=width, name=name, x_unit=self.x_unit)
+        self._width = self._create_width_parameter(
+            width=width, name=name, x_unit=self.x_unit
+        )
         self._damping = self._create_width_parameter(
-            width=damping, name=name, param_name='damping', x_unit=self.x_unit
+            width=damping, name=name, param_name="damping", x_unit=self.x_unit
         )
 
     @staticmethod
@@ -184,13 +188,13 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             If *scale* is not finite, or is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
         if not np.isfinite(scale):
-            raise ValueError('scale must be a finite number.')
+            raise ValueError("scale must be a finite number.")
         if float(scale) < 0:
-            raise ValueError('scale must be non-negative.')
+            raise ValueError("scale must be non-negative.")
         return Parameter(
-            name=name + ' scale',
+            name=name + " scale",
             value=float(scale),
             unit=str(sc.Unit(x_unit) * sc.Unit(y_unit)),
             min=0.0,
@@ -221,15 +225,15 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             If *alpha* is not finite, or does not lie in (0, 1].
         """
         if not isinstance(alpha, Numeric):
-            raise TypeError('alpha must be a number.')
+            raise TypeError("alpha must be a number.")
         if not np.isfinite(alpha):
-            raise ValueError('alpha must be a finite number.')
+            raise ValueError("alpha must be a finite number.")
         if not MINIMUM_ALPHA <= float(alpha) <= MAXIMUM_ALPHA:
-            raise ValueError('alpha must be greater than zero and at most one.')
+            raise ValueError("alpha must be greater than zero and at most one.")
         return Parameter(
-            name=name + ' alpha',
+            name=name + " alpha",
             value=float(alpha),
-            unit='dimensionless',
+            unit="dimensionless",
             min=MINIMUM_ALPHA,
             max=MAXIMUM_ALPHA,
         )
@@ -261,7 +265,7 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
         and a ``ValueError`` propagates from it if *value* violates the scale parameter's bounds,
         e.g. a negative value against its ``min=0``.
         """
-        self._set_bounded_parameter_value(self._scale, value, 'scale')
+        self._set_bounded_parameter_value(self._scale, value, "scale")
 
     @property
     def alpha(self) -> Parameter:
@@ -288,7 +292,7 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
         A ``TypeError`` propagates from the shared value setter if *value* is not a numeric type,
         and a ``ValueError`` propagates from it if *value* falls outside (0, 1].
         """
-        self._set_bounded_parameter_value(self._alpha, value, 'alpha')
+        self._set_bounded_parameter_value(self._alpha, value, "alpha")
 
     @property
     def width(self) -> Parameter:
@@ -318,10 +322,10 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             If *value* is not positive, or violates the width parameter's bounds.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('width must be a number')
+            raise TypeError("width must be a number")
         if float(value) <= 0:
-            raise ValueError('width must be positive')
-        self._set_bounded_parameter_value(self._width, value, 'width')
+            raise ValueError("width must be positive")
+        self._set_bounded_parameter_value(self._width, value, "width")
 
     @property
     def damping(self) -> Parameter:
@@ -351,10 +355,10 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             If *value* is not positive, or violates the damping parameter's bounds.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('damping must be a number')
+            raise TypeError("damping must be a number")
         if float(value) <= 0:
-            raise ValueError('damping must be positive')
-        self._set_bounded_parameter_value(self._damping, value, 'damping')
+            raise ValueError("damping must be positive")
+        self._set_bounded_parameter_value(self._damping, value, "damping")
 
     def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
@@ -395,7 +399,8 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             + epsilon * np.cos(phase)
         )
         denominator = modulus_squared * (
-            (modulus_squared**alpha + 1) * modulus_squared ** (-alpha / 2) + 2 * np.cos(phase)
+            (modulus_squared**alpha + 1) * modulus_squared ** (-alpha / 2)
+            + 2 * np.cos(phase)
         )
         return scale * numerator / (np.pi * width * denominator)
 
@@ -439,10 +444,10 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
             A string representation of the diffusion-damped Mittag-Leffler component.
         """
         return (
-            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
-            f'    scale = {self.scale},\n'
-            f'    alpha = {self.alpha},\n'
-            f'    width = {self.width},\n'
-            f'    damping = {self.damping})'
+            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
+            f"x_unit = {self.x_unit}, y_unit = {self.y_unit},\n"
+            f"    scale = {self.scale},\n"
+            f"    alpha = {self.alpha},\n"
+            f"    width = {self.width},\n"
+            f"    damping = {self.damping})"
         )
