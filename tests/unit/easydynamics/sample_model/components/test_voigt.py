@@ -6,12 +6,12 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.integrate import simpson
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model import Voigt
+from easydynamics.variable import Parameter
 
 
 class TestVoigt:

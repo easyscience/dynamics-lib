@@ -9,7 +9,6 @@ import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
-from easyscience.variable import Parameter
 from matplotlib import rcParams
 from plopp.backends.matplotlib.figure import WidgetFigure
 
@@ -22,6 +21,7 @@ from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import convert_value_unit
+from easydynamics.variable import Parameter
 
 
 class ParameterAnalysis(EasyDynamicsModelBase):
@@ -826,7 +826,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             # Apply the same finite filtering as the variance path: NaN values arise when a
             # parameter is absent for a given Q, and must not leak into a fit.
             finite_mask = np.isfinite(values)
-            return q_values[finite_mask], values[finite_mask], np.ones_like(values[finite_mask])
+            return (
+                q_values[finite_mask],
+                values[finite_mask],
+                np.ones_like(values[finite_mask]),
+            )
 
         # NaN variances arise when a parameter is absent for a given Q (parameters_to_dataset
         # fills np.nan for missing parameters). Filter those rows silently; other non-finite or
@@ -844,7 +848,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 f'cannot compute weights.'
             )
 
-        return q_values[valid_mask], values[valid_mask], 1 / np.sqrt(variances[valid_mask])
+        return (
+            q_values[valid_mask],
+            values[valid_mask],
+            1 / np.sqrt(variances[valid_mask]),
+        )
 
     #############
     # Dunder methods

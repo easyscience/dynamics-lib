@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 MINIMUM_ALPHA = 1e-10  # To avoid a vanishing form parameter
 MAXIMUM_ALPHA = 1.0  # Above 1 the Mittag-Leffler function is no longer a relaxation function

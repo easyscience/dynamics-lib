@@ -5,7 +5,6 @@ from functools import partial
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
@@ -15,6 +14,7 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import energy_to_scipp
+from easydynamics.variable import Parameter
 
 
 class ConvolutionBase(EasyDynamicsModelBase):
@@ -324,7 +324,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
 
         conversions = [
             (_convert_energy, unit, old_x_unit),
-            (partial(convert_parameter_unit, self._energy_offset), unit, old_offset_unit),
+            (
+                partial(convert_parameter_unit, self._energy_offset),
+                unit,
+                old_offset_unit,
+            ),
         ]
         if self.sample_components is not None:
             conversions.append((self.sample_components.convert_x_unit, unit, old_x_unit))

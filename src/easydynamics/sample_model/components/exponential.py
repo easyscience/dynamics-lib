@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 
 class Exponential(CreateParametersMixin, ModelComponent):
@@ -114,7 +114,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             raise TypeError('rate must be a number.')
         if not np.isfinite(rate):
             raise ValueError('rate must be finite.')
-        self._rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
+        self._rate = Parameter(value=float(rate), name=name + ' rate', unit='1/' + x_unit_str)
 
     @property
     def amplitude(self) -> Parameter:

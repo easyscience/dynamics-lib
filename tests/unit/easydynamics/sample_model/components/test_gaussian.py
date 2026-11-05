@@ -6,11 +6,11 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian
+from easydynamics.variable import Parameter
 
 
 class TestGaussian:

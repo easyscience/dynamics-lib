@@ -7,12 +7,12 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 GAUSSIAN_EXPRESSION = 'A / (sigma*sqrt(2*pi)) * exp(-(x - x0)**2 / (2*sigma**2))'
 GAUSSIAN_UNITS = {'A': 'meV', 'x0': 'meV', 'sigma': 'meV'}
@@ -46,7 +46,7 @@ class TestExpressionComponent:
 
     def test_init_with_parameter(self):
         # WHEN THEN
-        A = Parameter('A', 3.0)
+        A = Parameter(3.0)
         expr = ExpressionComponent('A * x', parameters={'A': A})
 
         # EXPECT
@@ -76,7 +76,7 @@ class TestExpressionComponent:
 
     def test_init_parameter_units_overrides_parameter_instance_unit(self):
         # WHEN: a Parameter instance in eV, but parameter_units requests meV
-        A = Parameter('A', 3.0, unit='eV')
+        A = Parameter(3.0, unit='eV')
 
         # THEN: A*x evaluates to meV**2, which mismatches the default dimensionless y_unit
         with pytest.warns(UserWarning, match='does not match'):
@@ -521,7 +521,9 @@ class TestExpressionComponent:
     def test_output_unit_sign_is_dimensionless(self):
         # WHEN
         expr = ExpressionComponent(
-            'A * sign(x - x0)', parameters={'A': 1.0, 'x0': 0.5}, parameter_units={'x0': 'meV'}
+            'A * sign(x - x0)',
+            parameters={'A': 1.0, 'x0': 0.5},
+            parameter_units={'x0': 'meV'},
         )
 
         # THEN EXPECT
@@ -556,7 +558,10 @@ class TestExpressionComponent:
         # WHEN
         with pytest.warns(UserWarning, match='not unit-consistent'):
             expr = ExpressionComponent(
-                'exp(x * A)', parameters={'A': 1.0}, parameter_units={'A': 'meV'}, x_unit='meV'
+                'exp(x * A)',
+                parameters={'A': 1.0},
+                parameter_units={'A': 'meV'},
+                x_unit='meV',
             )
 
         # THEN EXPECT
@@ -580,7 +585,10 @@ class TestExpressionComponent:
         # WHEN: the exponent itself carries a unit
         with pytest.warns(UserWarning, match='not unit-consistent'):
             expr = ExpressionComponent(
-                'x**A', parameters={'A': 1.0}, parameter_units={'A': 'meV'}, x_unit='meV'
+                'x**A',
+                parameters={'A': 1.0},
+                parameter_units={'A': 'meV'},
+                x_unit='meV',
             )
 
         # THEN EXPECT
@@ -591,7 +599,9 @@ class TestExpressionComponent:
         # WHEN: only integer and half-integer powers of quantities with units are supported
         with pytest.warns(UserWarning, match='not unit-consistent'):
             expr = ExpressionComponent(
-                'sigma**0.25 * x', parameters={'sigma': 0.5}, parameter_units={'sigma': 'meV'}
+                'sigma**0.25 * x',
+                parameters={'sigma': 0.5},
+                parameter_units={'sigma': 'meV'},
             )
 
         # THEN EXPECT
@@ -602,7 +612,10 @@ class TestExpressionComponent:
         # WHEN: without an x_unit, x is treated as dimensionless in the propagation
         with pytest.warns(UserWarning, match='does not match'):
             expr = ExpressionComponent(
-                'A * x', parameters={'A': 1.0}, parameter_units={'A': 'meV'}, x_unit=None
+                'A * x',
+                parameters={'A': 1.0},
+                parameter_units={'A': 'meV'},
+                x_unit=None,
             )
 
         # THEN EXPECT
@@ -721,7 +734,9 @@ class TestExpressionComponent:
     def test_hbar_constant_value_and_unit(self):
         # WHEN
         expr = ExpressionComponent(
-            'exp(-(x * tau / hbar)**2)', parameters={'tau': 1.0}, parameter_units={'tau': 'ps'}
+            'exp(-(x * tau / hbar)**2)',
+            parameters={'tau': 1.0},
+            parameter_units={'tau': 'ps'},
         )
 
         # THEN EXPECT: hbar in meV*s, a read-only DescriptorNumber
@@ -749,7 +764,9 @@ class TestExpressionComponent:
         with warnings.catch_warnings():
             warnings.simplefilter('error')
             expr = ExpressionComponent(
-                'exp(-x / (kb * T))', parameters={'T': 300.0}, parameter_units={'T': 'K'}
+                'exp(-x / (kb * T))',
+                parameters={'T': 300.0},
+                parameter_units={'T': 'K'},
             )
         assert expr.output_unit == 'dimensionless'
 

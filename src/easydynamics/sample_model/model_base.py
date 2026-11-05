@@ -5,7 +5,6 @@ from copy import copy
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
@@ -15,6 +14,7 @@ from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import Parameter
 
 
 class ModelBase(EasyDynamicsModelBase):

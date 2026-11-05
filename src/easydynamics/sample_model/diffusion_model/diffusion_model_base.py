@@ -5,8 +5,6 @@ from functools import partial
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
@@ -19,6 +17,8 @@ from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 
 class DiffusionModelBase(EasyDynamicsModelBase):
@@ -355,7 +355,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         new_scale_unit = str(sc.Unit(unit_str) * sc.Unit(str(self.y_unit)))
         old_scale_unit = str(sc.Unit(old_x_unit) * sc.Unit(str(self.y_unit)))
         conversions = [
-            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+            (
+                partial(convert_parameter_unit, self._scale),
+                new_scale_unit,
+                old_scale_unit,
+            ),
             (self._convert_extra_x_unit_parameters, unit_str, old_x_unit),
         ]
         conversions.extend(
@@ -395,7 +399,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         new_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(unit_str))
         old_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(old_y_unit))
         conversions = [
-            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+            (
+                partial(convert_parameter_unit, self._scale),
+                new_scale_unit,
+                old_scale_unit,
+            ),
         ]
         conversions.extend(
             (collection.convert_y_unit, unit_str, old_y_unit)

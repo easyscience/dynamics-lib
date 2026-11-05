@@ -8,7 +8,7 @@ import pytest
 import scipp as sc
 from scipy.signal import fftconvolve
 
-# from easyscience.variable import Parameter
+# from easydynamics.variable import Parameter
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.sample_model import DampedHarmonicOscillator
 from easydynamics.sample_model import DeltaFunction

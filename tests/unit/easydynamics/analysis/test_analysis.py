@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.fitting.multi_fitter import MultiFitter
-from easyscience.variable import Parameter
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -20,6 +19,7 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 Q_VALUES = [0.5, 1.0, 1.5]
 
@@ -911,7 +911,7 @@ class TestAnalysis:
 
     def test_get_all_variables(self, analysis):
         # WHEN
-        extra_par = Parameter(name='extra_par', value=1.0)
+        extra_par = Parameter(value=1.0)
         analysis._extra_parameters = [extra_par]
 
         # THEN
@@ -1427,7 +1427,7 @@ class TestAnalysis:
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, multi_q_analysis):
         # WHEN a parameter belongs to no Q index of this analysis
-        stranger = Parameter(name='Gaussian width', value=1.0)
+        stranger = Parameter(value=1.0, name='Gaussian width')
 
         # EXPECT it is returned unqualified rather than mislabelled
         assert multi_q_analysis._parameter_labels().label(stranger) == 'Gaussian width'

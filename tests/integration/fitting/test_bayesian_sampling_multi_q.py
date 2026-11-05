@@ -263,13 +263,19 @@ class TestParameterAnalysisChain:
             bindings=edyn.FitBinding(model=model, targets='Gaussian width'),
         )
         analysis.fit()
-        # The linear coefficient sits at exactly zero with a vanishing uncertainty, so the sigma
-        # rule has no scale to work from and flags it rather than inventing one. absolute_floor
-        # supplies the scale the data cannot; the asserts guard that this setup really leaves
+        # This noiseless fit starts at the truth, so it produces no covariance and every
+        # uncertainty is left as None. suggest_bounds flags each coefficient rather than inventing
+        # a scale, so the bounds are set by hand; the asserts guard that this setup really leaves
         # every coefficient bounded before sampling.
         flagged = analysis.bayesian.suggest_bounds().needing_attention
-        assert [s.label for s in flagged] == ['Width model_c1']
-        analysis.bayesian.suggest_bounds(absolute_floor=1.0).apply()
+        assert {s.label for s in flagged} == {
+            'Width model_c0',
+            'Width model_c1',
+            'Width model_c2',
+        }
+        for parameter in model.get_free_parameters():
+            parameter.min = parameter.value - 1.0
+            parameter.max = parameter.value + 1.0
         assert not analysis.bayesian.suggest_bounds().needing_attention
 
         # THEN

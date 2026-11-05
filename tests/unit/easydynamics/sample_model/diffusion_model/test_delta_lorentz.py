@@ -4,11 +4,11 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.delta_function import DeltaFunction
 from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.variable import Parameter
 
 
 class TestDeltaLorentz:

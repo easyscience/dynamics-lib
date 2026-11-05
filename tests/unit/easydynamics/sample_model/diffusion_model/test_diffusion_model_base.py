@@ -4,10 +4,10 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable.parameter import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.variable import Parameter
 
 
 class TestDiffusionModelBase:

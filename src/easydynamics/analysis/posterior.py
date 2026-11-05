@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from easyscience.variable import Parameter
+    from easydynamics.variable import Parameter
 
 # How many times wider than the parameter's own value a suggested range may be before it is
 # reported as suspicious. A fit that returns an uncertainty this large is describing a flat
@@ -357,7 +357,8 @@ def _suggest_bounds_for_parameter(
         )
 
     value = float(parameter.value)
-    error = float(parameter.error)
+    # A fit that produced no covariance leaves the error as None.
+    error = np.nan if parameter.error is None else float(parameter.error)
     if not np.isfinite(value):
         return BoundsSuggestion(
             parameter=parameter,
@@ -367,7 +368,8 @@ def _suggest_bounds_for_parameter(
             reason='value is not finite',
         )
 
-    # A NaN uncertainty is exactly the degenerate fit this helper exists to guard against, so it
+    # A missing or NaN uncertainty is exactly the degenerate fit this helper exists to guard
+    # against, so it
     # is flagged rather than silently treated like a zero error, which would yield deceptively
     # tight bounds of value +/- relative_pad * |value|.
     if not np.isfinite(error):

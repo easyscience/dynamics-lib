@@ -6,7 +6,6 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.utils.utils import _assert_valid_unit
@@ -17,7 +16,9 @@ from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import convert_value_unit
 from easydynamics.utils.utils import energy_to_scipp
+from easydynamics.utils.utils import prepare_x_for_evaluate
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import Parameter
 
 
 class TestVerifyQIndex:
@@ -94,8 +95,8 @@ class TestConvertValueUnit:
 class TestConvertUnitsWithRollback:
     def test_applies_all_conversions(self):
         # WHEN
-        p1 = Parameter(name='p1', value=1.0, unit='meV')
-        p2 = Parameter(name='p2', value=2.0, unit='meV')
+        p1 = Parameter(value=1.0, unit='meV')
+        p2 = Parameter(value=2.0, unit='meV')
 
         # THEN
         convert_units_with_rollback([
@@ -111,8 +112,8 @@ class TestConvertUnitsWithRollback:
 
     def test_rolls_back_on_failure_and_reraises(self):
         # WHEN: the second conversion fails (meV -> K is not valid)
-        p1 = Parameter(name='p1', value=1.0, unit='meV')
-        p2 = Parameter(name='p2', value=2.0, unit='meV')
+        p1 = Parameter(value=1.0, unit='meV')
+        p2 = Parameter(value=2.0, unit='meV')
 
         def fail(_unit):
             raise RuntimeError('conversion failed')
@@ -327,7 +328,7 @@ class TestInNotebook:
         available."""
 
         # WHEN
-        def raise_import_error(*args, **kwargs):  # ruff: ignore[unused-function-argument]
+        def raise_import_error(*_args, **_kwargs):
             raise ImportError
 
         # THEN
@@ -371,3 +372,118 @@ class TestAssertValidUnit:
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'is not a valid scipp unit'):
             _assert_valid_unit('not_a_real_unit')
+
+
+class TestPrepareXForEvaluate:
+    @pytest.mark.parametrize(
+        'x_input, expected_array',
+        [
+            (5.0, np.array([5.0])),
+            ([1.0, 2.0, 3.0], np.array([1.0, 2.0, 3.0])),
+            (np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 3.0])),
+            (sc.scalar(5.0, unit='meV'), np.array([5.0])),
+            (
+                sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='meV'),
+                np.array([1.0, 2.0, 3.0]),
+            ),
+            (
+                sc.DataArray(
+                    data=sc.array(dims=['x'], values=[10.0, 20.0, 30.0]),
+                    coords={'x': sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='meV')},
+                ),
+                np.array([1.0, 2.0, 3.0]),
+            ),
+        ],
+        ids=[
+            'python_scalar',
+            'python_list',
+            'numpy_array',
+            'scipp_scalar',
+            'scipp_array',
+            'scipp_dataarray',
+        ],
+    )
+    def test_various_inputs(self, x_input, expected_array):
+        # WHEN THEN
+        x_prepared, _detected_unit, _dim = prepare_x_for_evaluate(x_input, 'meV', 'Dummy')
+
+        # EXPECT
+        assert isinstance(x_prepared, np.ndarray)
+        assert x_prepared.shape == expected_array.shape
+        np.testing.assert_array_equal(x_prepared, expected_array)
+
+    def test_detected_unit_and_dim_for_scipp_input(self):
+        # WHEN
+        x = sc.array(dims=['energy'], values=[1.0, 2.0], unit='meV')
+
+        # THEN
+        _x_prepared, detected_unit, dim = prepare_x_for_evaluate(x, 'meV', 'Dummy')
+
+        # EXPECT
+        assert detected_unit == 'meV'
+        assert dim == 'energy'
+
+    def test_detected_unit_and_dim_for_plain_input(self):
+        # WHEN THEN
+        _x_prepared, detected_unit, dim = prepare_x_for_evaluate([1.0, 2.0], 'meV', 'Dummy')
+
+        # EXPECT
+        assert detected_unit is None
+        assert dim == 'x'
+
+    def test_scipp_data_array_with_multiple_coords_raises(self):
+        # WHEN
+        x = sc.array(dims=['x'], values=[0.0, 0.5, 1.0], unit='meV')
+        y = sc.array(dims=['y'], values=[0.0, 1.0, 2.0], unit='meV')
+        var = sc.array(
+            dims=['x', 'y'],
+            values=[[10.0, 20.0, 30.0], [40.0, 50.0, 60.0], [70.0, 80.0, 90.0]],
+        )
+        array = sc.DataArray(data=var, coords={'x': x, 'y': y})
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='must have exactly one coordinate'):
+            prepare_x_for_evaluate(array, 'meV', 'Dummy')
+
+    @pytest.mark.parametrize(
+        'x, expected_message',
+        [
+            (np.array([0.0, np.nan, 1.0]), 'Input x contains NaN values.'),
+            (np.array([0.0, np.inf, 1.0]), 'Input x contains infinite values.'),
+        ],
+        ids=['nan', 'infinite'],
+    )
+    def test_invalid_input_raises(self, x, expected_message):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=expected_message):
+            prepare_x_for_evaluate(x, 'meV', 'Dummy')
+
+    def test_incompatible_unit_raises(self):
+        # WHEN
+        x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='nm')
+
+        # THEN EXPECT
+        with pytest.raises(UnitError, match=r'Input x has unit nm.*Dummy x_unit meV'):
+            prepare_x_for_evaluate(x, 'meV', 'Dummy')
+
+    def test_compatible_unit_is_returned_unconverted(self):
+        # WHEN
+        x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='microeV')
+
+        # THEN: compatible units are accepted and the values are returned as-is
+        x_prepared, detected_unit, _dim = prepare_x_for_evaluate(x, 'meV', 'Dummy')
+
+        # EXPECT
+        assert detected_unit == str(x.unit)
+        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
+
+    def test_x_unit_none_skips_unit_check(self):
+        # WHEN
+        x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='nm')
+
+        # THEN
+        x_prepared, detected_unit, _dim = prepare_x_for_evaluate(x, None, 'Dummy')
+
+        # EXPECT
+        assert detected_unit == 'nm'
+        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])

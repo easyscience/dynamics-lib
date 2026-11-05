@@ -7,7 +7,6 @@ from itertools import pairwise
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.integrate import simpson
 from scipy.special import gamma
@@ -21,6 +20,7 @@ from easydynamics.sample_model.components.stretched_exponential import MINIMUM_B
 from easydynamics.sample_model.components.stretched_exponential import _kww_shape
 from easydynamics.sample_model.components.stretched_exponential import _kww_shape_interpolated
 from easydynamics.sample_model.components.stretched_exponential import _reduced_hwhm
+from easydynamics.variable import Parameter
 
 # hbar in meV*ps (CODATA), so the tests derive the energy scale independently of the library.
 HBAR_MEV_PS = 0.6582119569509066

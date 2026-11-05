@@ -6,10 +6,10 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
+from easydynamics.variable import Parameter
 
 
 class TestPolynomial:
@@ -102,11 +102,11 @@ class TestPolynomial:
         [
             [2.0, 0.0, -1.0],  # all floats
             [
-                Parameter('p0', 2.0),
-                Parameter('p1', 0.0),
-                Parameter('p2', -1.0),
+                Parameter(2.0),
+                Parameter(0.0),
+                Parameter(-1.0),
             ],  # all Parameters
-            [2.0, Parameter('p1', 0.0), -1.0],  # mixed numbers and Parameters
+            [2.0, Parameter(0.0), -1.0],  # mixed numbers and Parameters
         ],
     )
     def test_set_coefficients(self, polynomial: Polynomial, values):
@@ -185,7 +185,7 @@ class TestPolynomial:
         # WHEN a linear coefficient with a lower bound that the converted value would cross
         # (regression: the value was multiplied in place and easyscience silently clamped
         # it to the bound, corrupting the coefficient irreversibly)
-        bounded = Parameter(name='c1', value=1.0, min=0.5)
+        bounded = Parameter(value=1.0, name='c1', min=0.5)
         polynomial = Polynomial(coefficients=[0.0, bounded], x_unit='meV')
 
         # THEN
@@ -199,7 +199,7 @@ class TestPolynomial:
 
     def test_convert_y_unit_rescales_bounded_coefficient_without_clamping(self):
         # WHEN a coefficient with an upper bound that the converted value would cross
-        bounded = Parameter(name='c0', value=1.0, max=2.0)
+        bounded = Parameter(value=1.0, name='c0', max=2.0)
         polynomial = Polynomial(coefficients=[bounded], x_unit='meV', y_unit='1/meV')
 
         # THEN

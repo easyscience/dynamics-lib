@@ -5,7 +5,6 @@ from collections.abc import Iterable
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.experiment import Experiment
@@ -13,6 +12,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 
 class AnalysisBase(EasyDynamicsModelBase):

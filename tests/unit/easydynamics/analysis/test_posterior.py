@@ -5,7 +5,6 @@ import warnings
 
 import numpy as np
 import pytest
-from easyscience.variable import Parameter
 
 from easydynamics.analysis.posterior import BoundsSuggestion
 from easydynamics.analysis.posterior import BoundsSuggestions
@@ -14,10 +13,11 @@ from easydynamics.analysis.posterior import parameters_at_bounds
 from easydynamics.analysis.posterior import suggest_bounds_for_parameters
 from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.analysis.posterior import unbounded_parameters
+from easydynamics.variable import Parameter
 
 
 def make_parameter(name='p', value=1.0, error=0.0, minimum=-np.inf, maximum=np.inf, unit='meV'):
-    parameter = Parameter(name=name, value=value, unit=unit)
+    parameter = Parameter(value=value, name=name, unit=unit)
     parameter.min = minimum
     parameter.max = maximum
     if error:
@@ -107,6 +107,18 @@ class TestSuggestBounds:
         suggestion = suggest_bounds_for_parameters([parameter]).suggestions[0]
 
         # EXPECT a flag, rather than deceptively tight bounds from the relative pad alone
+        assert suggestion.needs_attention
+        assert 'uncertainty is not finite' in suggestion.reason
+
+    def test_missing_uncertainty_is_flagged(self):
+        # WHEN a fit without a covariance leaves the uncertainty as None
+        parameter = make_parameter(value=5.0)
+        parameter.error = None
+
+        # THEN
+        suggestion = suggest_bounds_for_parameters([parameter]).suggestions[0]
+
+        # EXPECT a flag, rather than a crash or tight bounds from the relative pad alone
         assert suggestion.needs_attention
         assert 'uncertainty is not finite' in suggestion.reason
 

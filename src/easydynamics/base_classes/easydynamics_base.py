@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
-from easyscience.base_classes.new_base import NewBase
+from easyscience.base_classes import EasyBase
 
 from easydynamics.base_classes.name_mixin import NameMixin
 
 
-class EasyDynamicsBase(NameMixin, NewBase):
+class EasyDynamicsBase(NameMixin, EasyBase):
     """Base class for all EasyDynamics classes."""
 
     def __init__(

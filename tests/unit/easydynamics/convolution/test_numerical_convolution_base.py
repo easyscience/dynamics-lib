@@ -4,7 +4,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
@@ -14,6 +13,7 @@ from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 
 class TestNumericalConvolutionBase:
@@ -298,7 +298,7 @@ class TestNumericalConvolutionBase:
         [
             (1, 1.0),
             (100.0, 100.0),
-            (Parameter(name='TempParam', value=250.0, unit='K'), 250.0),
+            (Parameter(value=250.0, name='TempParam', unit='K'), 250.0),
         ],
         ids=['int', 'float', 'parameter'],
     )
@@ -333,7 +333,7 @@ class TestNumericalConvolutionBase:
         exists does not create a new Parameter.
         """
         # WHEN
-        temp_param = Parameter(name='TempParam', value=300.0, unit='K')
+        temp_param = Parameter(value=300.0, name='TempParam', unit='K')
         default_numerical_convolution_base.temperature = temp_param
 
         # THEN
@@ -773,7 +773,7 @@ class TestNumericalConvolutionBase:
         assert conv._convolution_plan_is_current() is True
 
         # THEN rebinding to a new Parameter object invalidates the plan
-        conv.energy_offset = Parameter(name='energy_offset', value=1.5, unit='meV')
+        conv.energy_offset = Parameter(value=1.5, name='energy_offset', unit='meV')
 
         # EXPECT
         assert conv._convolution_plan_is_current() is False

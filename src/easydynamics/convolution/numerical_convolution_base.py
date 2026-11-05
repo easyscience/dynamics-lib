@@ -5,7 +5,6 @@ import warnings
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.convolution.energy_grid import EnergyGrid
@@ -14,6 +13,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 # The thresholds are illustrated in
 # performance_tests/convolution/convolution_width_thresholds.ipynb
