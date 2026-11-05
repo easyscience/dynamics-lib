@@ -6,15 +6,18 @@ from __future__ import annotations
 import warnings
 from collections.abc import Sequence
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorBase
 from scipp import UnitError
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.variable import Parameter
+
+if TYPE_CHECKING:
+    from easyscience.variable import DescriptorBase
 
 _CoefficientsInput = Sequence[Numeric | Parameter] | dict[int, Numeric]
 
@@ -93,12 +96,12 @@ class Polynomial(ModelComponent):
             :class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
             present are filled with fixed-to-zero Parameters, and the degree is taken from the
             largest key.  Must contain at least one element.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  When the x_unit is changed via :meth:`convert_x_unit`, coefficient
             values are rescaled by power-law factors so the evaluated output remains unchanged.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Polynomial"
+        name : str, default='Polynomial'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

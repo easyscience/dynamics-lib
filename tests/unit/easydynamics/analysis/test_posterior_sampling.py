@@ -19,6 +19,7 @@ import matplotlib as mpl
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.minimizers import Minimizers
 
 from easydynamics.variable import Parameter
 
@@ -34,7 +35,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 
-SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler'
+SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler.from_fitter'
 
 
 def make_analysis(with_variances=True):
@@ -279,9 +280,9 @@ class TestPosteriorSampler:
         # EXPECT
         after = [(p.unique_name, p.value) for p in analysis.get_free_parameters()]
         assert after == before
-        assert analysis.fitter.minimizer.enum == AvailableMinimizers.LMFit_leastsq
+        assert analysis.fitter.minimizer.enum == Minimizers.LMFit_leastsq
 
-    def test_switches_to_bumps_for_the_run(self, analysis):
+    def test_leaves_the_minimizer_alone_during_the_run(self, analysis):
         # WHEN
         bound_all(analysis)
         seen = []
@@ -295,20 +296,7 @@ class TestPosteriorSampler:
             analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        assert seen == [AvailableMinimizers.Bumps]
-
-    def test_restores_the_minimizer_even_when_sampling_raises(self, analysis):
-        # WHEN
-        bound_all(analysis)
-
-        # THEN
-        with patch(SAMPLER_PATH) as sampler_class:
-            sampler_class.return_value.sample.side_effect = RuntimeError('boom')
-            with pytest.raises(RuntimeError, match='boom'):
-                analysis.bayesian.sample(samples=10)
-
-        # EXPECT
-        assert analysis.fitter.minimizer.enum == AvailableMinimizers.LMFit_leastsq
+        assert seen == [Minimizers.LMFit_leastsq]
 
     def test_forwards_sampling_arguments(self, analysis):
         # WHEN

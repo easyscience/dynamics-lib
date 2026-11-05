@@ -23,8 +23,8 @@ class Parameter(NameMixin, EasyScienceParameter):
         name: str = 'MyEasyDynamicsParameter',
         unit: str | sc.Unit = '',
         variance: numbers.Number | None = 0.0,
-        min: numbers.Number | None = -np.inf,
-        max: numbers.Number | None = np.inf,
+        min: numbers.Number | None = -np.inf,  # ruff: ignore[builtin-argument-shadowing]
+        max: numbers.Number | None = np.inf,  # ruff: ignore[builtin-argument-shadowing]
         fixed: bool = False,
         unique_name: str | None = None,
         description: str | None = None,
@@ -45,9 +45,9 @@ class Parameter(NameMixin, EasyScienceParameter):
         ----------
         value : numbers.Number
             Value of this object.
-        name : str, default="MyEasyDynamicsParameter"
+        name : str, default='MyEasyDynamicsParameter'
             Name of the Parameter.
-        unit : str | sc.Unit, default=""
+        unit : str | sc.Unit, default=''
             This object can have a physical unit associated with it. By default, ''.
         variance : numbers.Number | None, default=0.0
             The variance of the value. By default, 0.0.
@@ -64,18 +64,14 @@ class Parameter(NameMixin, EasyScienceParameter):
         url : str | None, default=None
             Lookup url for documentation/information. By default, None.
         display_name : str | None, default=None
-            The name of the object as it should be displayed. Falls back to ``unique_name`` when
-            not given. By default, None.
+            The name of the object as it should be displayed. Falls back to ``name`` when not
+            given. By default, None.
         **kwargs : object
             Additional keyword arguments used during serialization.
-
-        Raises
-        ------
-        TypeError
-            If any numeric or boolean input has the wrong type.
-        ValueError
-            If ``value`` falls outside the provided bounds or if the bounds are invalid.
         """
+        if display_name is None:
+            display_name = name
+
         super().__init__(
             value=value,
             name=name,

@@ -154,8 +154,16 @@ class ExpressionComponent(ModelComponent):
     _DIMENSIONLESS_RESULT_FUNCS: ClassVar[tuple] = (sp.sign,)
 
     # parameter_units is applied at construction only; the resulting units are captured in
-    # the serialized Parameter dicts, so the argument is skipped during serialization.
-    _REDIRECT: ClassVar[dict[str, object]] = {'parameter_units': None}
+    # the serialized Parameter dicts, so the argument is left out of the arguments to serialize.
+    _arg_spec: ClassVar[tuple[str, ...]] = (
+        'expression',
+        'parameters',
+        'x_unit',
+        'y_unit',
+        'name',
+        'display_name',
+        'unique_name',
+    )
 
     def __init__(
         self,
@@ -189,11 +197,11 @@ class ExpressionComponent(ModelComponent):
             of a Parameter instance given in *parameters*. When units are in use, an output unit
             convertible to y_unit rescales the evaluated values into y_unit; a warning is issued
             only if the output unit is incompatible with y_unit.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Expression"
+        name : str, default='Expression'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

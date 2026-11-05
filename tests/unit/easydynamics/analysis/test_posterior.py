@@ -110,6 +110,18 @@ class TestSuggestBounds:
         assert suggestion.needs_attention
         assert 'uncertainty is not finite' in suggestion.reason
 
+    def test_missing_uncertainty_is_flagged(self):
+        # WHEN a fit without a covariance leaves the uncertainty as None
+        parameter = make_parameter(value=5.0)
+        parameter.error = None
+
+        # THEN
+        suggestion = suggest_bounds_for_parameters([parameter]).suggestions[0]
+
+        # EXPECT a flag, rather than a crash or tight bounds from the relative pad alone
+        assert suggestion.needs_attention
+        assert 'uncertainty is not finite' in suggestion.reason
+
     def test_non_finite_value_is_flagged(self):
         # WHEN
         parameter = make_parameter(value=1.0)

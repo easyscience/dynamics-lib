@@ -528,12 +528,12 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             If True, evaluate the profile by interpolating a cached table instead of by quadrature.
             This is many times faster, which matters in fits and sampling, and accurate to ~1e-7 of
             the peak rather than ~1e-11.  Set it to False for the full quadrature accuracy.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  Must be an energy, since $\hbar / \tau$ is converted into it.
             center is stored in this unit. area_unit = x_unit * y_unit.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="StretchedExponential"
+        name : str, default='StretchedExponential'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

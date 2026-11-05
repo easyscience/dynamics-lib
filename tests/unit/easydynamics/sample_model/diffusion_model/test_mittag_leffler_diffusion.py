@@ -15,7 +15,7 @@ from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 from easydynamics.variable import Parameter
 
-ALL_Q_VARIATION = {"A_0": True, "relaxation_rate": True, "alpha": True}
+ALL_Q_VARIATION = {'A_0': True, 'relaxation_rate': True, 'alpha': True}
 
 
 class TestMittagLefflerDiffusion:
@@ -67,7 +67,7 @@ class TestMittagLefflerDiffusion:
         assert model.A_1.value == pytest.approx(1.0)
         assert model.relaxation_rate.value == pytest.approx(1.0)
         assert model.alpha.value == pytest.approx(1.0)
-        assert model.x_unit == "meV"
+        assert model.x_unit == 'meV'
         assert model.get_component_collections() == []
 
     def test_init_with_Q_builds_two_components_per_Q(self, model_with_Q):
@@ -78,55 +78,53 @@ class TestMittagLefflerDiffusion:
         assert len(collections) == 5
         for collection in collections:
             assert collection.list_component_names() == [
-                "Elastic Lorentzian",
-                "Mittag-Leffler",
+                'Elastic Lorentzian',
+                'Mittag-Leffler',
             ]
             assert isinstance(collection[0], Lorentzian)
             assert isinstance(collection[1], DiffusionDampedMittagLeffler)
 
     def test_parameter_units(self, model):
         # WHEN THEN EXPECT
-        assert model.scale.unit == "meV"
-        assert model.diffusion_coefficient.unit == "m^2/s"
-        assert model.relaxation_rate.unit == "meV"
-        assert model.alpha.unit == "dimensionless"
+        assert model.scale.unit == 'meV'
+        assert model.diffusion_coefficient.unit == 'm^2/s'
+        assert model.relaxation_rate.unit == 'meV'
+        assert model.alpha.unit == 'dimensionless'
 
     @pytest.mark.parametrize(
-        "kwargs, expected_exception, expected_message",
+        'kwargs, expected_exception, expected_message',
         [
-            ({"diffusion_coefficient": "invalid"}, TypeError, "must be a number"),
-            ({"diffusion_coefficient": -1.0}, ValueError, "must be at least"),
-            ({"diffusion_coefficient": 0.0}, ValueError, "must be at least"),
-            ({"A_0": "invalid"}, TypeError, "A_0 must be a number"),
-            ({"A_0": 1.5}, ValueError, "A_0 must be between 0 and 1"),
-            ({"relaxation_rate": "invalid"}, TypeError, "must be a number"),
-            ({"relaxation_rate": -1.0}, ValueError, "relaxation_rate must be at least"),
-            ({"alpha": "invalid"}, TypeError, "alpha must be a number"),
-            ({"alpha": 1.5}, ValueError, "greater than zero and at most one"),
-            ({"alpha": 0.0}, ValueError, "greater than zero and at most one"),
+            ({'diffusion_coefficient': 'invalid'}, TypeError, 'must be a number'),
+            ({'diffusion_coefficient': -1.0}, ValueError, 'must be at least'),
+            ({'diffusion_coefficient': 0.0}, ValueError, 'must be at least'),
+            ({'A_0': 'invalid'}, TypeError, 'A_0 must be a number'),
+            ({'A_0': 1.5}, ValueError, 'A_0 must be between 0 and 1'),
+            ({'relaxation_rate': 'invalid'}, TypeError, 'must be a number'),
+            ({'relaxation_rate': -1.0}, ValueError, 'relaxation_rate must be at least'),
+            ({'alpha': 'invalid'}, TypeError, 'alpha must be a number'),
+            ({'alpha': 1.5}, ValueError, 'greater than zero and at most one'),
+            ({'alpha': 0.0}, ValueError, 'greater than zero and at most one'),
             (
-                {"mittag_leffler_name": 123},
+                {'mittag_leffler_name': 123},
                 TypeError,
-                "mittag_leffler_name must be a string",
+                'mittag_leffler_name must be a string',
             ),
-            ({"allow_Q_variation": "invalid"}, TypeError, "must be a dict or None"),
-            ({"allow_Q_variation": {"nope": True}}, ValueError, "Unknown keys"),
+            ({'allow_Q_variation': 'invalid'}, TypeError, 'must be a dict or None'),
+            ({'allow_Q_variation': {'nope': True}}, ValueError, 'Unknown keys'),
         ],
     )
-    def test_input_validation_raises(
-        self, kwargs, expected_exception, expected_message
-    ):
+    def test_input_validation_raises(self, kwargs, expected_exception, expected_message):
         # WHEN THEN EXPECT
         with pytest.raises(expected_exception, match=expected_message):
             MittagLefflerDiffusion(**kwargs)
 
     @pytest.mark.parametrize(
-        "prop, valid_value",
+        'prop, valid_value',
         [
-            ("diffusion_coefficient", 5e-11),
-            ("A_0", 0.3),
-            ("relaxation_rate", 0.05),
-            ("alpha", 0.6),
+            ('diffusion_coefficient', 5e-11),
+            ('A_0', 0.3),
+            ('relaxation_rate', 0.05),
+            ('alpha', 0.6),
         ],
     )
     def test_setters(self, model, prop, valid_value):
@@ -137,8 +135,8 @@ class TestMittagLefflerDiffusion:
         assert getattr(model, prop).value == pytest.approx(valid_value)
 
         # WHEN: an invalid value — THEN EXPECT
-        with pytest.raises(TypeError, match="must be a number"):
-            setattr(model, prop, "invalid")
+        with pytest.raises(TypeError, match='must be a number'):
+            setattr(model, prop, 'invalid')
 
     def test_diffusion_coefficient_setter_rejects_instead_of_clamping(self, model):
         # WHEN a diffusion coefficient below the parameter's own bound is assigned
@@ -146,7 +144,7 @@ class TestMittagLefflerDiffusion:
 
         # THEN EXPECT it raises rather than being silently clamped up to the bound, which would
         # leave the model holding a value nobody asked for
-        with pytest.raises(ValueError, match="must be at least"):
+        with pytest.raises(ValueError, match='must be at least'):
             model.diffusion_coefficient = 0.0
         assert model.diffusion_coefficient.value == pytest.approx(original)
 
@@ -159,14 +157,12 @@ class TestMittagLefflerDiffusion:
 
         # EXPECT the damping stays strictly positive, so the lineshapes remain regular at x=0
         assert np.all(damping > 0)
-        values = model_with_Q.get_component_collections()[0].evaluate(
-            np.linspace(-0.1, 0.1, 21)
-        )
+        values = model_with_Q.get_component_collections()[0].evaluate(np.linspace(-0.1, 0.1, 21))
         assert np.all(np.isfinite(values))
 
     def test_A_1_setter_raises(self, model):
         # WHEN THEN EXPECT A_1 is derived from A_0
-        with pytest.raises(AttributeError, match="derived from A_0"):
+        with pytest.raises(AttributeError, match='derived from A_0'):
             model.A_1 = 0.5
 
     def test_A_1_follows_A_0(self, model):
@@ -187,7 +183,7 @@ class TestMittagLefflerDiffusion:
 
         # EXPECT epsilon = hbar * D * Q**2, matching Eq. (39) of Hassani et al.
         factor = hbar * model_with_Q.diffusion_coefficient / angstrom**2
-        factor.convert_unit("meV")
+        factor.convert_unit('meV')
         np.testing.assert_allclose(widths, Q**2 * factor.value, rtol=1e-10)
 
     def test_calculate_EISF_and_QISF_sum_to_one(self, model_with_Q):
@@ -198,16 +194,12 @@ class TestMittagLefflerDiffusion:
         # EXPECT
         np.testing.assert_allclose(eisf + qisf, np.ones(5), rtol=1e-12)
 
-    def test_calculate_relaxation_rate_and_alpha_shared(
-        self, model_with_Q_no_variation
-    ):
+    def test_calculate_relaxation_rate_and_alpha_shared(self, model_with_Q_no_variation):
         # WHEN THEN EXPECT the shared values are returned at every Q
         np.testing.assert_allclose(
             model_with_Q_no_variation.calculate_relaxation_rate(), np.full(5, 0.02)
         )
-        np.testing.assert_allclose(
-            model_with_Q_no_variation.calculate_alpha(), np.full(5, 0.85)
-        )
+        np.testing.assert_allclose(model_with_Q_no_variation.calculate_alpha(), np.full(5, 0.85))
 
     def test_per_Q_parameters_are_independent(self, model_with_Q):
         # WHEN a single Q gets its own alpha, relaxation rate and elastic fraction
@@ -245,9 +237,9 @@ class TestMittagLefflerDiffusion:
         model = MittagLefflerDiffusion(allow_Q_variation=ALL_Q_VARIATION)
 
         # THEN EXPECT
-        with pytest.raises(ValueError, match="Q must be provided"):
+        with pytest.raises(ValueError, match='Q must be provided'):
             model.calculate_relaxation_rate()
-        with pytest.raises(ValueError, match="Q must be provided"):
+        with pytest.raises(ValueError, match='Q must be provided'):
             model.calculate_alpha()
 
     #############
@@ -270,9 +262,7 @@ class TestMittagLefflerDiffusion:
         before = [collection[1].damping.value for collection in collections]
 
         # THEN
-        model_with_Q.diffusion_coefficient = (
-            2 * model_with_Q.diffusion_coefficient.value
-        )
+        model_with_Q.diffusion_coefficient = 2 * model_with_Q.diffusion_coefficient.value
 
         # EXPECT
         after = [collection[1].damping.value for collection in collections]
@@ -291,9 +281,7 @@ class TestMittagLefflerDiffusion:
             assert collection[1].alpha.value == pytest.approx(0.5)
             assert collection[1].width.value == pytest.approx(0.03)
 
-    def test_scale_and_A_0_drive_the_component_amplitudes(
-        self, model_with_Q_no_variation
-    ):
+    def test_scale_and_A_0_drive_the_component_amplitudes(self, model_with_Q_no_variation):
         # WHEN
         collections = model_with_Q_no_variation.get_component_collections()
 
@@ -332,23 +320,20 @@ class TestMittagLefflerDiffusion:
         names = [variable.name for variable in model_with_Q.get_global_variables()]
 
         # EXPECT only scale and D are global once everything else varies with Q
-        assert names == ["scale", "diffusion_coefficient"]
+        assert names == ['scale', 'diffusion_coefficient']
 
     def test_get_global_variables_without_Q_variation(self, model_with_Q_no_variation):
         # WHEN THEN
-        names = [
-            variable.name
-            for variable in model_with_Q_no_variation.get_global_variables()
-        ]
+        names = [variable.name for variable in model_with_Q_no_variation.get_global_variables()]
 
         # EXPECT
         assert names == [
-            "scale",
-            "diffusion_coefficient",
-            "A_0",
-            "A_1",
-            "relaxation_rate",
-            "alpha",
+            'scale',
+            'diffusion_coefficient',
+            'A_0',
+            'A_1',
+            'relaxation_rate',
+            'alpha',
         ]
 
     def test_get_independent_variables_holds_the_per_Q_amplitudes(self, model_with_Q):
@@ -369,11 +354,11 @@ class TestMittagLefflerDiffusion:
         names = [parameter.name for parameter in free]
 
         # EXPECT scale + D + 5 * (A_0, alpha, width)
-        assert names.count("scale") == 1
-        assert names.count("diffusion_coefficient") == 1
-        assert names.count("MittagLefflerDiffusion A_0") == 5
-        assert names.count("Mittag-Leffler alpha") == 5
-        assert names.count("Mittag-Leffler width") == 5
+        assert names.count('scale') == 1
+        assert names.count('diffusion_coefficient') == 1
+        assert names.count('MittagLefflerDiffusion A_0') == 5
+        assert names.count('Mittag-Leffler alpha') == 5
+        assert names.count('Mittag-Leffler width') == 5
         assert all(isinstance(parameter, Parameter) for parameter in free)
 
     def test_get_fit_targets(self, model_with_Q):
@@ -382,17 +367,17 @@ class TestMittagLefflerDiffusion:
 
         # EXPECT the quasi-elastic weight points at the Mittag-Leffler component, and the
         # Lorentzian keys at the elastic line
-        assert set(targets) == {"area", "width", "elastic_area"}
-        assert targets["area"].dataset_key == "Mittag-Leffler scale"
-        assert targets["width"].dataset_key == "Elastic Lorentzian width"
-        assert targets["elastic_area"].dataset_key == "Elastic Lorentzian area"
+        assert set(targets) == {'area', 'width', 'elastic_area'}
+        assert targets['area'].dataset_key == 'Mittag-Leffler scale'
+        assert targets['width'].dataset_key == 'Elastic Lorentzian width'
+        assert targets['elastic_area'].dataset_key == 'Elastic Lorentzian area'
 
         Q = model_with_Q.Q.values
         np.testing.assert_allclose(
-            targets["area"].function(Q), model_with_Q.calculate_QISF(Q) * 2.0
+            targets['area'].function(Q), model_with_Q.calculate_QISF(Q) * 2.0
         )
         np.testing.assert_allclose(
-            targets["elastic_area"].function(Q), model_with_Q.calculate_EISF(Q) * 2.0
+            targets['elastic_area'].function(Q), model_with_Q.calculate_EISF(Q) * 2.0
         )
 
     #############
@@ -412,9 +397,7 @@ class TestMittagLefflerDiffusion:
 
     def test_relaxation_rate_spectrum_alpha_one_is_peaked_at_the_rate(self):
         # WHEN alpha=1 the relaxation is exponential, so p(lambda) collapses onto a delta at 1/tau
-        model = MittagLefflerDiffusion(
-            alpha=1.0, relaxation_rate=0.02, Q=np.array([1.0])
-        )
+        model = MittagLefflerDiffusion(alpha=1.0, relaxation_rate=0.02, Q=np.array([1.0]))
         rate = np.linspace(0.001, 0.1, 2001)
 
         # THEN
@@ -425,10 +408,10 @@ class TestMittagLefflerDiffusion:
 
     def test_relaxation_rate_spectrum_rejects_non_positive_rate(self, model_with_Q):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="rate must be strictly positive"):
+        with pytest.raises(ValueError, match='rate must be strictly positive'):
             model_with_Q.calculate_relaxation_rate_spectrum(np.array([0.0, 1.0]))
 
-    @pytest.mark.parametrize("alpha", [0.99, 0.7, 0.3])
+    @pytest.mark.parametrize('alpha', [0.99, 0.7, 0.3])
     def test_energy_barrier_distribution_carries_half_the_rate_spectrum(self, alpha):
         # WHEN h >= 0 maps onto lambda * tau_R <= 1 only, which by the lambda -> 1/lambda symmetry
         # of Eq. (37) is half of p(lambda)
@@ -458,9 +441,7 @@ class TestMittagLefflerDiffusion:
 
     def test_energy_barrier_distribution_vanishes_at_zero_barrier(self, model_with_Q):
         # WHEN THEN
-        distribution = model_with_Q.calculate_energy_barrier_distribution(
-            np.array([0.0])
-        )
+        distribution = model_with_Q.calculate_energy_barrier_distribution(np.array([0.0]))
 
         # EXPECT
         np.testing.assert_allclose(distribution, np.zeros((5, 1)), atol=1e-15)
@@ -474,31 +455,27 @@ class TestMittagLefflerDiffusion:
         widths_before = model_with_Q.calculate_width()
 
         # THEN
-        model_with_Q.convert_x_unit("microeV")
+        model_with_Q.convert_x_unit('microeV')
 
         # EXPECT the shared template, the per-Q rates and the components all follow
-        assert model_with_Q.x_unit == "microeV"
-        assert sc.Unit(model_with_Q.relaxation_rate.unit) == sc.Unit("microeV")
-        np.testing.assert_allclose(
-            model_with_Q.calculate_width(), widths_before * 1e3, rtol=1e-10
-        )
+        assert model_with_Q.x_unit == 'microeV'
+        assert sc.Unit(model_with_Q.relaxation_rate.unit) == sc.Unit('microeV')
+        np.testing.assert_allclose(model_with_Q.calculate_width(), widths_before * 1e3, rtol=1e-10)
         for collection in model_with_Q.get_component_collections():
             assert collection[1].width.value == pytest.approx(20.0)
             assert collection[1].alpha.value == pytest.approx(0.85)
 
     def test_convert_y_unit_rescales_the_scale(self):
         # WHEN scale_unit = x_unit * y_unit = meV/s
-        model = MittagLefflerDiffusion(
-            scale=2.0, y_unit="1/s", Q=np.linspace(0.8, 1.8, 3)
-        )
+        model = MittagLefflerDiffusion(scale=2.0, y_unit='1/s', Q=np.linspace(0.8, 1.8, 3))
 
         # THEN
-        model.convert_y_unit("1/ms")
+        model.convert_y_unit('1/ms')
 
         # EXPECT the scale follows the y-unit, 1/s -> 1/ms being a factor 1e-3
-        assert model.y_unit == "1/ms"
+        assert model.y_unit == '1/ms'
         assert model.scale.value == pytest.approx(2.0e-3)
-        assert sc.Unit(model.scale.unit) == sc.Unit("meV/ms")
+        assert sc.Unit(model.scale.unit) == sc.Unit('meV/ms')
 
     def test_on_Q_change_rebuilds_the_per_Q_lists(self, model):
         # WHEN
@@ -529,7 +506,7 @@ class TestMittagLefflerDiffusion:
         repr_str = repr(model)
 
         # EXPECT
-        assert "MittagLefflerDiffusion" in repr_str
-        assert "diffusion_coefficient=" in repr_str
-        assert "relaxation_rate=" in repr_str
-        assert "alpha=" in repr_str
+        assert 'MittagLefflerDiffusion' in repr_str
+        assert 'diffusion_coefficient=' in repr_str
+        assert 'relaxation_rate=' in repr_str
+        assert 'alpha=' in repr_str

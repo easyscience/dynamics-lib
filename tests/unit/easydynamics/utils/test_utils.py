@@ -328,7 +328,7 @@ class TestInNotebook:
         available."""
 
         # WHEN
-        def raise_import_error(*args, **kwargs):
+        def raise_import_error(*_args, **_kwargs):
             raise ImportError
 
         # THEN

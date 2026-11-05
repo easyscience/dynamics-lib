@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import gc
 from contextlib import nullcontext
 from typing import ClassVar
 from unittest.mock import patch
@@ -833,19 +834,21 @@ class TestConvolution:
     #############
 
     def test_plan_rebuilds_do_not_leak_registry_entries(self, default_convolution):
-        "Regression: every plan rebuild used to register new objects in the global map forever"
+        "Regression: every plan rebuild used to register new objects in the registry forever"
         # WHEN a convolver that has built its plan at least once
         conv = default_convolution
         conv.convolution()
-        vertices_before = len(conv._global_object.map.vertices())
+        gc.collect()
+        entries_before = len(conv._global_object.registry)
 
         # THEN forcing several full plan rebuilds
         for _ in range(3):
             conv._plan_seen_version = None
             conv.convolution()
 
-        # EXPECT the global map did not grow
-        assert len(conv._global_object.map.vertices()) == vertices_before
+        # EXPECT the global registry did not grow, once dropped objects are collected
+        gc.collect()
+        assert len(conv._global_object.registry) <= entries_before
 
     def test_convert_y_unit_updates_plan_collection_labels(self):
         "Regression: plan-collection y_unit labels used to stay stale until the next rebuild"

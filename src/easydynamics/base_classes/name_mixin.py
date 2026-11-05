@@ -30,7 +30,7 @@ class NameMixin:
         """
 
         # Validate before delegating to the parent class so an invalid name fails fast,
-        # before the parent registers the object in the global map.
+        # before the parent registers the object in the global registry.
         if not isinstance(name, str):
             raise TypeError('Name must be a string.')
         super().__init__(*args, **kwargs)

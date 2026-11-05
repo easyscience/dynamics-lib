@@ -70,7 +70,7 @@ class InstrumentModel(EasyBase):
 
         Parameters
         ----------
-        display_name : str, default="MyInstrumentModel"
+        display_name : str, default='MyInstrumentModel'
             The display name of the InstrumentModel.
         unique_name : str | None, default=None
             The unique name of the InstrumentModel.
@@ -86,7 +86,7 @@ class InstrumentModel(EasyBase):
         energy_offset : Numeric | None, default=None
             Template energy offset of the instrument. Will be copied to each Q value. If None, the
             energy offset will be 0.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
 
         Raises

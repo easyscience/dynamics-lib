@@ -70,11 +70,11 @@ class Exponential(CreateParametersMixin, ModelComponent):
             fixed.
         rate : Numeric, default=1.0
             Exponential rate B in units of ``1/x_unit``.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center is stored in this unit; rate is stored in ``1/x_unit``.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).  amplitude is stored in this unit.
-        name : str, default="Exponential"
+        name : str, default='Exponential'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

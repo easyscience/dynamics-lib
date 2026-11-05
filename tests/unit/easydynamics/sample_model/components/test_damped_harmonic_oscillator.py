@@ -17,12 +17,12 @@ class TestDampedHarmonicOscillator:
     @pytest.fixture
     def dho(self):
         return DampedHarmonicOscillator(
-            name="TestDHOName",
-            display_name="TestDHO",
+            name='TestDHOName',
+            display_name='TestDHO',
             area=2.0,
             center=1.5,
             width=0.3,
-            x_unit="meV",
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -30,94 +30,92 @@ class TestDampedHarmonicOscillator:
         dho = DampedHarmonicOscillator()
 
         # EXPECT
-        assert dho.display_name == "DampedHarmonicOscillator"
+        assert dho.display_name == 'DampedHarmonicOscillator'
         assert dho.area.value == pytest.approx(1.0)
         assert dho.center.value == pytest.approx(1.0)
         assert dho.width.value == pytest.approx(1.0)
-        assert dho.x_unit == "meV"
-        assert dho.y_unit == "dimensionless"
+        assert dho.x_unit == 'meV'
+        assert dho.y_unit == 'dimensionless'
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        assert dho.display_name == "TestDHO"
+        assert dho.display_name == 'TestDHO'
         assert dho.area.value == pytest.approx(2.0)
         assert dho.center.value == pytest.approx(1.5)
         assert dho.width.value == pytest.approx(0.3)
-        assert dho.x_unit == "meV"
+        assert dho.x_unit == 'meV'
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message, expected_error",
+        'kwargs, expected_message, expected_error',
         [
             (
-                {"area": "invalid", "center": 0.5, "width": 0.6, "x_unit": "meV"},
-                "area must be a number",
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
+                'area must be a number',
                 TypeError,
             ),
             (
-                {"area": 2.0, "center": "invalid", "width": 0.6, "x_unit": "meV"},
-                "center must be ",
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
+                'center must be ',
                 TypeError,
             ),
             (
-                {"area": 2.0, "center": 0.5, "width": "invalid", "x_unit": "meV"},
-                "width must be a number",
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
+                'width must be a number',
                 TypeError,
             ),
             (
-                {"area": 2.0, "center": 0.5, "width": 0.6, "x_unit": 123},
-                "unit must be None, a string",
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
+                'unit must be None, a string',
                 UnitError,
             ),
             (
                 {
-                    "area": 2.0,
-                    "center": 0.5,
-                    "width": 0.6,
-                    "x_unit": "meV",
-                    "y_unit": 123,
+                    'area': 2.0,
+                    'center': 0.5,
+                    'width': 0.6,
+                    'x_unit': 'meV',
+                    'y_unit': 123,
                 },
-                "unit must be None, a string",
+                'unit must be None, a string',
                 UnitError,
             ),
         ],
     )
-    def test_input_type_validation_raises(
-        self, kwargs, expected_message, expected_error
-    ):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         with pytest.raises(expected_error, match=expected_message):
-            DampedHarmonicOscillator(display_name="DampedHarmonicOscillator", **kwargs)
+            DampedHarmonicOscillator(display_name='DampedHarmonicOscillator', **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
-            match=r"The width of a DampedHarmonicOscillator must be greater than zero.",
+            match=r'The width of a DampedHarmonicOscillator must be greater than zero.',
         ):
             DampedHarmonicOscillator(
-                display_name="TestDampedHarmonicOscillator",
+                display_name='TestDampedHarmonicOscillator',
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                x_unit="meV",
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
-        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+        with pytest.warns(UserWarning, match='may not be physically meaningful'):
             DampedHarmonicOscillator(
-                display_name="TestDampedHarmonicOscillator",
+                display_name='TestDampedHarmonicOscillator',
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                x_unit="meV",
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
-        "prop, valid_value, invalid_value, invalid_message",
+        'prop, valid_value, invalid_value, invalid_message',
         [
-            ("area", 3.0, "invalid", r"must be a number"),
-            ("center", 0.6, "invalid", r"must be a number"),
-            ("width", 0.7, "invalid", r"must be a number"),
+            ('area', 3.0, 'invalid', r'must be a number'),
+            ('center', 0.6, 'invalid', r'must be a number'),
+            ('width', 0.7, 'invalid', r'must be a number'),
         ],
     )
     def test_property_setters(
@@ -142,12 +140,12 @@ class TestDampedHarmonicOscillator:
 
     def test_center_setter_negative_raises(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="center must be positive"):
+        with pytest.raises(ValueError, match='center must be positive'):
             dho.center = -1.0
 
     def test_width_must_be_positive(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="width must be positive"):
+        with pytest.raises(ValueError, match='width must be positive'):
             dho.width = -0.5
 
     def test_area_setter_out_of_bounds_raises(self, dho: DampedHarmonicOscillator):
@@ -155,7 +153,7 @@ class TestDampedHarmonicOscillator:
         original_area = dho.area.value
 
         # THEN EXPECT a negative assignment raises instead of being silently clamped to 0
-        with pytest.raises(ValueError, match="violates the parameter bounds"):
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
             dho.area = -1.0
         assert dho.area.value == pytest.approx(original_area)
 
@@ -164,7 +162,7 @@ class TestDampedHarmonicOscillator:
         original_width = dho.width.value
 
         # THEN EXPECT a tiny positive width below the bound raises instead of being clamped
-        with pytest.raises(ValueError, match="violates the parameter bounds"):
+        with pytest.raises(ValueError, match='violates the parameter bounds'):
             dho.width = 1e-12
         assert dho.width.value == pytest.approx(original_width)
 
@@ -177,12 +175,7 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         expected_result = (
-            2
-            * 2.0
-            * (1.5**2)
-            * (0.3)
-            / np.pi
-            / ((x**2 - 1.5**2) ** 2 + (2 * 0.3 * x) ** 2)
+            2 * 2.0 * (1.5**2) * (0.3) / np.pi / ((x**2 - 1.5**2) ** 2 + (2 * 0.3 * x) ** 2)
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
@@ -194,9 +187,9 @@ class TestDampedHarmonicOscillator:
         assert len(params) == 3
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            "TestDHOName area",
-            "TestDHOName center",
-            "TestDHOName width",
+            'TestDHOName area',
+            'TestDHOName center',
+            'TestDHOName width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -216,10 +209,10 @@ class TestDampedHarmonicOscillator:
 
     def test_convert_x_unit(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
-        dho.convert_x_unit("microeV")
+        dho.convert_x_unit('microeV')
 
         # EXPECT
-        assert dho.x_unit == "microeV"
+        assert dho.x_unit == 'microeV'
         assert dho.area.value == pytest.approx(2 * 1e3)
         assert dho.center.value == pytest.approx(1.5 * 1e3)
         assert dho.width.value == pytest.approx(0.3 * 1e3)
@@ -248,37 +241,37 @@ class TestDampedHarmonicOscillator:
         repr_str = repr(dho)
 
         # EXPECT
-        assert "DampedHarmonicOscillator" in repr_str
-        assert "name = TestDHOName" in repr_str
-        assert "x_unit = meV" in repr_str
-        assert "area =" in repr_str
-        assert "center =" in repr_str
-        assert "width =" in repr_str
+        assert 'DampedHarmonicOscillator' in repr_str
+        assert 'name = TestDHOName' in repr_str
+        assert 'x_unit = meV' in repr_str
+        assert 'area =' in repr_str
+        assert 'center =' in repr_str
+        assert 'width =' in repr_str
 
     def test_y_unit_custom(self):
         # WHEN THEN
         dho = DampedHarmonicOscillator(
-            area=1.0, center=1.0, width=0.3, x_unit="meV", y_unit="1/meV"
+            area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
         )
         # EXPECT
-        assert dho.y_unit == "1/meV"
+        assert dho.y_unit == '1/meV'
 
     def test_y_unit_setter_raises(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
-            dho.y_unit = "1/meV"
+            dho.y_unit = '1/meV'
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
         dho = DampedHarmonicOscillator(
-            area=1.0, center=1.0, width=0.3, x_unit="meV", y_unit="1/meV"
+            area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
         )
 
         # THEN: convert y_unit to '1/eV' (same dimension, different scale)
-        dho.convert_y_unit("1/eV")
+        dho.convert_y_unit('1/eV')
 
         # EXPECT: y_unit updated and area value rescaled (1e3 factor)
-        assert dho.y_unit == "1/eV"
+        assert dho.y_unit == '1/eV'
         assert dho.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
@@ -291,49 +284,49 @@ class TestDampedHarmonicOscillator:
         x = np.linspace(0.5, 5.0, 50)
 
         # THEN
-        result = dho.evaluate(x, output="scipp")
+        result = dho.evaluate(x, output='scipp')
 
         # EXPECT
         assert isinstance(result, sc.Variable)
-        assert result.unit == sc.Unit("dimensionless")
+        assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
-        np.testing.assert_allclose(result.values, dho.evaluate(x, output="numpy"))
+        np.testing.assert_allclose(result.values, dho.evaluate(x, output='numpy'))
 
     def test_evaluate_scipp_output_with_y_unit(self):
         # WHEN
         dho = DampedHarmonicOscillator(
-            area=1.0, center=1.0, width=0.3, x_unit="meV", y_unit="1/meV"
+            area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
         )
         x = np.linspace(0.5, 5.0, 50)
 
         # THEN
-        result = dho.evaluate(x, output="scipp")
+        result = dho.evaluate(x, output='scipp')
 
         # EXPECT
         assert isinstance(result, sc.Variable)
-        assert result.unit == sc.Unit("1/meV")
+        assert result.unit == sc.Unit('1/meV')
 
     def test_convert_x_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r"x_unit must be a string or sc\.Unit"):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             dho.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
         with pytest.raises(UnitError):
-            dho.convert_x_unit("m")
+            dho.convert_x_unit('m')
         # EXPECT: state rolled back
-        assert dho.x_unit == "meV"
+        assert dho.x_unit == 'meV'
         assert dho.area.value == pytest.approx(2.0)
         assert dho.center.value == pytest.approx(1.5)
         assert dho.width.value == pytest.approx(0.3)
 
     def test_convert_y_unit_rollback_on_failure(self):
         # WHEN
-        dho = DampedHarmonicOscillator(area=1.0, center=1.0, width=0.3, x_unit="meV")
+        dho = DampedHarmonicOscillator(area=1.0, center=1.0, width=0.3, x_unit='meV')
         # THEN
         with pytest.raises(UnitError):
-            dho.convert_y_unit("K")
+            dho.convert_y_unit('K')
         # EXPECT: state rolled back
-        assert dho.y_unit == "dimensionless"
+        assert dho.y_unit == 'dimensionless'
         assert dho.area.value == pytest.approx(1.0)

@@ -8,6 +8,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.minimizers import Minimizers
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
@@ -192,10 +193,10 @@ class TestAnalysis1d:
 
     def test_minimizer_can_be_switched_through_the_fitter(self, analysis1d):
         # THEN
-        analysis1d.fitter.switch_minimizer(AvailableMinimizers.Bumps)
+        analysis1d.fitter.switch_minimizer(Minimizers.Bumps)
 
         # EXPECT
-        assert analysis1d.fitter.minimizer.enum == AvailableMinimizers.Bumps
+        assert analysis1d.fitter.minimizer.enum == Minimizers.Bumps
 
     def test_fit_uses_the_persistent_fitter(self, fittable_analysis1d):
         # THEN

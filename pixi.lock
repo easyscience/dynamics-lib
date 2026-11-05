@@ -7744,7 +7744,7 @@ packages:
   name: easydynamics
   requires_dist:
   - darkdetect
-  - easyscience>=2.5.1
+  - easyscience>=3.0
   - h5py
   - ipykernel
   - ipympl

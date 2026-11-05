@@ -87,10 +87,7 @@ class BoundsSuggestion:
         bool
             True when either bound differs from the parameter's current bound.
         """
-        return (
-            self.suggested_min != self.parameter.min
-            or self.suggested_max != self.parameter.max
-        )
+        return self.suggested_min != self.parameter.min or self.suggested_max != self.parameter.max
 
 
 class BoundsSuggestions:
@@ -164,10 +161,10 @@ class BoundsSuggestions:
         if absurd:
             warnings.warn(
                 (
-                    f"Applied bounds far wider than the parameter itself for: "
+                    f'Applied bounds far wider than the parameter itself for: '
                     f'{", ".join(absurd)}. That width comes from a very large fitted uncertainty, '
-                    f"which usually means these parameters are degenerate with others, so the "
-                    f"data cannot determine them separately. Sampling explores that whole range."
+                    f'which usually means these parameters are degenerate with others, so the '
+                    f'data cannot determine them separately. Sampling explores that whole range.'
                 ),
                 UserWarning,
                 stacklevel=2,
@@ -206,26 +203,26 @@ class BoundsSuggestions:
             A table of current and suggested bounds, one row per parameter.
         """
         if not self._suggestions:
-            return "BoundsSuggestions(no free parameters)"
+            return 'BoundsSuggestions(no free parameters)'
 
-        width = max(len("parameter"), *(len(s.label) for s in self._suggestions))
+        width = max(len('parameter'), *(len(s.label) for s in self._suggestions))
         header = f'{"parameter":<{width}s} {"current":>26s} {"suggested":>26s}'
-        lines = ["BoundsSuggestions", header, "-" * len(header)]
+        lines = ['BoundsSuggestions', header, '-' * len(header)]
         for s in self._suggestions:
-            current = f"({s.parameter.min:.4g}, {s.parameter.max:.4g})"
+            current = f'({s.parameter.min:.4g}, {s.parameter.max:.4g})'
             if s.needs_attention:
-                suggested = f"-- {s.reason}"
+                suggested = f'-- {s.reason}'
             else:
-                suggested = f"({s.suggested_min:.4g}, {s.suggested_max:.4g})"
-            lines.append(f"{s.label:<{width}s} {current:>26s} {suggested:>26s}")
+                suggested = f'({s.suggested_min:.4g}, {s.suggested_max:.4g})'
+            lines.append(f'{s.label:<{width}s} {current:>26s} {suggested:>26s}')
 
         attention = self.needing_attention
         if attention:
-            lines.append("")
+            lines.append('')
             lines.append(
-                f"{len(attention)} parameter(s) need bounds set by hand; .apply() will skip them."
+                f'{len(attention)} parameter(s) need bounds set by hand; .apply() will skip them.'
             )
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
 
 def _is_absurdly_wide(suggestion: BoundsSuggestion) -> bool:
@@ -296,10 +293,10 @@ def suggest_bounds_for_parameters(
     BoundsSuggestions
         The proposed bounds, which must be applied explicitly.
     """
-    _verify_nonneg_number(n_sigma, "n_sigma")
-    _verify_nonneg_number(relative_pad, "relative_pad")
+    _verify_nonneg_number(n_sigma, 'n_sigma')
+    _verify_nonneg_number(relative_pad, 'relative_pad')
     if absolute_floor is not None:
-        _verify_nonneg_number(absolute_floor, "absolute_floor")
+        _verify_nonneg_number(absolute_floor, 'absolute_floor')
 
     if labels is None:
         labels = [parameter.name for parameter in parameters]
@@ -356,21 +353,23 @@ def _suggest_bounds_for_parameter(
             label=label,
             suggested_min=current_min,
             suggested_max=current_max,
-            reason="",
+            reason='',
         )
 
     value = float(parameter.value)
-    error = float(parameter.error)
+    # A fit that produced no covariance leaves the error as None.
+    error = np.nan if parameter.error is None else float(parameter.error)
     if not np.isfinite(value):
         return BoundsSuggestion(
             parameter=parameter,
             label=label,
             suggested_min=current_min,
             suggested_max=current_max,
-            reason="value is not finite",
+            reason='value is not finite',
         )
 
-    # A NaN uncertainty is exactly the degenerate fit this helper exists to guard against, so it
+    # A missing or NaN uncertainty is exactly the degenerate fit this helper exists to guard
+    # against, so it
     # is flagged rather than silently treated like a zero error, which would yield deceptively
     # tight bounds of value +/- relative_pad * |value|.
     if not np.isfinite(error):
@@ -379,7 +378,7 @@ def _suggest_bounds_for_parameter(
             label=label,
             suggested_min=current_min,
             suggested_max=current_max,
-            reason="fitted uncertainty is not finite",
+            reason='fitted uncertainty is not finite',
         )
 
     half_width = relative_pad * abs(value) + n_sigma * error
@@ -392,7 +391,7 @@ def _suggest_bounds_for_parameter(
             label=label,
             suggested_min=current_min,
             suggested_max=current_max,
-            reason="no scale information (zero value and uncertainty)",
+            reason='no scale information (zero value and uncertainty)',
         )
 
     return BoundsSuggestion(
@@ -400,7 +399,7 @@ def _suggest_bounds_for_parameter(
         label=label,
         suggested_min=current_min if min_is_finite else value - half_width,
         suggested_max=current_max if max_is_finite else value + half_width,
-        reason="",
+        reason='',
     )
 
 
@@ -623,7 +622,7 @@ class PosteriorSummary:
         for entry in self._entries:
             if entry.name == name:
                 return entry
-        raise KeyError(f"No sampled parameter named {name!r}.")
+        raise KeyError(f'No sampled parameter named {name!r}.')
 
     def __repr__(self) -> str:
         """
@@ -635,20 +634,20 @@ class PosteriorSummary:
             A table with the median and 68% credible interval of each parameter.
         """
         if not self._entries:
-            return "PosteriorSummary(no parameters)"
+            return 'PosteriorSummary(no parameters)'
 
-        width = max(len("parameter"), *(len(e.name) for e in self._entries))
+        width = max(len('parameter'), *(len(e.name) for e in self._entries))
         header = (
             f'{"parameter":<{width}s} {"unit":>10s} {"median":>14s} '
             f'{"-":>12s} {"+":>12s} {"current":>14s}'
         )
-        lines = ["PosteriorSummary", header, "-" * len(header)]
+        lines = ['PosteriorSummary', header, '-' * len(header)]
         lines.extend(
-            f"{e.name:<{width}s} {e.unit:>10s} {e.median:>14.5g} "
-            f"{e.minus:>12.4g} {e.plus:>12.4g} {e.value:>14.5g}"
+            f'{e.name:<{width}s} {e.unit:>10s} {e.median:>14.5g} '
+            f'{e.minus:>12.4g} {e.plus:>12.4g} {e.value:>14.5g}'
             for e in self._entries
         )
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
 
 def summarize_draws(
@@ -681,17 +680,16 @@ def summarize_draws(
     entries = []
     for column, parameter in enumerate(parameters_by_column):
         lower, median, upper = (
-            float(percentile)
-            for percentile in np.percentile(draws[:, column], [16, 50, 84])
+            float(percentile) for percentile in np.percentile(draws[:, column], [16, 50, 84])
         )
         entries.append(
             ParameterPosterior(
                 name=labels[column],
-                unit="" if parameter is None else str(parameter.unit),
+                unit='' if parameter is None else str(parameter.unit),
                 median=median,
                 lower=lower,
                 upper=upper,
-                value=float("nan") if parameter is None else float(parameter.value),
+                value=float('nan') if parameter is None else float(parameter.value),
             )
         )
     return PosteriorSummary(entries)
@@ -716,6 +714,6 @@ def _verify_nonneg_number(value: object, name: str) -> None:
         If value is negative.
     """
     if not isinstance(value, (int, float)) or isinstance(value, bool):
-        raise TypeError(f"{name} must be a number. Got {type(value)}.")
+        raise TypeError(f'{name} must be a number. Got {type(value)}.')
     if value < 0:
-        raise ValueError(f"{name} must be non-negative. Got {value}.")
+        raise ValueError(f'{name} must be non-negative. Got {value}.')

@@ -133,20 +133,20 @@ class MittagLefflerDiffusion(DiffusionModelBase):
             paper's analysis corresponds to all three being True.
         Q : Q_type | None, default=None
             Q values for the model in 1/angstrom. If None, Q is not set.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis (energy). Must be convertible to meV.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default="MittagLefflerDiffusion"
+        name : str, default='MittagLefflerDiffusion'
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default="Elastic Lorentzian"
+        lorentzian_name : str, default='Elastic Lorentzian'
             Name of the elastic Lorentzian component.
         lorentzian_display_name : str | None, default=None
             Display name of the elastic Lorentzian component. If None, it falls back to
             *lorentzian_name*.
-        mittag_leffler_name : str, default="Mittag-Leffler"
+        mittag_leffler_name : str, default='Mittag-Leffler'
             Name of the Mittag-Leffler component.
         mittag_leffler_display_name : str | None, default=None
             Display name of the Mittag-Leffler component. If None, it falls back to

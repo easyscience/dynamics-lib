@@ -92,7 +92,7 @@ class Analysis1d(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default="MyAnalysis"
+        display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -272,7 +272,7 @@ class Analysis1d(AnalysisBase):
         The EasyScience Fitter used for fitting and sampling, built on first use.
 
         Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
-        directly, e.g. ``analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)``.
+        directly, e.g. ``analysis.fitter.switch_minimizer(Minimizers.Bumps)``.
 
         Returns
         -------

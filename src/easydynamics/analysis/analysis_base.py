@@ -28,7 +28,7 @@ class AnalysisBase(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        display_name: str | None = "MyAnalysis",
+        display_name: str | None = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -80,23 +80,21 @@ class AnalysisBase(EasyDynamicsModelBase):
         elif isinstance(experiment, Experiment):
             self._experiment = experiment
         else:
-            raise TypeError("experiment must be an instance of Experiment or None.")
+            raise TypeError('experiment must be an instance of Experiment or None.')
 
         if sample_model is None:
             self._sample_model = SampleModel()
         elif isinstance(sample_model, SampleModel):
             self._sample_model = sample_model
         else:
-            raise TypeError("sample_model must be an instance of SampleModel or None.")
+            raise TypeError('sample_model must be an instance of SampleModel or None.')
 
         if instrument_model is None:
             self._instrument_model = InstrumentModel()
         elif isinstance(instrument_model, InstrumentModel):
             self._instrument_model = instrument_model
         else:
-            raise TypeError(
-                "instrument_model must be an instance of InstrumentModel or None."
-            )
+            raise TypeError('instrument_model must be an instance of InstrumentModel or None.')
 
         if convolution_settings is None:
             self.convolution_settings = ConvolutionSettings()
@@ -104,7 +102,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             self.convolution_settings = convolution_settings
         else:
             raise TypeError(
-                "convolution_settings must be an instance of ConvolutionSettings or None."
+                'convolution_settings must be an instance of ConvolutionSettings or None.'
             )
 
         self.extra_parameters = extra_parameters
@@ -115,7 +113,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             self._detailed_balance_settings = detailed_balance_settings
         else:
             raise TypeError(
-                "detailed_balance_settings must be an instance of DetailedBalanceSettings or None."
+                'detailed_balance_settings must be an instance of DetailedBalanceSettings or None.'
             )
 
         self._on_experiment_changed()
@@ -154,7 +152,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         """
 
         if not isinstance(value, Experiment):
-            raise TypeError("experiment must be an instance of Experiment")
+            raise TypeError('experiment must be an instance of Experiment')
         self._experiment = value
         self._on_experiment_changed()
 
@@ -187,7 +185,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is not a SampleModel.
         """
         if not isinstance(value, SampleModel):
-            raise TypeError("sample_model must be an instance of SampleModel")
+            raise TypeError('sample_model must be an instance of SampleModel')
         self._sample_model = value
         self._on_sample_model_changed()
 
@@ -219,7 +217,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is not an InstrumentModel.
         """
         if not isinstance(value, InstrumentModel):
-            raise TypeError("instrument_model must be an instance of InstrumentModel")
+            raise TypeError('instrument_model must be an instance of InstrumentModel')
         self._instrument_model = value
         self._on_instrument_model_changed()
 
@@ -250,7 +248,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         AttributeError
             If trying to set Q.
         """
-        raise AttributeError("Q is a read-only property derived from the Experiment.")
+        raise AttributeError('Q is a read-only property derived from the Experiment.')
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -281,9 +279,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If trying to set energy.
         """
 
-        raise AttributeError(
-            "energy is a read-only property derived from the Experiment."
-        )
+        raise AttributeError('energy is a read-only property derived from the Experiment.')
 
     @property
     def temperature(self) -> Parameter | None:
@@ -315,9 +311,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If trying to set temperature.
         """
 
-        raise AttributeError(
-            "temperature is a read-only property derived from the SampleModel."
-        )
+        raise AttributeError('temperature is a read-only property derived from the SampleModel.')
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -347,9 +341,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is not an instance of ConvolutionSettings.
         """
         if not isinstance(value, ConvolutionSettings):
-            raise TypeError(
-                "convolution_settings must be an instance of ConvolutionSettings."
-            )
+            raise TypeError('convolution_settings must be an instance of ConvolutionSettings.')
         self._convolution_settings = value
         self._on_convolution_settings_changed()
 
@@ -381,9 +373,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is not a DetailedBalanceSettings.
         """
         if not isinstance(value, DetailedBalanceSettings):
-            raise TypeError(
-                "detailed_balance_settings must be a DetailedBalanceSettings"
-            )
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
         self._detailed_balance_settings = value
         self._on_detailed_balance_settings_changed()
 
@@ -421,9 +411,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         elif value is None:
             self._extra_parameters = []
         else:
-            raise TypeError(
-                "extra_parameters must be a Parameter, a list of Parameters, or None."
-            )
+            raise TypeError('extra_parameters must be a Parameter, a list of Parameters, or None.')
 
     #############
     # Other methods
@@ -458,8 +446,8 @@ class AnalysisBase(EasyDynamicsModelBase):
             A list of parameters that are near their bounds.
         """
 
-        self._verify_nonneg_float(rtol, "rtol")
-        self._verify_nonneg_float(atol, "atol")
+        self._verify_nonneg_float(rtol, 'rtol')
+        self._verify_nonneg_float(atol, 'atol')
 
         parameters = self.get_all_parameters()
         at_bounds = []
@@ -470,13 +458,9 @@ class AnalysisBase(EasyDynamicsModelBase):
                 at_bounds.append(p)
                 continue
 
-            at_min = not np.isneginf(p.min) and np.isclose(
-                value, p.min, rtol=rtol, atol=atol
-            )
+            at_min = not np.isneginf(p.min) and np.isclose(value, p.min, rtol=rtol, atol=atol)
 
-            at_max = not np.isposinf(p.max) and np.isclose(
-                value, p.max, rtol=rtol, atol=atol
-            )
+            at_max = not np.isposinf(p.max) and np.isclose(value, p.max, rtol=rtol, atol=atol)
 
             if at_min or at_max:
                 at_bounds.append(p)
@@ -537,9 +521,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         """
 
         if energy is not None and not isinstance(energy, sc.Variable):
-            raise TypeError(
-                f"Energy must be a sc.Variable or None. Got {type(energy)}."
-            )
+            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
         return energy
 
     @staticmethod
@@ -560,7 +542,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is not a bool.
         """
         if not isinstance(value, bool):
-            raise TypeError(f"{name} must be True or False.")
+            raise TypeError(f'{name} must be True or False.')
 
     @staticmethod
     def _verify_nonneg_float(value: object, name: str) -> None:
@@ -582,9 +564,9 @@ class AnalysisBase(EasyDynamicsModelBase):
             If value is negative.
         """
         if not isinstance(value, (int, float)):
-            raise TypeError(f"{name} must be a float. Got {type(value)}.")
+            raise TypeError(f'{name} must be a float. Got {type(value)}.')
         if value < 0:
-            raise ValueError(f"{name} must be non-negative. Got {value}.")
+            raise ValueError(f'{name} must be non-negative. Got {value}.')
 
     def _build_plot_style_defaults(self, keys: Iterable[str]) -> dict:
         """
@@ -607,30 +589,30 @@ class AnalysisBase(EasyDynamicsModelBase):
         color: dict = {}
         markerfacecolor: dict = {}
         for key in keys:
-            if key == "Data":
-                linestyle[key] = "none"
-                marker[key] = "o"
-                color[key] = "black"
-                markerfacecolor[key] = "none"
-            elif key == "Model":
-                linestyle[key] = "-"
+            if key == 'Data':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'black'
+                markerfacecolor[key] = 'none'
+            elif key == 'Model':
+                linestyle[key] = '-'
                 marker[key] = None
-                color[key] = "red"
-                markerfacecolor[key] = "none"
-            elif key == "Residuals":
-                linestyle[key] = "none"
-                marker[key] = "o"
-                color[key] = "blue"
-                markerfacecolor[key] = "none"
+                color[key] = 'red'
+                markerfacecolor[key] = 'none'
+            elif key == 'Residuals':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'blue'
+                markerfacecolor[key] = 'none'
             else:
-                linestyle[key] = "--"
+                linestyle[key] = '--'
                 marker[key] = None
         return {
-            "title": self.display_name,
-            "linestyle": linestyle,
-            "marker": marker,
-            "color": color,
-            "markerfacecolor": markerfacecolor,
+            'title': self.display_name,
+            'linestyle': linestyle,
+            'marker': marker,
+            'color': color,
+            'markerfacecolor': markerfacecolor,
         }
 
     #############
@@ -647,7 +629,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             A string representation of the Analysis.
         """
         return (
-            f"{self.__class__.__name__}("
-            f"display_name={self.display_name!r}, "
-            f"unique_name={self.unique_name!r})"
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r})'
         )

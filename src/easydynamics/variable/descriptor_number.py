@@ -2,14 +2,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numbers
-from typing import TYPE_CHECKING
 
+import scipp as sc
 from easyscience.variable import DescriptorNumber as EasyScienceDescriptorNumber
 
 from easydynamics.base_classes.name_mixin import NameMixin
-
-if TYPE_CHECKING:
-    import scipp as sc
 
 
 class DescriptorNumber(NameMixin, EasyScienceDescriptorNumber):
@@ -44,9 +41,9 @@ class DescriptorNumber(NameMixin, EasyScienceDescriptorNumber):
         ----------
         value : numbers.Number
             Value of this object.
-        name : str, default="MyEasyDynamicsDescriptorNumber"
+        name : str, default='MyEasyDynamicsDescriptorNumber'
             Name of the Parameter.
-        unit : str | sc.Unit, default=""
+        unit : str | sc.Unit, default=''
             This object can have a physical unit associated with it. By default, ''.
         variance : numbers.Number | None, default=0.0
             The variance of the value. By default, 0.0.
@@ -57,18 +54,14 @@ class DescriptorNumber(NameMixin, EasyScienceDescriptorNumber):
         url : str | None, default=None
             Lookup url for documentation/information. By default, None.
         display_name : str | None, default=None
-            The name of the object as it should be displayed. Falls back to ``unique_name`` when
-            not given. By default, None.
+            The name of the object as it should be displayed. Falls back to ``name`` when not
+            given. By default, None.
         **kwargs : object
             Additional keyword arguments used during serialization.
-
-        Raises
-        ------
-        TypeError
-            If any numeric or boolean input has the wrong type.
-        ValueError
-            If ``value`` falls outside the provided bounds or if the bounds are invalid.
         """
+        if display_name is None:
+            display_name = name
+
         super().__init__(
             value=value,
             name=name,

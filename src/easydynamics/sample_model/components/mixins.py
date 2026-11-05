@@ -74,9 +74,9 @@ class CreateParametersMixin:
             Initial area value.
         name : str
             Base name used to label the Parameter (``name + ' area'``).
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             X-axis unit.  The resulting area unit is ``x_unit * y_unit``.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Y-axis unit.  The resulting area unit is ``x_unit * y_unit``.
         minimum_area : float, default=MINIMUM_AREA
             Lower bound applied to the Parameter when the area is non-negative. When *area* is
@@ -134,7 +134,7 @@ class CreateParametersMixin:
             Base name used to label the Parameter (``name + ' center'``).
         fix_if_none : bool
             Whether to fix the Parameter when *center* is None.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             X-axis unit, applied to the center Parameter.
         enforce_minimum_center : bool, default=False
             If True, the Parameter's lower bound is raised to ``DHO_MINIMUM_CENTER`` (1e-10) to
@@ -197,10 +197,10 @@ class CreateParametersMixin:
             Initial width value.  Must be strictly positive (>= *minimum_width*).
         name : str
             Base name used to label the Parameter (``name + ' ' + param_name``).
-        param_name : str, default="width"
+        param_name : str, default='width'
             Logical name of the parameter used in the label and error messages (e.g.
             ``'gaussian_width'``, ``'lorentzian_width'``).
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             X-axis unit, applied to the width Parameter.
         minimum_width : float, default=MINIMUM_WIDTH
             Absolute lower bound for the width to prevent division-by-zero.

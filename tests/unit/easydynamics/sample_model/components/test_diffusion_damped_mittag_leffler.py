@@ -30,13 +30,13 @@ class TestDiffusionDampedMittagLeffler:
     @pytest.fixture
     def mittag_leffler(self):
         return DiffusionDampedMittagLeffler(
-            name="TestMLName",
-            display_name="TestML",
+            name='TestMLName',
+            display_name='TestML',
             scale=2.0,
             alpha=0.7,
             width=0.3,
             damping=0.05,
-            x_unit="meV",
+            x_unit='meV',
         )
 
     #############
@@ -48,58 +48,56 @@ class TestDiffusionDampedMittagLeffler:
         ml = DiffusionDampedMittagLeffler()
 
         # EXPECT
-        assert ml.display_name == "DiffusionDampedMittagLeffler"
+        assert ml.display_name == 'DiffusionDampedMittagLeffler'
         assert ml.scale.value == pytest.approx(1.0)
         assert ml.alpha.value == pytest.approx(1.0)
         assert ml.width.value == pytest.approx(1.0)
         assert ml.damping.value == pytest.approx(1.0)
-        assert ml.x_unit == "meV"
-        assert ml.y_unit == "dimensionless"
+        assert ml.x_unit == 'meV'
+        assert ml.y_unit == 'dimensionless'
 
     def test_initialization(self, mittag_leffler: DiffusionDampedMittagLeffler):
         # WHEN THEN EXPECT
-        assert mittag_leffler.display_name == "TestML"
+        assert mittag_leffler.display_name == 'TestML'
         assert mittag_leffler.scale.value == pytest.approx(2.0)
         assert mittag_leffler.alpha.value == pytest.approx(0.7)
         assert mittag_leffler.width.value == pytest.approx(0.3)
         assert mittag_leffler.damping.value == pytest.approx(0.05)
-        assert mittag_leffler.x_unit == "meV"
+        assert mittag_leffler.x_unit == 'meV'
 
     def test_parameter_units(self, mittag_leffler: DiffusionDampedMittagLeffler):
         # WHEN THEN EXPECT scale = x_unit * y_unit, width/damping = x_unit, alpha dimensionless
-        assert mittag_leffler.scale.unit == "meV"
-        assert mittag_leffler.alpha.unit == "dimensionless"
-        assert mittag_leffler.width.unit == "meV"
-        assert mittag_leffler.damping.unit == "meV"
+        assert mittag_leffler.scale.unit == 'meV'
+        assert mittag_leffler.alpha.unit == 'dimensionless'
+        assert mittag_leffler.width.unit == 'meV'
+        assert mittag_leffler.damping.unit == 'meV'
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message, expected_error",
+        'kwargs, expected_message, expected_error',
         [
-            ({"scale": "invalid"}, "scale must be a number", TypeError),
-            ({"alpha": "invalid"}, "alpha must be a number", TypeError),
-            ({"width": "invalid"}, "width must be a number", TypeError),
-            ({"damping": "invalid"}, "damping must be a number", TypeError),
-            ({"x_unit": 123}, "unit must be None, a string", UnitError),
-            ({"y_unit": 123}, "unit must be None, a string", UnitError),
+            ({'scale': 'invalid'}, 'scale must be a number', TypeError),
+            ({'alpha': 'invalid'}, 'alpha must be a number', TypeError),
+            ({'width': 'invalid'}, 'width must be a number', TypeError),
+            ({'damping': 'invalid'}, 'damping must be a number', TypeError),
+            ({'x_unit': 123}, 'unit must be None, a string', UnitError),
+            ({'y_unit': 123}, 'unit must be None, a string', UnitError),
         ],
     )
-    def test_input_type_validation_raises(
-        self, kwargs, expected_message, expected_error
-    ):
+    def test_input_type_validation_raises(self, kwargs, expected_message, expected_error):
         # WHEN THEN EXPECT
         with pytest.raises(expected_error, match=expected_message):
             DiffusionDampedMittagLeffler(**kwargs)
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message",
+        'kwargs, expected_message',
         [
-            ({"scale": -1.0}, "scale must be non-negative"),
-            ({"scale": np.nan}, "scale must be a finite number"),
-            ({"alpha": 0.0}, "alpha must be greater than zero and at most one"),
-            ({"alpha": 1.5}, "alpha must be greater than zero and at most one"),
-            ({"alpha": np.nan}, "alpha must be a finite number"),
-            ({"width": -0.6}, "must be greater than zero"),
-            ({"damping": -0.6}, "must be greater than zero"),
+            ({'scale': -1.0}, 'scale must be non-negative'),
+            ({'scale': np.nan}, 'scale must be a finite number'),
+            ({'alpha': 0.0}, 'alpha must be greater than zero and at most one'),
+            ({'alpha': 1.5}, 'alpha must be greater than zero and at most one'),
+            ({'alpha': np.nan}, 'alpha must be a finite number'),
+            ({'width': -0.6}, 'must be greater than zero'),
+            ({'damping': -0.6}, 'must be greater than zero'),
         ],
     )
     def test_input_value_validation_raises(self, kwargs, expected_message):
@@ -112,12 +110,12 @@ class TestDiffusionDampedMittagLeffler:
     #############
 
     @pytest.mark.parametrize(
-        "prop, valid_value",
+        'prop, valid_value',
         [
-            ("scale", 3.0),
-            ("alpha", 0.5),
-            ("width", 0.7),
-            ("damping", 0.2),
+            ('scale', 3.0),
+            ('alpha', 0.5),
+            ('width', 0.7),
+            ('damping', 0.2),
         ],
     )
     def test_property_setters(
@@ -133,19 +131,19 @@ class TestDiffusionDampedMittagLeffler:
         assert getattr(mittag_leffler, prop).value == valid_value
 
         # WHEN: set an invalid value — THEN EXPECT
-        with pytest.raises(TypeError, match="must be a number"):
-            setattr(mittag_leffler, prop, "invalid")
+        with pytest.raises(TypeError, match='must be a number'):
+            setattr(mittag_leffler, prop, 'invalid')
 
     @pytest.mark.parametrize(
-        "prop, invalid_value, expected_message",
+        'prop, invalid_value, expected_message',
         [
-            ("scale", -1.0, "violates the parameter bounds"),
-            ("alpha", 1.5, "violates the parameter bounds"),
-            ("alpha", -0.1, "violates the parameter bounds"),
-            ("width", -0.5, "width must be positive"),
-            ("width", 1e-12, "violates the parameter bounds"),
-            ("damping", -0.5, "damping must be positive"),
-            ("damping", 1e-12, "violates the parameter bounds"),
+            ('scale', -1.0, 'violates the parameter bounds'),
+            ('alpha', 1.5, 'violates the parameter bounds'),
+            ('alpha', -0.1, 'violates the parameter bounds'),
+            ('width', -0.5, 'width must be positive'),
+            ('width', 1e-12, 'violates the parameter bounds'),
+            ('damping', -0.5, 'damping must be positive'),
+            ('damping', 1e-12, 'violates the parameter bounds'),
         ],
     )
     def test_setters_out_of_bounds_raise(
@@ -171,10 +169,10 @@ class TestDiffusionDampedMittagLeffler:
         assert len(params) == 4
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            "TestMLName scale",
-            "TestMLName alpha",
-            "TestMLName width",
-            "TestMLName damping",
+            'TestMLName scale',
+            'TestMLName alpha',
+            'TestMLName width',
+            'TestMLName damping',
         }
         assert {param.name for param in params} == expected_names
 
@@ -182,31 +180,25 @@ class TestDiffusionDampedMittagLeffler:
     # Evaluation
     #############
 
-    @pytest.mark.parametrize("alpha", [0.3, 0.5, 0.8, 1.0])
-    @pytest.mark.parametrize("damping", [0.01, 0.5])
+    @pytest.mark.parametrize('alpha', [0.3, 0.5, 0.8, 1.0])
+    @pytest.mark.parametrize('damping', [0.01, 0.5])
     def test_evaluate_matches_laplace_reference(self, alpha, damping):
         # WHEN Eq. (42) is the real-valued form of (1/pi) Re{phi_hat(damping + i|omega|)}
-        ml = DiffusionDampedMittagLeffler(
-            scale=2.0, alpha=alpha, width=0.4, damping=damping
-        )
+        ml = DiffusionDampedMittagLeffler(scale=2.0, alpha=alpha, width=0.4, damping=damping)
         x = np.linspace(-5.0, 5.0, 401)
 
         # THEN
         result = ml.evaluate(x)
 
         # EXPECT
-        expected = laplace_reference(
-            x, scale=2.0, alpha=alpha, width=0.4, damping=damping
-        )
+        expected = laplace_reference(x, scale=2.0, alpha=alpha, width=0.4, damping=damping)
         np.testing.assert_allclose(result, expected, rtol=1e-10, atol=1e-14)
 
     def test_evaluate_reproduces_printed_equation_42(self):
         # WHEN width=1 reduces the model to Eq. (42) as printed (tau_R = 1), up to the 1/pi that
         # the printed equation omits but Eq. (41) requires
         alpha, epsilon = 0.6, 0.2
-        ml = DiffusionDampedMittagLeffler(
-            scale=1.0, alpha=alpha, width=1.0, damping=epsilon
-        )
+        ml = DiffusionDampedMittagLeffler(scale=1.0, alpha=alpha, width=1.0, damping=epsilon)
         omega = np.linspace(-4.0, 4.0, 201)
 
         # THEN
@@ -217,13 +209,9 @@ class TestDiffusionDampedMittagLeffler:
         square = abs_omega**2 + epsilon**2
         arg = alpha * np.angle(epsilon + 1j * abs_omega)
         numerator = (
-            epsilon * square ** (alpha / 2)
-            + abs_omega * np.sin(arg)
-            + epsilon * np.cos(arg)
+            epsilon * square ** (alpha / 2) + abs_omega * np.sin(arg) + epsilon * np.cos(arg)
         )
-        denominator = square * (
-            (square**alpha + 1) * square ** (-alpha / 2) + 2 * np.cos(arg)
-        )
+        denominator = square * ((square**alpha + 1) * square ** (-alpha / 2) + 2 * np.cos(arg))
         np.testing.assert_allclose(result, numerator / denominator / np.pi, rtol=1e-10)
 
     def test_evaluate_alpha_one_is_lorentzian(self):
@@ -265,12 +253,10 @@ class TestDiffusionDampedMittagLeffler:
         assert np.argmax(values) == 100
         assert mittag_leffler.evaluate(0.0)[0] == pytest.approx(np.max(values))
 
-    @pytest.mark.parametrize("alpha", [0.4, 0.7, 1.0])
+    @pytest.mark.parametrize('alpha', [0.4, 0.7, 1.0])
     def test_scale_is_the_integrated_area(self, alpha):
         # WHEN THEN
-        ml = DiffusionDampedMittagLeffler(
-            scale=2.5, alpha=alpha, width=0.3, damping=0.05
-        )
+        ml = DiffusionDampedMittagLeffler(scale=2.5, alpha=alpha, width=0.3, damping=0.05)
         integral, _ = quad(lambda x: ml.evaluate(x)[0], -np.inf, np.inf, limit=400)
 
         # EXPECT
@@ -291,7 +277,7 @@ class TestDiffusionDampedMittagLeffler:
         # WHEN
         ml = DiffusionDampedMittagLeffler(scale=1.0, alpha=0.7, width=0.3, damping=0.05)
         x_mev = np.linspace(-2.0, 2.0, 51)
-        x_microev = sc.array(dims=["x"], values=x_mev * 1e3, unit="microeV")
+        x_microev = sc.array(dims=['x'], values=x_mev * 1e3, unit='microeV')
 
         # THEN
         from_mev = ml.evaluate(x_mev)
@@ -306,14 +292,12 @@ class TestDiffusionDampedMittagLeffler:
         x = np.linspace(-2.0, 2.0, 50)
 
         # THEN
-        result = mittag_leffler.evaluate(x, output="scipp")
+        result = mittag_leffler.evaluate(x, output='scipp')
 
         # EXPECT
         assert isinstance(result, sc.Variable)
-        assert result.unit == sc.Unit("dimensionless")
-        np.testing.assert_allclose(
-            result.values, mittag_leffler.evaluate(x, output="numpy")
-        )
+        assert result.unit == sc.Unit('dimensionless')
+        np.testing.assert_allclose(result.values, mittag_leffler.evaluate(x, output='numpy'))
 
     #############
     # Unit conversion
@@ -321,22 +305,22 @@ class TestDiffusionDampedMittagLeffler:
 
     def test_convert_x_unit(self, mittag_leffler: DiffusionDampedMittagLeffler):
         # WHEN THEN
-        mittag_leffler.convert_x_unit("microeV")
+        mittag_leffler.convert_x_unit('microeV')
 
         # EXPECT
-        assert mittag_leffler.x_unit == "microeV"
+        assert mittag_leffler.x_unit == 'microeV'
         assert mittag_leffler.scale.value == pytest.approx(2.0 * 1e3)
         assert mittag_leffler.width.value == pytest.approx(0.3 * 1e3)
         assert mittag_leffler.damping.value == pytest.approx(0.05 * 1e3)
         # EXPECT the dimensionless form parameter is untouched
         assert mittag_leffler.alpha.value == pytest.approx(0.7)
-        assert mittag_leffler.alpha.unit == "dimensionless"
+        assert mittag_leffler.alpha.unit == 'dimensionless'
 
     def test_convert_x_unit_invalid_type_raises(
         self, mittag_leffler: DiffusionDampedMittagLeffler
     ):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r"x_unit must be a string or sc\.Unit"):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             mittag_leffler.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(
@@ -344,25 +328,23 @@ class TestDiffusionDampedMittagLeffler:
     ):
         # WHEN THEN
         with pytest.raises(UnitError):
-            mittag_leffler.convert_x_unit("m")
+            mittag_leffler.convert_x_unit('m')
 
         # EXPECT: state rolled back
-        assert mittag_leffler.x_unit == "meV"
+        assert mittag_leffler.x_unit == 'meV'
         assert mittag_leffler.scale.value == pytest.approx(2.0)
         assert mittag_leffler.width.value == pytest.approx(0.3)
         assert mittag_leffler.damping.value == pytest.approx(0.05)
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → scale_unit='dimensionless'
-        ml = DiffusionDampedMittagLeffler(
-            scale=1.0, width=0.3, damping=0.05, y_unit="1/meV"
-        )
+        ml = DiffusionDampedMittagLeffler(scale=1.0, width=0.3, damping=0.05, y_unit='1/meV')
 
         # THEN
-        ml.convert_y_unit("1/eV")
+        ml.convert_y_unit('1/eV')
 
         # EXPECT
-        assert ml.y_unit == "1/eV"
+        assert ml.y_unit == '1/eV'
         assert ml.scale.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(
@@ -377,16 +359,16 @@ class TestDiffusionDampedMittagLeffler:
     ):
         # WHEN THEN
         with pytest.raises(UnitError):
-            mittag_leffler.convert_y_unit("K")
+            mittag_leffler.convert_y_unit('K')
 
         # EXPECT: state rolled back
-        assert mittag_leffler.y_unit == "dimensionless"
+        assert mittag_leffler.y_unit == 'dimensionless'
         assert mittag_leffler.scale.value == pytest.approx(2.0)
 
     def test_y_unit_setter_raises(self, mittag_leffler: DiffusionDampedMittagLeffler):
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
-            mittag_leffler.y_unit = "1/meV"
+            mittag_leffler.y_unit = '1/meV'
 
     #############
     # Copy and repr
@@ -399,7 +381,7 @@ class TestDiffusionDampedMittagLeffler:
         # EXPECT
         assert ml_copy is not mittag_leffler
         assert ml_copy.display_name == mittag_leffler.display_name
-        for prop in ("scale", "alpha", "width", "damping"):
+        for prop in ('scale', 'alpha', 'width', 'damping'):
             assert getattr(ml_copy, prop).value == getattr(mittag_leffler, prop).value
             assert getattr(ml_copy, prop).fixed == getattr(mittag_leffler, prop).fixed
         assert ml_copy.x_unit == mittag_leffler.x_unit
@@ -409,10 +391,10 @@ class TestDiffusionDampedMittagLeffler:
         repr_str = repr(mittag_leffler)
 
         # EXPECT
-        assert "DiffusionDampedMittagLeffler" in repr_str
-        assert "name = TestMLName" in repr_str
-        assert "x_unit = meV" in repr_str
-        assert "scale =" in repr_str
-        assert "alpha =" in repr_str
-        assert "width =" in repr_str
-        assert "damping =" in repr_str
+        assert 'DiffusionDampedMittagLeffler' in repr_str
+        assert 'name = TestMLName' in repr_str
+        assert 'x_unit = meV' in repr_str
+        assert 'scale =' in repr_str
+        assert 'alpha =' in repr_str
+        assert 'width =' in repr_str
+        assert 'damping =' in repr_str

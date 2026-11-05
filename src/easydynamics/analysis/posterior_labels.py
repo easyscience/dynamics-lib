@@ -60,12 +60,10 @@ class ParameterLabels:
             base = self.label(p)
             if label_counts[base] > 1:
                 occurrence[base] += 1
-                self._storage_labels[p.unique_name] = f"{base} [{occurrence[base]}]"
+                self._storage_labels[p.unique_name] = f'{base} [{occurrence[base]}]'
             else:
                 self._storage_labels[p.unique_name] = base
-        self._by_label = {
-            self._storage_labels[p.unique_name]: p for p in self._parameters
-        }
+        self._by_label = {self._storage_labels[p.unique_name]: p for p in self._parameters}
 
     @property
     def parameters(self) -> list[Parameter]:
@@ -96,9 +94,7 @@ class ParameterLabels:
         if self._counts[parameter.name] <= 1 or self._qualify is None:
             return parameter.name
         qualifier = self._qualify(parameter)
-        return (
-            parameter.name if qualifier is None else f"{parameter.name} ({qualifier})"
-        )
+        return parameter.name if qualifier is None else f'{parameter.name} ({qualifier})'
 
     def name_map(self) -> dict[str, str]:
         """
@@ -144,7 +140,7 @@ class ParameterLabels:
         for unique_name in column_names:
             parameter = self._by_unique_name.get(unique_name)
             if parameter is None:
-                parameter = self._by_label.get(saved_labels.get(unique_name, ""))
+                parameter = self._by_label.get(saved_labels.get(unique_name, ''))
             resolved.append(parameter)
         return resolved
 
@@ -201,6 +197,6 @@ class ParameterLabels:
             One unit per column, empty where no parameter could be matched.
         """
         return [
-            "" if parameter is None else str(parameter.unit)
+            '' if parameter is None else str(parameter.unit)
             for parameter in self.resolve(column_names, saved_labels)
         ]

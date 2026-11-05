@@ -83,11 +83,11 @@ class Convolution(NumericalConvolutionBase):
     # rebinds are detected separately via the plan-state snapshot and the settings' plan
     # versions (see NumericalConvolutionBase._convolution_plan_is_current).
     _invalidate_plan_on_change: ClassVar[set[str]] = {
-        "_energy",
-        "_sample_components",
-        "_resolution_components",
-        "_temperature",
-        "_detailed_balance_settings",
+        '_energy',
+        '_sample_components',
+        '_resolution_components',
+        '_temperature',
+        '_detailed_balance_settings',
     }
 
     def __init__(
@@ -98,11 +98,11 @@ class Convolution(NumericalConvolutionBase):
         energy_offset: Numeric | Parameter = 0.0,
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = "K",
+        temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        display_name: str | None = "MyConvolution",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -235,7 +235,7 @@ class Convolution(NumericalConvolutionBase):
 
         if isinstance(resolution_component, DeltaFunction):
             raise ValueError(
-                "resolution_components contains delta functions. This is not supported."
+                'resolution_components contains delta functions. This is not supported.'
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -246,10 +246,10 @@ class Convolution(NumericalConvolutionBase):
 
     def _prune_plan_object(self, obj: object) -> None:
         """
-        Remove a plan-internal object from the easyscience global map.
+        Remove a plan-internal object from the easyscience global registry.
 
         The plan collections and sub-convolvers are private, per-plan objects recreated on every
-        rebuild; pruning the previous generation keeps the global map from growing with every
+        rebuild; pruning the previous generation keeps the global registry from growing with every
         rebuild.
 
         Parameters
@@ -258,7 +258,7 @@ class Convolution(NumericalConvolutionBase):
             The object to prune, or None for a no-op.
         """
         if obj is not None:
-            self._global_object.map.prune(obj.unique_name)
+            self._global_object.registry.discard(obj.unique_name)
 
     def _build_convolution_plan(self) -> None:
         """
@@ -272,30 +272,24 @@ class Convolution(NumericalConvolutionBase):
 
         if self._resolution_components.is_empty:
             raise ValueError(
-                "resolution_components is empty. Convolution with an empty resolution "
-                "model is not defined; add at least one resolution component."
+                'resolution_components is empty. Convolution with an empty resolution '
+                'model is not defined; add at least one resolution component.'
             )
         self._validate_no_delta_in_resolution(self._resolution_components)
 
-        # Previous plan collections are recreated below; remove them from the global map so
+        # Previous plan collections are recreated below; remove them from the global registry so
         # rebuilds do not leak registry entries.
-        self._prune_plan_object(getattr(self, "_analytical_sample_components", None))
-        self._prune_plan_object(getattr(self, "_delta_sample_components", None))
-        self._prune_plan_object(getattr(self, "_numerical_sample_components", None))
+        self._prune_plan_object(getattr(self, '_analytical_sample_components', None))
+        self._prune_plan_object(getattr(self, '_delta_sample_components', None))
+        self._prune_plan_object(getattr(self, '_numerical_sample_components', None))
 
         # Keep the (otherwise unused) inherited dense grid in sync with the current energy
         # and settings so it can never hold stale state.
         self._energy_grid = self._create_energy_grid()
 
-        analytical_sample_components = ComponentCollection(
-            x_unit=self.x_unit, y_unit=self.y_unit
-        )
-        delta_sample_components = ComponentCollection(
-            x_unit=self.x_unit, y_unit=self.y_unit
-        )
-        numerical_sample_components = ComponentCollection(
-            x_unit=self.x_unit, y_unit=self.y_unit
-        )
+        analytical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        delta_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        numerical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
 
         for sample_component in self._sample_components:
             # If delta function, put in delta sample model and go to the
@@ -344,10 +338,10 @@ class Convolution(NumericalConvolutionBase):
         convolution method.
         """
 
-        # Previous sub-convolvers are recreated below; remove them from the global map so
+        # Previous sub-convolvers are recreated below; remove them from the global registry so
         # rebuilds do not leak registry entries.
-        self._prune_plan_object(getattr(self, "_analytical_convolver", None))
-        self._prune_plan_object(getattr(self, "_numerical_convolver", None))
+        self._prune_plan_object(getattr(self, '_analytical_convolver', None))
+        self._prune_plan_object(getattr(self, '_numerical_convolver', None))
 
         if self._analytical_sample_components:
             self._analytical_convolver = AnalyticalConvolution(
@@ -389,18 +383,14 @@ class Convolution(NumericalConvolutionBase):
         super().convert_y_unit(unit)
         # The sub-convolvers and plan collections share this convolver's component objects,
         # which were already converted by super(); only their y-unit labels need updating.
-        if getattr(self, "_analytical_convolver", None) is not None:
-            self._analytical_convolver._relabel_y_unit(
-                self.y_unit
-            )  # ruff: ignore[private-member-access]
-        if getattr(self, "_numerical_convolver", None) is not None:
-            self._numerical_convolver._relabel_y_unit(
-                self.y_unit
-            )  # ruff: ignore[private-member-access]
+        if getattr(self, '_analytical_convolver', None) is not None:
+            self._analytical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
+        if getattr(self, '_numerical_convolver', None) is not None:
+            self._numerical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
         for collection in (
-            getattr(self, "_analytical_sample_components", None),
-            getattr(self, "_delta_sample_components", None),
-            getattr(self, "_numerical_sample_components", None),
+            getattr(self, '_analytical_sample_components', None),
+            getattr(self, '_delta_sample_components', None),
+            getattr(self, '_numerical_sample_components', None),
         ):
             if collection is not None:
                 collection._y_unit = self.y_unit  # ruff: ignore[private-member-access]
@@ -426,19 +416,16 @@ class Convolution(NumericalConvolutionBase):
         # Only rebuild the convolution plan if reactions are enabled, to
         # avoid issues during __init__. These are convolver-local changes, so other convolvers
         # sharing the same ConvolutionSettings are unaffected.
-        if (
-            getattr(self, "_reactions_enabled", False)
-            and name in self._invalidate_plan_on_change
-        ):
+        if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
             self._plan_seen_version = None
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"display_name={self.display_name!r}, "
-            f"unique_name={self.unique_name!r}, "
-            f"x_unit={self.x_unit}, "
-            f"y_unit={self.y_unit}, "
-            f"energy_len={len(self.energy)}, "
-            f"temperature={self.temperature})"
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
+            f'energy_len={len(self.energy)}, '
+            f'temperature={self.temperature})'
         )

@@ -369,8 +369,8 @@ class PosteriorSampler:
         """
         Run a sampling operation with the surrounding guards in place.
 
-        Checks the bounds, switches the minimizer to BUMPS, optionally holds parameters fixed, and
-        restores the parameter values, fixed flags and minimizer afterwards.
+        Checks the bounds, optionally holds parameters fixed, and restores the parameter values and
+        fixed flags afterwards.
 
         Parameters
         ----------
@@ -418,9 +418,6 @@ class PosteriorSampler:
             if reuse_sampler:
                 self._verify_chain_shape_unchanged(chain_parameters)
 
-            fitter = self._analysis.fitter
-            original_minimizer = fitter.minimizer.enum
-            fitter.switch_minimizer(AvailableMinimizers.Bumps)
             try:
                 results = run(self._get_or_build_sampler(reuse_sampler=reuse_sampler))
             except IndexError as error:
@@ -434,7 +431,6 @@ class PosteriorSampler:
                     "removal off with sampler_kwargs={'outliers': 'none'}."
                 ) from error
             finally:
-                fitter.switch_minimizer(original_minimizer)
                 for parameter, value in saved_values:
                     parameter.value = value
 
@@ -474,7 +470,7 @@ class PosteriorSampler:
             )
         if self._sampler is None or (self._sampler_is_dirty and not reuse_sampler):
             x, y, weights = self._sampling_data()
-            self._sampler = Sampler(self._analysis.fitter, x, y, weights=weights)
+            self._sampler = Sampler.from_fitter(self._analysis.fitter, x, y, weights=weights)
             self._sampler_is_dirty = False
         return self._sampler
 
@@ -759,15 +755,7 @@ class PosteriorSampler:
                 stacklevel=2,
             )
 
-        fitter = self._analysis.fitter
-        original_minimizer = fitter.minimizer.enum
-        fitter.switch_minimizer(AvailableMinimizers.Bumps)
-        try:
-            self._results = self._get_or_build_sampler(reuse_sampler=False).load_state(
-                path, skip=skip
-            )
-        finally:
-            fitter.switch_minimizer(original_minimizer)
+        self._results = self._get_or_build_sampler(reuse_sampler=False).load_state(path, skip=skip)
         return self._results
 
     #############
@@ -1192,7 +1180,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
             Burn-in generations to discard before collecting samples.
         thin : int, default=10
             Thinning interval, which reduces autocorrelation between retained draws.
-        fit_method : str, default="independent"
+        fit_method : str, default='independent'
             Either "independent" (a separate chain per Q index) or "simultaneous" (one chain over
             all Q indices at once).
         Q_index : int | None, default=None

@@ -72,11 +72,11 @@ class TestNameMixin:
         class _RegisteredWithName(NameMixin, EasyBase):
             pass
 
-        vertices_before = set(global_object.map.vertices())
+        names_before = set(global_object.registry.names())
 
         # THEN EXPECT construction fails on the invalid name
         with pytest.raises(TypeError, match=r'Name must be a string'):
             _RegisteredWithName(name=123)
 
-        # EXPECT no half-constructed object was registered in the global map
-        assert set(global_object.map.vertices()) == vertices_before
+        # EXPECT no half-constructed object was registered in the global registry
+        assert set(global_object.registry.names()) <= names_before

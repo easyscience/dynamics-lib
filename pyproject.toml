@@ -23,7 +23,7 @@ classifiers = [
 ]
 requires-python = '>=3.12'
 dependencies = [
-  'easyscience>=2.5.1',  # The base library of the EasyScience framework. 2.5.1 adds fitting.Sampler
+  'easyscience>=3.0',  # The base library of the EasyScience framework. 3.0 adds Sampler.from_fitter and Minimizers
   'numpy',  # Numerical arrays (used directly throughout the library)
   'scipy',  # Numerical routines (convolution, interpolation, special functions)
   'scipp',  # Labelled multi-dimensional arrays; backs Experiment data handling
