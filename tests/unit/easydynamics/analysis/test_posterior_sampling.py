@@ -19,8 +19,9 @@ import matplotlib as mpl
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.fitting import AvailableMinimizers
-from easyscience.variable import Parameter
+from easyscience.fitting.minimizers import Minimizers
+
+from easydynamics.variable import Parameter
 
 mpl.use('Agg')
 
@@ -34,7 +35,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 
-SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler'
+SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler.from_fitter'
 
 
 def make_analysis(with_variances=True):
@@ -164,13 +165,19 @@ def make_dataset():
     return sc.Dataset({
         'Lorentzian width': sc.DataArray(
             data=sc.array(
-                dims=['Q'], values=widths, variances=np.full_like(widths, 1e-4), unit='meV'
+                dims=['Q'],
+                values=widths,
+                variances=np.full_like(widths, 1e-4),
+                unit='meV',
             ),
             coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
         ),
         'Lorentzian area': sc.DataArray(
             data=sc.array(
-                dims=['Q'], values=areas, variances=np.full_like(areas, 4e-4), unit='meV'
+                dims=['Q'],
+                values=areas,
+                variances=np.full_like(areas, 4e-4),
+                unit='meV',
             ),
             coords={'Q': sc.array(dims=['Q'], values=Q, unit='1/angstrom')},
         ),
@@ -181,7 +188,10 @@ def make_parameter_analysis(two_bindings=True):
     bindings = [
         edyn.FitBinding(
             model=sm.Polynomial(
-                coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Width line'
+                coefficients=[0.1, 0.35],
+                x_unit='1/angstrom',
+                y_unit='meV',
+                name='Width line',
             ),
             targets='Lorentzian width',
         )
@@ -190,7 +200,10 @@ def make_parameter_analysis(two_bindings=True):
         bindings.append(
             edyn.FitBinding(
                 model=sm.Polynomial(
-                    coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Area line'
+                    coefficients=[2.0, -0.3],
+                    x_unit='1/angstrom',
+                    y_unit='meV',
+                    name='Area line',
                 ),
                 targets='Lorentzian area',
             )
@@ -267,9 +280,9 @@ class TestPosteriorSampler:
         # EXPECT
         after = [(p.unique_name, p.value) for p in analysis.get_free_parameters()]
         assert after == before
-        assert analysis.fitter.minimizer.enum == AvailableMinimizers.LMFit_leastsq
+        assert analysis.fitter.minimizer.enum == Minimizers.LMFit_leastsq
 
-    def test_switches_to_bumps_for_the_run(self, analysis):
+    def test_leaves_the_minimizer_alone_during_the_run(self, analysis):
         # WHEN
         bound_all(analysis)
         seen = []
@@ -283,20 +296,7 @@ class TestPosteriorSampler:
             analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        assert seen == [AvailableMinimizers.Bumps]
-
-    def test_restores_the_minimizer_even_when_sampling_raises(self, analysis):
-        # WHEN
-        bound_all(analysis)
-
-        # THEN
-        with patch(SAMPLER_PATH) as sampler_class:
-            sampler_class.return_value.sample.side_effect = RuntimeError('boom')
-            with pytest.raises(RuntimeError, match='boom'):
-                analysis.bayesian.sample(samples=10)
-
-        # EXPECT
-        assert analysis.fitter.minimizer.enum == AvailableMinimizers.LMFit_leastsq
+        assert seen == [Minimizers.LMFit_leastsq]
 
     def test_forwards_sampling_arguments(self, analysis):
         # WHEN
@@ -423,7 +423,7 @@ class TestPosteriorSampler:
     def test_parameter_from_another_model_is_rejected(self, analysis):
         # WHEN
         bound_all(analysis)
-        foreign = Parameter(name='foreign', value=1.0, unit='meV')
+        foreign = Parameter(value=1.0, name='foreign', unit='meV')
 
         # THEN EXPECT
         with pytest.raises(ValueError, match='not a free parameter'):
@@ -901,7 +901,7 @@ class TestPosteriorSampler:
     def test_marginal_foreign_parameter_raises(self, analysis):
         # WHEN
         bound_all(analysis)
-        foreign = Parameter(name='foreign', value=1.0, unit='meV')
+        foreign = Parameter(value=1.0, name='foreign', unit='meV')
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
@@ -1120,7 +1120,10 @@ class TestPosteriorSampler:
 
             # THEN EXPECT refused up front, rather than failing obscurely inside BUMPS, which
             # resumes from a stored chain whose width is fixed
-            with pytest.warns(UserWarning), pytest.raises(ValueError, match='Cannot extend'):
+            with (
+                pytest.warns(UserWarning),
+                pytest.raises(ValueError, match='Cannot extend'),
+            ):
                 analysis.bayesian.extend(additional_samples=10, parameters=[target.name])
 
     def test_extending_with_the_same_parameters_is_allowed(self, analysis):
@@ -1418,7 +1421,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN the per-Q predictive data is assembled and handed to the plopp-backed slider
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=True,
+            ),
             patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
         ):
             multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
@@ -1447,7 +1453,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=True,
+            ),
             patch('easydynamics.utils.posterior_plotting.predictive_with_slider') as slicer,
         ):
             multi_q_analysis.bayesian.plot_posterior_predictive(n_draws=3)
@@ -1464,7 +1473,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN EXPECT it names the sampled Q indices rather than just refusing
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=False,
+            ),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
         ):
             multi_q_analysis.bayesian.plot_posterior_predictive()
@@ -1615,7 +1627,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN EXPECT it names the sampled Q indices rather than just refusing
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=False,
+            ),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
         ):
             multi_q_analysis.bayesian.plot_corner()
@@ -1674,7 +1689,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN EXPECT it names the sampled Q indices rather than just refusing
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=False,
+            ),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
         ):
             multi_q_analysis.bayesian.plot_trace()
@@ -1724,7 +1742,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN EXPECT
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=False,
+            ),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
         ):
             multi_q_analysis.bayesian.plot_marginal('Gaussian width')
@@ -1761,7 +1782,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN EXPECT
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=False,
+            ),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
         ):
             multi_q_analysis.bayesian.plot_correlations()
@@ -1870,7 +1894,10 @@ class TestMultiQPosteriorSampler:
 
         # THEN
         with (
-            patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True),
+            patch(
+                'easydynamics.analysis.posterior_sampling._in_notebook',
+                return_value=True,
+            ),
             patch('easydynamics.utils.posterior_plotting.corner_with_slider') as slider,
         ):
             multi_q_analysis.bayesian.plot_corner(bins=13)

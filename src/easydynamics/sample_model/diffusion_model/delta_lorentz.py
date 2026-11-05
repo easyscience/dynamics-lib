@@ -4,8 +4,6 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DeltaFunction
@@ -18,6 +16,8 @@ from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
@@ -151,7 +151,10 @@ class DeltaLorentz(DiffusionModelBase):
             self._mean_u_squared_over_angstrom_squared = Parameter.from_dependency(
                 name='mean_u_squared_over_angstrom_squared',
                 dependency_expression='mean_u_squared / angstrom**2',
-                dependency_map={'mean_u_squared': self._mean_u_squared, 'angstrom': angstrom},
+                dependency_map={
+                    'mean_u_squared': self._mean_u_squared,
+                    'angstrom': angstrom,
+                },
             )
             self._mean_u_squared_over_angstrom_squared.set_desired_unit('dimensionless')
 

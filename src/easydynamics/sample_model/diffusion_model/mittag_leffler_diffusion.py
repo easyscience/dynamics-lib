@@ -4,8 +4,6 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DiffusionDampedMittagLeffler
@@ -21,6 +19,8 @@ from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 DIFFUSION_COEFFICIENT_MIN = 1e-25  # To avoid division by zero in the diffusion damping calculation

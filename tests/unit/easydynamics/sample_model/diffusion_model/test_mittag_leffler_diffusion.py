@@ -4,7 +4,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model import DiffusionDampedMittagLeffler
 from easydynamics.sample_model import Lorentzian
@@ -14,6 +13,7 @@ from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
 )
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
+from easydynamics.variable import Parameter
 
 ALL_Q_VARIATION = {'A_0': True, 'relaxation_rate': True, 'alpha': True}
 
@@ -77,7 +77,10 @@ class TestMittagLefflerDiffusion:
         # EXPECT one elastic Lorentzian and one Mittag-Leffler component at every Q
         assert len(collections) == 5
         for collection in collections:
-            assert collection.list_component_names() == ['Elastic Lorentzian', 'Mittag-Leffler']
+            assert collection.list_component_names() == [
+                'Elastic Lorentzian',
+                'Mittag-Leffler',
+            ]
             assert isinstance(collection[0], Lorentzian)
             assert isinstance(collection[1], DiffusionDampedMittagLeffler)
 
@@ -101,7 +104,11 @@ class TestMittagLefflerDiffusion:
             ({'alpha': 'invalid'}, TypeError, 'alpha must be a number'),
             ({'alpha': 1.5}, ValueError, 'greater than zero and at most one'),
             ({'alpha': 0.0}, ValueError, 'greater than zero and at most one'),
-            ({'mittag_leffler_name': 123}, TypeError, 'mittag_leffler_name must be a string'),
+            (
+                {'mittag_leffler_name': 123},
+                TypeError,
+                'mittag_leffler_name must be a string',
+            ),
             ({'allow_Q_variation': 'invalid'}, TypeError, 'must be a dict or None'),
             ({'allow_Q_variation': {'nope': True}}, ValueError, 'Unknown keys'),
         ],

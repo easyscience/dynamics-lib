@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import gc
 from contextlib import nullcontext
 from typing import ClassVar
 from unittest.mock import patch
@@ -8,7 +9,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.convolution import Convolution
@@ -22,6 +22,7 @@ from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.variable import Parameter
 
 
 class TestConvolution:
@@ -764,7 +765,7 @@ class TestConvolution:
         result_before = conv.convolution()
 
         # THEN rebinding the offset to a brand-new Parameter
-        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        conv.energy_offset = Parameter(value=1.0, name='energy_offset', unit='meV')
         result_after = conv.convolution()
 
         # EXPECT every path (analytical, numerical, delta) sees the new offset, matching a
@@ -833,19 +834,21 @@ class TestConvolution:
     #############
 
     def test_plan_rebuilds_do_not_leak_registry_entries(self, default_convolution):
-        "Regression: every plan rebuild used to register new objects in the global map forever"
+        "Regression: every plan rebuild used to register new objects in the registry forever"
         # WHEN a convolver that has built its plan at least once
         conv = default_convolution
         conv.convolution()
-        vertices_before = len(conv._global_object.map.vertices())
+        gc.collect()
+        entries_before = len(conv._global_object.registry)
 
         # THEN forcing several full plan rebuilds
         for _ in range(3):
             conv._plan_seen_version = None
             conv.convolution()
 
-        # EXPECT the global map did not grow
-        assert len(conv._global_object.map.vertices()) == vertices_before
+        # EXPECT the global registry did not grow, once dropped objects are collected
+        gc.collect()
+        assert len(conv._global_object.registry) <= entries_before
 
     def test_convert_y_unit_updates_plan_collection_labels(self):
         "Regression: plan-collection y_unit labels used to stay stale until the next rebuild"
@@ -885,7 +888,12 @@ class TestConvolution:
         sample_components = ComponentCollection()
         sample_components.append_component(
             DampedHarmonicOscillator(
-                name='DHO', area=1.0, center=1.0, width=0.5, x_unit='meV', y_unit='1/meV'
+                name='DHO',
+                area=1.0,
+                center=1.0,
+                width=0.5,
+                x_unit='meV',
+                y_unit='1/meV',
             )
         )
         resolution_components = ComponentCollection()

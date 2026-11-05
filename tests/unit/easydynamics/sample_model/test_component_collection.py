@@ -6,7 +6,6 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.integrate import simpson
 
@@ -16,6 +15,7 @@ from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
+from easydynamics.variable import Parameter
 
 
 class TestComponentCollection:
@@ -425,7 +425,7 @@ class TestComponentCollection:
         # EXPECT
         assert len(parameters) == 0
 
-    def test_get_fit_parameters(self, component_collection):
+    def test_get_free_parameters(self, component_collection):
         # WHEN
 
         # Fix one parameter and make another dependent
@@ -436,10 +436,10 @@ class TestComponentCollection:
         )
 
         # THEN
-        fit_parameters = component_collection.get_fit_parameters()
+        free_parameters = component_collection.get_free_parameters()
 
         # EXPECT
-        assert len(fit_parameters) == 4
+        assert len(free_parameters) == 4
 
         expected_names = {
             'TestGaussian1Name center',
@@ -447,9 +447,9 @@ class TestComponentCollection:
             'TestLorentzian1Name area',
             'TestLorentzian1Name center',
         }
-        actual_names = {param.name for param in fit_parameters}
+        actual_names = {param.name for param in free_parameters}
         assert actual_names == expected_names
-        assert all(isinstance(param, Parameter) for param in fit_parameters)
+        assert all(isinstance(param, Parameter) for param in free_parameters)
 
     def test_fix_and_free_all_parameters(self, component_collection):
         # WHEN THEN

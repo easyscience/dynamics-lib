@@ -6,15 +6,18 @@ from __future__ import annotations
 import warnings
 from collections.abc import Sequence
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorBase
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
+
+if TYPE_CHECKING:
+    from easyscience.variable import DescriptorBase
 
 _CoefficientsInput = Sequence[Numeric | Parameter] | dict[int, Numeric]
 
@@ -144,9 +147,9 @@ class Polynomial(ModelComponent):
                     raise ValueError('Dict keys (powers) must be non-negative integers.')
             for i in range(max(coefficients) + 1):
                 if i not in coefficients:
-                    param = Parameter(name=f'{name}_c{i}', value=0.0, fixed=True)
+                    param = Parameter(value=0.0, name=f'{name}_c{i}', fixed=True)
                 elif isinstance(coefficients[i], Numeric):
-                    param = Parameter(name=f'{name}_c{i}', value=float(coefficients[i]))
+                    param = Parameter(value=float(coefficients[i]), name=f'{name}_c{i}')
                 else:
                     raise TypeError('Each coefficient value must be a number.')
                 self._coefficients.append(param)
@@ -155,7 +158,7 @@ class Polynomial(ModelComponent):
                 if isinstance(coef, Parameter):
                     param = coef
                 elif isinstance(coef, Numeric):
-                    param = Parameter(name=f'{name}_c{i}', value=float(coef))
+                    param = Parameter(value=float(coef), name=f'{name}_c{i}')
                 else:
                     raise TypeError(
                         'Each coefficient must be either a numeric value or a Parameter.'
@@ -274,7 +277,7 @@ class Polynomial(ModelComponent):
             raise TypeError('value must be a numeric value.')
         new_power = len(self._coefficients)
         self._coefficients.append(
-            Parameter(name=f'{self.name}_c{new_power}', value=float(value), fixed=fixed)
+            Parameter(value=float(value), name=f'{self.name}_c{new_power}', fixed=fixed)
         )
 
     def remove_coefficient(self) -> float:

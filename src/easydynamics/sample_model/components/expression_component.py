@@ -10,9 +10,10 @@ from typing import ClassVar
 
 import scipp as sc
 import sympy as sp
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from scipy.special import erf
+
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 if TYPE_CHECKING:
     import numpy as np
@@ -153,8 +154,16 @@ class ExpressionComponent(ModelComponent):
     _DIMENSIONLESS_RESULT_FUNCS: ClassVar[tuple] = (sp.sign,)
 
     # parameter_units is applied at construction only; the resulting units are captured in
-    # the serialized Parameter dicts, so the argument is skipped during serialization.
-    _REDIRECT: ClassVar[dict[str, object]] = {'parameter_units': None}
+    # the serialized Parameter dicts, so the argument is left out of the arguments to serialize.
+    _arg_spec: ClassVar[tuple[str, ...]] = (
+        'expression',
+        'parameters',
+        'x_unit',
+        'y_unit',
+        'name',
+        'display_name',
+        'unique_name',
+    )
 
     def __init__(
         self,

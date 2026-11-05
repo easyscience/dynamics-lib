@@ -5,7 +5,6 @@ from contextlib import suppress
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -18,6 +17,7 @@ from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.variable import Parameter
 
 
 class SampleModel(ModelBase):

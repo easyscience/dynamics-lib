@@ -4,7 +4,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.energy_grid import EnergyGrid
@@ -13,6 +12,7 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
+from easydynamics.variable import Parameter
 
 
 def _make_numerical_convolution(convolution_settings=None):
@@ -280,11 +280,11 @@ class TestNumericalConvolution:
     def test_convolution_with_energy_offset_in_different_unit(self, default_numerical_convolution):
         # WHEN: energy grid is in meV, offset given as a Parameter in eV (0.001 eV = 1.0 meV)
         conv = default_numerical_convolution
-        conv.energy_offset = Parameter(name='energy_offset', value=0.001, unit='eV')
+        conv.energy_offset = Parameter(value=0.001, unit='eV')
         result_ev = conv.convolution()
 
         # THEN: run again with the numerically equivalent offset as an explicit meV Parameter
-        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        conv.energy_offset = Parameter(value=1.0, unit='meV')
         result_mev = conv.convolution()
 
         # EXPECT: unit conversion is transparent — results are numerically identical
@@ -314,7 +314,8 @@ class TestNumericalConvolution:
             return detailed_balance_factor(**kwargs)
 
         monkeypatch.setattr(
-            'easydynamics.convolution.numerical_convolution.detailed_balance_factor', spy_dbf
+            'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
+            spy_dbf,
         )
 
         # THEN: run convolution
@@ -324,5 +325,7 @@ class TestNumericalConvolution:
         # Before the fix, energy_even_length_offset was omitted, causing a half-bin error.
         grid = nc._energy_grid
         np.testing.assert_allclose(
-            captured['energy'], grid.energy_dense - grid.energy_even_length_offset, atol=1e-12
+            captured['energy'],
+            grid.energy_dense - grid.energy_even_length_offset,
+            atol=1e-12,
         )

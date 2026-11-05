@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from easyscience.variable import Parameter
+    from easydynamics.variable import Parameter
 
 
 class ParameterLabels:
@@ -166,9 +166,11 @@ class ParameterLabels:
         """
         saved_labels = saved_labels or {}
         return [
-            saved_labels.get(unique_name, unique_name)
-            if parameter is None
-            else self.label(parameter)
+            (
+                saved_labels.get(unique_name, unique_name)
+                if parameter is None
+                else self.label(parameter)
+            )
             for unique_name, parameter in zip(
                 column_names, self.resolve(column_names, saved_labels), strict=True
             )

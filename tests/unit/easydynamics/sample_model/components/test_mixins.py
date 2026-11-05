@@ -3,9 +3,9 @@
 
 import numpy as np
 import pytest
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.variable import Parameter
 
 
 class TestCreateParametersMixin:
@@ -60,7 +60,7 @@ class TestCreateParametersMixin:
     #############
     def test_set_bounded_parameter_value_within_bounds(self, dummy_model):
         # WHEN
-        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+        param = Parameter(value=1.0, min=0.0, max=2.0)
 
         # THEN
         dummy_model._set_bounded_parameter_value(param, 1.5, 'p')
@@ -71,7 +71,7 @@ class TestCreateParametersMixin:
     @pytest.mark.parametrize('out_of_bounds', [-1.0, 3.0], ids=['below_min', 'above_max'])
     def test_set_bounded_parameter_value_out_of_bounds_raises(self, dummy_model, out_of_bounds):
         # WHEN
-        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+        param = Parameter(value=1.0, min=0.0, max=2.0)
 
         # THEN EXPECT the assignment raises instead of silently clamping, leaving the value
         with pytest.raises(ValueError, match='violates the parameter bounds'):
@@ -80,7 +80,7 @@ class TestCreateParametersMixin:
 
     def test_set_bounded_parameter_value_invalid_type_raises(self, dummy_model):
         # WHEN
-        param = Parameter(name='p', value=1.0, min=0.0, max=2.0)
+        param = Parameter(value=1.0, min=0.0, max=2.0)
 
         # THEN EXPECT
         with pytest.raises(TypeError, match='p must be a number'):

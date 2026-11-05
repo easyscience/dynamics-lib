@@ -144,7 +144,7 @@ class TestDetailedBalanceFactor:
     def test_parameter_temperature(self):
         # WHEN
         energy = np.array([1.0, 2.0, 3.0])
-        T_param = Parameter(name='T', value=150, unit='K')
+        T_param = Parameter(value=150, unit='K')
         # THEN
         result = detailed_balance_factor(energy, T_param)
         # EXPECT

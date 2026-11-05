@@ -5,7 +5,6 @@ from typing import ClassVar
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
@@ -19,6 +18,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 
 class Convolution(NumericalConvolutionBase):
@@ -246,10 +246,10 @@ class Convolution(NumericalConvolutionBase):
 
     def _prune_plan_object(self, obj: object) -> None:
         """
-        Remove a plan-internal object from the easyscience global map.
+        Remove a plan-internal object from the easyscience global registry.
 
         The plan collections and sub-convolvers are private, per-plan objects recreated on every
-        rebuild; pruning the previous generation keeps the global map from growing with every
+        rebuild; pruning the previous generation keeps the global registry from growing with every
         rebuild.
 
         Parameters
@@ -258,7 +258,7 @@ class Convolution(NumericalConvolutionBase):
             The object to prune, or None for a no-op.
         """
         if obj is not None:
-            self._global_object.map.prune(obj.unique_name)
+            self._global_object.registry.discard(obj.unique_name)
 
     def _build_convolution_plan(self) -> None:
         """
@@ -277,7 +277,7 @@ class Convolution(NumericalConvolutionBase):
             )
         self._validate_no_delta_in_resolution(self._resolution_components)
 
-        # Previous plan collections are recreated below; remove them from the global map so
+        # Previous plan collections are recreated below; remove them from the global registry so
         # rebuilds do not leak registry entries.
         self._prune_plan_object(getattr(self, '_analytical_sample_components', None))
         self._prune_plan_object(getattr(self, '_delta_sample_components', None))
@@ -338,7 +338,7 @@ class Convolution(NumericalConvolutionBase):
         convolution method.
         """
 
-        # Previous sub-convolvers are recreated below; remove them from the global map so
+        # Previous sub-convolvers are recreated below; remove them from the global registry so
         # rebuilds do not leak registry entries.
         self._prune_plan_object(getattr(self, '_analytical_convolver', None))
         self._prune_plan_object(getattr(self, '_numerical_convolver', None))

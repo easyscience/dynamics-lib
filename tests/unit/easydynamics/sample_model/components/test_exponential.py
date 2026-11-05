@@ -6,10 +6,10 @@ from copy import copy
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model import Exponential
+from easydynamics.variable import Parameter
 
 
 class TestExponential:
@@ -282,13 +282,13 @@ class TestExponential:
 
     def test_init_rejects_parameter_amplitude(self):
         # WHEN THEN EXPECT
-        amplitude_param = Parameter(name='amp', value=3.0, unit='meV')
+        amplitude_param = Parameter(value=3.0, name='amp', unit='meV')
         with pytest.raises(TypeError, match='amplitude must be a number'):
             Exponential(amplitude=amplitude_param, x_unit='meV')
 
     def test_init_rejects_parameter_rate(self):
         # WHEN THEN EXPECT
-        rate_param = Parameter(name='rate', value=0.5, unit='1/meV')
+        rate_param = Parameter(value=0.5, name='rate', unit='1/meV')
         with pytest.raises(TypeError, match='rate must be a number'):
             Exponential(rate=rate_param, x_unit='meV')
 

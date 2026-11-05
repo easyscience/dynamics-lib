@@ -4,8 +4,6 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
@@ -14,6 +12,8 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 

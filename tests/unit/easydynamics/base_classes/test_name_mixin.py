@@ -3,7 +3,7 @@
 
 import pytest
 from easyscience import global_object
-from easyscience.base_classes.new_base import NewBase
+from easyscience.base_classes import EasyBase
 
 from easydynamics.base_classes.name_mixin import NameMixin
 
@@ -68,15 +68,15 @@ class TestNameMixin:
     def test_invalid_name_fails_before_global_registration(self):
         """Regression: name validation must run before the parent registers the object."""
 
-        # WHEN a class whose MRO reaches the registering NewBase through NameMixin
-        class _RegisteredWithName(NameMixin, NewBase):
+        # WHEN a class whose MRO reaches the registering EasyBase through NameMixin
+        class _RegisteredWithName(NameMixin, EasyBase):
             pass
 
-        vertices_before = set(global_object.map.vertices())
+        names_before = set(global_object.registry.names())
 
         # THEN EXPECT construction fails on the invalid name
         with pytest.raises(TypeError, match=r'Name must be a string'):
             _RegisteredWithName(name=123)
 
-        # EXPECT no half-constructed object was registered in the global map
-        assert set(global_object.map.vertices()) == vertices_before
+        # EXPECT no half-constructed object was registered in the global registry
+        assert set(global_object.registry.names()) <= names_before

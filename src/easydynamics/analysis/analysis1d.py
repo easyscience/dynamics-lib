@@ -9,8 +9,6 @@ import plopp as pp
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
-from easyscience.variable import DescriptorNumber
-from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
@@ -27,6 +25,8 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import verify_Q_index
+from easydynamics.variable import DescriptorNumber
+from easydynamics.variable import Parameter
 
 
 class Analysis1d(AnalysisBase):
@@ -272,7 +272,7 @@ class Analysis1d(AnalysisBase):
         The EasyScience Fitter used for fitting and sampling, built on first use.
 
         Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
-        directly, e.g. ``analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)``.
+        directly, e.g. ``analysis.fitter.switch_minimizer(Minimizers.Bumps)``.
 
         Returns
         -------

@@ -5,9 +5,9 @@ import warnings
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.utils.utils import Numeric
+from easydynamics.variable import Parameter
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 MINIMUM_AREA = 0.0  # To avoid negative areas
@@ -101,7 +101,7 @@ class CreateParametersMixin:
             raise ValueError('area must be a finite number.')
 
         area_unit = str(sc.Unit(x_unit) * sc.Unit(y_unit))
-        area_param = Parameter(name=name + ' area', value=float(area), unit=area_unit)
+        area_param = Parameter(value=float(area), name=name + ' area', unit=area_unit)
 
         if area_param.value < 0:
             warnings.warn(
@@ -157,15 +157,19 @@ class CreateParametersMixin:
 
         if center is None:
             center_param = Parameter(
-                name=name + ' center',
                 value=0.0,
+                name=name + ' center',
                 unit=x_unit,
                 fixed=fix_if_none,
             )
         else:
             if not np.isfinite(center):
                 raise ValueError('center must be None or a finite number.')
-            center_param = Parameter(name=name + ' center', value=float(center), unit=x_unit)
+            center_param = Parameter(
+                value=float(center),
+                name=name + ' center',
+                unit=x_unit,
+            )
 
         if enforce_minimum_center:
             # Clamp the value before raising the bound: Parameter.min rejects a new minimum
@@ -224,8 +228,8 @@ class CreateParametersMixin:
                 f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
             )
         return Parameter(
-            name=name + ' ' + param_name,
             value=float(width),
+            name=name + ' ' + param_name,
             unit=x_unit,
             min=minimum_width,
         )

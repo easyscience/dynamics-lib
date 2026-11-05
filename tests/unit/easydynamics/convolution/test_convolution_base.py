@@ -4,13 +4,13 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.variable import Parameter
 
 
 class TestConvolutionBase:
@@ -235,7 +235,7 @@ class TestConvolutionBase:
 
     def test_convert_unit_invalid_offset_unit_rollback(self, convolution_base):
         # WHEN
-        convolution_base.energy_offset = Parameter(name='energy_offset', value=5, unit='s')
+        convolution_base.energy_offset = Parameter(value=5, name='energy_offset', unit='s')
 
         # THEN
         with pytest.raises(

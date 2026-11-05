@@ -19,7 +19,8 @@ from easydynamics.utils.utils import prepare_x_for_evaluate
 
 if TYPE_CHECKING:
     import numpy as np
-    from easyscience.variable import Parameter
+
+    from easydynamics.variable import Parameter
 
 
 class ModelComponent(EasyDynamicsModelBase):
