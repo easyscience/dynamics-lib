@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -29,10 +29,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -2624,7 +2624,7 @@ is created.</p>
                 <code>extra_parameters</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | None</code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2726,17 +2726,6 @@ parameters are added.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.Analysis.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3024,7 +3013,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.Analysis.extra_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis.extra_parameters">extra_parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3138,7 +3127,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.Analysis.temperature&lt;/code&gt;)" href="#easydynamics.analysis.Analysis.temperature">temperature</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3557,7 +3546,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3869,7 +3858,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4176,6 +4165,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -4223,7 +4227,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4357,7 +4361,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4404,7 +4408,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4452,7 +4456,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4465,29 +4469,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="easydynamics.analysis.Analysis.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -4597,7 +4578,7 @@ can be changed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5739,7 +5720,7 @@ therefore build the MultiFitter and the Sampler as side effects of merely listin
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6045,7 +6026,7 @@ until a Q index is set.</p>
                 <code>extra_parameters</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6147,17 +6128,6 @@ parameters are added.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.Analysis1d.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis1d.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6434,7 +6404,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.Analysis1d.extra_parameters&lt;/code&gt;)" href="#easydynamics.analysis.Analysis1d.extra_parameters">extra_parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6548,7 +6518,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.Analysis1d.temperature&lt;/code&gt;)" href="#easydynamics.analysis.Analysis1d.temperature">temperature</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6967,7 +6937,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7279,7 +7249,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7419,7 +7389,7 @@ parameters are added.</p>
 
         <p>The EasyScience Fitter used for fitting and sampling, built on first use.</p>
 <p>Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
-directly, e.g. <code>analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)</code>.</p>
+directly, e.g. <code>analysis.fitter.switch_minimizer(Minimizers.Bumps)</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7588,6 +7558,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -7635,7 +7620,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7769,7 +7754,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7816,7 +7801,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7864,7 +7849,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7877,29 +7862,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="easydynamics.analysis.Analysis1d.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -8009,7 +7971,7 @@ can be changed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8317,7 +8279,7 @@ the calculated model.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.DescriptorNumber">DescriptorNumber</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9480,6 +9442,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -9526,7 +9503,7 @@ EasyScience object.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9551,7 +9528,7 @@ EasyScience object.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.new_base.NewBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.new_base.NewBase">NewBase</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.easy_base.EasyBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.easy_base.EasyBase">EasyBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9921,17 +9898,6 @@ default, None.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10726,6 +10692,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -10773,7 +10754,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10907,7 +10888,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10954,7 +10935,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11002,7 +10983,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11015,29 +10996,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="easydynamics.analysis.ParameterAnalysis.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -11567,7 +11525,7 @@ the supported axes.</p>
           <tr class="doc-section-item">
             <td><code><span title="easydynamics.analysis.BoundsSuggestion.parameter">parameter</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12108,7 +12066,7 @@ reading the table first is easy to skip in a script.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12959,7 +12917,7 @@ work for an analysis with many Q values.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12978,7 +12936,7 @@ work for an analysis with many Q values.</p>
                 <code>qualify</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span> | None] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span> | None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13095,7 +13053,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
       &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.ParameterLabels.parameters&lt;/code&gt;)" href="#easydynamics.analysis.ParameterLabels.parameters">parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13153,7 +13111,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13207,7 +13165,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13389,7 +13347,7 @@ where the saved labels are used instead.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -14795,7 +14753,7 @@ rather than here.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15021,7 +14979,7 @@ separate. Labels carry the Q index either way, so the table reads the same.</p>
                 <code>labeller</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span>] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15099,7 +15057,7 @@ own Q-qualified labels.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15416,7 +15374,7 @@ chains are per-Q and the parameter goes by its plain label in each; pick a chain
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15913,7 +15871,7 @@ arrays for a multi-dataset fit.</p>
                 <code>chain_parameters</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[], <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]]</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[], <span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16657,7 +16615,7 @@ rather than an exact count.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16833,7 +16791,7 @@ credible intervals; if they do not, the chain is too short to have converged.</p
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16994,7 +16952,7 @@ random state and exposes no seed control.</p>
                 <code>labeller</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span>] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -17074,7 +17032,7 @@ strongly correlated parameters need not even be a good fit.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -17474,7 +17432,7 @@ and 84th percentiles marked -- the same 68% credible interval :meth:<code>summar
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -18154,7 +18112,7 @@ is created.</p>
                 <code>extra_parameters</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | None</code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -18384,17 +18342,6 @@ parameters are added.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;normalize_resolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.normalize_resolution&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.normalize_resolution">normalize_resolution</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -18609,7 +18556,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.extra_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.extra_parameters">extra_parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -18723,7 +18670,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis.Analysis.temperature&lt;/code&gt;)" href="#easydynamics.analysis.analysis.Analysis.temperature">temperature</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19241,7 +19188,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19553,7 +19500,7 @@ parameters are added.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -20749,7 +20696,7 @@ therefore build the MultiFitter and the Sampler as side effects of merely listin
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -20895,6 +20842,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -20942,7 +20904,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21076,7 +21038,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -21123,7 +21085,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -21171,7 +21133,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -21184,29 +21146,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.analysis.analysis.Analysis.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -21316,7 +21255,7 @@ can be changed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -21644,7 +21583,7 @@ until a Q index is set.</p>
                 <code>extra_parameters</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -21856,17 +21795,6 @@ parameters are added.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis1d.Analysis1d.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis1d.Analysis1d.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -22088,7 +22016,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis1d.Analysis1d.extra_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis1d.Analysis1d.extra_parameters">extra_parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -22202,7 +22130,7 @@ parameters are added.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis1d.Analysis1d.temperature&lt;/code&gt;)" href="#easydynamics.analysis.analysis1d.Analysis1d.temperature">temperature</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -22316,7 +22244,7 @@ parameters are added.</p>
 
         <p>The EasyScience Fitter used for fitting and sampling, built on first use.</p>
 <p>Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
-directly, e.g. <code>analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)</code>.</p>
+directly, e.g. <code>analysis.fitter.switch_minimizer(Minimizers.Bumps)</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -22722,7 +22650,7 @@ directly, e.g. <code>analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -23034,7 +22962,7 @@ directly, e.g. <code>analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -23396,7 +23324,7 @@ the calculated model.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.DescriptorNumber&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.descriptor_number.DescriptorNumber">DescriptorNumber</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.DescriptorNumber">DescriptorNumber</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -23948,6 +23876,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -23995,7 +23938,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24129,7 +24072,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -24176,7 +24119,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -24224,7 +24167,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -24237,29 +24180,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.analysis.analysis1d.Analysis1d.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -24369,7 +24289,7 @@ can be changed.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -24642,7 +24562,7 @@ is created.</p>
                 <code>extra_parameters</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -24813,17 +24733,6 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
                 </div>
               </td>
             </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.analysis_base.AnalysisBase.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis_base.AnalysisBase.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
       </tbody>
     </table>
 
@@ -24943,7 +24852,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis_base.AnalysisBase.temperature&lt;/code&gt;)" href="#easydynamics.analysis.analysis_base.AnalysisBase.temperature">temperature</a></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25000,7 +24909,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
       &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.analysis_base.AnalysisBase.extra_parameters&lt;/code&gt;)" href="#easydynamics.analysis.analysis_base.AnalysisBase.extra_parameters">extra_parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25414,7 +25323,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None</code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25570,7 +25479,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25928,7 +25837,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -26027,6 +25936,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -26074,7 +25998,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -26255,7 +26179,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -26302,7 +26226,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -26350,7 +26274,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -26363,29 +26287,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.analysis.analysis_base.AnalysisBase.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -27205,6 +27106,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -27251,7 +27167,7 @@ EasyScience object.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27276,7 +27192,7 @@ EasyScience object.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.new_base.NewBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.new_base.NewBase">NewBase</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.easy_base.EasyBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.easy_base.EasyBase">EasyBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -27728,17 +27644,6 @@ default, None.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28945,6 +28850,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -28992,7 +28912,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29126,7 +29046,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -29173,7 +29093,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -29221,7 +29141,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -29234,29 +29154,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.analysis.parameter_analysis.ParameterAnalysis.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -29494,7 +29391,7 @@ can be unit-tested on their own and reused by every Analysis class.</p>
           <tr class="doc-section-item">
             <td><code><span title="easydynamics.analysis.posterior.BoundsSuggestion.parameter">parameter</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -30035,7 +29932,7 @@ reading the table first is easy to skip in a script.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -30891,7 +30788,7 @@ any is negative.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31052,7 +30949,7 @@ but neither the uncertainty nor the value carries it.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31081,7 +30978,7 @@ but neither the uncertainty nor the value carries it.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31136,7 +31033,7 @@ cause.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31165,7 +31062,7 @@ cause.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31239,7 +31136,7 @@ when two parameters are degenerate and the pair drifts until it is stopped by a 
                 <code>parameters_by_column</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31366,7 +31263,7 @@ each parameter per Q, all sharing a name, so those labels have to be qualified b
                 <code>parameters_by_column</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31529,7 +31426,7 @@ work for an analysis with many Q values.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31548,7 +31445,7 @@ work for an analysis with many Q values.</p>
                 <code>qualify</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span> | None] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span> | None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31665,7 +31562,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
       &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.posterior_labels.ParameterLabels.parameters&lt;/code&gt;)" href="#easydynamics.analysis.posterior_labels.ParameterLabels.parameters">parameters</a></code></td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31723,7 +31620,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31777,7 +31674,7 @@ to disambiguate keeps its short names. Returning None leaves the name unqualifie
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -31959,7 +31856,7 @@ where the saved labels are used instead.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | None]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -32357,7 +32254,7 @@ arrays for a multi-dataset fit.</p>
                 <code>chain_parameters</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[], <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]]</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[], <span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -33101,7 +32998,7 @@ rather than an exact count.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -33277,7 +33174,7 @@ credible intervals; if they do not, the chain is too short to have converged.</p
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -33438,7 +33335,7 @@ random state and exposes no seed control.</p>
                 <code>labeller</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span>] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -33518,7 +33415,7 @@ strongly correlated parameters need not even be a good fit.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -33918,7 +33815,7 @@ and 84th percentiles marked -- the same 68% credible interval :meth:<code>summar
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -35116,7 +35013,7 @@ rather than here.</p>
                 <code>parameters</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>] | <span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -35342,7 +35239,7 @@ separate. Labels carry the Q index either way, so the table reads the same.</p>
                 <code>labeller</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Callable">Callable</span>[[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>], <span title="str">str</span>] | None</code>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="easydynamics.variable.Parameter">Parameter</span>], <span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -35420,7 +35317,7 @@ own Q-qualified labels.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -35737,7 +35634,7 @@ chains are per-Q and the parameter goes by its plain label in each; pick a chain
                 <code>parameter</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a> | <span title="str">str</span></code>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span> | <span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -36704,10 +36601,10 @@ enclose no range (<code>min &gt;= max</code>).</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/javascripts/extra.js"></script>
       
@@ -36716,5 +36613,112 @@ enclose no range (<code>min &gt;= max</code>).</p>
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
-  </body>
+  <script data-mkdocs-jupyter-mathjax="{&quot;url&quot;: &quot;https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.js&quot;, &quot;version&quot;: 4}">
+/* Shared by full pages and Material's instant navigation. */
+(() => {
+  const config = JSON.parse(document.currentScript.dataset.mkdocsJupyterMathjax);
+  if (window.mkdocsJupyterMathJax) return;
+
+  let loading;
+  let queue = Promise.resolve();
+  let previous = [];
+
+  const ready = async () => {
+    if (!loading) {
+      loading = (async () => {
+        let math = window.MathJax;
+        if (!math?.typesetPromise) {
+          const url = new URL(config.url, document.baseURI).href;
+          const existing = Array.from(document.scripts).find(script =>
+            script.src && (script.src === url || script.id === 'MathJax-script' ||
+              (/mathjax/i.test(script.src) &&
+               /\/(?:MathJax|latest|(?:tex|mml)(?:-mml)?-(?:chtml|svg))\.js(?:[?#]|$)/i.test(script.src))));
+          if (existing) {
+            if (!math?.startup?.promise) {
+              await new Promise((resolve, reject) => {
+                existing.addEventListener('load', resolve, { once: true });
+                existing.addEventListener('error', reject, { once: true });
+              });
+            }
+          } else {
+            // Keep site macros, delimiters and startup hooks when supplied.
+            const options = math || {};
+            window.MathJax = {
+              ...options,
+              loader: {
+                ...options.loader,
+                load: Array.from(new Set(['ui/safe', ...(options.loader?.load || [])]))
+              },
+              startup: { typeset: false, ...options.startup },
+              tex: {
+                tags: 'ams',
+                useLabelIds: true,
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                ...options.tex
+              }
+            };
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = config.url;
+              script.id = 'MathJax-script';
+              script.async = true;
+              script.onload = resolve;
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          }
+        }
+        math = window.MathJax;
+        await math.startup.promise;
+        return math;
+      })();
+    }
+    const math = await loading;
+    // A site owner can extend the v3 queue again on each navigation.
+    await math.startup.promise;
+    return math;
+  };
+
+  const unrendered = node => {
+    if (node.matches('mjx-container')) return [];
+    if (!node.querySelector('mjx-container')) return [node];
+    // In v3, scanning generated assistive MathML again produces nested output.
+    return Array.from(node.children).flatMap(unrendered);
+  };
+
+  const refresh = () => {
+    // A separate chain also serializes v3, without changing v4's startup promise.
+    queue = queue.then(async () => {
+      const notebooks = Array.from(document.querySelectorAll('.jupyter-wrapper'));
+      if (!notebooks.length && !previous.length) return;
+      if (notebooks.length === previous.length &&
+          notebooks.every((node, index) => node === previous[index])) return;
+      const math = await ready();
+      if (previous.length) {
+        math.typesetClear(previous);
+        math.texReset();
+      }
+      previous = notebooks.filter(node => node.isConnected);
+      const pending = previous.flatMap(unrendered);
+      if (pending.length) await math.typesetPromise(pending);
+    }).catch(error => console.error('mkdocs-jupyter: MathJax rendering failed', error));
+    return queue;
+  };
+
+  window.mkdocsJupyterMathJax = { refresh };
+  const start = () => {
+    if (typeof document$ !== 'undefined') document$.subscribe(refresh);
+    else refresh();
+  };
+  // Theme bundles and user-provided MathJax scripts can follow notebook content.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else start();
+})();
+
+</script>
+</body>
 </html>

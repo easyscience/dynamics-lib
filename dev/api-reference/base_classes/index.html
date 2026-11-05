@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -29,10 +29,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -2483,6 +2483,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -2529,7 +2544,7 @@ EasyScience object.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2554,7 +2569,7 @@ EasyScience object.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.new_base.NewBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.new_base.NewBase">NewBase</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.easy_base.EasyBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.easy_base.EasyBase">EasyBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2918,17 +2933,6 @@ class.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.EasyDynamicsModelBase.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.base_classes.EasyDynamicsModelBase.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3377,6 +3381,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -3424,7 +3443,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3605,7 +3624,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3652,7 +3671,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3700,7 +3719,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3713,29 +3732,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="easydynamics.base_classes.EasyDynamicsModelBase.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -4325,6 +4321,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -4371,7 +4382,7 @@ EasyScience object.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4396,7 +4407,7 @@ EasyScience object.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.new_base.NewBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.new_base.NewBase">NewBase</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.easy_base.EasyBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.easy_base.EasyBase">EasyBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4793,7 +4804,7 @@ EasyDynamicsModelBase subclass or a list of them. If None, defaults to
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.easydynamics_list.EasyDynamicsList.to_dict&lt;/code&gt;)" href="#easydynamics.base_classes.easydynamics_list.EasyDynamicsList.to_dict">to_dict</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.easydynamics_list.EasyDynamicsList.to_dict&lt;/code&gt;)" href="#easydynamics.base_classes.easydynamics_list.EasyDynamicsList.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Convert the EasyList to a dictionary for serialization.</p>
@@ -4833,7 +4844,7 @@ EasyDynamicsModelBase subclass or a list of them. If None, defaults to
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_all_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.easydynamics_list.EasyDynamicsList.get_all_variables&lt;/code&gt;)" href="#easydynamics.base_classes.easydynamics_list.EasyDynamicsList.get_all_variables">get_all_variables</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Get all <code>Descriptor</code> and <code>Parameter</code> objects from all</p>
+                  <p>Get all <code>Descriptor</code> and <code>Parameter</code> objects held by this</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4867,17 +4878,6 @@ EasyDynamicsModelBase subclass or a list of them. If None, defaults to
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.easydynamics_list.EasyDynamicsList.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.base_classes.easydynamics_list.EasyDynamicsList.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5830,7 +5830,7 @@ item, and a <code>TypeError</code> propagates from it if idx is not an int, slic
 
 
 <h7 id="easydynamics.base_classes.easydynamics_list.EasyDynamicsList.to_dict" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">to_dict</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h7>
 
@@ -5838,9 +5838,45 @@ item, and a <code>TypeError</code> propagates from it if idx is not an int, slic
     <div class="doc doc-contents ">
 
         <p>Convert the EasyList to a dictionary for serialization.</p>
+<p>The serializer calls <code>to_dict</code> on nested EasyScience objects.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>skip</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of field names as strings to skip when forming the
+dictionary. By default, None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -5914,8 +5950,8 @@ item, and a <code>TypeError</code> propagates from it if idx is not an int, slic
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+                <p>Dictionary containing the serialized contents
+of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5940,7 +5976,7 @@ item, and a <code>TypeError</code> propagates from it if idx is not an int, slic
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.new_base.NewBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.new_base.NewBase">NewBase</a></code>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.easy_base.EasyBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.easy_base.EasyBase">EasyBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6030,11 +6066,13 @@ item, and a <code>TypeError</code> propagates from it if idx is not an int, slic
 
     <div class="doc doc-contents ">
 
-        <p>Get all <code>Descriptor</code> and <code>Parameter</code> objects from all
-elements that are derived from <code>ModelBase</code>.</p>
-<p>For each element that is a <code>ModelBase</code> instance, the element's
-own <code>get_all_variables()</code> method is called and the results are
-collected into a single flat list.</p>
+        <p>Get all <code>Descriptor</code> and <code>Parameter</code> objects held by this
+list.</p>
+<p>Elements that are <code>DescriptorBase</code> instances (e.g. a bare
+<code>Parameter</code>) are collected directly, while elements derived
+from <code>ModelBase</code> contribute the result of their own
+<code>get_all_variables()</code> call. Everything is collected into a
+single flat list.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6099,7 +6137,7 @@ collected into a single flat list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6146,7 +6184,7 @@ collected into a single flat list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6194,7 +6232,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6207,29 +6245,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.base_classes.easydynamics_list.EasyDynamicsList.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -6623,17 +6638,6 @@ can be changed.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get all parameters which are currently free to be fitted as a</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_fit_parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.easydynamics_modelbase.EasyDynamicsModelBase.get_fit_parameters&lt;/code&gt;)" href="#easydynamics.base_classes.easydynamics_modelbase.EasyDynamicsModelBase.get_fit_parameters">get_fit_parameters</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>This is an alias for <code>get_free_parameters</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7082,6 +7086,21 @@ EasyScience object.</p>
     </table>
 
 
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>A <code>unique_name</code> that was generated automatically is not
+written; only an explicitly supplied one is, so that a
+deserialized object gets a fresh name instead of clashing with
+the original. Likewise <code>display_name</code> is omitted when it is
+<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
     </div>
 
 </div>
@@ -7129,7 +7148,7 @@ from a full encoded dictionary.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
+<code>to_dict</code>) of an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7310,7 +7329,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7357,7 +7376,7 @@ class.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7405,7 +7424,7 @@ list.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.parameter.Parameter">Parameter</a>]</code>
+                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.variable.Parameter&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/variable/#easyscience.variable.Parameter">Parameter</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7418,29 +7437,6 @@ list.</p>
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.base_classes.easydynamics_modelbase.EasyDynamicsModelBase.get_fit_parameters" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fit_parameters</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>This is an alias for <code>get_free_parameters</code>.</p>
-<p>To be removed when fully moved to new base classes and minimizer
-can be changed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
 
 
     </div>
@@ -7934,10 +7930,10 @@ can be changed.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/javascripts/extra.js"></script>
       
@@ -7946,5 +7942,112 @@ can be changed.</p>
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
-  </body>
+  <script data-mkdocs-jupyter-mathjax="{&quot;url&quot;: &quot;https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.js&quot;, &quot;version&quot;: 4}">
+/* Shared by full pages and Material's instant navigation. */
+(() => {
+  const config = JSON.parse(document.currentScript.dataset.mkdocsJupyterMathjax);
+  if (window.mkdocsJupyterMathJax) return;
+
+  let loading;
+  let queue = Promise.resolve();
+  let previous = [];
+
+  const ready = async () => {
+    if (!loading) {
+      loading = (async () => {
+        let math = window.MathJax;
+        if (!math?.typesetPromise) {
+          const url = new URL(config.url, document.baseURI).href;
+          const existing = Array.from(document.scripts).find(script =>
+            script.src && (script.src === url || script.id === 'MathJax-script' ||
+              (/mathjax/i.test(script.src) &&
+               /\/(?:MathJax|latest|(?:tex|mml)(?:-mml)?-(?:chtml|svg))\.js(?:[?#]|$)/i.test(script.src))));
+          if (existing) {
+            if (!math?.startup?.promise) {
+              await new Promise((resolve, reject) => {
+                existing.addEventListener('load', resolve, { once: true });
+                existing.addEventListener('error', reject, { once: true });
+              });
+            }
+          } else {
+            // Keep site macros, delimiters and startup hooks when supplied.
+            const options = math || {};
+            window.MathJax = {
+              ...options,
+              loader: {
+                ...options.loader,
+                load: Array.from(new Set(['ui/safe', ...(options.loader?.load || [])]))
+              },
+              startup: { typeset: false, ...options.startup },
+              tex: {
+                tags: 'ams',
+                useLabelIds: true,
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                ...options.tex
+              }
+            };
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = config.url;
+              script.id = 'MathJax-script';
+              script.async = true;
+              script.onload = resolve;
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          }
+        }
+        math = window.MathJax;
+        await math.startup.promise;
+        return math;
+      })();
+    }
+    const math = await loading;
+    // A site owner can extend the v3 queue again on each navigation.
+    await math.startup.promise;
+    return math;
+  };
+
+  const unrendered = node => {
+    if (node.matches('mjx-container')) return [];
+    if (!node.querySelector('mjx-container')) return [node];
+    // In v3, scanning generated assistive MathML again produces nested output.
+    return Array.from(node.children).flatMap(unrendered);
+  };
+
+  const refresh = () => {
+    // A separate chain also serializes v3, without changing v4's startup promise.
+    queue = queue.then(async () => {
+      const notebooks = Array.from(document.querySelectorAll('.jupyter-wrapper'));
+      if (!notebooks.length && !previous.length) return;
+      if (notebooks.length === previous.length &&
+          notebooks.every((node, index) => node === previous[index])) return;
+      const math = await ready();
+      if (previous.length) {
+        math.typesetClear(previous);
+        math.texReset();
+      }
+      previous = notebooks.filter(node => node.isConnected);
+      const pending = previous.flatMap(unrendered);
+      if (pending.length) await math.typesetPromise(pending);
+    }).catch(error => console.error('mkdocs-jupyter: MathJax rendering failed', error));
+    return queue;
+  };
+
+  window.mkdocsJupyterMathJax = { refresh };
+  const start = () => {
+    if (typeof document$ !== 'undefined') document$.subscribe(refresh);
+    else refresh();
+  };
+  // Theme bundles and user-provided MathJax scripts can follow notebook content.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else start();
+})();
+
+</script>
+</body>
 </html>
