@@ -691,3 +691,31 @@ class TestModelBase:
         assert model_base.component_collections_is_dirty is True
         names = model_base.get_component_collection(0).list_component_names()
         assert names == ['TestGaussian1Name', 'NewGaussian']
+
+    def test_remove_component_rebuilds_when_per_Q_collection_was_edited(self, model_base):
+        "Regression: a template index applied to an edited per-Q collection removed the wrong one"
+        # WHEN one per-Q collection was edited directly, so it no longer lines up with the template
+        model_base.get_component_collection(0).pop('TestGaussian1Name')
+
+        # THEN
+        model_base.remove_component('TestLorentzian1Name')
+
+        # EXPECT a full rebuild instead of removing by position
+        assert model_base.component_collections_is_dirty is True
+        for i in range(len(model_base.Q)):
+            names = model_base.get_component_collection(i).list_component_names()
+            assert names == ['TestGaussian1Name']
+
+    def test_append_component_rebuilds_when_per_Q_collection_was_edited(self, model_base):
+        # WHEN one per-Q collection was edited directly, so it no longer lines up with the template
+        model_base.get_component_collection(0).pop('TestGaussian1Name')
+
+        # THEN
+        model_base.append_component(Gaussian(name='NewGaussian'))
+
+        # EXPECT a full rebuild instead of inserting at a misaligned position
+        assert model_base.component_collections_is_dirty is True
+        template_names = model_base.components.list_component_names()
+        for i in range(len(model_base.Q)):
+            names = model_base.get_component_collection(i).list_component_names()
+            assert names == template_names

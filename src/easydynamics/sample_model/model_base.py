@@ -139,10 +139,10 @@ class ModelBase(EasyDynamicsModelBase):
         component : ModelComponent | ComponentCollection
             The ModelComponent or ComponentCollection to append.
         """
-        was_current = not self.component_collections_is_dirty
+        can_patch = self._can_patch_component_collections()
         n_before = len(self._components)
         self._components.append_component(component)
-        if not was_current:
+        if not can_patch:
             self._on_components_change()
             return
         added = self._components[n_before:]
@@ -163,13 +163,13 @@ class ModelBase(EasyDynamicsModelBase):
         name : str
             The name of the ModelComponent to remove.
         """
-        was_current = not self.component_collections_is_dirty
-        before = list(self._components)
-        removed = self._components.pop(name)
-        if not was_current:
+        can_patch = self._can_patch_component_collections()
+        names = self._components.list_component_names()
+        self._components.pop(name)
+        if not can_patch:
             self._on_components_change()
             return
-        index = next(i for i, component in enumerate(before) if component is removed)
+        index = names.index(name)
         for collection in self._component_collections:
             collection.pop(index)
         self._mark_component_collections_patched()
@@ -188,9 +188,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Get the template ComponentCollection of the SampleModel.
 
-        This is the live template collection: mutating it in place (e.g. via ``append_component``)
-        is detected through its ``version`` and triggers a rebuild of the per-Q collections on next
-        use.
+        This is the live template collection: mutating it in place (e.g.
+        ``model.components.append_component(...)``, bypassing the model's own methods) is detected
+        through its ``version`` and triggers a full rebuild of the per-Q collections on next use.
 
         Returns
         -------
@@ -512,6 +512,27 @@ class ModelBase(EasyDynamicsModelBase):
         self._component_collections = []
         for _ in range(len(self.Q)):
             self._component_collections.append(copy(self._components))
+
+    def _can_patch_component_collections(self) -> bool:
+        """
+        Check whether the per-Q collections can be updated in place instead of rebuilt.
+
+        They can if they are current and each still starts with the template's components, in
+        template order. Per-Q collections edited directly (e.g. a component popped from one Q) fail
+        the check, so a full rebuild restores them rather than patching at the wrong position.
+
+        Returns
+        -------
+        bool
+            ``True`` if the per-Q collections can be patched in place.
+        """
+        if self.component_collections_is_dirty:
+            return False
+        names = self._components.list_component_names()
+        return all(
+            collection.list_component_names()[: len(names)] == names
+            for collection in self._component_collections
+        )
 
     def _mark_component_collections_patched(self) -> None:
         """

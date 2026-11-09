@@ -797,3 +797,30 @@ class TestSampleModel:
         assert sample_model.component_collections_is_dirty is True
         names = sample_model.get_component_collection(0).list_component_names()
         assert names == sample_model.components.list_component_names()
+
+    def test_append_diffusion_model_without_Q_does_not_raise(self):
+        "Regression: a diffusion model with its own Q on a Q-less SampleModel raised in zip"
+        # WHEN a SampleModel without Q whose (empty) per-Q collections are current
+        model = SampleModel(components=Gaussian(name='A'))
+        model.get_all_variables()
+        diffusion_model = BrownianTranslationalDiffusion(name='D', Q=[0.5, 1.0])
+
+        # THEN
+        model.append_diffusion_model(diffusion_model)
+
+        # EXPECT the model is added and a rebuild is scheduled instead of a patch
+        assert model.diffusion_models == [diffusion_model]
+        assert model.component_collections_is_dirty is True
+
+    def test_append_diffusion_model_rebuilds_when_collections_stale(self, sample_model):
+        # WHEN per-Q collections have not been built yet
+        new_model = BrownianTranslationalDiffusion(name='NewDiffusion', lorentzian_name='NewL')
+
+        # THEN
+        sample_model.append_diffusion_model(new_model)
+
+        # EXPECT nothing is patched; the next access rebuilds with the new model's components
+        assert sample_model.component_collections_is_dirty is True
+        collection = sample_model.get_component_collection(0)
+        for component in new_model.get_component_collections(0):
+            assert any(c is component for c in collection)

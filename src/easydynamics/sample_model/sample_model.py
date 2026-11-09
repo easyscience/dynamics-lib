@@ -190,18 +190,15 @@ class SampleModel(ModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
-        was_current = not self.component_collections_is_dirty
+        can_patch = self._can_patch_component_collections()
         diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
-        if not was_current:
+        sources = diffusion_model.get_component_collections()
+        if not can_patch or len(sources) != len(self._component_collections):
             self._component_collections_is_dirty = True
             return
         # Append the new components in place, so existing per-Q parameters are kept.
-        for target, source in zip(
-            self._component_collections,
-            diffusion_model.get_component_collections(),
-            strict=True,
-        ):
+        for target, source in zip(self._component_collections, sources, strict=True):
             for component in source:
                 target.append_component(component)
         self._mark_component_collections_patched()
@@ -231,8 +228,11 @@ class SampleModel(ModelBase):
                 f'Multiple DiffusionModels share the name {name!r}. '
                 f'Rename them to have unique names before removing.'
             )
-        was_current = not self.component_collections_is_dirty
+        can_patch = self._can_patch_component_collections()
         removed = self.diffusion_models.pop(matches[0])
+        if not can_patch:
+            self._component_collections_is_dirty = True
+            return
         removed_ids = {
             id(component)
             for collection in removed.get_component_collections()
@@ -242,7 +242,7 @@ class SampleModel(ModelBase):
             [i for i, component in enumerate(target) if id(component) in removed_ids]
             for target in self._component_collections
         ]
-        if not was_current or sum(map(len, found)) != len(removed_ids):
+        if sum(map(len, found)) != len(removed_ids):
             self._component_collections_is_dirty = True
             return
         # Remove only this model's components in place, so the other per-Q parameters are kept.
