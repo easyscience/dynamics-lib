@@ -18,7 +18,7 @@ from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
-from easydynamics.utils.plotting import add_x_axis_coord
+from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import convert_value_unit
 from easydynamics.variable import Parameter
@@ -492,7 +492,6 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         markers = itertools.cycle(['o', 's', 'D', '^', 'v', '<', '>'])
 
         plot_kwargs = {
-            'coords': [x_axis],
             'title': self.display_name,
             'linestyle': {},
             'marker': {},
@@ -537,7 +536,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         data_and_model = sc.Dataset(data_arrays)
         data_and_model.update(model_arrays)
 
-        return pp.plot(add_x_axis_coord(data_and_model, x_axis), **plot_kwargs)
+        return pp.plot(with_x_axis_dim(data_and_model, x_axis), **plot_kwargs)
 
     def calculate_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
         """

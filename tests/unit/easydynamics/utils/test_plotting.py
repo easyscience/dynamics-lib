@@ -7,11 +7,11 @@ from unittest.mock import patch
 import pytest
 import scipp as sc
 
-from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.plotting import with_x_axis_dim
 
 
-class TestAdd_x_axis_coord:
+class TestWith_x_axis_dim:
     @pytest.fixture
     def dataset(self):
         return sc.Dataset(
@@ -27,28 +27,30 @@ class TestAdd_x_axis_coord:
         ],
         ids=['Q', 'Q_squared'],
     )
-    def test_add_x_axis_coord(self, dataset, x_axis, expected_values, expected_unit):
+    def test_with_x_axis_dim(self, dataset, x_axis, expected_values, expected_unit):
         # THEN
-        result = add_x_axis_coord(dataset, x_axis)
+        result = with_x_axis_dim(dataset, x_axis)
 
-        # EXPECT the coordinate is added and the data is unchanged
+        # EXPECT the coordinate is added as the dimension and the values are unchanged
+        assert result.dims == (x_axis,)
         assert sc.identical(
             result.coords[x_axis],
-            sc.array(dims=['Q'], values=expected_values, unit=expected_unit),
+            sc.array(dims=[x_axis], values=expected_values, unit=expected_unit),
         )
-        assert sc.identical(result['width'].data, dataset['width'].data)
+        assert sc.identical(result['width'].data, dataset['width'].data.rename_dims(Q=x_axis))
 
-    def test_add_x_axis_coord_does_not_modify_input(self, dataset):
+    def test_with_x_axis_dim_does_not_modify_input(self, dataset):
         # THEN
-        add_x_axis_coord(dataset, 'Q^2')
+        with_x_axis_dim(dataset, 'Q^2')
 
         # EXPECT
         assert 'Q^2' not in dataset.coords
+        assert dataset.dims == ('Q',)
 
-    def test_add_x_axis_coord_invalid_x_axis_raises(self, dataset):
+    def test_with_x_axis_dim_invalid_x_axis_raises(self, dataset):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='x_axis must be one of'):
-            add_x_axis_coord(dataset, 'Q^3')
+            with_x_axis_dim(dataset, 'Q^3')
 
 
 class TestSlicerplot_with_residuals:

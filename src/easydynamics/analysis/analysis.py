@@ -23,8 +23,8 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
-from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
@@ -678,7 +678,7 @@ class Analysis(AnalysisBase):
             A Plopp WidgetFigure containing the plot of the parameters.
         """
 
-        ds = add_x_axis_coord(self.parameters_to_dataset(), x_axis)
+        ds = with_x_axis_dim(self.parameters_to_dataset(), x_axis)
 
         # None or an empty list both mean 'plot all parameters'.
         if not names:
@@ -696,7 +696,6 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'coords': [x_axis],
             'linestyle': dict.fromkeys(names, 'none'),
             'marker': dict.fromkeys(names, 'o'),
             'markerfacecolor': dict.fromkeys(names, 'none'),

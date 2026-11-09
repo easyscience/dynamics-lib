@@ -682,8 +682,9 @@ class TestAnalysis:
         for name, data_array in dataset_passed.items():
             assert sc.identical(data_array, fake_dataset[name])
 
-        # Check default kwargs
-        assert kwargs['coords'] == ['Q']
+        # Check default kwargs. No coords kwarg: plopp's coords= drops the names that the
+        # per-line style dicts are keyed by.
+        assert 'coords' not in kwargs
 
         assert 'linestyle' in kwargs
         assert kwargs['linestyle'] == {
@@ -717,10 +718,30 @@ class TestAnalysis:
         with patch('plopp.plot') as mock_plot:
             analysis.plot_parameters(x_axis='Q^2')
 
-        # EXPECT the parameters are plotted against a Q^2 coordinate
+        # EXPECT the parameters are plotted against a Q^2 dimension
         args, kwargs = mock_plot.call_args
-        assert kwargs['coords'] == ['Q^2']
-        assert sc.identical(args[0]['width'].coords['Q^2'], Q**2)
+        assert 'coords' not in kwargs
+        assert args[0]['width'].dims == ('Q^2',)
+        assert sc.identical(args[0]['width'].coords['Q^2'], (Q**2).rename_dims(Q='Q^2'))
+
+    @pytest.mark.parametrize('x_axis', ['Q', 'Q^2'])
+    def test_plot_parameters_applies_styles(self, analysis, x_axis):
+        # WHEN rendering for real, without mocking plopp
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        fake_dataset = sc.Dataset(
+            data={'width': sc.array(dims=['Q'], values=[0.1, 0.2], unit='meV')},
+            coords={'Q': Q},
+        )
+        analysis.parameters_to_dataset = MagicMock(return_value=fake_dataset)
+
+        # THEN
+        fig = analysis.plot_parameters(x_axis=x_axis, marker={'width': 's'})
+
+        # EXPECT the per-line styles reach the line, which is labelled by name
+        lines = {line.get_label(): line for line in fig.ax.get_lines()}
+        assert lines['width'].get_linestyle() == 'None'
+        assert lines['width'].get_marker() == 's'
+        assert lines['width'].get_markerfacecolor() == 'none'
 
     def test_fix_and_free_energy_offset(self, analysis):
         # EXPECT

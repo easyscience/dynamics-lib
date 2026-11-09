@@ -19,23 +19,26 @@ Q_AXIS_TRANSFORMS: dict[str, Callable[[sc.Variable], sc.Variable]] = {
 }
 
 
-def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
+def with_x_axis_dim(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
-    Add an x_axis coordinate computed from the Q coordinate, for plotting against it.
+    Make x_axis, computed from the Q coordinate, the dimension to plot against.
 
-    Only the coordinate is transformed; the values at each Q are unchanged.
+    Only the coordinate is transformed; the values at each Q are unchanged. The x_axis coordinate
+    is made the dimension coordinate here rather than by passing ``coords=`` to ``plopp.plot``:
+    plopp implements ``coords=`` with ``DataArray.rename_dims``, which drops the DataArray's name,
+    so per-line styles keyed by name (``linestyle={name: ...}``) would silently not be applied.
 
     Parameters
     ----------
     data : sc.Dataset
-        Dataset with a 'Q' coordinate.
+        Dataset with a 'Q' dimension and coordinate.
     x_axis : str
-        Name of the axis to add, one of the keys of ``Q_AXIS_TRANSFORMS``.
+        Name of the axis to plot against, one of the keys of ``Q_AXIS_TRANSFORMS``.
 
     Returns
     -------
     sc.Dataset
-        A copy of data with the x_axis coordinate added.
+        A copy of data with the x_axis coordinate added and used as the dimension.
 
     Raises
     ------
@@ -44,7 +47,10 @@ def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
     if x_axis not in Q_AXIS_TRANSFORMS:
         raise ValueError(f"x_axis must be one of {list(Q_AXIS_TRANSFORMS)}, got '{x_axis}'.")
-    return data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
+    out = data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
+    if x_axis != 'Q':
+        out = out.rename_dims(Q=x_axis)
+    return out
 
 
 def slicerplot_with_residuals(
