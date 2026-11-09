@@ -5,6 +5,7 @@ from collections.abc import Iterable
 
 import numpy as np
 import scipp as sc
+from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.experiment import Experiment
@@ -614,6 +615,30 @@ class AnalysisBase(EasyDynamicsModelBase):
             'color': color,
             'markerfacecolor': markerfacecolor,
         }
+
+    def _label_components_by_display_name(self, fig: WidgetFigure, Q_index: int) -> None:
+        """
+        Show the display names of the components in the legend of a figure.
+
+        Plopp labels lines by DataGroup key, which must stay the unique name, so lines are
+        relabelled after plotting.
+
+        Parameters
+        ----------
+        fig : WidgetFigure
+            The figure holding the lines to relabel.
+        Q_index : int
+            The Q index to read the components from.
+        """
+        sample = self.sample_model.get_component_collection(Q_index=Q_index)
+        background = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
+        )
+        labels = {component.name: component.display_name for component in (*sample, *background)}
+        for line in fig.ax.get_lines():
+            if line.get_label() in labels:
+                line.set_label(labels[line.get_label()])
+        fig.canvas.update_legend()
 
     #############
     # Dunder methods
