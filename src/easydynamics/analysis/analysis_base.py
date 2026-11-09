@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from collections.abc import Iterable
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
-from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.experiment import Experiment
@@ -14,6 +15,11 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.variable import Parameter
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from plopp.backends.matplotlib.figure import WidgetFigure
 
 
 class AnalysisBase(EasyDynamicsModelBase):

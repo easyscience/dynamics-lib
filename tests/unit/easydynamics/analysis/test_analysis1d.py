@@ -543,6 +543,14 @@ class TestAnalysis1d:
         # EXPECT
         assert self._legend_labels(fig) == ['Data', 'Model']
 
+    def test_plot_without_components_does_not_relabel(self, analysis1d):
+        # THEN
+        with patch.object(analysis1d, '_label_components_by_display_name') as relabel:
+            analysis1d.plot_data_and_model(plot_components=False)
+
+        # EXPECT
+        relabel.assert_not_called()
+
     def test_plot_data_and_model_no_Q_index_raises(self, analysis1d):
         # WHEN
         analysis1d._Q_index = None
