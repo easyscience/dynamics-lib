@@ -47,6 +47,20 @@ class TestWith_x_axis_dim:
         assert 'Q^2' not in dataset.coords
         assert dataset.dims == ('Q',)
 
+    @pytest.mark.parametrize('x_axis', ['Q', 'Q^2'])
+    def test_with_x_axis_dim_Q_coord_on_differently_named_dim(self, x_axis):
+        # WHEN the Q coordinate lies along a dimension that is not named 'Q'
+        dataset = sc.Dataset(
+            data={'width': sc.array(dims=['q'], values=[0.1, 0.2], unit='meV')},
+            coords={'Q': sc.array(dims=['q'], values=[0.5, 2.0], unit='1/angstrom')},
+        )
+
+        # THEN
+        result = with_x_axis_dim(dataset, x_axis)
+
+        # EXPECT that dimension is renamed, so the data is still plotted against x_axis
+        assert result.dims == (x_axis,)
+
     def test_with_x_axis_dim_invalid_x_axis_raises(self, dataset):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='x_axis must be one of'):

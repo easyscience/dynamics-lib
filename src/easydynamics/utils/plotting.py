@@ -24,14 +24,15 @@ def with_x_axis_dim(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     Make x_axis, computed from the Q coordinate, the dimension to plot against.
 
     Only the coordinate is transformed; the values at each Q are unchanged. The x_axis coordinate
-    is made the dimension coordinate here rather than by passing ``coords=`` to ``plopp.plot``:
-    plopp implements ``coords=`` with ``DataArray.rename_dims``, which drops the DataArray's name,
-    so per-line styles keyed by name (``linestyle={name: ...}``) would silently not be applied.
+    is made the dimension coordinate here rather than by passing ``coords=`` to ``plopp.plot``: as
+    of plopp 26.10 / scipp 26.9, plopp implements ``coords=`` with ``DataArray.rename_dims``, which
+    drops the DataArray's name, so per-line styles keyed by name (``linestyle={name: ...}``) would
+    silently not be applied.
 
     Parameters
     ----------
     data : sc.Dataset
-        Dataset with a 'Q' dimension and coordinate.
+        Dataset with a 1-D 'Q' coordinate. Its dimension need not be named 'Q'.
     x_axis : str
         Name of the axis to plot against, one of the keys of ``Q_AXIS_TRANSFORMS``.
 
@@ -47,9 +48,10 @@ def with_x_axis_dim(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
     if x_axis not in Q_AXIS_TRANSFORMS:
         raise ValueError(f"x_axis must be one of {list(Q_AXIS_TRANSFORMS)}, got '{x_axis}'.")
-    out = data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
-    if x_axis != 'Q':
-        out = out.rename_dims(Q=x_axis)
+    Q = data.coords['Q']
+    out = data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](Q)})
+    if Q.dim != x_axis:
+        out = out.rename_dims({Q.dim: x_axis})
     return out
 
 

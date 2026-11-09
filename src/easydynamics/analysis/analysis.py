@@ -662,7 +662,8 @@ class Analysis(AnalysisBase):
             e.g., a Fickian diffusion width (D*Q^2) as a straight line.
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
-            title, linestyle, marker, color).
+            title, linestyle, marker, color). Use x_axis rather than plopp's coords to choose the
+            x-axis: passing coords makes plopp ignore per-parameter styles.
 
         Raises
         ------

@@ -430,7 +430,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
             'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.
         **kwargs : dict[str, Any]
-            Additional keyword arguments to pass to the plotting function.
+            Additional keyword arguments to pass to the plotting function. Use x_axis rather than
+            plopp's coords to choose the x-axis: passing coords makes plopp ignore the per-line
+            styles.
 
         Returns
         -------
