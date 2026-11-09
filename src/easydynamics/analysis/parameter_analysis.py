@@ -444,14 +444,16 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If the units of the specified parameters are not consistent, or if x_axis is not one of
-            the supported axes.
+            If the units of the specified parameters are not consistent, if x_axis is not one of
+            the supported axes, or if Q is not 1D or does not have a unit of inverse length.
         RuntimeError
             If plot() is called outside of a Jupyter notebook environment.
         """
 
         if not _in_notebook():
             raise RuntimeError('plot() can only be used in a Jupyter notebook environment.')
+
+        self._verify_Q(Q)
 
         if self.parameters is None:
             raise ValueError('No parameters available to plot.')
@@ -567,7 +569,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If any parameter name from the bindings is not found in the parameters Dataset.
+            If any parameter name from the bindings is not found in the parameters Dataset, or if Q
+            is not 1D or does not have a unit of inverse length.
 
         TypeError
             If bindings is not a list of FitBinding objects, or if Q is not a sc.Variable or None.
@@ -582,8 +585,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if not isinstance(bindings, list) or not all(isinstance(b, FitBinding) for b in bindings):
             raise TypeError('bindings must be a list of FitBinding objects.')
 
-        if Q is not None and not isinstance(Q, sc.Variable):
-            raise TypeError(f'Q must be a sc.Variable or None. Got {type(Q)}.')
+        self._verify_Q(Q)
 
         arrays = {}
 
@@ -751,6 +753,34 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 raise ValueError(f"Parameter name '{names}' not found in parameters Dataset.")
             names = [names]
         return names
+
+    @staticmethod
+    def _verify_Q(Q: sc.Variable | None) -> None:
+        """
+        Verify that Q is None or a 1D sc.Variable with a unit of inverse length.
+
+        Parameters
+        ----------
+        Q : sc.Variable | None
+            The Q grid to verify.
+
+        Raises
+        ------
+        TypeError
+            If Q is not a sc.Variable or None.
+        ValueError
+            If Q is not 1D, or if its unit is not an inverse length.
+        """
+        if Q is None:
+            return
+        if not isinstance(Q, sc.Variable):
+            raise TypeError(f'Q must be a sc.Variable or None. Got {type(Q)}.')
+        if Q.ndim != 1:
+            raise ValueError(f'Q must be 1D. Got {Q.ndim} dimensions.')
+        try:
+            Q.to(unit='1/angstrom')
+        except sc.UnitError:
+            raise ValueError(f'Q must have a unit of inverse length. Got {Q.unit}.') from None
 
     #############
     # Private methods

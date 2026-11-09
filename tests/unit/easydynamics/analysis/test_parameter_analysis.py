@@ -676,6 +676,20 @@ class TestParameterAnalysis:
             [parameter_analysis.bindings[0]], Q=Q
         )
 
+    def test_plot_invalid_Q_raises_without_bindings(self, parameter_analysis):
+        # WHEN
+        parameter_analysis.clear_bindings()
+
+        # THEN EXPECT
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(TypeError, match=r'Q must be a sc\.Variable or None'),
+        ):
+            parameter_analysis.plot(Q=[0.1, 0.2])
+
     def test_plot_data_and_model_on_different_Q_grids(self, parameter_analysis):
         # WHEN the model is evaluated on a finer grid than the data
         Q = sc.linspace('Q', 0.1, 0.2, 11, unit='1/angstrom')
@@ -803,10 +817,25 @@ class TestParameterAnalysis:
         assert da.coords['Q'].unit == parameter_analysis.parameters['parameter1'].coords['Q'].unit
         np.testing.assert_allclose(mock_callable.call_args.args[0], [0.1, 0.15, 0.2])
 
-    def test_calculate_model_dataset_Q_wrong_type_raises(self, parameter_analysis):
+    @pytest.mark.parametrize(
+        'Q, expected_exception, match',
+        [
+            ([0.1, 0.2], TypeError, r'Q must be a sc\.Variable or None'),
+            (
+                sc.ones(dims=['Q', 'x'], shape=[2, 2], unit='1/angstrom'),
+                ValueError,
+                'Q must be 1D',
+            ),
+            (sc.linspace('Q', 0.1, 0.2, 3, unit='meV'), ValueError, 'inverse length'),
+        ],
+        ids=['not_a_variable', 'not_1d', 'wrong_unit'],
+    )
+    def test_calculate_model_dataset_invalid_Q_raises(
+        self, parameter_analysis, Q, expected_exception, match
+    ):
         # THEN EXPECT
-        with pytest.raises(TypeError, match=r'Q must be a sc\.Variable or None'):
-            parameter_analysis.calculate_model_dataset(parameter_analysis.bindings, Q=[0.1, 0.2])
+        with pytest.raises(expected_exception, match=match):
+            parameter_analysis.calculate_model_dataset(parameter_analysis.bindings, Q=Q)
 
     def test_calculate_model_dataset_multiple_bindings(self, parameter_analysis):
         # WHEN
