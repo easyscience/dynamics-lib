@@ -654,6 +654,26 @@ class SampleModel(ModelBase):
                 for component in source:
                     target.append_component(component)
 
+    def _generated_component_names(self, Q_index: int) -> list[str]:
+        """
+        Get the names of the diffusion-model components in a per-Q collection.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index of the collection.
+
+        Returns
+        -------
+        list[str]
+            The names of every diffusion model's components at this Q, in model order.
+        """
+        return [
+            name
+            for diffusion_model in self.diffusion_models
+            for name in diffusion_model.get_component_collections(Q_index).list_component_names()
+        ]
+
     def _on_diffusion_models_change(self) -> None:
         """Handle changes to the diffusion models."""
         for diffusion_model in self.diffusion_models:

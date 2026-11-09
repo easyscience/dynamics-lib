@@ -517,9 +517,10 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Check whether the per-Q collections can be updated in place instead of rebuilt.
 
-        They can if they are current and each still starts with the template's components, in
-        template order. Per-Q collections edited directly (e.g. a component popped from one Q) fail
-        the check, so a full rebuild restores them rather than patching at the wrong position.
+        They can if they are current, there is one per Q, and each holds exactly the components a
+        rebuild would produce, by name and in order. Per-Q collections edited directly (e.g. a
+        component popped from one Q) fail the check, so a full rebuild restores them rather than
+        patching at the wrong position.
 
         Returns
         -------
@@ -528,11 +529,32 @@ class ModelBase(EasyDynamicsModelBase):
         """
         if self.component_collections_is_dirty:
             return False
+        if len(self._component_collections) != (0 if self.Q is None else len(self.Q)):
+            return False
         names = self._components.list_component_names()
         return all(
-            collection.list_component_names()[: len(names)] == names
-            for collection in self._component_collections
+            collection.list_component_names() == names + self._generated_component_names(Q_index)
+            for Q_index, collection in enumerate(self._component_collections)
         )
+
+    def _generated_component_names(
+        self,
+        Q_index: int,  # ruff: ignore[unused-method-argument]
+    ) -> list[str]:
+        """
+        Get the names of components added to a per-Q collection after the template's.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index of the collection.
+
+        Returns
+        -------
+        list[str]
+            Empty for a plain model; subclasses that add generated components override this.
+        """
+        return []
 
     def _mark_component_collections_patched(self) -> None:
         """

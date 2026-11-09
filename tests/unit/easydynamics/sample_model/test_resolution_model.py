@@ -345,8 +345,8 @@ class TestResolutionModel:
         resolution_model = ResolutionModel.from_sample_model(sample_model)
         calibrated = resolution_model.get_component_collection(0)
 
-        # THEN EXPECT mutations that would rebuild the collections from the unfitted
-        # template fail loudly instead of silently discarding the calibration
+        # THEN EXPECT mutations that would change the collections from the unfitted
+        # template fail loudly instead of silently corrupting the calibration
         with pytest.raises(RuntimeError, match='calibrated'):
             resolution_model.append_component(Gaussian(name='Extra'))
         with pytest.raises(RuntimeError, match='calibrated'):

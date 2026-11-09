@@ -824,3 +824,26 @@ class TestSampleModel:
         collection = sample_model.get_component_collection(0)
         for component in new_model.get_component_collections(0):
             assert any(c is component for c in collection)
+
+    @pytest.mark.filterwarnings('ignore:Duplicate component names')
+    def test_remove_component_rebuilds_when_edit_hidden_by_name_clash(self):
+        "Regression: a diffusion component sharing a template name masked a per-Q edit"
+        # WHEN a template component and a diffusion component share the name 'L', and the
+        # template 'L' was popped from one per-Q collection directly
+        diffusion_model = BrownianTranslationalDiffusion(name='D', lorentzian_name='L')
+        model = SampleModel(
+            components=ComponentCollection(components=[Gaussian(name='A'), Lorentzian(name='L')]),
+            diffusion_models=diffusion_model,
+            Q=[0.5, 1.0],
+        )
+        model.get_component_collection(0).pop(1)
+
+        # THEN
+        model.remove_component('L')
+
+        # EXPECT a full rebuild, so the diffusion component survives at every Q
+        assert model.component_collections_is_dirty is True
+        for i in range(len(model.Q)):
+            collection = model.get_component_collection(i)
+            for component in diffusion_model.get_component_collections(i):
+                assert any(c is component for c in collection)

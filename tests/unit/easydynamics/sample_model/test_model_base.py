@@ -719,3 +719,15 @@ class TestModelBase:
         for i in range(len(model_base.Q)):
             names = model_base.get_component_collection(i).list_component_names()
             assert names == template_names
+
+    def test_append_component_rebuilds_when_collection_count_does_not_match_Q(self, model_base):
+        # WHEN the collections are flagged current but there is not one per Q
+        model_base._component_collections = []
+        model_base._component_collections_is_dirty = False
+
+        # THEN
+        model_base.append_component(Gaussian(name='NewGaussian'))
+
+        # EXPECT a full rebuild instead of a no-op patch that leaves no collections
+        assert model_base.component_collections_is_dirty is True
+        assert len(model_base.get_component_collection(0)) == 3
