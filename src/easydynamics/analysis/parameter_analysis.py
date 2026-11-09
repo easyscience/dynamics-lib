@@ -417,6 +417,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         self,
         names: str | list[str] | None = None,
         x_axis: str = 'Q',
+        Q: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> WidgetFigure:
         """
@@ -429,6 +430,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         x_axis : str, default='Q'
             Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
             'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.
+        Q : sc.Variable | None, default=None
+            Optional Q grid to evaluate the model on, e.g. a finer grid than the data. If None, the
+            Q values of the data are used.
         **kwargs : dict[str, Any]
             Additional keyword arguments to pass to the plotting function.
 
@@ -480,7 +484,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 if any(target.dataset_key in names for target in b.get_targets())
             ]
             if relevant_bindings:
-                full_model_dataset = self.calculate_model_dataset(relevant_bindings)
+                full_model_dataset = self.calculate_model_dataset(relevant_bindings, Q=Q)
 
         # Check that the units of the specified parameters are consistent.
         units = [self.parameters[name].unit for name in names]
@@ -534,12 +538,16 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         # Update kwargs with user provided kwargs.
         plot_kwargs.update(kwargs)
 
-        data_and_model = sc.Dataset(data_arrays)
-        data_and_model.update(model_arrays)
+        # Data and model can be on different Q grids, so they are plotted as separate Datasets.
+        data_and_model = dict(add_x_axis_coord(sc.Dataset(data_arrays), x_axis))
+        if model_arrays:
+            data_and_model.update(add_x_axis_coord(sc.Dataset(model_arrays), x_axis))
 
-        return pp.plot(add_x_axis_coord(data_and_model, x_axis), **plot_kwargs)
+        return pp.plot(data_and_model, **plot_kwargs)
 
-    def calculate_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
+    def calculate_model_dataset(
+        self, bindings: list[FitBinding], Q: sc.Variable | None = None
+    ) -> sc.Dataset:
         """
         Evaluate all bindings into a sc.Dataset of model predictions.
 
@@ -547,6 +555,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         ----------
         bindings : list[FitBinding]
             The bindings to evaluate.
+        Q : sc.Variable | None, default=None
+            Optional Q grid to evaluate the model on, e.g. a finer grid than the data. If None, the
+            Q values of the data are used.
 
         Returns
         -------
@@ -559,7 +570,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             If any parameter name from the bindings is not found in the parameters Dataset.
 
         TypeError
-            If bindings is not a list of FitBinding objects.
+            If bindings is not a list of FitBinding objects, or if Q is not a sc.Variable or None.
         """
 
         if self.parameters is None:
@@ -571,6 +582,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if not isinstance(bindings, list) or not all(isinstance(b, FitBinding) for b in bindings):
             raise TypeError('bindings must be a list of FitBinding objects.')
 
+        if Q is not None and not isinstance(Q, sc.Variable):
+            raise TypeError(f'Q must be a sc.Variable or None. Got {type(Q)}.')
+
         arrays = {}
 
         for b in bindings:
@@ -581,14 +595,14 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                         f'not found in parameters Dataset.'
                     )
                 da = self.parameters[target.dataset_key]
-                x = da.coords['Q']
+                x = da.coords['Q'] if Q is None else Q.to(unit=da.coords['Q'].unit, dtype=float)
                 x_factor, y_factor = self._get_unit_conversions(target)
 
                 y_model = target.function(x.values * x_factor)
                 y_model = y_model / y_factor
 
                 arrays[target.label] = sc.DataArray(
-                    data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
+                    data=sc.array(dims=x.dims, values=y_model, unit=da.unit),
                     coords={'Q': x},
                 )
         return sc.Dataset(arrays)
