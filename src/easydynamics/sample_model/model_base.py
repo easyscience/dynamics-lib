@@ -425,12 +425,24 @@ class ModelBase(EasyDynamicsModelBase):
             self._y_unit = unit_str
 
     def fix_all_parameters(self) -> None:
-        """Fix all Parameters in all ComponentCollections."""
+        """
+        Fix all Parameters in all ComponentCollections.
+
+        The template components are fixed too, so the call also takes effect on per-Q collections
+        built later, e.g. when Q is set after this call.
+        """
+        self._components.fix_all_parameters()
         for par in self.get_all_variables():
             par.fixed = True
 
     def free_all_parameters(self) -> None:
-        """Free all Parameters in all ComponentCollections."""
+        """
+        Free all Parameters in all ComponentCollections.
+
+        The template components are freed too, so the call also takes effect on per-Q collections
+        built later, e.g. when Q is set after this call.
+        """
+        self._components.free_all_parameters()
         for par in self.get_all_variables():
             par.fixed = False
 

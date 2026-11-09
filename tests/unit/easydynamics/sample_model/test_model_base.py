@@ -127,6 +127,50 @@ class TestModelBase:
         for par in model_base.get_all_variables():
             assert par.fixed is False
 
+    def test_fix_all_parameters_before_Q_applies_to_later_collections(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(width=0.01))
+
+        # THEN
+        model.fix_all_parameters()
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the template and the per-Q copies built from it are fixed
+        assert all(par.fixed for par in model.components.get_fittable_parameters())
+        all_vars = model.get_all_variables()
+        assert len(all_vars) == 6
+        assert all(par.fixed for par in all_vars)
+
+    def test_free_all_parameters_before_Q_applies_to_later_collections(self):
+        # WHEN
+        gaussian = Gaussian(width=0.01)
+        gaussian.fix_all_parameters()
+        model = ModelBase(components=gaussian)
+
+        # THEN
+        model.free_all_parameters()
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the template and the per-Q copies built from it are free
+        assert not any(par.fixed for par in model.components.get_fittable_parameters())
+        all_vars = model.get_all_variables()
+        assert len(all_vars) == 6
+        assert not any(par.fixed for par in all_vars)
+
+    def test_fix_all_parameters_with_Q_keeps_per_Q_collections(self, model_base):
+        # WHEN
+        collection = model_base.get_component_collection(Q_index=0)
+        collection[0].area.value = 5.0
+
+        # THEN
+        model_base.fix_all_parameters()
+
+        # EXPECT the per-Q collections are fixed in place, not rebuilt, and the
+        # template is fixed so a later rebuild also comes out fixed
+        assert model_base.get_component_collection(Q_index=0) is collection
+        assert collection[0].area.value == pytest.approx(5.0)
+        assert all(par.fixed for par in model_base.components.get_fittable_parameters())
+
     def test_get_all_variables(self, model_base):
         # WHEN
         all_vars = model_base.get_all_variables()
