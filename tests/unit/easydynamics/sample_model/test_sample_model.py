@@ -719,3 +719,81 @@ class TestSampleModel:
             model.convert_x_unit('ueV')
         # EXPECT the model's own x_unit to be rolled back to the original
         assert model.x_unit == original_unit
+
+    #############
+    # Incremental per-Q updates (issue #220)
+    #############
+
+    def test_append_component_inserts_before_diffusion_components(self, sample_model):
+        # WHEN per-Q collections are built
+        _ = sample_model.get_component_collection(0)
+
+        # THEN
+        sample_model.append_component(Gaussian(name='NewGaussian'))
+
+        # EXPECT the order matches a full rebuild: template components first
+        patched = [
+            sample_model.get_component_collection(i).list_component_names()
+            for i in range(len(sample_model.Q))
+        ]
+        sample_model._generate_component_collections()
+        rebuilt = [
+            sample_model.get_component_collection(i).list_component_names()
+            for i in range(len(sample_model.Q))
+        ]
+        assert patched == rebuilt
+
+    def test_append_diffusion_model_keeps_per_Q_state(self, sample_model):
+        # WHEN per-Q collections are built and one per-Q parameter is fitted
+        width = sample_model.get_component_collection(1)['TestGaussian1Name'].width
+        width.value = 0.123
+        version = sample_model.state_version
+        new_model = BrownianTranslationalDiffusion(name='NewDiffusion', lorentzian_name='NewL')
+
+        # THEN
+        sample_model.append_diffusion_model(new_model)
+
+        # EXPECT the new model's components are added at every Q, and the fitted value is kept
+        for i in range(len(sample_model.Q)):
+            collection = sample_model.get_component_collection(i)
+            for component in new_model.get_component_collections(i):
+                assert any(c is component for c in collection)
+        assert sample_model.get_component_collection(1)['TestGaussian1Name'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert sample_model.state_version > version
+        assert sample_model.component_collections_is_dirty is False
+
+    def test_remove_diffusion_model_keeps_per_Q_state(self, sample_model):
+        # WHEN per-Q collections are built and one per-Q parameter is fitted
+        width = sample_model.get_component_collection(1)['TestGaussian1Name'].width
+        width.value = 0.123
+        removed = sample_model.diffusion_models[0]
+        version = sample_model.state_version
+
+        # THEN
+        sample_model.remove_diffusion_model('DiffusionModelName')
+
+        # EXPECT only the template components remain, with the fitted value kept
+        template_names = sample_model.components.list_component_names()
+        for i in range(len(sample_model.Q)):
+            collection = sample_model.get_component_collection(i)
+            assert collection.list_component_names() == template_names
+            for component in removed.get_component_collections(i):
+                assert not any(c is component for c in collection)
+        assert sample_model.get_component_collection(1)['TestGaussian1Name'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert sample_model.state_version > version
+        assert sample_model.component_collections_is_dirty is False
+
+    def test_remove_diffusion_model_rebuilds_when_components_not_found(self, sample_model):
+        # WHEN per-Q collections are built, but the diffusion model has since regenerated its own
+        _ = sample_model.get_component_collection(0)
+        sample_model.diffusion_models[0].create_component_collections()
+
+        # THEN
+        sample_model.remove_diffusion_model('DiffusionModelName')
+
+        # EXPECT a full rebuild is scheduled instead of a partial in-place removal
+        assert sample_model.component_collections_is_dirty is True
+        names = sample_model.get_component_collection(0).list_component_names()
+        assert names == sample_model.components.list_component_names()

@@ -190,9 +190,21 @@ class SampleModel(ModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
+        was_current = not self.component_collections_is_dirty
         diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
-        self._component_collections_is_dirty = True
+        if not was_current:
+            self._component_collections_is_dirty = True
+            return
+        # Append the new components in place, so existing per-Q parameters are kept.
+        for target, source in zip(
+            self._component_collections,
+            diffusion_model.get_component_collections(),
+            strict=True,
+        ):
+            for component in source:
+                target.append_component(component)
+        self._mark_component_collections_patched()
 
     def remove_diffusion_model(self, name: str) -> None:
         """
@@ -219,8 +231,25 @@ class SampleModel(ModelBase):
                 f'Multiple DiffusionModels share the name {name!r}. '
                 f'Rename them to have unique names before removing.'
             )
-        del self.diffusion_models[matches[0]]
-        self._component_collections_is_dirty = True
+        was_current = not self.component_collections_is_dirty
+        removed = self.diffusion_models.pop(matches[0])
+        removed_ids = {
+            id(component)
+            for collection in removed.get_component_collections()
+            for component in collection
+        }
+        found = [
+            [i for i, component in enumerate(target) if id(component) in removed_ids]
+            for target in self._component_collections
+        ]
+        if not was_current or sum(map(len, found)) != len(removed_ids):
+            self._component_collections_is_dirty = True
+            return
+        # Remove only this model's components in place, so the other per-Q parameters are kept.
+        for target, indices in zip(self._component_collections, found, strict=True):
+            for index in reversed(indices):
+                target.pop(index)
+        self._mark_component_collections_patched()
 
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""

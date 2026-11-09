@@ -616,3 +616,78 @@ class TestModelBase:
         extra = Gaussian(name='Reference', area=10.0, center=0.0, width=1.0).evaluate(x)
         for before, after in zip(result_before, result_after, strict=True):
             np.testing.assert_allclose(after, before + extra, rtol=1e-10)
+
+    #############
+    # Incremental per-Q updates (issue #220)
+    #############
+
+    def test_append_component_keeps_per_Q_state(self, model_base):
+        # WHEN per-Q collections are built and one per-Q parameter is fitted and fixed
+        width = model_base.get_component_collection(1)['TestGaussian1Name'].width
+        width.value = 0.123
+        width.fixed = True
+        version = model_base.state_version
+
+        # THEN
+        model_base.append_component(Gaussian(name='NewGaussian', area=3.0))
+
+        # EXPECT the per-Q parameter is untouched and every Q gets its own copy of the new one
+        assert model_base.get_component_collection(1)['TestGaussian1Name'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert width.fixed is True
+        new_components = [
+            model_base.get_component_collection(i)['NewGaussian'] for i in range(len(model_base.Q))
+        ]
+        assert all(c is not model_base.components['NewGaussian'] for c in new_components)
+        assert len({id(c.area) for c in new_components}) == len(model_base.Q)
+        assert all(c.area.value == pytest.approx(3.0) for c in new_components)
+        assert model_base.state_version > version
+        assert model_base.component_collections_is_dirty is False
+
+    def test_append_component_collection_inserts_in_template_order(self, model_base):
+        # WHEN per-Q collections are built
+        _ = model_base.get_component_collection(0)
+
+        # THEN
+        model_base.append_component(
+            ComponentCollection(components=[Lorentzian(name='NewL'), Gaussian(name='NewG')])
+        )
+
+        # EXPECT every per-Q collection lists the components in template order
+        template_names = model_base.components.list_component_names()
+        for i in range(len(model_base.Q)):
+            names = model_base.get_component_collection(i).list_component_names()
+            assert names == template_names
+
+    def test_remove_component_keeps_per_Q_state(self, model_base):
+        # WHEN per-Q collections are built and one per-Q parameter is fitted and fixed
+        width = model_base.get_component_collection(1)['TestGaussian1Name'].width
+        width.value = 0.123
+        width.fixed = True
+        version = model_base.state_version
+
+        # THEN removing an unrelated component
+        model_base.remove_component('TestLorentzian1Name')
+
+        # EXPECT it is gone at every Q, and the remaining per-Q parameter is untouched
+        for i in range(len(model_base.Q)):
+            names = model_base.get_component_collection(i).list_component_names()
+            assert names == ['TestGaussian1Name']
+        assert model_base.get_component_collection(1)['TestGaussian1Name'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert width.fixed is True
+        assert model_base.state_version > version
+        assert model_base.component_collections_is_dirty is False
+
+    def test_append_and_remove_component_rebuild_when_collections_stale(self, model_base):
+        # WHEN per-Q collections have not been built yet
+        assert model_base.component_collections_is_dirty is True
+
+        # THEN
+        model_base.append_component(Gaussian(name='NewGaussian'))
+        model_base.remove_component('TestLorentzian1Name')
+
+        # EXPECT nothing is patched; the next access rebuilds from the template
+        assert model_base.component_collections_is_dirty is True
+        names = model_base.get_component_collection(0).list_component_names()
+        assert names == ['TestGaussian1Name', 'NewGaussian']

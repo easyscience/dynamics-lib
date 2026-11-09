@@ -131,25 +131,48 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Append a ModelComponent or ComponentCollection to the SampleModel.
 
+        If the per-Q collections are current, a copy of the new component(s) is inserted into each
+        of them in place, so existing per-Q parameters (e.g. fitted values) are kept.
+
         Parameters
         ----------
         component : ModelComponent | ComponentCollection
             The ModelComponent or ComponentCollection to append.
         """
+        was_current = not self.component_collections_is_dirty
+        n_before = len(self._components)
         self._components.append_component(component)
-        self._on_components_change()
+        if not was_current:
+            self._on_components_change()
+            return
+        added = self._components[n_before:]
+        for collection in self._component_collections:
+            for offset, new_component in enumerate(copy(added)):
+                collection.insert(n_before + offset, new_component)
+        self._mark_component_collections_patched()
 
     def remove_component(self, name: str) -> None:
         """
         Remove a ModelComponent from the SampleModel by its name.
+
+        If the per-Q collections are current, the component is removed from each of them in place,
+        so the per-Q parameters of the remaining components are kept.
 
         Parameters
         ----------
         name : str
             The name of the ModelComponent to remove.
         """
-        self._components.pop(name)
-        self._on_components_change()
+        was_current = not self.component_collections_is_dirty
+        before = list(self._components)
+        removed = self._components.pop(name)
+        if not was_current:
+            self._on_components_change()
+            return
+        index = next(i for i, component in enumerate(before) if component is removed)
+        for collection in self._component_collections:
+            collection.pop(index)
+        self._mark_component_collections_patched()
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
@@ -489,6 +512,16 @@ class ModelBase(EasyDynamicsModelBase):
         self._component_collections = []
         for _ in range(len(self.Q)):
             self._component_collections.append(copy(self._components))
+
+    def _mark_component_collections_patched(self) -> None:
+        """
+        Record that the per-Q collections were updated in place to match the template.
+
+        The state counter is bumped so consumers keyed on ``state_version`` (e.g. convolvers) see
+        the structural change, while the collections themselves are marked current.
+        """
+        self._state_counter += 1
+        self._component_collections_is_dirty = False
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""

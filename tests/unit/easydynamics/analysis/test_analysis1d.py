@@ -1048,10 +1048,11 @@ class TestAnalysis1d:
         analysis1d._create_convolver = MagicMock(return_value=None)
         analysis1d._convolver_is_dirty = False
         analysis1d.sample_model._component_collections_is_dirty = False
+        version = analysis1d.sample_model.state_version
 
         # THEN - append a component in-place (doesn't go through Analysis1d setters)
         analysis1d.sample_model.append_component(Gaussian(name='NewGaussian'))
-        assert analysis1d.sample_model._component_collections_is_dirty is True
+        assert analysis1d.sample_model.state_version > version
         assert analysis1d._convolver_is_dirty is False  # not yet propagated
 
         # WHEN - fit() should propagate the dirty flag and rebuild the convolver
