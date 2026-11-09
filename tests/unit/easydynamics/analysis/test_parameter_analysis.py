@@ -672,9 +672,10 @@ class TestParameterAnalysis:
             parameter_analysis.plot(names=['parameter1'], Q=Q)
 
         # EXPECT
-        parameter_analysis.calculate_model_dataset.assert_called_once_with(
-            [parameter_analysis.bindings[0]], Q=Q
-        )
+        parameter_analysis.calculate_model_dataset.assert_called_once()
+        args, kwargs = parameter_analysis.calculate_model_dataset.call_args
+        assert args == ([parameter_analysis.bindings[0]],)
+        assert sc.identical(kwargs['Q'], Q)
 
     def test_plot_invalid_Q_raises_without_bindings(self, parameter_analysis):
         # WHEN
@@ -686,9 +687,9 @@ class TestParameterAnalysis:
                 'easydynamics.analysis.parameter_analysis._in_notebook',
                 return_value=True,
             ),
-            pytest.raises(TypeError, match=r'Q must be a sc\.Variable or None'),
+            pytest.raises(TypeError, match='Q must be a number'),
         ):
-            parameter_analysis.plot(Q=[0.1, 0.2])
+            parameter_analysis.plot(Q='not Q')
 
     def test_plot_data_and_model_on_different_Q_grids(self, parameter_analysis):
         # WHEN the model is evaluated on a finer grid than the data
@@ -820,15 +821,16 @@ class TestParameterAnalysis:
     @pytest.mark.parametrize(
         'Q, expected_exception, match',
         [
-            ([0.1, 0.2], TypeError, r'Q must be a sc\.Variable or None'),
+            ('not Q', TypeError, 'Q must be a number'),
             (
                 sc.ones(dims=['Q', 'x'], shape=[2, 2], unit='1/angstrom'),
                 ValueError,
-                'Q must be 1D',
+                "single dimension named 'Q'",
             ),
-            (sc.linspace('Q', 0.1, 0.2, 3, unit='meV'), ValueError, 'inverse length'),
+            (sc.linspace('Q', 0.1, 0.2, 3, unit='meV'), sc.UnitError, None),
+            (sc.linspace('Q', 0.0, 0.2, 3, unit='1/angstrom'), ValueError, 'positive'),
         ],
-        ids=['not_a_variable', 'not_1d', 'wrong_unit'],
+        ids=['wrong_type', 'not_1d', 'wrong_unit', 'not_positive'],
     )
     def test_calculate_model_dataset_invalid_Q_raises(
         self, parameter_analysis, Q, expected_exception, match
