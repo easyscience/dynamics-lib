@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import weakref
 from functools import partial
 
 import numpy as np
@@ -113,6 +114,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._lorentzian_name = lorentzian_name
         self._lorentzian_display_name = lorentzian_display_name
 
+        # The SampleModels using this diffusion model; its Q grid is the union of their Q values.
+        self._sample_models: weakref.WeakSet = weakref.WeakSet()
         if self.Q is None:
             self._component_collections = []
         else:
@@ -160,6 +163,103 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if float(scale) < 0:
             raise ValueError('scale must be non-negative.')
         self._scale.value = float(scale)
+
+    @property
+    def _component_collections(self) -> list[ComponentCollection]:
+        """
+        The per-Q component collections.
+
+        Returns
+        -------
+        list[ComponentCollection]
+            One collection per Q value, or an empty list without Q.
+        """
+        return getattr(self, '_stored_component_collections', [])
+
+    @_component_collections.setter
+    def _component_collections(self, value: list[ComponentCollection]) -> None:
+        """
+        Replace the per-Q component collections and bump ``collections_version``.
+
+        Parameters
+        ----------
+        value : list[ComponentCollection]
+            The new collections.
+        """
+        self._stored_component_collections = value
+        self._collections_version = self.collections_version + 1
+
+    @property
+    def collections_version(self) -> int:
+        """
+        Get a counter that increases every time the per-Q component collections are regenerated.
+
+        A SampleModel compares it against the value it built its own collections from, so it
+        notices when this model regenerated its components (e.g. because its Q grid changed).
+
+        Returns
+        -------
+        int
+            The current version.
+        """
+        return getattr(self, '_collections_version', 0)
+
+    def register_sample_model(self, sample_model: object) -> None:
+        """
+        Register a SampleModel that uses this diffusion model, and update the Q grid.
+
+        A diffusion model can be used by several SampleModels, e.g. for data sets with different Q
+        values fitted together. Its Q grid is then the union of their Q values, so each SampleModel
+        finds its own Q values in the grid and the global parameters are shared by all of them.
+        Called by SampleModel; the registration is weak, so it ends with the SampleModel.
+
+        Parameters
+        ----------
+        sample_model : object
+            The SampleModel using this diffusion model.
+        """
+        self._sample_models.add(sample_model)
+        self.update_Q_from_sample_models()
+
+    def unregister_sample_model(self, sample_model: object) -> None:
+        """
+        Remove a SampleModel from the registered users, and update the Q grid.
+
+        Parameters
+        ----------
+        sample_model : object
+            The SampleModel that no longer uses this diffusion model.
+        """
+        self._sample_models.discard(sample_model)
+        self.update_Q_from_sample_models()
+
+    def update_Q_from_sample_models(self) -> None:
+        """
+        Set the Q grid to the union of the Q values of the registered SampleModels.
+
+        Nothing changes while no registered SampleModel has Q values, so a diffusion model keeps
+        the grid it was given until a SampleModel with data uses it. Changing the grid regenerates
+        the per-Q components and per-Q parameters; the SampleModels using them rebuild on next use.
+        """
+        Q_values = [
+            sample_model.Q.to(unit=CANONICAL_Q_UNIT).values
+            for sample_model in self._sample_models
+            if sample_model.Q is not None
+        ]
+        if not Q_values:
+            return
+        union: list[float] = []
+        for value in np.sort(np.concatenate(Q_values)):
+            if not union or not np.isclose(union[-1], value, rtol=1e-5, atol=1e-8):
+                union.append(float(value))
+        if (
+            self.Q is not None
+            and len(self.Q) == len(union)
+            and np.allclose(self.Q.to(unit=CANONICAL_Q_UNIT).values, union, rtol=1e-5, atol=1e-8)
+        ):
+            return
+        self.clear_Q(confirm=True)
+        self.Q = sc.array(dims=['Q'], values=union, unit=CANONICAL_Q_UNIT)
 
     @property
     def Q(self) -> sc.Variable | None:

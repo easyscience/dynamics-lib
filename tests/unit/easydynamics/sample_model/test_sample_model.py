@@ -448,6 +448,7 @@ class TestSampleModel:
 
         sample_model._component_collections = [collection1, collection2]
         sample_model._component_collections_is_dirty = False
+        sample_model._built_diffusion_versions = sample_model._diffusion_versions()
 
         with patch('easydynamics.sample_model.sample_model.detailed_balance_factor') as mock_dbf:
             mock_dbf.return_value = np.array([10.0, 10.0, 10.0])  # simplified DBF
@@ -496,6 +497,7 @@ class TestSampleModel:
 
         sample_model._component_collections = [collection1, collection2]
         sample_model._component_collections_is_dirty = False
+        sample_model._built_diffusion_versions = sample_model._diffusion_versions()
 
         sample_model.temperature = temperature
         sample_model.use_detailed_balance = use_detailed_balance
@@ -847,3 +849,245 @@ class TestSampleModel:
             collection = model.get_component_collection(i)
             for component in diffusion_model.get_component_collections(i):
                 assert any(c is component for c in collection)
+
+    #############
+    # Diffusion models shared between SampleModels (union Q grid)
+    #############
+
+    @staticmethod
+    def diffusion_components(sample_model, Q_index):
+        collection = sample_model.get_component_collection(Q_index)
+        template_names = sample_model.components.list_component_names()
+        return [c for c in collection if c.name not in template_names]
+
+    def test_diffusion_model_grid_follows_its_sample_models(self):
+        # WHEN a diffusion model created with a Q grid of its own
+        diffusion_model = BrownianTranslationalDiffusion(name='D', Q=[0.5, 1.0, 1.5, 2.0])
+
+        # THEN
+        model = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 2.0])
+
+        # EXPECT the grid is the Q of the SampleModels using it, and each Q picks its components
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0])
+        assert self.diffusion_components(model, 0) == list(
+            diffusion_model.get_component_collections(0)
+        )
+        assert self.diffusion_components(model, 1) == list(
+            diffusion_model.get_component_collections(1)
+        )
+        assert (
+            model._generated_component_names(1)
+            == diffusion_model.get_component_collections(1).list_component_names()
+        )
+
+    def test_two_sample_models_extend_a_shared_diffusion_model_to_the_union_Q(self):
+        # WHEN two SampleModels with partly overlapping Q share one diffusion model
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0, 1.5])
+
+        # THEN
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5, 2.0])
+
+        # EXPECT the grid is the union, both pick their own Q, and the common Q share components
+        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0, 1.5, 2.0])
+        assert self.diffusion_components(first, 1) == self.diffusion_components(second, 0)
+        assert self.diffusion_components(first, 2) == self.diffusion_components(second, 1)
+        assert self.diffusion_components(first, 0) == list(
+            diffusion_model.get_component_collections(0)
+        )
+        assert self.diffusion_components(second, 2) == list(
+            diffusion_model.get_component_collections(3)
+        )
+
+    def test_sample_model_refreshes_diffusion_components_when_shared_model_regenerates(self):
+        # WHEN a SampleModel with a fitted per-Q template parameter, whose diffusion model is then
+        # extended by a second SampleModel
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(
+            components=Gaussian(name='G'), diffusion_models=diffusion_model, Q=[0.5, 1.0]
+        )
+        width = first.get_component_collection(0)['G'].width
+        width.value = 0.123
+        width.fixed = True
+        stale = self.diffusion_components(first, 0)
+        version = first.state_version
+        assert first.component_collections_is_dirty is False
+
+        # THEN
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5])
+
+        # EXPECT the version moves at once, and on next use the diffusion components are swapped
+        # in place while the template component keeps its fitted state
+        assert first.state_version > version
+        assert first.component_collections_is_dirty is True
+        assert self.diffusion_components(first, 0) != stale
+        assert self.diffusion_components(first, 0) == list(
+            diffusion_model.get_component_collections(0)
+        )
+        assert self.diffusion_components(first, 1) == self.diffusion_components(second, 0)
+        assert first.get_component_collection(0)['G'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert width.fixed is True
+        assert first.component_collections_is_dirty is False
+
+    def test_get_all_variables_maps_Q_index_onto_the_diffusion_model_grid(self):
+        # WHEN a DeltaLorentz with per-Q parameters shared by two SampleModels
+        diffusion_model = DeltaLorentz(name='DL', allow_Q_variation={'A_0': True})
+        first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0])
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.5])
+        assert first.Q is not None
+
+        # THEN
+        variables = second.get_all_variables(Q_index=0)
+
+        # EXPECT the per-Q variables are those at the grid's Q index 2, not index 0
+        expected = diffusion_model.get_independent_variables(Q_index=2)
+        assert expected
+        assert all(any(v is e for v in variables) for e in expected)
+        unexpected = diffusion_model.get_independent_variables(Q_index=0)
+        assert not any(any(v is u for v in variables) for u in unexpected)
+
+    def test_clear_Q_keeps_the_diffusion_model_Q(self, sample_model):
+        # WHEN THEN clearing Q, as a SampleModel created before its data is loaded has none
+        sample_model.clear_Q(confirm=True)
+
+        # EXPECT the diffusion model keeps its grid, so other SampleModels using it are unaffected
+        np.testing.assert_allclose(sample_model.diffusion_models[0].Q.values, [1.0, 2.0, 3.0])
+
+    def test_append_diffusion_model_with_its_own_Q_grid_patches_in_place(self, sample_model):
+        # WHEN built collections and a new diffusion model created with another grid
+        width = sample_model.get_component_collection(1)['TestGaussian1Name'].width
+        width.value = 0.123
+        new_model = BrownianTranslationalDiffusion(
+            name='New', lorentzian_name='NewL', Q=[1.0, 2.0, 3.0, 4.0]
+        )
+
+        # THEN
+        sample_model.append_diffusion_model(new_model)
+
+        # EXPECT the grid follows the SampleModel, its components are added, the value is kept
+        assert sample_model.component_collections_is_dirty is False
+        np.testing.assert_allclose(new_model.Q.values, [1.0, 2.0, 3.0])
+        for Q_index in range(3):
+            collection = sample_model.get_component_collection(Q_index)
+            for component in new_model.get_component_collections(Q_index):
+                assert any(c is component for c in collection)
+        assert width.value == pytest.approx(0.123)
+
+    def test_new_Q_after_clear_Q_replaces_the_diffusion_model_grid(self, sample_model):
+        # WHEN the only SampleModel using the diffusion model gets new Q values, as in a rebin
+        sample_model.clear_Q(confirm=True)
+
+        # THEN
+        sample_model.Q = [1.5, 2.5]
+
+        # EXPECT the grid is the new Q only, without the old values
+        np.testing.assert_allclose(sample_model.diffusion_models[0].Q.values, [1.5, 2.5])
+
+    def test_grid_shrinks_when_a_sample_model_stops_using_the_diffusion_model(self):
+        # WHEN two SampleModels share a diffusion model
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0])
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5])
+        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0, 1.5])
+
+        # THEN the second drops the diffusion model
+        second.remove_diffusion_model('D')
+
+        # EXPECT the grid is the first's Q again, and the first follows the regenerated components
+        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0])
+        assert self.diffusion_components(first, 1) == list(
+            diffusion_model.get_component_collections(1)
+        )
+        assert second.get_component_collection(0).list_component_names() == []
+
+    def test_duplicate_Q_values_share_one_grid_point(self):
+        # WHEN a SampleModel with a repeated Q value
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+
+        # THEN
+        model = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.0])
+
+        # EXPECT one grid point, used by both per-Q collections
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0])
+        assert self.diffusion_components(model, 0) == self.diffusion_components(model, 1)
+
+    def test_remove_diffusion_model_with_larger_Q_grid_patches_in_place(self):
+        # WHEN a SampleModel sharing a diffusion model on a larger grid, with fitted per-Q state
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(
+            components=Gaussian(name='G'), diffusion_models=diffusion_model, Q=[0.5, 1.0]
+        )
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5])
+        width = first.get_component_collection(0)['G'].width
+        width.value = 0.123
+        version = first.state_version
+
+        # THEN
+        first.remove_diffusion_model('D')
+
+        # EXPECT only the template component remains, with its value; the grid is the second's
+        assert first.get_component_collection(0).list_component_names() == ['G']
+        assert first.get_component_collection(0)['G'].width is width
+        assert width.value == pytest.approx(0.123)
+        assert first.state_version > version
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 1.5])
+        assert self.diffusion_components(second, 0) == list(
+            diffusion_model.get_component_collections(0)
+        )
+
+    def test_refresh_falls_back_to_a_rebuild_when_the_grid_lacks_Q(self):
+        # WHEN a diffusion model whose grid was set by hand without the SampleModel's Q values,
+        # while another registered SampleModel keeps those values in the union
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(
+            components=Gaussian(name='G'), diffusion_models=diffusion_model, Q=[0.5, 1.0]
+        )
+        _ = first.get_component_collection(0)
+        diffusion_model.clear_Q(confirm=True)
+        diffusion_model.Q = [7.0]
+
+        # THEN
+        collection = first.get_component_collection(0)
+
+        # EXPECT the grid is restored and the collection holds the live components
+        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0])
+        assert self.diffusion_components(first, 0) == list(
+            diffusion_model.get_component_collections(0)
+        )
+        assert collection.list_component_names()[0] == 'G'
+
+    def test_refresh_does_not_bump_the_state_counter_twice(self):
+        # WHEN a SampleModel whose shared diffusion model is extended by a second SampleModel
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0])
+        _ = first.get_component_collection(0)
+        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5])
+        assert second.Q is not None
+        version = first.state_version
+
+        # THEN the first refreshes its collections
+        _ = first.get_component_collection(0)
+
+        # EXPECT the version seen before the refresh is the version after it
+        assert first.state_version == version
+
+    def test_state_version_is_monotonic_across_diffusion_model_replacement(self, sample_model):
+        # WHEN
+        versions = [sample_model.state_version]
+        removed = sample_model.diffusion_models[0]
+        new_model = BrownianTranslationalDiffusion(name='New', lorentzian_name='NewL')
+
+        # THEN replacing, clearing, and re-adding diffusion models
+        sample_model.diffusion_models = [new_model]
+        versions.append(sample_model.state_version)
+        sample_model.diffusion_models = None
+        versions.append(sample_model.state_version)
+        sample_model.append_diffusion_model(removed)
+        versions.append(sample_model.state_version)
+        _ = sample_model.get_component_collection(0)
+        versions.append(sample_model.state_version)
+
+        # EXPECT
+        assert versions == sorted(versions)
+        assert len(set(versions)) >= 4

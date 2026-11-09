@@ -12,12 +12,40 @@ from easydynamics.sample_model.diffusion_model.diffusion_model_base import Diffu
 from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils import detailed_balance_factor
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.variable import Parameter
+
+
+def _Q_indices_in_grid(Q: sc.Variable, grid: sc.Variable) -> list[int] | None:
+    """
+    Find each value of Q in a Q grid.
+
+    Parameters
+    ----------
+    Q : sc.Variable
+        The Q values to look up.
+    grid : sc.Variable
+        The Q grid to look them up in.
+
+    Returns
+    -------
+    list[int] | None
+        For each value of Q, the index of the same value (to within floating point) in the grid, or
+        None if any value is missing.
+    """
+    grid_values = grid.to(unit=CANONICAL_Q_UNIT).values
+    indices = []
+    for value in Q.to(unit=CANONICAL_Q_UNIT).values:
+        matches = np.flatnonzero(np.isclose(grid_values, value, rtol=1e-5, atol=1e-8))
+        if len(matches) == 0:
+            return None
+        indices.append(int(matches[0]))
+    return indices
 
 
 class SampleModel(ModelBase):
@@ -123,7 +151,7 @@ class SampleModel(ModelBase):
                     'diffusion_models must be a DiffusionModelBase, '
                     'a list of DiffusionModelBase or None'
                 )
-            self._diffusion_models = diffusion_models
+            self._diffusion_models = list(diffusion_models)
 
         Q = _validate_and_convert_Q(Q)
 
@@ -152,8 +180,13 @@ class SampleModel(ModelBase):
         elif not isinstance(detailed_balance_settings, DetailedBalanceSettings):
             raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings or None')
 
-        for dm in self.diffusion_models:
-            dm.Q = Q  # Ensure diffusion models have the same Q as the SampleModel
+        # The collections_version of each diffusion model the per-Q collections were built from,
+        # so that a diffusion model which regenerated its components (e.g. because its Q grid grew
+        # when another SampleModel started using it) is noticed and the collections refreshed.
+        self._built_diffusion_versions: tuple[int, ...] = ()
+        # Versions of diffusion models removed since construction, so state_version never
+        # decreases when a diffusion model (and its version) leaves the sum.
+        self._removed_diffusion_versions = 0
 
         super().__init__(
             display_name=display_name,
@@ -163,6 +196,9 @@ class SampleModel(ModelBase):
             components=components,
             Q=Q,
         )
+
+        for dm in self._diffusion_models:
+            dm.register_sample_model(self)
 
         self._temperature = temperature_parameter
         self._temperature_unit = temperature_unit
@@ -191,15 +227,15 @@ class SampleModel(ModelBase):
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
         can_patch = self._can_patch_component_collections()
-        diffusion_model.Q = self.Q
+        diffusion_model.register_sample_model(self)
         self._diffusion_models.append(diffusion_model)
-        sources = diffusion_model.get_component_collections()
-        if not can_patch or len(sources) != len(self._component_collections):
+        if not can_patch or self.Q is None:
             self._component_collections_is_dirty = True
             return
         # Append the new components in place, so existing per-Q parameters are kept.
-        for target, source in zip(self._component_collections, sources, strict=True):
-            for component in source:
+        indices = self._diffusion_Q_indices(diffusion_model)
+        for target, index in zip(self._component_collections, indices, strict=True):
+            for component in diffusion_model.get_component_collections(index):
                 target.append_component(component)
         self._mark_component_collections_patched()
 
@@ -230,25 +266,29 @@ class SampleModel(ModelBase):
             )
         can_patch = self._can_patch_component_collections()
         removed = self.diffusion_models.pop(matches[0])
+        self._removed_diffusion_versions += removed.collections_version
         if not can_patch:
+            removed.unregister_sample_model(self)
             self._component_collections_is_dirty = True
             return
         removed_ids = {
             id(component)
-            for collection in removed.get_component_collections()
-            for component in collection
+            for index in self._diffusion_Q_indices(removed)
+            for component in removed.get_component_collections(index)
         }
         found = [
             [i for i, component in enumerate(target) if id(component) in removed_ids]
             for target in self._component_collections
         ]
         if sum(map(len, found)) != len(removed_ids):
+            removed.unregister_sample_model(self)
             self._component_collections_is_dirty = True
             return
         # Remove only this model's components in place, so the other per-Q parameters are kept.
         for target, indices in zip(self._component_collections, found, strict=True):
             for index in reversed(indices):
                 target.pop(index)
+        removed.unregister_sample_model(self)
         self._mark_component_collections_patched()
 
     def clear_diffusion_models(self) -> None:
@@ -291,24 +331,21 @@ class SampleModel(ModelBase):
             If value is not a DiffusionModelBase, a list of DiffusionModelBase, or None.
         """
         if value is None:
-            self._diffusion_models = []
-            self._on_diffusion_models_change()
-            return
-        if isinstance(value, DiffusionModelBase):
-            value.Q = self.Q
-            self._diffusion_models = [value]
-            self._on_diffusion_models_change()
-            return
-        if not isinstance(value, list) or not all(
-            isinstance(dm, DiffusionModelBase) for dm in value
-        ):
+            new_models = []
+        elif isinstance(value, DiffusionModelBase):
+            new_models = [value]
+        elif isinstance(value, list) and all(isinstance(dm, DiffusionModelBase) for dm in value):
+            new_models = list(value)
+        else:
             raise TypeError(
                 'diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, '
                 'or None'
             )
-        for dm in value:
-            dm.Q = self.Q
-        self._diffusion_models = value
+        for dm in self._diffusion_models:
+            if dm not in new_models:
+                self._removed_diffusion_versions += dm.collections_version
+                dm.unregister_sample_model(self)
+        self._diffusion_models = new_models
         self._on_diffusion_models_change()
 
     @property
@@ -626,7 +663,8 @@ class SampleModel(ModelBase):
 
         for diffusion_model in self.diffusion_models:
             all_vars.extend(diffusion_model.get_global_variables())
-            all_vars.extend(diffusion_model.get_independent_variables(Q_index=Q_index))
+            for index in dict.fromkeys(self._diffusion_Q_indices(diffusion_model, Q_index)):
+                all_vars.extend(diffusion_model.get_independent_variables(Q_index=index))
 
         return all_vars
 
@@ -638,21 +676,22 @@ class SampleModel(ModelBase):
         """
         Generate ComponentCollections from the DiffusionModels for each Q and add the components
         from self._components.
+
+        A diffusion model's Q grid may be larger than Q (it is the union over the SampleModels
+        using it), so its collections are picked by Q value rather than zipped. If a diffusion
+        model's grid does not hold this SampleModel's Q values (e.g. its Q was cleared by hand), it
+        is brought back in line with its registered SampleModels first.
         """
         super()._generate_component_collections()
 
-        if self.Q is None:
-            return
-        # Generate components from diffusion models and add to component collections
-        for diffusion_model in self.diffusion_models:
-            diffusion_collections = diffusion_model.get_component_collections()
-            for target, source in zip(
-                self._component_collections,
-                diffusion_collections,
-                strict=True,
-            ):
-                for component in source:
-                    target.append_component(component)
+        if self.Q is not None:
+            for diffusion_model in self.diffusion_models:
+                diffusion_model.update_Q_from_sample_models()
+                indices = self._diffusion_Q_indices(diffusion_model)
+                for target, index in zip(self._component_collections, indices, strict=True):
+                    for component in diffusion_model.get_component_collections(index):
+                        target.append_component(component)
+        self._built_diffusion_versions = self._diffusion_versions()
 
     def _generated_component_names(self, Q_index: int) -> list[str]:
         """
@@ -671,21 +710,191 @@ class SampleModel(ModelBase):
         return [
             name
             for diffusion_model in self.diffusion_models
-            for name in diffusion_model.get_component_collections(Q_index).list_component_names()
+            for index in self._diffusion_Q_indices(diffusion_model, Q_index)
+            for name in diffusion_model.get_component_collections(index).list_component_names()
         ]
 
     def _on_diffusion_models_change(self) -> None:
         """Handle changes to the diffusion models."""
         for diffusion_model in self.diffusion_models:
-            diffusion_model.Q = self.Q
+            diffusion_model.register_sample_model(self)
         self._component_collections_is_dirty = True
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
         for diffusion_model in self.diffusion_models:
-            diffusion_model.clear_Q(confirm=True)
-            diffusion_model.Q = self.Q
+            diffusion_model.update_Q_from_sample_models()
         self._component_collections_is_dirty = True
+
+    def _diffusion_Q_indices(
+        self, diffusion_model: DiffusionModelBase, Q_index: int | None = None
+    ) -> list[int]:
+        """
+        Get the Q indices of a diffusion model that correspond to this SampleModel's Q indices.
+
+        Parameters
+        ----------
+        diffusion_model : DiffusionModelBase
+            A diffusion model of this SampleModel.
+        Q_index : int | None, default=None
+            A Q index of this SampleModel, or None for all of them.
+
+        Returns
+        -------
+        list[int]
+            The diffusion model's Q index for ``Q_index``, or one for every Q index of this
+            SampleModel if ``Q_index`` is None. Empty if Q is not set.
+
+        Raises
+        ------
+        ValueError
+            If the diffusion model's Q grid does not hold this SampleModel's Q values.
+        """
+        if self.Q is None:
+            return []
+        indices = (
+            None if diffusion_model.Q is None else _Q_indices_in_grid(self.Q, diffusion_model.Q)
+        )
+        if indices is None:
+            raise ValueError(
+                f'Diffusion model {diffusion_model.name!r} does not have the Q values of this '
+                f'SampleModel.'
+            )
+        if Q_index is None:
+            return indices
+        return [indices[Q_index]]
+
+    def _diffusion_versions(self) -> tuple[int, ...]:
+        """
+        Get the ``collections_version`` of every diffusion model.
+
+        Returns
+        -------
+        tuple[int, ...]
+            The versions, in diffusion-model order.
+        """
+        return tuple(
+            diffusion_model.collections_version for diffusion_model in self.diffusion_models
+        )
+
+    def _only_diffusion_components_stale(self) -> bool:
+        """
+        Check whether the per-Q collections are current except for regenerated diffusion
+        components.
+
+        Returns
+        -------
+        bool
+            ``True`` if the template and Q are unchanged, every per-Q collection still starts with
+            the template's components, and only the diffusion models' versions moved on, so the
+            diffusion components can be swapped in place.
+        """
+        if self._component_collections_is_dirty:
+            return False
+        if self._built_components_version != self._components.version:
+            return False
+        if self._built_diffusion_versions == self._diffusion_versions():
+            return False
+        if self.Q is None or len(self._component_collections) != len(self.Q):
+            return False
+        names = self._components.list_component_names()
+        return all(
+            collection.list_component_names()[: len(names)] == names
+            for collection in self._component_collections
+        )
+
+    def _refresh_diffusion_components(self) -> None:
+        """
+        Swap regenerated diffusion components into the per-Q collections in place.
+
+        The template components, and so their fitted per-Q values and fixed flags, are kept. The
+        diffusion models' grids are brought back to the union of their users' Q values first. Falls
+        back to a full rebuild if a diffusion model does not hold this SampleModel's Q values.
+
+        The state counter is not bumped: the diffusion models' ``collections_version`` already
+        moved ``state_version`` on, so convolvers rebuild once, not twice.
+        """
+        for diffusion_model in self.diffusion_models:
+            diffusion_model.update_Q_from_sample_models()
+        try:
+            regenerated = [
+                [
+                    component
+                    for diffusion_model in self.diffusion_models
+                    for component in diffusion_model.get_component_collections(
+                        self._diffusion_Q_indices(diffusion_model, Q_index)[0]
+                    )
+                ]
+                for Q_index in range(len(self.Q))
+            ]
+        except ValueError:
+            self._component_collections_is_dirty = True
+            return
+        n_template = len(self._components)
+        for collection, components in zip(self._component_collections, regenerated, strict=True):
+            while len(collection) > n_template:
+                collection.pop(len(collection) - 1)
+            for component in components:
+                collection.append_component(component)
+        self._component_collections_is_dirty = False
+        self._built_diffusion_versions = self._diffusion_versions()
+
+    @property
+    def component_collections_is_dirty(self) -> bool:
+        """
+        Return whether component collections need to be rebuilt before use.
+
+        Extends the ModelBase check: the collections are also stale when a diffusion model has
+        regenerated its components since they were built, e.g. because its Q grid was extended by
+        another SampleModel using it.
+
+        Returns
+        -------
+        bool
+            ``True`` if component collections have not been built yet or are stale.
+        """
+        return (
+            super().component_collections_is_dirty
+            or self._built_diffusion_versions != self._diffusion_versions()
+        )
+
+    @property
+    def state_version(self) -> int:
+        """
+        Get a monotonic version of everything affecting the per-Q component collections.
+
+        Extends the ModelBase version with the diffusion models' ``collections_version``, so that a
+        diffusion model regenerating its components (e.g. because another SampleModel extended its
+        Q grid) is visible to convolvers at once, before this SampleModel is next used.
+
+        Returns
+        -------
+        int
+            The current state version.
+        """
+        return (
+            super().state_version
+            + sum(self._diffusion_versions())
+            + self._removed_diffusion_versions
+        )
+
+    def _ensure_component_collections_current(self) -> None:
+        """
+        Rebuild component collections if any dependency has changed since they were last built.
+
+        When only the diffusion models regenerated their components, they are swapped in place
+        instead, so the template components keep their fitted per-Q values.
+        """
+        if self._only_diffusion_components_stale():
+            self._refresh_diffusion_components()
+        super()._ensure_component_collections_current()
+
+    def _mark_component_collections_patched(self) -> None:
+        """
+        Record an in-place update, including the diffusion models' versions it corresponds to.
+        """
+        super()._mark_component_collections_patched()
+        self._built_diffusion_versions = self._diffusion_versions()
 
     # ------------------------------------------------------------------
     # dunder methods
