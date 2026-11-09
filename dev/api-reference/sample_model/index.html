@@ -3534,9 +3534,9 @@ are copied into ComponentCollections for each Q value.</p>
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4349,6 +4349,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Append a ModelComponent or ComponentCollection to the SampleModel.</p>
+<p>If the per-Q collections are current, a copy of the new component(s) is inserted into each
+of them in place, so existing per-Q parameters (e.g. fitted values) are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4404,6 +4406,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Remove a ModelComponent from the SampleModel by its name.</p>
+<p>If the per-Q collections are current, the component is removed from each of them in place,
+so the per-Q parameters of the remaining components are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -44084,9 +44088,9 @@ directly into a ResolutionModel:
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45226,8 +45230,8 @@ physical resolution components.</p>
 
 <!-- prettier-ignore-end --></summary>
   <p>A <code>RuntimeError</code> propagates from the calibration guard if the model holds calibrated
-per-Q collections from <code>from_sample_model</code>; a template change would schedule a rebuild
-that silently discards them.</p>
+per-Q collections from <code>from_sample_model</code>: an unfitted copy of the new component would
+be mixed into the calibrated resolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45294,8 +45298,8 @@ that silently discards them.</p>
 
 <!-- prettier-ignore-end --></summary>
   <p>A <code>RuntimeError</code> propagates from the calibration guard if the model holds calibrated
-per-Q collections from <code>from_sample_model</code>; a template change would schedule a rebuild
-that silently discards them.</p>
+per-Q collections from <code>from_sample_model</code>: removing a component would silently alter the
+calibrated resolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45430,9 +45434,9 @@ broadening (it is the identity under convolution), so the fitted broadened compo
 the resolution. Polynomial and Exponential components are rejected, as backgrounds do not
 belong in a resolution model.</p>
 <p>When the SampleModel has Q values, the fitted per-Q collections are installed as the
-calibrated resolution and the model is locked: mutations that would rebuild the collections
+calibrated resolution and the model is locked: mutations that would change the collections
 from the (unfitted) template — <code>append_component</code>, <code>remove_component</code>,
-<code>clear_components</code>, <code>clear_Q</code> — raise a RuntimeError instead of silently discarding the
+<code>clear_components</code>, <code>clear_Q</code> — raise a RuntimeError instead of silently corrupting the
 calibration.</p>
 <!-- prettier-ignore-start -->
 
@@ -46722,9 +46726,9 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47638,6 +47642,8 @@ list.</p>
     <div class="doc doc-contents ">
 
         <p>Append a ModelComponent or ComponentCollection to the SampleModel.</p>
+<p>If the per-Q collections are current, a copy of the new component(s) is inserted into each
+of them in place, so existing per-Q parameters (e.g. fitted values) are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47693,6 +47699,8 @@ list.</p>
     <div class="doc doc-contents ">
 
         <p>Remove a ModelComponent from the SampleModel by its name.</p>
+<p>If the per-Q collections are current, the component is removed from each of them in place,
+so the per-Q parameters of the remaining components are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49474,9 +49482,9 @@ are copied into ComponentCollections for each Q value.</p>
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50289,6 +50297,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Append a ModelComponent or ComponentCollection to the SampleModel.</p>
+<p>If the per-Q collections are current, a copy of the new component(s) is inserted into each
+of them in place, so existing per-Q parameters (e.g. fitted values) are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50344,6 +50354,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Remove a ModelComponent from the SampleModel by its name.</p>
+<p>If the per-Q collections are current, the component is removed from each of them in place,
+so the per-Q parameters of the remaining components are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -129453,9 +129465,9 @@ are copied into ComponentCollections for each Q value.</p>
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -130028,6 +130040,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Append a ModelComponent or ComponentCollection to the SampleModel.</p>
+<p>If the per-Q collections are current, a copy of the new component(s) is inserted into each
+of them in place, so existing per-Q parameters (e.g. fitted values) are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -130083,6 +130097,8 @@ list will match the number of Q values in the model.</p>
     <div class="doc doc-contents ">
 
         <p>Remove a ModelComponent from the SampleModel by its name.</p>
+<p>If the per-Q collections are current, the component is removed from each of them in place,
+so the per-Q parameters of the remaining components are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -131896,9 +131912,9 @@ directly into a ResolutionModel:
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -132183,8 +132199,8 @@ physical resolution components.</p>
 
 <!-- prettier-ignore-end --></summary>
   <p>A <code>RuntimeError</code> propagates from the calibration guard if the model holds calibrated
-per-Q collections from <code>from_sample_model</code>; a template change would schedule a rebuild
-that silently discards them.</p>
+per-Q collections from <code>from_sample_model</code>: an unfitted copy of the new component would
+be mixed into the calibrated resolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -132251,8 +132267,8 @@ that silently discards them.</p>
 
 <!-- prettier-ignore-end --></summary>
   <p>A <code>RuntimeError</code> propagates from the calibration guard if the model holds calibrated
-per-Q collections from <code>from_sample_model</code>; a template change would schedule a rebuild
-that silently discards them.</p>
+per-Q collections from <code>from_sample_model</code>: removing a component would silently alter the
+calibrated resolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -132387,9 +132403,9 @@ broadening (it is the identity under convolution), so the fitted broadened compo
 the resolution. Polynomial and Exponential components are rejected, as backgrounds do not
 belong in a resolution model.</p>
 <p>When the SampleModel has Q values, the fitted per-Q collections are installed as the
-calibrated resolution and the model is locked: mutations that would rebuild the collections
+calibrated resolution and the model is locked: mutations that would change the collections
 from the (unfitted) template — <code>append_component</code>, <code>remove_component</code>,
-<code>clear_components</code>, <code>clear_Q</code> — raise a RuntimeError instead of silently discarding the
+<code>clear_components</code>, <code>clear_Q</code> — raise a RuntimeError instead of silently corrupting the
 calibration.</p>
 <!-- prettier-ignore-start -->
 
@@ -134915,9 +134931,9 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
     <div class="doc doc-contents ">
 
         <p>Get the template ComponentCollection of the SampleModel.</p>
-<p>This is the live template collection: mutating it in place (e.g. via <code>append_component</code>)
-is detected through its <code>version</code> and triggers a rebuild of the per-Q collections on next
-use.</p>
+<p>This is the live template collection: mutating it in place (e.g.
+<code>model.components.append_component(...)</code>, bypassing the model's own methods) is detected
+through its <code>version</code> and triggers a full rebuild of the per-Q collections on next use.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135980,6 +135996,8 @@ list.</p>
     <div class="doc doc-contents ">
 
         <p>Append a ModelComponent or ComponentCollection to the SampleModel.</p>
+<p>If the per-Q collections are current, a copy of the new component(s) is inserted into each
+of them in place, so existing per-Q parameters (e.g. fitted values) are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -136035,6 +136053,8 @@ list.</p>
     <div class="doc doc-contents ">
 
         <p>Remove a ModelComponent from the SampleModel by its name.</p>
+<p>If the per-Q collections are current, the component is removed from each of them in place,
+so the per-Q parameters of the remaining components are kept.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
