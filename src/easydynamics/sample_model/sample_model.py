@@ -271,23 +271,18 @@ class SampleModel(ModelBase):
             removed.unregister_sample_model(self)
             self._component_collections_is_dirty = True
             return
+        # Remove only this model's components in place, so the other per-Q parameters are kept.
+        # The collections are current (a regenerated diffusion model would have made them stale
+        # through its collections_version), so they hold the model's components by identity.
         removed_ids = {
             id(component)
             for index in self._diffusion_Q_indices(removed)
             for component in removed.get_component_collections(index)
         }
-        found = [
-            [i for i, component in enumerate(target) if id(component) in removed_ids]
-            for target in self._component_collections
-        ]
-        if sum(map(len, found)) != len(removed_ids):
-            removed.unregister_sample_model(self)
-            self._component_collections_is_dirty = True
-            return
-        # Remove only this model's components in place, so the other per-Q parameters are kept.
-        for target, indices in zip(self._component_collections, found, strict=True):
-            for index in reversed(indices):
-                target.pop(index)
+        for target in self._component_collections:
+            for index in reversed(range(len(target))):
+                if id(target[index]) in removed_ids:
+                    target.pop(index)
         removed.unregister_sample_model(self)
         self._mark_component_collections_patched()
 
@@ -789,9 +784,7 @@ class SampleModel(ModelBase):
             the template's components, and only the diffusion models' versions moved on, so the
             diffusion components can be swapped in place.
         """
-        if self._component_collections_is_dirty:
-            return False
-        if self._built_components_version != self._components.version:
+        if super().component_collections_is_dirty:
             return False
         if self._built_diffusion_versions == self._diffusion_versions():
             return False
@@ -808,28 +801,24 @@ class SampleModel(ModelBase):
         Swap regenerated diffusion components into the per-Q collections in place.
 
         The template components, and so their fitted per-Q values and fixed flags, are kept. The
-        diffusion models' grids are brought back to the union of their users' Q values first. Falls
-        back to a full rebuild if a diffusion model does not hold this SampleModel's Q values.
+        diffusion models' grids are brought back to the union of their users' Q values first, so
+        they hold this SampleModel's Q values.
 
         The state counter is not bumped: the diffusion models' ``collections_version`` already
         moved ``state_version`` on, so convolvers rebuild once, not twice.
         """
         for diffusion_model in self.diffusion_models:
             diffusion_model.update_Q_from_sample_models()
-        try:
-            regenerated = [
-                [
-                    component
-                    for diffusion_model in self.diffusion_models
-                    for component in diffusion_model.get_component_collections(
-                        self._diffusion_Q_indices(diffusion_model, Q_index)[0]
-                    )
-                ]
-                for Q_index in range(len(self.Q))
+        regenerated = [
+            [
+                component
+                for diffusion_model in self.diffusion_models
+                for component in diffusion_model.get_component_collections(
+                    self._diffusion_Q_indices(diffusion_model, Q_index)[0]
+                )
             ]
-        except ValueError:
-            self._component_collections_is_dirty = True
-            return
+            for Q_index in range(len(self.Q))
+        ]
         n_template = len(self._components)
         for collection, components in zip(self._component_collections, regenerated, strict=True):
             while len(collection) > n_template:

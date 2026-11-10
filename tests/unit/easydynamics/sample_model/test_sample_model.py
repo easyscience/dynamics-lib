@@ -1036,9 +1036,8 @@ class TestSampleModel:
             diffusion_model.get_component_collections(0)
         )
 
-    def test_refresh_falls_back_to_a_rebuild_when_the_grid_lacks_Q(self):
-        # WHEN a diffusion model whose grid was set by hand without the SampleModel's Q values,
-        # while another registered SampleModel keeps those values in the union
+    def test_refresh_restores_a_grid_set_by_hand_without_the_Q_values(self):
+        # WHEN a diffusion model whose grid was set by hand without the SampleModel's Q values
         diffusion_model = BrownianTranslationalDiffusion(name='D')
         first = SampleModel(
             components=Gaussian(name='G'), diffusion_models=diffusion_model, Q=[0.5, 1.0]
@@ -1056,6 +1055,62 @@ class TestSampleModel:
             diffusion_model.get_component_collections(0)
         )
         assert collection.list_component_names()[0] == 'G'
+
+    def test_diffusion_Q_indices_raises_when_the_grid_lacks_Q(self, sample_model):
+        # WHEN a diffusion model that is not used by the SampleModel, on another grid
+        other = BrownianTranslationalDiffusion(name='Other', Q=[7.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="'Other' does not have the Q values"):
+            sample_model._diffusion_Q_indices(other)
+
+    def test_sample_model_without_Q_ignores_the_per_Q_state_of_a_diffusion_model(self):
+        # WHEN a SampleModel without Q, using a diffusion model that has a grid of its own
+        diffusion_model = DeltaLorentz(name='DL', allow_Q_variation={'A_0': True}, Q=[0.5, 1.0])
+        model = SampleModel(diffusion_models=diffusion_model)
+        per_Q = diffusion_model.get_independent_variables()
+        assert per_Q
+
+        # THEN reading the variables, also after the diffusion model regenerated its components
+        variables = model.get_all_variables()
+        diffusion_model.create_component_collections()
+        variables_after = model.get_all_variables()
+
+        # EXPECT only the global variables, and no per-Q collections to refresh
+        for found in (variables, variables_after):
+            assert all(any(v is g for v in found) for g in diffusion_model.get_global_variables())
+            assert not any(any(v is p for v in found) for p in per_Q)
+        assert model.component_collections_is_dirty is False
+
+    def test_remove_diffusion_model_with_duplicate_Q_values_patches_in_place(self):
+        # WHEN a repeated Q value, so two per-Q collections hold the same diffusion components
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        model = SampleModel(
+            components=Gaussian(name='G'), diffusion_models=diffusion_model, Q=[1.0, 1.0]
+        )
+        width = model.get_component_collection(0)['G'].width
+
+        # THEN
+        model.remove_diffusion_model('D')
+
+        # EXPECT they are removed from both collections, and the template component is kept
+        assert model.component_collections_is_dirty is False
+        for Q_index in range(2):
+            assert model.get_component_collection(Q_index).list_component_names() == ['G']
+        assert model.get_component_collection(0)['G'].width is width
+
+    def test_diffusion_models_setter_keeps_a_model_that_stays_registered(self, sample_model):
+        # WHEN
+        kept = sample_model.diffusion_models[0]
+        new_model = BrownianTranslationalDiffusion(name='New', lorentzian_name='NewL')
+
+        # THEN
+        sample_model.diffusion_models = [kept, new_model]
+
+        # EXPECT both follow the SampleModel's Q, and the kept model was not unregistered
+        assert sample_model in kept._sample_models
+        np.testing.assert_allclose(kept.Q.values, sample_model.Q.values)
+        np.testing.assert_allclose(new_model.Q.values, sample_model.Q.values)
 
     def test_refresh_does_not_bump_the_state_counter_twice(self):
         # WHEN a SampleModel whose shared diffusion model is extended by a second SampleModel
