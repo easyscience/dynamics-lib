@@ -541,7 +541,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         # Update kwargs with user provided kwargs.
         plot_kwargs.update(kwargs)
 
-        # Data and model can be on different Q grids, so they are plotted as separate Datasets.
+        # Data and model can be on different Q grids, so they cannot share one Dataset: plot a
+        # dict of DataArrays instead.
         data_and_model = dict(add_x_axis_coord(sc.Dataset(data_arrays), x_axis))
         if model_arrays:
             data_and_model.update(add_x_axis_coord(sc.Dataset(model_arrays), x_axis))
@@ -605,7 +606,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 y_model = y_model / y_factor
 
                 arrays[target.label] = sc.DataArray(
-                    data=sc.array(dims=x.dims, values=y_model, unit=da.unit),
+                    data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
                     coords={'Q': x},
                 )
         return sc.Dataset(arrays)
