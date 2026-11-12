@@ -1236,6 +1236,15 @@ class MittagLefflerDiffusion(DiffusionModelBase):
         """
         self.create_component_collections()
 
+    def _on_parameters_replaced(self) -> None:
+        """Make A_1 follow the A_0 that ``from_dict`` put in place, then rebuild the components."""
+        self._A_1 = Parameter.from_dependency(
+            name='A_1',
+            dependency_expression='1 - A_0',
+            dependency_map={'A_0': self._A_0},
+        )
+        super()._on_parameters_replaced()
+
     def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
         """
         Convert the shared relaxation rate template to the new x-axis unit.
