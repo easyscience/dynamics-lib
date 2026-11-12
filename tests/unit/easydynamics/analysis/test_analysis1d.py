@@ -543,6 +543,18 @@ class TestAnalysis1d:
         # EXPECT
         assert self._legend_labels(fig) == ['Data', 'Model']
 
+    def test_plot_legend_shows_split_by_resolution(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.resolution_model.append_component(
+            Gaussian(name='ResGauss', display_name='Res. Gauss')
+        )
+
+        # THEN
+        fig = analysis1d.plot_data_and_model(split_by_resolution=True)
+
+        # EXPECT
+        assert self._legend_labels(fig) == ['Data', 'Model', 'Gaussian ⊗ Res. Gauss']
+
     def test_plot_without_components_does_not_relabel(self, analysis1d):
         # THEN
         with patch.object(analysis1d, '_label_components_by_display_name') as relabel:
@@ -1076,6 +1088,51 @@ class TestAnalysis1d:
         # THEN EXPECT
         with pytest.raises(ValueError, match=r"Q_index 0: \['Gaussian'\]"):
             analysis1d._create_components_dataset_single_Q()
+
+    def test_components_dataset_split_by_resolution(self, analysis1d):
+        # WHEN a resolution of two components
+        resolution_model = analysis1d.instrument_model.resolution_model
+        resolution_model.append_component(Gaussian(name='ResGauss', width=5.0))
+        resolution_model.append_component(Gaussian(name='ResWide', width=10.0, area=0.5))
+
+        # THEN
+        split = analysis1d._create_components_dataset_single_Q(split_by_resolution=True)
+
+        # EXPECT one entry per resolution component, adding up to the convolved component
+        whole = analysis1d._create_components_dataset_single_Q(add_background=False)
+        background = analysis1d._evaluate_direct(
+            analysis1d.instrument_model.background_model.get_component_collection(0), None
+        )
+        assert set(split.keys()) == {'Gaussian ⊗ ResGauss', 'Gaussian ⊗ ResWide'}
+        np.testing.assert_allclose(
+            split['Gaussian ⊗ ResGauss'].values
+            + split['Gaussian ⊗ ResWide'].values
+            - 2 * background,
+            whole['Gaussian'].values,
+        )
+
+    def test_components_dataset_split_without_resolution_is_not_split(self, analysis1d):
+        # THEN
+        dataset = analysis1d._create_components_dataset_single_Q(split_by_resolution=True)
+
+        # EXPECT
+        assert set(dataset.keys()) == {'Gaussian'}
+
+    @pytest.mark.filterwarnings('ignore:Duplicate component names')
+    def test_components_dataset_split_refuses_duplicate_resolution_names(self, analysis1d):
+        # WHEN two resolution components share a name
+        resolution_model = analysis1d.instrument_model.resolution_model
+        resolution_model.append_component(Gaussian(name='Res'))
+        resolution_model.append_component(Gaussian(name='Res', width=2.0))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r"resolution names at Q_index 0: \['Res'\]"):
+            analysis1d._create_components_dataset_single_Q(split_by_resolution=True)
+
+    def test_data_and_model_to_datagroup_split_by_resolution_not_bool_raises(self, analysis1d):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(TypeError, match=r'split_by_resolution must be True or False'):
+            analysis1d.data_and_model_to_datagroup(split_by_resolution='not_a_boolean')
 
     def test_to_scipp_array(self, analysis1d):
         # WHEN

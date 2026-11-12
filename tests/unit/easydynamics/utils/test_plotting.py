@@ -6,7 +6,9 @@ from unittest.mock import patch
 
 import pytest
 import scipp as sc
+from matplotlib.figure import Figure
 
+from easydynamics.utils.plotting import relabel_lines
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.plotting import with_x_axis_dim
 
@@ -272,3 +274,19 @@ class TestSlicerplot_with_residuals:
             assert main_ax.get_xlim() == res_ax.get_xlim()
         finally:
             plt.switch_backend('Agg')
+
+
+class TestRelabel_lines:
+    def test_relabel_lines(self):
+        # WHEN a figure with three labelled lines
+        axes = Figure().subplots()
+        for label in ('Data', 'Gaussian', 'Hidden'):
+            axes.plot([0.0, 1.0], [0.0, 1.0], label=label)
+        fig = MagicMock(ax=axes)
+
+        # THEN
+        relabel_lines(fig, {'Gaussian': 'Narrow', 'Hidden': '', 'Missing': 'Unused'})
+
+        # EXPECT only the lines named in the mapping are relabelled
+        assert [line.get_label() for line in axes.get_lines()] == ['Data', 'Narrow', '']
+        fig.canvas.update_legend.assert_called_once_with()

@@ -296,6 +296,7 @@ class TestAnalysis:
             add_background=True,
             plot_residuals=False,
             energy=None,
+            split_by_resolution=False,
             **kwargs,
         )
         assert result == 'plot_Q1'
@@ -333,6 +334,35 @@ class TestAnalysis:
             ),
         ):
             analysis.plot_data_and_model(add_background='not_a_boolean')
+
+    def test_plot_data_and_model_invalid_split_by_resolution_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with (
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            pytest.raises(
+                TypeError,
+                match='split_by_resolution must be True or False',
+            ),
+        ):
+            analysis.plot_data_and_model(split_by_resolution='not_a_boolean')
+
+    def test_plot_data_and_model_split_by_resolution(self, analysis):
+        # WHEN
+        analysis.instrument_model.resolution_model.append_component(Gaussian(name='ResGauss'))
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {}
+
+        # THEN
+        with (
+            patch('plopp.slicer', return_value=fake_fig) as slicer,
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+        ):
+            analysis.plot_data_and_model(split_by_resolution=True)
+
+        # EXPECT the component is plotted convolved with each resolution component
+        plotted = slicer.call_args.args[0]
+        assert set(plotted.keys()) == {'Data', 'Model', 'GaussianName ⊗ ResGauss'}
 
     def test_plot_data_and_model_invalid_plot_residuals_raises(self, analysis):
         # WHEN / THEN / EXPECT
@@ -1272,6 +1302,29 @@ class TestAnalysis:
             assert 'Q' in components_dataset[component_name].dims
             assert 'energy' in components_dataset[component_name].dims
         assert components_dataset.sizes['Q'] == analysis.Q.sizes['Q']
+
+    def test_create_components_dataset_split_by_resolution(self, analysis):
+        # WHEN
+        resolution_model = analysis.instrument_model.resolution_model
+        resolution_model.append_component(Gaussian(name='ResGauss', width=5.0))
+        resolution_model.append_component(Gaussian(name='ResWide', width=10.0, area=0.5))
+
+        # THEN
+        split = analysis._create_components_dataset(add_background=False, split_by_resolution=True)
+
+        # EXPECT one entry per resolution component, at every Q, adding up to the component
+        whole = analysis._create_components_dataset(add_background=False)
+        assert set(split.keys()) == {'GaussianName ⊗ ResGauss', 'GaussianName ⊗ ResWide'}
+        assert split.sizes == {'Q': 3, 'energy': 3}
+        np.testing.assert_allclose(
+            (split['GaussianName ⊗ ResGauss'] + split['GaussianName ⊗ ResWide']).values,
+            whole['GaussianName'].values,
+        )
+
+    def test_data_and_model_to_datagroup_invalid_split_by_resolution_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(TypeError, match='split_by_resolution must be True or False'):
+            analysis.data_and_model_to_datagroup(split_by_resolution='not_a_boolean')
 
     def test_create_components_dataset_single_Q(self, analysis_single_Q):
         # WHEN

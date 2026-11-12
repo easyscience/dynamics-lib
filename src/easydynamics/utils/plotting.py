@@ -163,3 +163,24 @@ def slicerplot_with_residuals(
 
     fig1.autoscale()
     return fig1
+
+
+def relabel_lines(fig: WidgetFigure, labels: dict[str, str]) -> None:
+    """
+    Rename the lines of a figure in its legend.
+
+    Plopp labels each line by its DataGroup key, which must be unique, so lines whose label is a
+    key in ``labels`` are renamed after plotting. A blank new label leaves the line out of the
+    legend.
+
+    Parameters
+    ----------
+    fig : WidgetFigure
+        The figure holding the lines to relabel.
+    labels : dict[str, str]
+        The new label of each line, keyed by its current label.
+    """
+    for line in fig.ax.get_lines():
+        if line.get_label() in labels:
+            line.set_label(labels[line.get_label()])
+    fig.canvas.update_legend()

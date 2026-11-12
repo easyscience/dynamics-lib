@@ -14,6 +14,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import relabel_lines
 from easydynamics.variable import Parameter
 
 if TYPE_CHECKING:
@@ -640,11 +641,40 @@ class AnalysisBase(EasyDynamicsModelBase):
         background = self.instrument_model.background_model.get_component_collection(
             Q_index=Q_index
         )
+        resolution = self.instrument_model.resolution_model.get_component_collection(
+            Q_index=Q_index
+        )
         labels = {component.name: component.display_name for component in (*sample, *background)}
-        for line in fig.ax.get_lines():
-            if line.get_label() in labels:
-                line.set_label(labels[line.get_label()])
-        fig.canvas.update_legend()
+        # Components split by resolution (split_by_resolution=True).
+        for sample_component in sample:
+            for res_component in resolution:
+                key = self._resolution_split_label(sample_component.name, res_component.name)
+                labels[key] = self._resolution_split_label(
+                    sample_component.display_name, res_component.display_name
+                )
+        relabel_lines(fig, labels)
+
+    @staticmethod
+    def _resolution_split_label(sample_label: str, resolution_label: str) -> str:
+        """
+        Get the label of a sample component convolved with a single resolution component.
+
+        Parameters
+        ----------
+        sample_label : str
+            The name or display name of the sample component.
+        resolution_label : str
+            The name or display name of the resolution component.
+
+        Returns
+        -------
+        str
+            The combined label, or an empty string if either label is blank, so a component left
+            out of the legend stays out when it is split.
+        """
+        if not sample_label or not resolution_label:
+            return ''
+        return f'{sample_label} ⊗ {resolution_label}'
 
     #############
     # Dunder methods
