@@ -480,6 +480,46 @@ class TestExperiment:
             assert kwargs['keep'] == 'energy'
             assert result == mock_fig
 
+    def test_plot_data_superplot_success(self, experiment):
+        "Test plotting data with superplot when in notebook environment"
+        # WHEN
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            patch('plopp.superplot') as mock_plot,
+            patch('plopp.slicer') as mock_slicer,
+        ):
+            mock_fig = MagicMock()
+            mock_plot.return_value = mock_fig
+
+            # THEN
+            result = experiment.plot_data(superplot=True)
+
+            # EXPECT
+            mock_plot.assert_called_once()
+            mock_slicer.assert_not_called()
+            args, kwargs = mock_plot.call_args
+            assert sc.identical(args[0], experiment.data)
+            assert kwargs['title'] == f'{experiment.display_name}'
+            assert kwargs['keep'] == 'energy'
+            assert result == mock_fig
+
+    def test_plot_data_normalize(self, experiment):
+        "Test plotting normalized data divides each Q spectrum by its sum over energy"
+        # WHEN
+        original = experiment.binned_data.copy()
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            patch('plopp.plot') as mock_plot,
+        ):
+            # THEN
+            experiment.plot_data(normalize=True)
+
+            # EXPECT
+            plotted = mock_plot.call_args.args[0]
+            sums = sc.nansum(plotted.data, dim='energy')
+            np.testing.assert_allclose(sums.values, 1.0)
+            assert sc.identical(experiment.binned_data, original)
+
     def test_plot_data_no_data_raises(self):
         "Test plotting data raises ValueError when no data is present"
         # WHEN
@@ -502,24 +542,27 @@ class TestExperiment:
         ):
             experiment.plot_data()
 
-    def test_plot_data_invalid_slicer_type_raises(self, experiment):
-        "Test plotting data raises TypeError when slicer argument is invalid"
-        # WHEN THEN EXPECT
-
-        with (
-            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
-            pytest.raises(TypeError, match='slicer must be True or False'),
-        ):
-            experiment.plot_data(slicer='not_a_boolean')
-
-    def test_plot_data_invalid_transpose_type_raises(self, experiment):
-        "Test plotting data raises TypeError when transpose argument is invalid"
+    @pytest.mark.parametrize(
+        'argument',
+        ['slicer', 'superplot', 'transpose_axes', 'normalize'],
+    )
+    def test_plot_data_invalid_bool_argument_type_raises(self, experiment, argument):
+        "Test plotting data raises TypeError when a True/False argument is invalid"
         # WHEN THEN EXPECT
         with (
             patch(f'{Experiment.__module__}._in_notebook', return_value=True),
-            pytest.raises(TypeError, match='transpose_axes must be True or False'),
+            pytest.raises(TypeError, match=f'{argument} must be True or False'),
         ):
-            experiment.plot_data(transpose_axes='not_a_boolean')
+            experiment.plot_data(**{argument: 'not_a_boolean'})
+
+    def test_plot_data_slicer_and_superplot_raises(self, experiment):
+        "Test plotting data raises ValueError when both slicer and superplot are True"
+        # WHEN THEN EXPECT
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            pytest.raises(ValueError, match='slicer and superplot cannot both be True'),
+        ):
+            experiment.plot_data(slicer=True, superplot=True)
 
     ##############
     # test private methods
