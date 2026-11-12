@@ -643,16 +643,38 @@ class TestParameterAnalysis:
         ):
             parameter_analysis.plot(names=['parameter1'], x_axis='Q^2')
 
-        # EXPECT data and model are plotted unchanged against a Q^2 coordinate
+        # EXPECT data and model are plotted unchanged against a Q^2 dimension
         args, kwargs = mock_plot.call_args
         plotted = args[0]
-        assert kwargs['coords'] == ['Q^2']
-        for key in ['parameter1', 'Polynomial']:
-            assert sc.identical(plotted[key].coords['Q^2'], plotted[key].coords['Q'] ** 2)
+        assert 'coords' not in kwargs
+        assert plotted.dims == ('Q^2',)
+        assert sc.identical(plotted.coords['Q^2'], plotted.coords['Q'] ** 2)
         assert sc.identical(
-            plotted['parameter1'].data, parameter_analysis.parameters['parameter1'].data
+            plotted['parameter1'].data,
+            parameter_analysis.parameters['parameter1'].data.rename_dims(Q='Q^2'),
         )
-        assert sc.identical(plotted['Polynomial'].data, mock_model_dataset['Polynomial'].data)
+        assert sc.identical(
+            plotted['Polynomial'].data,
+            mock_model_dataset['Polynomial'].data.rename_dims(Q='Q^2'),
+        )
+
+    @pytest.mark.parametrize('x_axis', ['Q', 'Q^2'])
+    def test_plot_applies_styles_to_data_and_model(self, parameter_analysis, x_axis):
+        # WHEN rendering for real, without mocking plopp
+
+        # THEN
+        with patch(
+            'easydynamics.analysis.parameter_analysis._in_notebook',
+            return_value=True,
+        ):
+            fig = parameter_analysis.plot(names=['parameter1'], x_axis=x_axis)
+
+        # EXPECT the per-line styles reach the lines: data as markers, model as a dashed line
+        lines = {line.get_label(): line for line in fig.ax.get_lines()}
+        assert lines['parameter1'].get_linestyle() == 'None'
+        assert lines['parameter1'].get_marker() == 'o'
+        assert lines['Polynomial'].get_linestyle() == '--'
+        assert lines['Polynomial'].get_marker() == 'None'
 
     def test_plot_passes_Q_to_calculate_model_dataset(
         self, parameter_analysis, mock_model_dataset

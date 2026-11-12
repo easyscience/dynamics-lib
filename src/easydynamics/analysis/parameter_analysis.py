@@ -18,7 +18,7 @@ from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
-from easydynamics.utils.plotting import add_x_axis_coord
+from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_value_unit
@@ -435,7 +435,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
             positive, with the single dimension 'Q'. If None, the Q values of the data are used.
         **kwargs : dict[str, Any]
-            Additional keyword arguments to pass to the plotting function.
+            Additional keyword arguments to pass to the plotting function. Use x_axis rather than
+            plopp's coords to choose the x-axis.
 
         Returns
         -------
@@ -499,7 +500,6 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         markers = itertools.cycle(['o', 's', 'D', '^', 'v', '<', '>'])
 
         plot_kwargs = {
-            'coords': [x_axis],
             'title': self.display_name,
             'linestyle': {},
             'marker': {},
@@ -547,7 +547,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if model_arrays:
             data_and_model.update(add_x_axis_coord(sc.Dataset(model_arrays), x_axis))
 
-        return pp.plot(data_and_model, **plot_kwargs)
+        return pp.plot(with_x_axis_dim(data_and_model, x_axis), **plot_kwargs)
 
     def calculate_model_dataset(
         self, bindings: list[FitBinding], Q: sc.Variable | None = None
