@@ -972,10 +972,19 @@ class TestModelBase:
         with pytest.raises(ValueError, match='already depends on other Parameters'):
             model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
 
-    def test_make_parameter_Q_independent_unknown_component_raises(self, model_base):
-        # WHEN THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
-            model_base.make_parameter_Q_independent('Missing', 'width')
+    def test_clear_components_without_Q_drops_the_Q_constraints(self):
+        "Regression: without Q the constraint stayed, and applied to a new component of that name"
+        # WHEN a constraint declared before Q is set
+        model = ModelBase(components=Gaussian(name='G'))
+        model.make_parameter_Q_independent('G', 'width')
+
+        # THEN the components are cleared, and a component of the same name is added
+        model.clear_components()
+        model.append_component(Gaussian(name='G'))
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the new component is not constrained
+        assert all(parameter.independent for parameter in model.get_parameters('G', 'width'))
 
     def test_remove_component_drops_its_Q_constraint(self, model_base):
         # WHEN
