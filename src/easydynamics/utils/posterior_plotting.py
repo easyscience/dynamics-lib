@@ -6,6 +6,10 @@ Diagnostic plots for Bayesian posterior samples.
 
 These take plain arrays rather than an Analysis, so they can be used on any chain, including one
 loaded from disk. The Analysis classes wrap them in convenience methods.
+
+The figures are built directly from ``matplotlib.figure.Figure`` rather than through pyplot. A
+pyplot figure is shown by an interactive backend such as ipympl as soon as the cell ends, and the
+returned Figure is then shown a second time by Jupyter; a figure pyplot never sees is shown once.
 """
 
 from __future__ import annotations
@@ -18,11 +22,11 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colormaps
+from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
     from ipywidgets import VBox
-    from matplotlib.figure import Figure
     from plopp.backends.matplotlib.figure import WidgetFigure
 
 
@@ -82,7 +86,8 @@ def plot_trace(
     if figsize is None:
         figsize = (10.0, max(2.0, 1.6 * n_panels))
 
-    fig, axes = plt.subplots(n_panels, 1, figsize=figsize, sharex=True, squeeze=False)
+    fig = Figure(figsize=figsize)
+    axes = fig.subplots(n_panels, 1, sharex=True, squeeze=False)
     axes = axes[:, 0]
 
     for axis, column, name in zip(axes, range(draws.shape[1]), names, strict=False):
@@ -165,7 +170,8 @@ def plot_corner(
     # it, so the ticks of a column line up instead of each panel autoscaling on its own.
     limits = _column_limits(draws)
 
-    fig, axes = plt.subplots(n, n, figsize=figsize, squeeze=False)
+    fig = Figure(figsize=figsize)
+    axes = fig.subplots(n, n, squeeze=False)
     for row in range(n):
         for col in range(n):
             axis = axes[row, col]
@@ -197,8 +203,10 @@ def plot_corner(
                 axis.yaxis.set_major_locator(MaxNLocator(nbins=4))
 
     # Matplotlib parks the shared exponent ("1e-8") at the end of the axis, where it lands on top
-    # of the axis label. Fold it into the label instead.
-    fig.canvas.draw()
+    # of the axis label. Fold it into the label instead. The exponent only exists once the ticks
+    # are formatted; a figure built outside pyplot has no backend canvas to draw, so format them
+    # without rendering.
+    fig.draw_without_rendering()
     for row in range(n):
         for col in range(row + 1):
             axis = axes[row, col]
@@ -265,7 +273,8 @@ def plot_marginal(
 
     lower, median, upper = np.percentile(values, [16.0, 50.0, 84.0])
 
-    fig, axis = plt.subplots(figsize=figsize)
+    fig = Figure(figsize=figsize)
+    axis = fig.subplots()
     axis.hist(values, bins=bins, density=True, color='C0', histtype='stepfilled', alpha=0.7)
     axis.axvline(median, color='C3', lw=1.5, label='Median')
     axis.axvline(lower, color='C3', lw=1.0, ls='--', label='68% credible interval')
@@ -327,7 +336,8 @@ def plot_correlations(
     # around a neutral midpoint. Cells with no defined correlation are greyed out.
     colormap = colormaps['RdBu_r'].with_extremes(bad='0.85')
 
-    fig, axis = plt.subplots(figsize=figsize)
+    fig = Figure(figsize=figsize)
+    axis = fig.subplots()
     image = axis.imshow(np.ma.masked_invalid(matrix), cmap=colormap, vmin=-1.0, vmax=1.0)
     axis.set_xticks(range(n), labels=names, rotation=45, ha='right', fontsize=8)
     axis.set_yticks(range(n), labels=names, fontsize=8)
@@ -415,7 +425,8 @@ def plot_posterior_predictive(
     tail = (100.0 - credible_interval) / 2.0
     lower, median, upper = np.percentile(predictions, [tail, 50.0, 100.0 - tail], axis=0)
 
-    fig, axis = plt.subplots(figsize=figsize)
+    fig = Figure(figsize=figsize)
+    axis = fig.subplots()
     if y_err is None:
         axis.plot(x, y, 'o', mfc='none', color='black', label='Data', markersize=4)
     else:
