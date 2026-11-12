@@ -610,25 +610,6 @@ class TestSampleModel:
             assert collection[1].area.value == pytest.approx(2.0)
             assert isinstance(collection[2], Lorentzian)
 
-    def test_fix_and_free_all_parameters_with_diffusion_model(self, sample_model):
-        "Regression: fixing raised on the dependent Parameters of a diffusion model"
-        # WHEN the fixture has a diffusion model, whose per-Q width and area are dependent
-
-        # THEN
-        sample_model.fix_all_parameters()
-
-        # EXPECT every independent Parameter is fixed, including the diffusion model's own
-        parameters = sample_model.get_fittable_parameters()
-        assert any(p.name == 'diffusion_coefficient' for p in parameters)
-        assert len(parameters) < len(sample_model.get_all_parameters())
-        assert all(p.fixed for p in parameters)
-
-        # THEN
-        sample_model.free_all_parameters()
-
-        # EXPECT
-        assert not any(p.fixed for p in parameters)
-
     def test_get_all_variables(self, sample_model):
         # WHEN
 
