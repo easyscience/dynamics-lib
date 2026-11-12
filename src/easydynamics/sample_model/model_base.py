@@ -131,25 +131,48 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Append a ModelComponent or ComponentCollection to the SampleModel.
 
+        If the per-Q collections are current, a copy of the new component(s) is inserted into each
+        of them in place, so existing per-Q parameters (e.g. fitted values) are kept.
+
         Parameters
         ----------
         component : ModelComponent | ComponentCollection
             The ModelComponent or ComponentCollection to append.
         """
+        can_patch = self._can_patch_component_collections()
+        n_before = len(self._components)
         self._components.append_component(component)
-        self._on_components_change()
+        if not can_patch:
+            self._on_components_change()
+            return
+        added = self._components[n_before:]
+        for collection in self._component_collections:
+            for offset, new_component in enumerate(copy(added)):
+                collection.insert(n_before + offset, new_component)
+        self._mark_component_collections_patched()
 
     def remove_component(self, name: str) -> None:
         """
         Remove a ModelComponent from the SampleModel by its name.
+
+        If the per-Q collections are current, the component is removed from each of them in place,
+        so the per-Q parameters of the remaining components are kept.
 
         Parameters
         ----------
         name : str
             The name of the ModelComponent to remove.
         """
+        can_patch = self._can_patch_component_collections()
+        names = self._components.list_component_names()
         self._components.pop(name)
-        self._on_components_change()
+        if not can_patch:
+            self._on_components_change()
+            return
+        index = names.index(name)
+        for collection in self._component_collections:
+            collection.pop(index)
+        self._mark_component_collections_patched()
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
@@ -165,9 +188,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Get the template ComponentCollection of the SampleModel.
 
-        This is the live template collection: mutating it in place (e.g. via ``append_component``)
-        is detected through its ``version`` and triggers a rebuild of the per-Q collections on next
-        use.
+        This is the live template collection: mutating it in place (e.g.
+        ``model.components.append_component(...)``, bypassing the model's own methods) is detected
+        through its ``version`` and triggers a full rebuild of the per-Q collections on next use.
 
         Returns
         -------
@@ -402,12 +425,24 @@ class ModelBase(EasyDynamicsModelBase):
             self._y_unit = unit_str
 
     def fix_all_parameters(self) -> None:
-        """Fix all Parameters in all ComponentCollections."""
+        """
+        Fix all Parameters in all ComponentCollections.
+
+        The template components are fixed too, so the call also takes effect on per-Q collections
+        built later, e.g. when Q is set after this call.
+        """
+        self._components.fix_all_parameters()
         for par in self.get_all_variables():
             par.fixed = True
 
     def free_all_parameters(self) -> None:
-        """Free all Parameters in all ComponentCollections."""
+        """
+        Free all Parameters in all ComponentCollections.
+
+        The template components are freed too, so the call also takes effect on per-Q collections
+        built later, e.g. when Q is set after this call.
+        """
+        self._components.free_all_parameters()
         for par in self.get_all_variables():
             par.fixed = False
 
@@ -489,6 +524,59 @@ class ModelBase(EasyDynamicsModelBase):
         self._component_collections = []
         for _ in range(len(self.Q)):
             self._component_collections.append(copy(self._components))
+
+    def _can_patch_component_collections(self) -> bool:
+        """
+        Check whether the per-Q collections can be updated in place instead of rebuilt.
+
+        They can if they are current, there is one per Q, and each holds exactly the components a
+        rebuild would produce, by name and in order. Per-Q collections edited directly (e.g. a
+        component popped from one Q) fail the check, so a full rebuild restores them rather than
+        patching at the wrong position.
+
+        Returns
+        -------
+        bool
+            ``True`` if the per-Q collections can be patched in place.
+        """
+        if self.component_collections_is_dirty:
+            return False
+        if len(self._component_collections) != (0 if self.Q is None else len(self.Q)):
+            return False
+        names = self._components.list_component_names()
+        return all(
+            collection.list_component_names() == names + self._generated_component_names(Q_index)
+            for Q_index, collection in enumerate(self._component_collections)
+        )
+
+    def _generated_component_names(
+        self,
+        Q_index: int,  # ruff: ignore[unused-method-argument]
+    ) -> list[str]:
+        """
+        Get the names of components added to a per-Q collection after the template's.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index of the collection.
+
+        Returns
+        -------
+        list[str]
+            Empty for a plain model; subclasses that add generated components override this.
+        """
+        return []
+
+    def _mark_component_collections_patched(self) -> None:
+        """
+        Record that the per-Q collections were updated in place to match the template.
+
+        The state counter is bumped so consumers keyed on ``state_version`` (e.g. convolvers) see
+        the structural change, while the collections themselves are marked current.
+        """
+        self._state_counter += 1
+        self._component_collections_is_dirty = False
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""

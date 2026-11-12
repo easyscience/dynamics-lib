@@ -106,8 +106,8 @@ class ResolutionModel(ModelBase):
         Notes
         -----
         A ``RuntimeError`` propagates from the calibration guard if the model holds calibrated
-        per-Q collections from ``from_sample_model``; a template change would schedule a rebuild
-        that silently discards them.
+        per-Q collections from ``from_sample_model``: an unfitted copy of the new component would
+        be mixed into the calibrated resolution.
         """
         self._assert_not_calibrated('append a component')
         components = component if isinstance(component, ComponentCollection) else (component,)
@@ -132,8 +132,8 @@ class ResolutionModel(ModelBase):
         Notes
         -----
         A ``RuntimeError`` propagates from the calibration guard if the model holds calibrated
-        per-Q collections from ``from_sample_model``; a template change would schedule a rebuild
-        that silently discards them.
+        per-Q collections from ``from_sample_model``: removing a component would silently alter the
+        calibrated resolution.
         """
         self._assert_not_calibrated('remove a component')
         super().remove_component(name)
@@ -175,9 +175,9 @@ class ResolutionModel(ModelBase):
         Raise if this model holds calibrated per-Q collections installed by from_sample_model.
 
         The per-Q collections installed by ``from_sample_model`` hold the fitted (calibrated)
-        resolution, but the template components do not. Any mutation that schedules a rebuild would
-        silently replace the calibrated collections with unfitted template copies, so such
-        mutations fail loudly instead.
+        resolution, but the template components do not. Template mutations would either rebuild the
+        collections from unfitted template copies or mix unfitted components into the calibrated
+        ones, so such mutations fail loudly instead.
 
         Parameters
         ----------
@@ -193,7 +193,8 @@ class ResolutionModel(ModelBase):
             raise RuntimeError(
                 f'Cannot {action} on a ResolutionModel created by from_sample_model: its per-Q '
                 f'collections hold the fitted (calibrated) resolution, and this change would '
-                f'rebuild them from the unfitted template, silently discarding the calibration. '
+                f'mix in or rebuild from the unfitted template, silently corrupting the '
+                f'calibration. '
                 f'Create a new ResolutionModel (or rerun from_sample_model on an updated '
                 f'SampleModel) instead.'
             )
@@ -215,9 +216,9 @@ class ResolutionModel(ModelBase):
         belong in a resolution model.
 
         When the SampleModel has Q values, the fitted per-Q collections are installed as the
-        calibrated resolution and the model is locked: mutations that would rebuild the collections
+        calibrated resolution and the model is locked: mutations that would change the collections
         from the (unfitted) template — ``append_component``, ``remove_component``,
-        ``clear_components``, ``clear_Q`` — raise a RuntimeError instead of silently discarding the
+        ``clear_components``, ``clear_Q`` — raise a RuntimeError instead of silently corrupting the
         calibration.
 
         Parameters

@@ -190,9 +190,18 @@ class SampleModel(ModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
+        can_patch = self._can_patch_component_collections()
         diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
-        self._component_collections_is_dirty = True
+        sources = diffusion_model.get_component_collections()
+        if not can_patch or len(sources) != len(self._component_collections):
+            self._component_collections_is_dirty = True
+            return
+        # Append the new components in place, so existing per-Q parameters are kept.
+        for target, source in zip(self._component_collections, sources, strict=True):
+            for component in source:
+                target.append_component(component)
+        self._mark_component_collections_patched()
 
     def remove_diffusion_model(self, name: str) -> None:
         """
@@ -219,8 +228,28 @@ class SampleModel(ModelBase):
                 f'Multiple DiffusionModels share the name {name!r}. '
                 f'Rename them to have unique names before removing.'
             )
-        del self.diffusion_models[matches[0]]
-        self._component_collections_is_dirty = True
+        can_patch = self._can_patch_component_collections()
+        removed = self.diffusion_models.pop(matches[0])
+        if not can_patch:
+            self._component_collections_is_dirty = True
+            return
+        removed_ids = {
+            id(component)
+            for collection in removed.get_component_collections()
+            for component in collection
+        }
+        found = [
+            [i for i, component in enumerate(target) if id(component) in removed_ids]
+            for target in self._component_collections
+        ]
+        if sum(map(len, found)) != len(removed_ids):
+            self._component_collections_is_dirty = True
+            return
+        # Remove only this model's components in place, so the other per-Q parameters are kept.
+        for target, indices in zip(self._component_collections, found, strict=True):
+            for index in reversed(indices):
+                target.pop(index)
+        self._mark_component_collections_patched()
 
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""
@@ -624,6 +653,26 @@ class SampleModel(ModelBase):
             ):
                 for component in source:
                     target.append_component(component)
+
+    def _generated_component_names(self, Q_index: int) -> list[str]:
+        """
+        Get the names of the diffusion-model components in a per-Q collection.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index of the collection.
+
+        Returns
+        -------
+        list[str]
+            The names of every diffusion model's components at this Q, in model order.
+        """
+        return [
+            name
+            for diffusion_model in self.diffusion_models
+            for name in diffusion_model.get_component_collections(Q_index).list_component_names()
+        ]
 
     def _on_diffusion_models_change(self) -> None:
         """Handle changes to the diffusion models."""
