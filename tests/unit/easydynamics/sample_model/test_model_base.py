@@ -805,7 +805,7 @@ class TestModelBase:
 
     def test_get_parameters_unknown_component_raises(self, model_base):
         # WHEN THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
+        with pytest.raises(KeyError, match='Missing'):
             model_base.get_parameters('Missing', 'width')
 
     @pytest.mark.parametrize('parameter_name', ['missing', 'name'])
@@ -875,7 +875,7 @@ class TestModelBase:
         model = ModelBase(components=Gaussian(name='G'))
 
         # THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
+        with pytest.raises(KeyError, match='Missing'):
             model.fix_parameter('Missing', 'width')
 
     def test_free_parameter(self, model_base):

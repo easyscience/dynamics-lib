@@ -1224,3 +1224,11 @@ class TestSampleModel:
         assert len(widths) == 2
         assert all(p.fixed for p in widths)
         assert all(p.value == pytest.approx(0.3) for p in widths)
+
+    def test_fix_parameter_of_a_dependent_parameter_raises(self):
+        # WHEN the area of a diffusion model's Lorentzian, which follows the model's parameters
+        model = SampleModel(diffusion_models=BrownianTranslationalDiffusion(), Q=[0.5, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(AttributeError, match='dependent'):
+            model.fix_parameter('BrownianTranslationalDiffusion', 'area')
