@@ -347,7 +347,8 @@ class InstrumentModel(EasyBase):
         The sample model, after convolution with the resolution, is multiplied by the scale; the
         background is not. It lets data sets that measure the same sample on different intensity
         scales be described by the same sample model. It is one Parameter for all Q values, and it
-        is fixed at 1 unless it is set or freed (``scale.fixed = False``).
+        is fixed at 1 unless it is set or freed (``scale.fixed = False``). A free scale has to be
+        fitted with all Q together (``fit_method='simultaneous'``, or a JointAnalysis).
 
         Returns
         -------

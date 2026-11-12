@@ -781,10 +781,10 @@ class Analysis1d(AnalysisBase):
             return scale * convolver.convolution()
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
-        energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
 
         if resolution.is_empty:
+            energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
             result = components.evaluate(energy_with_offset)
             if (
                 self.temperature is not None
@@ -798,15 +798,13 @@ class Analysis1d(AnalysisBase):
                 )
             return scale * result
 
-        return (
-            scale
-            * self._build_convolution(
-                sample_components=components,
-                resolution_components=resolution,
-                energy=energy,
-                energy_offset=energy_offset,
-            ).convolution()
+        convolver = self._build_convolution(
+            sample_components=components,
+            resolution_components=resolution,
+            energy=energy,
+            energy_offset=energy_offset,
         )
+        return scale * convolver.convolution()
 
     def _evaluate_direct(
         self,
