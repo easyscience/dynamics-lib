@@ -1,15 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import gc
-
 import numpy as np
 import pytest
 import scipp as sc
 from scipp import UnitError
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
-from easydynamics.sample_model.sample_model import SampleModel
 from easydynamics.variable import Parameter
 
 
@@ -391,68 +388,36 @@ class TestDiffusionModelBase:
         # EXPECT
         assert model.collections_version > version
 
-    def test_register_sample_model_sets_Q_to_the_union_of_their_Q(self, diffusion_model):
-        # WHEN two SampleModels with partly overlapping Q values
-        first = SampleModel(Q=[0.5, 1.0, 1.5])
-        second = SampleModel(Q=[1.0, 1.5, 2.0])
+    def test_extend_Q_sets_the_grid_of_a_model_without_Q(self, diffusion_model):
+        # WHEN THEN
+        diffusion_model.extend_Q([2.0, 1.0])
 
-        # THEN
-        diffusion_model.register_sample_model(first)
-        diffusion_model.register_sample_model(second)
+        # EXPECT the values, in ascending order
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0])
+        assert len(diffusion_model.get_component_collections()) == 2
 
-        # EXPECT
-        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0, 1.5, 2.0])
-        assert len(diffusion_model.get_component_collections()) == 4
-
-    def test_unregister_sample_model_shrinks_Q(self, diffusion_model):
+    def test_extend_Q_adds_the_values_that_are_missing(self):
         # WHEN
-        first = SampleModel(Q=[0.5, 1.0])
-        second = SampleModel(Q=[1.0, 1.5])
-        diffusion_model.register_sample_model(first)
-        diffusion_model.register_sample_model(second)
+        model = DiffusionModelBase(Q=[0.5, 1.0, 1.5])
+        version = model.collections_version
 
-        # THEN
-        diffusion_model.unregister_sample_model(first)
+        # THEN Q values that partly overlap with the grid
+        model.extend_Q([1.0, 1.5, 2.0])
 
-        # EXPECT
-        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 1.5])
+        # EXPECT the union, with the shared values once, and regenerated collections
+        np.testing.assert_allclose(model.Q.values, [0.5, 1.0, 1.5, 2.0])
+        assert len(model.get_component_collections()) == 4
+        assert model.collections_version > version
 
-    def test_update_Q_from_sample_models_leaves_Q_without_users_with_Q(self):
-        # WHEN a diffusion model with its own Q grid and a registered SampleModel without Q
-        model = DiffusionModelBase(Q=[1.0, 2.0])
-        model.register_sample_model(SampleModel())
+    @pytest.mark.parametrize('Q', [None, [1.0, 3.0], [1.0 + 1e-9]], ids=['None', 'held', 'close'])
+    def test_extend_Q_does_not_regenerate_when_the_grid_holds_the_values(self, Q):
+        # WHEN
+        model = DiffusionModelBase(Q=[1.0, 2.0, 3.0])
         version = model.collections_version
 
         # THEN
-        model.update_Q_from_sample_models()
+        model.extend_Q(Q)
 
         # EXPECT nothing changes
-        np.testing.assert_allclose(model.Q.values, [1.0, 2.0])
+        np.testing.assert_allclose(model.Q.values, [1.0, 2.0, 3.0])
         assert model.collections_version == version
-
-    def test_update_Q_from_sample_models_does_not_regenerate_when_Q_already_matches(self):
-        # WHEN
-        model = DiffusionModelBase()
-        model.register_sample_model(SampleModel(Q=[1.0, 2.0]))
-        sample_model = SampleModel(Q=[1.0, 2.0])
-        model.register_sample_model(sample_model)
-        version = model.collections_version
-
-        # THEN
-        model.update_Q_from_sample_models()
-
-        # EXPECT
-        assert model.collections_version == version
-
-    def test_registration_is_weak(self, diffusion_model):
-        # WHEN a registered SampleModel is garbage collected
-        kept = SampleModel(Q=[0.5, 1.0])
-        diffusion_model.register_sample_model(kept)
-        diffusion_model.register_sample_model(SampleModel(Q=[1.0, 1.5]))
-        gc.collect()
-
-        # THEN
-        diffusion_model.update_Q_from_sample_models()
-
-        # EXPECT only the live SampleModel's Q remains
-        np.testing.assert_allclose(diffusion_model.Q.values, [0.5, 1.0])

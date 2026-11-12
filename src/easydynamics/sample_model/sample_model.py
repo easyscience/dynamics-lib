@@ -198,7 +198,7 @@ class SampleModel(ModelBase):
         )
 
         for dm in self._diffusion_models:
-            dm.register_sample_model(self)
+            dm.extend_Q(Q)
 
         self._temperature = temperature_parameter
         self._temperature_unit = temperature_unit
@@ -227,7 +227,7 @@ class SampleModel(ModelBase):
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
         can_patch = self._can_patch_component_collections()
-        diffusion_model.register_sample_model(self)
+        diffusion_model.extend_Q(self.Q)
         self._diffusion_models.append(diffusion_model)
         if not can_patch or self.Q is None:
             self._component_collections_is_dirty = True
@@ -268,7 +268,6 @@ class SampleModel(ModelBase):
         removed = self.diffusion_models.pop(matches[0])
         self._removed_diffusion_versions += removed.collections_version
         if not can_patch:
-            removed.unregister_sample_model(self)
             self._component_collections_is_dirty = True
             return
         # Remove only this model's components in place, so the other per-Q parameters are kept.
@@ -283,7 +282,6 @@ class SampleModel(ModelBase):
             for index in reversed(range(len(target))):
                 if id(target[index]) in removed_ids:
                     target.pop(index)
-        removed.unregister_sample_model(self)
         self._mark_component_collections_patched()
 
     def clear_diffusion_models(self) -> None:
@@ -339,7 +337,6 @@ class SampleModel(ModelBase):
         for dm in self._diffusion_models:
             if dm not in new_models:
                 self._removed_diffusion_versions += dm.collections_version
-                dm.unregister_sample_model(self)
         self._diffusion_models = new_models
         self._on_diffusion_models_change()
 
@@ -672,16 +669,16 @@ class SampleModel(ModelBase):
         Generate ComponentCollections from the DiffusionModels for each Q and add the components
         from self._components.
 
-        A diffusion model's Q grid may be larger than Q (it is the union over the SampleModels
-        using it), so its collections are picked by Q value rather than zipped. If a diffusion
-        model's grid does not hold this SampleModel's Q values (e.g. its Q was cleared by hand), it
-        is brought back in line with its registered SampleModels first.
+        A diffusion model's Q grid may be larger than Q (it holds the Q values of every SampleModel
+        that used it), so its collections are picked by Q value rather than zipped. If the grid
+        does not hold this SampleModel's Q values (e.g. its Q was cleared by hand), they are added
+        first.
         """
         super()._generate_component_collections()
 
         if self.Q is not None:
             for diffusion_model in self.diffusion_models:
-                diffusion_model.update_Q_from_sample_models()
+                diffusion_model.extend_Q(self.Q)
                 indices = self._diffusion_Q_indices(diffusion_model)
                 for target, index in zip(self._component_collections, indices, strict=True):
                     for component in diffusion_model.get_component_collections(index):
@@ -712,13 +709,22 @@ class SampleModel(ModelBase):
     def _on_diffusion_models_change(self) -> None:
         """Handle changes to the diffusion models."""
         for diffusion_model in self.diffusion_models:
-            diffusion_model.register_sample_model(self)
+            diffusion_model.extend_Q(self.Q)
         self._component_collections_is_dirty = True
 
     def _on_Q_change(self) -> None:
-        """Handle changes to the Q values."""
+        """
+        Handle changes to the Q values.
+
+        New Q values are added to the diffusion models' grids. Clearing Q clears the grids too, so
+        that new Q values (e.g. after a rebin) do not leave the old ones behind; other SampleModels
+        using a diffusion model add their Q values back the next time they are used.
+        """
         for diffusion_model in self.diffusion_models:
-            diffusion_model.update_Q_from_sample_models()
+            if self.Q is None:
+                diffusion_model.clear_Q(confirm=True)
+            else:
+                diffusion_model.extend_Q(self.Q)
         self._component_collections_is_dirty = True
 
     def _diffusion_Q_indices(
@@ -800,15 +806,15 @@ class SampleModel(ModelBase):
         """
         Swap regenerated diffusion components into the per-Q collections in place.
 
-        The template components, and so their fitted per-Q values and fixed flags, are kept. The
-        diffusion models' grids are brought back to the union of their users' Q values first, so
-        they hold this SampleModel's Q values.
+        The template components, and so their fitted per-Q values and fixed flags, are kept. This
+        SampleModel's Q values are added to the diffusion models' grids first, in case a grid was
+        cleared by hand.
 
         The state counter is not bumped: the diffusion models' ``collections_version`` already
         moved ``state_version`` on, so convolvers rebuild once, not twice.
         """
         for diffusion_model in self.diffusion_models:
-            diffusion_model.update_Q_from_sample_models()
+            diffusion_model.extend_Q(self.Q)
         regenerated = [
             [
                 component
