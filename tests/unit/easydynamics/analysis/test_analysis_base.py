@@ -576,6 +576,25 @@ class TestAnalysisBase:
         ]
         fig.canvas.update_legend.assert_called_once_with()
 
+    def test_label_components_by_display_name_split_by_resolution(
+        self, analysis_base_with_components
+    ):
+        # WHEN a figure with a line for a component split by a resolution component
+        analysis = analysis_base_with_components
+        analysis.sample_model.components[0].display_name = 'Narrow'
+        analysis.instrument_model.resolution_model.append_component(
+            Gaussian(name='ResGauss', display_name='Res. Gauss')
+        )
+        axes = Figure().subplots()
+        axes.plot([0.0, 1.0], [0.0, 1.0], label='Gaussian1 ⊗ ResGauss')
+        fig = SimpleNamespace(ax=axes, canvas=MagicMock())
+
+        # THEN
+        analysis._label_components_by_display_name(fig, Q_index=0)
+
+        # EXPECT
+        assert axes.get_lines()[0].get_label() == 'Narrow ⊗ Res. Gauss'
+
     def test_on_experiment_changed_updates_Q(self, analysis_base):
         # WHEN
         fake_Q = [1, 2, 3]

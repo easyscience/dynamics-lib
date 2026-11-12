@@ -391,6 +391,7 @@ class Analysis(AnalysisBase):
         add_background: bool = True,
         plot_residuals: bool = False,
         energy: sc.Variable | None = None,
+        split_by_resolution: bool = False,
         **kwargs: dict[str, Any],
     ) -> WidgetFigure:
         """
@@ -415,6 +416,11 @@ class Analysis(AnalysisBase):
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
             experiment.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components, e.g. 'Lorentzian ⊗ Res. Gauss' and 'Lorentzian ⊗ Res. Lorentz',
+            which add up to the convolved component. Only used if plot_components is True and there
+            is a resolution.
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp for customizing the plot.
 
@@ -438,6 +444,7 @@ class Analysis(AnalysisBase):
                 add_background=add_background,
                 plot_residuals=plot_residuals,
                 energy=energy,
+                split_by_resolution=split_by_resolution,
                 **kwargs,
             )
 
@@ -461,6 +468,7 @@ class Analysis(AnalysisBase):
             add_background=add_background,
             include_components=plot_components,
             include_residuals=plot_residuals,
+            split_by_resolution=split_by_resolution,
         )
 
         plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
@@ -494,6 +502,7 @@ class Analysis(AnalysisBase):
         add_background: bool = True,
         include_components: bool = True,
         include_residuals: bool = False,
+        split_by_resolution: bool = False,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation and optionally
@@ -512,13 +521,17 @@ class Analysis(AnalysisBase):
             only the total model will be included.
         include_residuals : bool, default=False
             Whether to include the residuals (data - model) in the DataGroup.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components, keyed 'sample_name ⊗ resolution_name'. Only used if
+            include_components is True and there is a resolution.
 
         Raises
         ------
         ValueError
             If there is no data to include in the DataGroup, or if there are no Q values available
             for creating the DataGroup. If include_components is True and two components share a
-            name.
+            name, or split_by_resolution is True and two resolution components share a name.
 
         Returns
         -------
@@ -537,6 +550,7 @@ class Analysis(AnalysisBase):
         self._verify_bool(add_background, 'add_background')
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
+        self._verify_bool(split_by_resolution, 'split_by_resolution')
 
         custom_energy = energy is not None
         energy = self._verify_energy(energy) if energy is not None else self.energy
@@ -559,7 +573,9 @@ class Analysis(AnalysisBase):
 
         if include_components:
             components = self._create_components_dataset(
-                add_background=add_background, energy=energy
+                add_background=add_background,
+                energy=energy,
+                split_by_resolution=split_by_resolution,
             )
             for key in components:
                 data_and_model[key] = components[key]
@@ -1073,6 +1089,7 @@ class Analysis(AnalysisBase):
         self,
         add_background: bool = True,
         energy: sc.Variable | None = None,
+        split_by_resolution: bool = False,
     ) -> sc.Dataset:
         """
         Create a scipp dataset containing the individual components of the model for plotting.
@@ -1085,6 +1102,9 @@ class Analysis(AnalysisBase):
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the components. If None, uses the energy from
             the experiment.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components.
 
         Returns
         -------
@@ -1098,7 +1118,9 @@ class Analysis(AnalysisBase):
 
         datasets = [
             analysis1d._create_components_dataset_single_Q(  # ruff: ignore[private-member-access]
-                add_background=add_background, energy=energy
+                add_background=add_background,
+                energy=energy,
+                split_by_resolution=split_by_resolution,
             )
             for analysis1d in self.analysis_list
         ]
