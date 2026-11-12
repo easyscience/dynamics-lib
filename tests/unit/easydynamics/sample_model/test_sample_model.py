@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -1204,3 +1205,31 @@ class TestSampleModel:
         # EXPECT
         assert versions == sorted(versions)
         assert len(set(versions)) >= 4
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_copy(self):
+        # WHEN a sample model using every constructor argument
+        sample_model = SampleModel(
+            components=Lorentzian(name='L', width=0.3),
+            Q=np.array([0.5, 1.0]),
+            diffusion_models=BrownianTranslationalDiffusion(name='Brownian'),
+            temperature=10.0,
+            detailed_balance_settings=DetailedBalanceSettings(normalize_detailed_balance=False),
+        )
+
+        # THEN
+        sample_model_copy = copy(sample_model)
+
+        # EXPECT an independent model that evaluates to the same values
+        assert sample_model_copy is not sample_model
+        assert sample_model_copy.diffusion_models[0] is not sample_model.diffusion_models[0]
+        assert sample_model_copy.diffusion_models[0].name == 'Brownian'
+        assert sample_model_copy.temperature is not sample_model.temperature
+        assert sample_model_copy.temperature.value == pytest.approx(10.0)
+        assert sample_model_copy.temperature.fixed is True
+        assert sample_model_copy.normalize_detailed_balance is False
+        x = np.linspace(-1.0, 1.0, 11)
+        np.testing.assert_allclose(sample_model_copy.evaluate(x), sample_model.evaluate(x))

@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from unittest.mock import Mock
 
 import numpy as np
@@ -775,3 +776,47 @@ class TestModelBase:
         # EXPECT a full rebuild instead of a no-op patch that leaves no collections
         assert model_base.component_collections_is_dirty is True
         assert len(model_base.get_component_collection(0)) == 3
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_copy(self):
+        # WHEN a model whose template parameters have non-default bounds
+        lorentzian = Lorentzian(name='L', area=2.0, width=0.3)
+        lorentzian.area.min = 1.0
+        lorentzian.width.min = 0.1
+        lorentzian.width.max = 3.0
+        lorentzian.width.fixed = True
+        model_base = ModelBase(components=lorentzian, Q=np.array([0.5, 1.0]))
+
+        # THEN
+        model_copy = copy(model_base)
+
+        # EXPECT an independent model with the same Q, components and bounds at every Q
+        assert model_copy is not model_base
+        assert model_copy.unique_name != model_base.unique_name
+        np.testing.assert_array_equal(model_copy.Q.values, model_base.Q.values)
+        assert model_copy.components['L'] is not model_base.components['L']
+        original = model_base.get_all_variables()
+        copied = model_copy.get_all_variables()
+        assert len(copied) == len(original) == 6
+        for original_parameter, copied_parameter in zip(original, copied, strict=True):
+            assert copied_parameter is not original_parameter
+            assert copied_parameter.name == original_parameter.name
+            assert copied_parameter.value == original_parameter.value
+            assert copied_parameter.min == original_parameter.min
+            assert copied_parameter.max == original_parameter.max
+            assert copied_parameter.fixed == original_parameter.fixed
+
+    def test_from_dict_round_trip_without_Q(self):
+        # WHEN
+        model_base = ModelBase(components=Gaussian(name='G', width=0.2), display_name='Model')
+
+        # THEN
+        model_copy = ModelBase.from_dict(model_base.to_dict())
+
+        # EXPECT
+        assert model_copy.display_name == 'Model'
+        assert model_copy.Q is None
+        assert model_copy.components['G'].width.value == pytest.approx(0.2)

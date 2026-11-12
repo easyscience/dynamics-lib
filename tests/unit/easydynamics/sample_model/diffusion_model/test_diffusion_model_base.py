@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -432,3 +434,20 @@ class TestDiffusionModelBase:
         # EXPECT nothing changes
         np.testing.assert_allclose(model.Q.values, [1.0, 2.0, 3.0])
         assert model.collections_version == version
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_from_dict_rebuilds_the_per_Q_components(self):
+        # WHEN
+        model = DiffusionModelBase(scale=2.0, Q=np.array([1.0, 2.0]))
+
+        # THEN
+        with patch.object(DiffusionModelBase, '_on_Q_change') as on_Q_change:
+            model_copy = DiffusionModelBase.from_dict(model.to_dict())
+
+        # EXPECT the components are rebuilt on the deserialised parameters
+        on_Q_change.assert_called_once_with()
+        assert model_copy.scale.value == pytest.approx(2.0)
+        np.testing.assert_array_equal(model_copy.Q.values, [1.0, 2.0])

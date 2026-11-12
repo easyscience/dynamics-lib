@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -588,3 +589,35 @@ class TestInstrumentModel:
         assert 'Q_len=3' in repr_str
         assert 'resolution_model=ResolutionModel(' in repr_str
         assert 'background_model=BackgroundModel(' in repr_str
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_copy(self):
+        # WHEN
+        instrument_model = InstrumentModel(
+            Q=np.array([1.0, 2.0]),
+            resolution_model=ResolutionModel(components=Gaussian(name='Res', width=0.1)),
+            background_model=BackgroundModel(components=Polynomial(coefficients=[0.5])),
+            energy_offset=0.2,
+        )
+        instrument_model.energy_offset.fixed = True
+
+        # THEN
+        instrument_model_copy = copy(instrument_model)
+
+        # EXPECT an independent model with the same content
+        assert instrument_model_copy is not instrument_model
+        assert instrument_model_copy.energy_offset is not instrument_model.energy_offset
+        assert instrument_model_copy.energy_offset.value == pytest.approx(0.2)
+        assert instrument_model_copy.energy_offset.fixed is True
+        np.testing.assert_array_equal(instrument_model_copy.Q.values, [1.0, 2.0])
+        assert instrument_model_copy.resolution_model is not instrument_model.resolution_model
+        resolution_width = instrument_model_copy.resolution_model.components['Res'].width
+        assert resolution_width.value == pytest.approx(0.1)
+        assert instrument_model_copy.background_model is not instrument_model.background_model
+        assert [p.value for p in instrument_model_copy.get_all_variables()] == [
+            p.value for p in instrument_model.get_all_variables()
+        ]
+        assert instrument_model_copy.get_energy_offset(0).fixed is True
