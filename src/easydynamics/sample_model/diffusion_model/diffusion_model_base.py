@@ -24,6 +24,9 @@ from easydynamics.variable import Parameter
 class DiffusionModelBase(EasyDynamicsModelBase):
     """Base class for constructing diffusion models."""
 
+    # Counts regenerations of the per-Q collections; see collections_version.
+    _collections_version = 0
+
     def __init__(
         self,
         scale: Numeric = 1.0,
@@ -171,7 +174,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         list[ComponentCollection]
             One collection per Q value, or an empty list without Q.
         """
-        return getattr(self, '_stored_component_collections', [])
+        return self._stored_component_collections
 
     @_component_collections.setter
     def _component_collections(self, value: list[ComponentCollection]) -> None:
@@ -184,7 +187,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             The new collections.
         """
         self._stored_component_collections = value
-        self._collections_version = self.collections_version + 1
+        self._collections_version += 1
 
     @property
     def collections_version(self) -> int:
@@ -199,7 +202,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         int
             The current version.
         """
-        return getattr(self, '_collections_version', 0)
+        return self._collections_version
 
     def extend_Q(self, Q: Q_type | None) -> None:
         """
@@ -222,16 +225,17 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         Q = _validate_and_convert_Q(Q)
         if Q is None:
             return
-        values = Q.values if self.Q is None else np.concatenate([self.Q.values, Q.values])
-        union: list[float] = []
-        for value in np.sort(values):
-            if not union or not np.isclose(union[-1], value, rtol=1e-5, atol=1e-8):
-                union.append(float(value))
+        values = Q.values
         if self.Q is not None:
-            if len(union) == len(self.Q):
+            grid = self.Q.values
+            if all(np.isclose(grid, value).any() for value in values):
                 return
-            self.clear_Q(confirm=True)
-        self.Q = sc.array(dims=['Q'], values=union, unit=CANONICAL_Q_UNIT)
+            values = np.concatenate([grid, values])
+            # Unset Q directly rather than with clear_Q, so that the per-Q components are
+            # regenerated once, by the setter below.
+            self._Q = None
+        values = np.sort(values)
+        self.Q = values[np.append(True, ~np.isclose(values[:-1], values[1:]))]
 
     @property
     def Q(self) -> sc.Variable | None:
@@ -276,10 +280,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 f'New Q values are not similar to the old ones on diffusion model '
-                f'{self.name!r}. This typically happens when a diffusion model that was '
-                f'previously used with different Q values (e.g. in another SampleModel) is '
-                f'reused. Run clear_Q(confirm=True) on the diffusion model first, then set '
-                f'the new Q values.'
+                f'{self.name!r}. Use extend_Q to add Q values, or run clear_Q(confirm=True) '
+                f'first to replace them.'
             )
 
     @property

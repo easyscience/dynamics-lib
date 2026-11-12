@@ -787,18 +787,19 @@ class TestSampleModel:
         assert sample_model.state_version > version
         assert sample_model.component_collections_is_dirty is False
 
-    def test_remove_diffusion_model_rebuilds_when_components_not_found(self, sample_model):
+    def test_remove_diffusion_model_after_the_model_regenerated_its_components(self, sample_model):
         # WHEN per-Q collections are built, but the diffusion model has since regenerated its own
-        _ = sample_model.get_component_collection(0)
+        width = sample_model.get_component_collection(1)['TestGaussian1Name'].width
         sample_model.diffusion_models[0].create_component_collections()
 
         # THEN
         sample_model.remove_diffusion_model('DiffusionModelName')
 
-        # EXPECT a full rebuild is scheduled instead of a partial in-place removal
-        assert sample_model.component_collections_is_dirty is True
+        # EXPECT the regenerated components are removed in place, keeping the template copies
+        assert sample_model.component_collections_is_dirty is False
         names = sample_model.get_component_collection(0).list_component_names()
         assert names == sample_model.components.list_component_names()
+        assert sample_model.get_component_collection(1)['TestGaussian1Name'].width is width
 
     def test_append_diffusion_model_without_Q_does_not_raise(self):
         "Regression: a diffusion model with its own Q on a Q-less SampleModel raised in zip"
@@ -933,14 +934,14 @@ class TestSampleModel:
         assert first.component_collections_is_dirty is False
 
     def test_get_all_variables_maps_Q_index_onto_the_diffusion_model_grid(self):
-        # WHEN a DeltaLorentz with per-Q parameters shared by two SampleModels
-        diffusion_model = DeltaLorentz(name='DL', allow_Q_variation={'A_0': True})
-        first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0])
-        second = SampleModel(diffusion_models=diffusion_model, Q=[1.5])
-        assert first.Q is not None
+        # WHEN a DeltaLorentz with per-Q parameters, on a larger grid than the SampleModel
+        diffusion_model = DeltaLorentz(
+            name='DL', allow_Q_variation={'A_0': True}, Q=[0.5, 1.0, 1.5]
+        )
+        model = SampleModel(diffusion_models=diffusion_model, Q=[1.5])
 
         # THEN
-        variables = second.get_all_variables(Q_index=0)
+        variables = model.get_all_variables(Q_index=0)
 
         # EXPECT the per-Q variables are those at the grid's Q index 2, not index 0
         expected = diffusion_model.get_independent_variables(Q_index=2)
@@ -1087,13 +1088,39 @@ class TestSampleModel:
         )
         assert collection.list_component_names()[0] == 'G'
 
-    def test_diffusion_Q_indices_raises_when_the_grid_lacks_Q(self, sample_model):
-        # WHEN a diffusion model that is not used by the SampleModel, on another grid
-        other = BrownianTranslationalDiffusion(name='Other', Q=[7.0])
+    @pytest.mark.parametrize(
+        'edit',
+        [
+            lambda model: model.append_component(Gaussian(name='New')),
+            lambda model: model.remove_component('L'),
+            lambda model: model.append_diffusion_model(
+                BrownianTranslationalDiffusion(name='D2', lorentzian_name='L2')
+            ),
+            lambda model: model.remove_diffusion_model('D'),
+        ],
+        ids=['append_component', 'remove_component', 'append_diffusion', 'remove_diffusion'],
+    )
+    def test_edit_while_only_diffusion_components_are_stale_keeps_per_Q_state(self, edit):
+        # WHEN a fitted per-Q template parameter, and a shared diffusion model that regenerated
+        # its components since the SampleModel was last used
+        diffusion_model = BrownianTranslationalDiffusion(name='D')
+        model = SampleModel(
+            components=ComponentCollection(components=[Gaussian(name='G'), Lorentzian(name='L')]),
+            diffusion_models=diffusion_model,
+            Q=[0.5, 1.0],
+        )
+        width = model.get_component_collection(0)['G'].width
+        width.value = 0.123
+        diffusion_model.extend_Q([1.5])
+        assert model.component_collections_is_dirty is True
 
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="'Other' does not have the Q values"):
-            sample_model._diffusion_Q_indices(other)
+        # THEN
+        edit(model)
+
+        # EXPECT the edit is patched in place rather than rebuilding the per-Q collections
+        assert model.component_collections_is_dirty is False
+        assert model.get_component_collection(0)['G'].width is width
+        assert width.value == pytest.approx(0.123)
 
     def test_sample_model_without_Q_ignores_the_per_Q_state_of_a_diffusion_model(self):
         # WHEN a SampleModel without Q, using a diffusion model that has a grid of its own
@@ -1145,12 +1172,11 @@ class TestSampleModel:
         np.testing.assert_allclose(new_model.Q.values, sample_model.Q.values)
 
     def test_refresh_does_not_bump_the_state_counter_twice(self):
-        # WHEN a SampleModel whose shared diffusion model is extended by a second SampleModel
+        # WHEN a SampleModel whose diffusion model is extended, as by a second SampleModel
         diffusion_model = BrownianTranslationalDiffusion(name='D')
         first = SampleModel(diffusion_models=diffusion_model, Q=[0.5, 1.0])
         _ = first.get_component_collection(0)
-        second = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 1.5])
-        assert second.Q is not None
+        diffusion_model.extend_Q([1.0, 1.5])
         version = first.state_version
 
         # THEN the first refreshes its collections

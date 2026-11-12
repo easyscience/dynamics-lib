@@ -409,6 +409,17 @@ class TestDiffusionModelBase:
         assert len(model.get_component_collections()) == 4
         assert model.collections_version > version
 
+    def test_extend_Q_adds_to_a_grid_with_repeated_values(self):
+        "Regression: comparing lengths dropped the new value when the grid held a duplicate"
+        # WHEN a grid set by hand with a repeated value
+        model = DiffusionModelBase(Q=[1.0, 1.0])
+
+        # THEN
+        model.extend_Q([2.0])
+
+        # EXPECT the new value is added, and the repeated one is kept once
+        np.testing.assert_allclose(model.Q.values, [1.0, 2.0])
+
     @pytest.mark.parametrize('Q', [None, [1.0, 3.0], [1.0 + 1e-9]], ids=['None', 'held', 'close'])
     def test_extend_Q_does_not_regenerate_when_the_grid_holds_the_values(self, Q):
         # WHEN
