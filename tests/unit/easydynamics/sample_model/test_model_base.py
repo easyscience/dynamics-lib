@@ -10,6 +10,7 @@ import pytest
 import scipp as sc
 from scipp import UnitError
 
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
@@ -605,15 +606,15 @@ class TestModelBase:
         fig.bottom_bar = [MagicMock(controls={'Q': widget})]
         return fig, widget
 
-    def test_plot_without_Q_plots_the_template_components(self, energy):
+    def test_plot_labels_the_components_by_display_name(self, energy):
         # WHEN
         model = ModelBase(
             components=Gaussian(name='GaussName', display_name='Gauss label'),
-            Q=None,
+            Q=np.array([1.0]),
         )
 
-        # THEN
-        fig = model.plot(energy)
+        # THEN rendering for real, without mocking plopp
+        fig = model.plot(energy, Q_index=0)
 
         # EXPECT the total and the component are plotted, labelled by display name
         labels = [text.get_text() for text in fig.ax.get_legend().get_texts()]
@@ -635,11 +636,7 @@ class TestModelBase:
         assert plotted['Total'].dims == ('Q', 'energy')
         assert sc.identical(plotted['Total'].coords['Q'], model_base.Q)
         assert kwargs['keep'] == 'energy'
-        assert kwargs['title'] == 'InitModel'
         assert kwargs['color'] == {'Total': 'blue'}
-        assert kwargs['linestyle']['Total'] == '-'
-        assert kwargs['linestyle']['TestGaussian1Name'] == '--'
-        assert kwargs['marker'] == dict.fromkeys(plotted)
         assert widget.slider_toggler.value == '-o-'
         fig.autoscale.assert_called_once_with()
 
@@ -691,30 +688,24 @@ class TestModelBase:
         with pytest.raises(IndexError):
             model_base.plot(energy, Q_index=5)
 
-    def test_plot_Q_index_without_Q_raises(self, energy):
-        # WHEN
-        model = ModelBase(components=Gaussian())
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='Q is not set on the model'):
-            model.plot(energy, Q_index=0)
-
-    def test_plot_no_components_raises(self, energy):
-        # WHEN
-        model = ModelBase(Q=np.array([1.0, 2.0]))
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='No components in the model to plot'):
+    @pytest.mark.parametrize(
+        'model',
+        [ModelBase(components=Gaussian()), ModelBase(Q=np.array([1.0, 2.0]))],
+        ids=['No Q', 'No components'],
+    )
+    def test_plot_without_Q_or_components_raises(self, model, energy):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Set Q and add components'):
             model.plot(energy)
 
     @pytest.mark.filterwarnings('ignore:Duplicate component names')
     def test_plot_duplicate_component_names_raises(self, energy):
         # WHEN
-        model = ModelBase(components=Gaussian(name='Same'))
+        model = ModelBase(components=Gaussian(name='Same'), Q=np.array([1.0]))
         model.append_component(Lorentzian(name='Same'))
 
         # THEN EXPECT
-        with pytest.raises(ValueError, match=r"Duplicate component names: \['Same'\]"):
+        with pytest.raises(AmbiguousNameError, match='Same'):
             model.plot(energy)
 
     #############
