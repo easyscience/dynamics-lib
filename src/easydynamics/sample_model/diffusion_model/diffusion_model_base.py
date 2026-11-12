@@ -24,6 +24,9 @@ from easydynamics.variable import Parameter
 class DiffusionModelBase(EasyDynamicsModelBase):
     """Base class for constructing diffusion models."""
 
+    # Counts regenerations of the per-Q collections; see collections_version.
+    _collections_version = 0
+
     def __init__(
         self,
         scale: Numeric = 1.0,
@@ -162,6 +165,79 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._scale.value = float(scale)
 
     @property
+    def _component_collections(self) -> list[ComponentCollection]:
+        """
+        The per-Q component collections.
+
+        Returns
+        -------
+        list[ComponentCollection]
+            One collection per Q value, or an empty list without Q.
+        """
+        return self._stored_component_collections
+
+    @_component_collections.setter
+    def _component_collections(self, value: list[ComponentCollection]) -> None:
+        """
+        Replace the per-Q component collections and bump ``collections_version``.
+
+        Parameters
+        ----------
+        value : list[ComponentCollection]
+            The new collections.
+        """
+        self._stored_component_collections = value
+        self._collections_version += 1
+
+    @property
+    def collections_version(self) -> int:
+        """
+        Get a counter that increases every time the per-Q component collections are regenerated.
+
+        A SampleModel compares it against the value it built its own collections from, so it
+        notices when this model regenerated its components (e.g. because its Q grid grew).
+
+        Returns
+        -------
+        int
+            The current version.
+        """
+        return self._collections_version
+
+    def extend_Q(self, Q: Q_type | None) -> None:
+        """
+        Add Q values to the Q grid.
+
+        A diffusion model can be used by several SampleModels, e.g. for data sets with different Q
+        values fitted together. Each SampleModel adds its Q values here, so the grid holds the Q
+        values of all of them: each SampleModel finds its own Q values in the grid, and the global
+        parameters are shared by all of them. Q values are only removed by ``clear_Q``, so the grid
+        does not depend on which SampleModels still exist.
+
+        Adding new Q values regenerates the per-Q components and per-Q parameters. Nothing changes
+        if the grid already holds all the values.
+
+        Parameters
+        ----------
+        Q : Q_type | None
+            The Q values to add. None adds nothing.
+        """
+        Q = _validate_and_convert_Q(Q)
+        if Q is None:
+            return
+        values = Q.values
+        if self.Q is not None:
+            grid = self.Q.values
+            if all(np.isclose(grid, value).any() for value in values):
+                return
+            values = np.concatenate([grid, values])
+            # Unset Q directly rather than with clear_Q, so that the per-Q components are
+            # regenerated once, by the setter below.
+            self._Q = None
+        values = np.sort(values)
+        self.Q = values[np.append(True, ~np.isclose(values[:-1], values[1:]))]
+
+    @property
     def Q(self) -> sc.Variable | None:
         """
         Get the Q values of the SampleModel.
@@ -204,10 +280,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 f'New Q values are not similar to the old ones on diffusion model '
-                f'{self.name!r}. This typically happens when a diffusion model that was '
-                f'previously used with different Q values (e.g. in another SampleModel) is '
-                f'reused. Run clear_Q(confirm=True) on the diffusion model first, then set '
-                f'the new Q values.'
+                f'{self.name!r}. Use extend_Q to add Q values, or run clear_Q(confirm=True) '
+                f'first to replace them.'
             )
 
     @property
