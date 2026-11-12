@@ -663,7 +663,7 @@ class Analysis(AnalysisBase):
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
             title, linestyle, marker, color). Use x_axis rather than plopp's coords to choose the
-            x-axis: passing coords makes plopp ignore per-parameter styles.
+            x-axis.
 
         Raises
         ------

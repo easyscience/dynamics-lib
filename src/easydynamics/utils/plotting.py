@@ -23,11 +23,7 @@ def with_x_axis_dim(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
     Make x_axis, computed from the Q coordinate, the dimension to plot against.
 
-    Only the coordinate is transformed; the values at each Q are unchanged. The x_axis coordinate
-    is made the dimension coordinate here rather than by passing ``coords=`` to ``plopp.plot``: as
-    of plopp 26.10 / scipp 26.9, plopp implements ``coords=`` with ``DataArray.rename_dims``, which
-    drops the DataArray's name, so per-line styles keyed by name (``linestyle={name: ...}``) would
-    silently not be applied.
+    Only the coordinate is transformed; the values at each Q are unchanged.
 
     Parameters
     ----------
