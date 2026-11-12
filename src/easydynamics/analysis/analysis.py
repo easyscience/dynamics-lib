@@ -405,7 +405,8 @@ class Analysis(AnalysisBase):
         Q_index : int | None, default=None
             Index of the Q value to plot. If None, plot all Q values.
         plot_components : bool, default=True
-            Whether to plot the individual components.
+            Whether to plot the individual components. Each component needs a unique name, and is
+            labelled by its display name in the legend.
         add_background : bool, default=True
             Whether to add background components to the sample model components when plotting.
             Default is True.
@@ -482,6 +483,8 @@ class Analysis(AnalysisBase):
             )
             for widget in fig.bottom_bar[0].controls.values():
                 widget.slider_toggler.value = '-o-'
+        if plot_components:
+            self._label_components_by_display_name(fig, Q_index=0)
         fig.autoscale()
         return fig
 
@@ -514,7 +517,8 @@ class Analysis(AnalysisBase):
         ------
         ValueError
             If there is no data to include in the DataGroup, or if there are no Q values available
-            for creating the DataGroup.
+            for creating the DataGroup. If include_components is True and two components share a
+            name.
 
         Returns
         -------

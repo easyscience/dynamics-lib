@@ -421,6 +421,27 @@ class TestAnalysis:
         # Widget toggler updated
         assert fake_widget.slider_toggler.value == '-o-'
 
+    @pytest.mark.parametrize('plot_residuals', [False, True])
+    def test_plot_data_and_model_relabels_the_components(self, analysis, plot_residuals):
+        # WHEN
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {}
+
+        # THEN
+        with (
+            patch('plopp.slicer', return_value=fake_fig),
+            patch(
+                'easydynamics.analysis.analysis.slicerplot_with_residuals', return_value=fake_fig
+            ),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            patch.object(analysis, '_label_components_by_display_name') as relabel,
+        ):
+            analysis.plot_data_and_model(plot_residuals=plot_residuals)
+
+        # EXPECT
+        relabel.assert_called_once_with(fake_fig, Q_index=0)
+
     def test_plot_data_and_model_with_residuals(
         self,
         analysis,

@@ -1,12 +1,15 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 import scipp as sc
+from matplotlib.figure import Figure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.experiment import Experiment
@@ -548,6 +551,30 @@ class TestAnalysisBase:
     #############
     # Private methods
     #############
+
+    def test_label_components_by_display_name(self, analysis_base_with_components):
+        # WHEN a figure with lines labelled by key, for two components and the data
+        analysis = analysis_base_with_components
+        analysis.sample_model.components[0].display_name = 'Narrow'
+        analysis.instrument_model.background_model.append_component(
+            Gaussian(name='Flat', display_name='Background')
+        )
+        axes = Figure().subplots()
+        for label in ('Data', 'Gaussian1', 'Gaussian2', 'Flat'):
+            axes.plot([0.0, 1.0], [0.0, 1.0], label=label)
+        fig = SimpleNamespace(ax=axes, canvas=MagicMock())
+
+        # THEN
+        analysis._label_components_by_display_name(fig, Q_index=0)
+
+        # EXPECT components are relabelled, and everything else is left alone
+        assert [line.get_label() for line in axes.get_lines()] == [
+            'Data',
+            'Narrow',
+            'Gaussian2',
+            'Background',
+        ]
+        fig.canvas.update_legend.assert_called_once_with()
 
     def test_on_experiment_changed_updates_Q(self, analysis_base):
         # WHEN
