@@ -134,15 +134,18 @@ class TestParameterAnalysis:
 
     @pytest.fixture
     def mock_model_dataset(self):
-        return sc.Dataset({
-            'Polynomial': sc.DataArray(data=sc.array(dims=['Q'], values=[1.1, 2.1], unit='meV')),
-            'BrownianTranslationalDiffusion area': sc.DataArray(
-                data=sc.array(dims=['Q'], values=[6.1, 7.1], unit='meV')
-            ),
-            'BrownianTranslationalDiffusion width': sc.DataArray(
-                data=sc.array(dims=['Q'], values=[8.1, 9.1], unit='meV')
-            ),
-        })
+        return sc.Dataset(
+            {
+                'Polynomial': sc.array(dims=['Q'], values=[1.1, 2.1], unit='meV'),
+                'BrownianTranslationalDiffusion area': sc.array(
+                    dims=['Q'], values=[6.1, 7.1], unit='meV'
+                ),
+                'BrownianTranslationalDiffusion width': sc.array(
+                    dims=['Q'], values=[8.1, 9.1], unit='meV'
+                ),
+            },
+            coords={'Q': sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')},
+        )
 
     @pytest.fixture
     def parameter_analysis(self, dataset):
@@ -451,7 +454,7 @@ class TestParameterAnalysis:
 
         # 2. Model dataset calculation
         parameter_analysis.calculate_model_dataset.assert_called_once_with(
-            parameter_analysis.bindings
+            parameter_analysis.bindings, Q=None
         )
 
         # 3. Plot called
@@ -462,7 +465,7 @@ class TestParameterAnalysis:
 
         # 4. Dataset passed correctly
         dataset = args[0]
-        assert isinstance(dataset, sc.Dataset)
+        assert isinstance(dataset, dict)
 
         # Data keys
         assert 'parameter1' in dataset
@@ -507,7 +510,7 @@ class TestParameterAnalysis:
 
         # 2. Model dataset calculation
         parameter_analysis.calculate_model_dataset.assert_called_once_with(
-            parameter_analysis.bindings
+            parameter_analysis.bindings, Q=None
         )
 
         # 3. Plot called
@@ -518,7 +521,7 @@ class TestParameterAnalysis:
 
         # 4. Dataset passed correctly
         dataset = args[0]
-        assert isinstance(dataset, sc.Dataset)
+        assert isinstance(dataset, dict)
 
         # Data keys
         assert 'parameter1' in dataset
@@ -572,7 +575,7 @@ class TestParameterAnalysis:
 
         # 4. Dataset passed correctly
         dataset = args[0]
-        assert isinstance(dataset, sc.Dataset)
+        assert isinstance(dataset, dict)
 
         # Data keys
         assert 'parameter1' in dataset
@@ -622,9 +625,9 @@ class TestParameterAnalysis:
             parameter_analysis.plot(names=['parameter1'])
 
         # EXPECT the diffusion binding is not evaluated for a plot that does not show it
-        parameter_analysis.calculate_model_dataset.assert_called_once_with([
-            parameter_analysis.bindings[0]
-        ])
+        parameter_analysis.calculate_model_dataset.assert_called_once_with(
+            [parameter_analysis.bindings[0]], Q=None
+        )
 
     def test_plot_against_Q_squared(self, parameter_analysis, mock_model_dataset):
         # WHEN
@@ -644,8 +647,9 @@ class TestParameterAnalysis:
         args, kwargs = mock_plot.call_args
         plotted = args[0]
         assert 'coords' not in kwargs
-        assert plotted.dims == ('Q^2',)
-        assert sc.identical(plotted.coords['Q^2'], plotted.coords['Q'] ** 2)
+        for key in ['parameter1', 'Polynomial']:
+            assert plotted[key].dims == ('Q^2',)
+            assert sc.identical(plotted[key].coords['Q^2'], plotted[key].coords['Q'] ** 2)
         assert sc.identical(
             plotted['parameter1'].data,
             parameter_analysis.parameters['parameter1'].data.rename_dims(Q='Q^2'),
@@ -672,6 +676,65 @@ class TestParameterAnalysis:
         assert lines['parameter1'].get_marker() == 'o'
         assert lines['Polynomial'].get_linestyle() == '--'
         assert lines['Polynomial'].get_marker() == 'None'
+
+    def test_plot_passes_Q_to_calculate_model_dataset(
+        self, parameter_analysis, mock_model_dataset
+    ):
+        # WHEN
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+        Q = sc.linspace('Q', 0.1, 0.2, 11, unit='1/angstrom')
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot'),
+        ):
+            parameter_analysis.plot(names=['parameter1'], Q=Q)
+
+        # EXPECT
+        parameter_analysis.calculate_model_dataset.assert_called_once()
+        args, kwargs = parameter_analysis.calculate_model_dataset.call_args
+        assert args == ([parameter_analysis.bindings[0]],)
+        assert sc.identical(kwargs['Q'], Q)
+
+    def test_plot_invalid_Q_raises_without_bindings(self, parameter_analysis):
+        # WHEN
+        parameter_analysis.clear_bindings()
+
+        # THEN EXPECT
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(TypeError, match='Q must be a number'),
+        ):
+            parameter_analysis.plot(Q='not Q')
+
+    def test_plot_data_and_model_on_different_Q_grids(self, parameter_analysis):
+        # WHEN the model is evaluated on a finer grid than the data
+        Q = sc.linspace('Q', 0.1, 0.2, 11, unit='1/angstrom')
+
+        # THEN
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            patch('easydynamics.analysis.parameter_analysis.pp.plot') as mock_plot,
+        ):
+            parameter_analysis.plot(names=['parameter1'], Q=Q)
+
+        # EXPECT data stays on its own grid and the model is on the fine grid
+        plotted = mock_plot.call_args.args[0]
+        assert sc.identical(
+            plotted['parameter1'].coords['Q'],
+            parameter_analysis.parameters['parameter1'].coords['Q'],
+        )
+        assert sc.identical(plotted['Polynomial'].coords['Q'], Q)
 
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
@@ -756,6 +819,48 @@ class TestParameterAnalysis:
         args, kwargs = mock_callable.call_args
         np.testing.assert_allclose(args[0], [0.1, 0.2])
         assert kwargs == {}
+
+    def test_calculate_model_dataset_on_custom_Q(self, parameter_analysis):
+        # WHEN a finer Q grid in a different unit than the data's 1/angstrom
+        binding = parameter_analysis.bindings[0]
+        mock_callable = MagicMock(return_value=np.array([10.0, 15.0, 20.0]))
+        Q = sc.array(dims=['Q'], values=[1e9, 1.5e9, 2e9], unit='1/m')
+
+        with patch.object(
+            binding,
+            'get_targets',
+            return_value=[make_target('parameter1', mock_callable, 'model1')],
+        ):
+            # THEN
+            result = parameter_analysis.calculate_model_dataset([binding], Q=Q)
+
+        # EXPECT the model is evaluated on Q, converted to the data's Q unit
+        da = result['model1']
+        np.testing.assert_allclose(da.values, [10.0, 15.0, 20.0])
+        np.testing.assert_allclose(da.coords['Q'].values, [0.1, 0.15, 0.2])
+        assert da.coords['Q'].unit == parameter_analysis.parameters['parameter1'].coords['Q'].unit
+        np.testing.assert_allclose(mock_callable.call_args.args[0], [0.1, 0.15, 0.2])
+
+    @pytest.mark.parametrize(
+        'Q, expected_exception, match',
+        [
+            ('not Q', TypeError, 'Q must be a number'),
+            (
+                sc.ones(dims=['Q', 'x'], shape=[2, 2], unit='1/angstrom'),
+                ValueError,
+                "single dimension named 'Q'",
+            ),
+            (sc.linspace('Q', 0.1, 0.2, 3, unit='meV'), sc.UnitError, None),
+            (sc.linspace('Q', 0.0, 0.2, 3, unit='1/angstrom'), ValueError, 'positive'),
+        ],
+        ids=['wrong_type', 'not_1d', 'wrong_unit', 'not_positive'],
+    )
+    def test_calculate_model_dataset_invalid_Q_raises(
+        self, parameter_analysis, Q, expected_exception, match
+    ):
+        # THEN EXPECT
+        with pytest.raises(expected_exception, match=match):
+            parameter_analysis.calculate_model_dataset(parameter_analysis.bindings, Q=Q)
 
     def test_calculate_model_dataset_multiple_bindings(self, parameter_analysis):
         # WHEN

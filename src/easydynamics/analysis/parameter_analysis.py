@@ -20,6 +20,7 @@ from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBa
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_value_unit
 from easydynamics.variable import Parameter
 
@@ -417,6 +418,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         self,
         names: str | list[str] | None = None,
         x_axis: str = 'Q',
+        Q: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> WidgetFigure:
         """
@@ -429,6 +431,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         x_axis : str, default='Q'
             Quantity to plot the parameters and fit results against: 'Q' or 'Q^2'. Plotting against
             'Q^2' shows, e.g., a Fickian diffusion width (D*Q^2) as a straight line.
+        Q : sc.Variable | None, default=None
+            Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+            positive, with the single dimension 'Q'. If None, the Q values of the data are used.
         **kwargs : dict[str, Any]
             Additional keyword arguments to pass to the plotting function. Use x_axis rather than
             plopp's coords to choose the x-axis.
@@ -441,14 +446,16 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If the units of the specified parameters are not consistent, or if x_axis is not one of
-            the supported axes.
+            If the units of the specified parameters are not consistent, if x_axis is not one of
+            the supported axes, or if Q is not a valid Q grid.
         RuntimeError
             If plot() is called outside of a Jupyter notebook environment.
         """
 
         if not _in_notebook():
             raise RuntimeError('plot() can only be used in a Jupyter notebook environment.')
+
+        Q = _validate_and_convert_Q(Q)
 
         if self.parameters is None:
             raise ValueError('No parameters available to plot.')
@@ -481,7 +488,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 if any(target.dataset_key in names for target in b.get_targets())
             ]
             if relevant_bindings:
-                full_model_dataset = self.calculate_model_dataset(relevant_bindings)
+                full_model_dataset = self.calculate_model_dataset(relevant_bindings, Q=Q)
 
         # Check that the units of the specified parameters are consistent.
         units = [self.parameters[name].unit for name in names]
@@ -534,12 +541,17 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         # Update kwargs with user provided kwargs.
         plot_kwargs.update(kwargs)
 
-        data_and_model = sc.Dataset(data_arrays)
-        data_and_model.update(model_arrays)
+        # Data and model can be on different Q grids, so they cannot share one Dataset: plot a
+        # dict of DataArrays instead.
+        data_and_model = dict(with_x_axis_dim(sc.Dataset(data_arrays), x_axis))
+        if model_arrays:
+            data_and_model.update(with_x_axis_dim(sc.Dataset(model_arrays), x_axis))
 
-        return pp.plot(with_x_axis_dim(data_and_model, x_axis), **plot_kwargs)
+        return pp.plot(data_and_model, **plot_kwargs)
 
-    def calculate_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
+    def calculate_model_dataset(
+        self, bindings: list[FitBinding], Q: sc.Variable | None = None
+    ) -> sc.Dataset:
         """
         Evaluate all bindings into a sc.Dataset of model predictions.
 
@@ -547,6 +559,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         ----------
         bindings : list[FitBinding]
             The bindings to evaluate.
+        Q : sc.Variable | None, default=None
+            Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+            positive, with the single dimension 'Q'. If None, the Q values of the data are used.
 
         Returns
         -------
@@ -556,10 +571,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If any parameter name from the bindings is not found in the parameters Dataset.
+            If any parameter name from the bindings is not found in the parameters Dataset, or if Q
+            is not a valid Q grid.
 
         TypeError
-            If bindings is not a list of FitBinding objects.
+            If bindings is not a list of FitBinding objects, or if Q is of an unsupported type.
         """
 
         if self.parameters is None:
@@ -571,6 +587,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if not isinstance(bindings, list) or not all(isinstance(b, FitBinding) for b in bindings):
             raise TypeError('bindings must be a list of FitBinding objects.')
 
+        Q = _validate_and_convert_Q(Q)
+
         arrays = {}
 
         for b in bindings:
@@ -581,7 +599,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                         f'not found in parameters Dataset.'
                     )
                 da = self.parameters[target.dataset_key]
-                x = da.coords['Q']
+                x = da.coords['Q'] if Q is None else Q.to(unit=da.coords['Q'].unit, dtype=float)
                 x_factor, y_factor = self._get_unit_conversions(target)
 
                 y_model = target.function(x.values * x_factor)
