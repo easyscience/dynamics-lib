@@ -13,6 +13,7 @@ from easydynamics.analysis import Analysis1d
 from easydynamics.analysis import BoundsSuggestion
 from easydynamics.analysis import BoundsSuggestions
 from easydynamics.analysis import FitBinding
+from easydynamics.analysis import JointAnalysis
 from easydynamics.analysis import MultiQPosteriorSampler
 from easydynamics.analysis import ParameterAnalysis
 from easydynamics.analysis import ParameterLabels
@@ -76,6 +77,7 @@ __all__ = [
     'FitBinding',
     'Gaussian',
     'InstrumentModel',
+    'JointAnalysis',
     'JumpTranslationalDiffusion',
     'Lorentzian',
     'MittagLefflerDiffusion',
