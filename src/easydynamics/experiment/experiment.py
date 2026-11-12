@@ -438,7 +438,9 @@ class Experiment(EasyDynamicsBase):
     def plot_data(
         self,
         slicer: bool = False,
+        superplot: bool = False,
         transpose_axes: bool = False,
+        normalize: bool = False,
         **kwargs: dict,
     ) -> WidgetFigure:
         """
@@ -448,9 +450,18 @@ class Experiment(EasyDynamicsBase):
         ----------
         slicer : bool, default=False
             If True, use plopp's slicer instead of plot.
+        superplot : bool, default=False
+            If True, use plopp's superplot instead of plot. Like the slicer, but with a tool to
+            keep the current Q slice on the figure, so several Q values can be compared while
+            sliding on to others.
         transpose_axes : bool, default=False
             If True, transpose the data to have dimensions in the order (energy, Q) before
-            plotting, so that energy is on the x-axis. This only applies when slicer=False.
+            plotting, so that energy is on the x-axis. This only applies when neither slicer nor
+            superplot is used.
+        normalize : bool, default=False
+            If True, divide each Q spectrum by its sum over energy before plotting, so the line
+            shapes at different Q can be compared directly. Only the plot is affected; the data is
+            left unchanged.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
 
@@ -462,11 +473,11 @@ class Experiment(EasyDynamicsBase):
         Raises
         ------
         ValueError
-            If there is no data to plot.
+            If there is no data to plot, or if both slicer and superplot are True.
         RuntimeError
             If not in a Jupyter notebook environment.
         TypeError
-            If slicer or transpose_axes are not True or False.
+            If slicer, superplot, transpose_axes or normalize are not True or False.
         """
 
         if self.binned_data is None:
@@ -475,37 +486,50 @@ class Experiment(EasyDynamicsBase):
         if not _in_notebook():
             raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
 
-        if not isinstance(slicer, bool):
-            raise TypeError(f'slicer must be True or False, not {type(slicer).__name__}')
+        for name, value in (
+            ('slicer', slicer),
+            ('superplot', superplot),
+            ('transpose_axes', transpose_axes),
+            ('normalize', normalize),
+        ):
+            if not isinstance(value, bool):
+                raise TypeError(f'{name} must be True or False, not {type(value).__name__}')
 
-        if not isinstance(transpose_axes, bool):
-            raise TypeError(
-                f'transpose_axes must be True or False, not {type(transpose_axes).__name__}'
-            )
+        if slicer and superplot:
+            raise ValueError('slicer and superplot cannot both be True.')
+
+        data = self.binned_data
+        if normalize:
+            # Divide by the values only: scipp cannot broadcast a divisor with variances.
+            data = data / sc.values(sc.nansum(data.data, dim='energy'))
 
         plot_kwargs_defaults = {
             'title': self.display_name,
         }
 
-        if slicer:
+        if slicer or superplot:
             plot_kwargs_defaults['keep'] = 'energy'
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
-        if slicer:
-            fig = pp.slicer(
-                self.binned_data,
+        if slicer or superplot:
+            plot_function = pp.superplot if superplot else pp.slicer
+            fig = plot_function(
+                data,
                 **plot_kwargs_defaults,
             )
-            for widget in fig.bottom_bar[0].controls.values():
-                widget.slider_toggler.value = '-o-'
+            if slicer:
+                # The slicer starts with range sliders; switch them to single handles.
+                # Superplot only has single-handle sliders, so there is nothing to switch.
+                for widget in fig.bottom_bar[0].controls.values():
+                    widget.slider_toggler.value = '-o-'
             fig.autoscale()
 
         else:
             if transpose_axes:
-                data_to_plot = self.binned_data.transpose(dims=['energy', 'Q'])
+                data_to_plot = data.transpose(dims=['energy', 'Q'])
             else:
-                data_to_plot = self.binned_data.transpose(dims=['Q', 'energy'])
+                data_to_plot = data.transpose(dims=['Q', 'energy'])
             fig = pp.plot(
                 data_to_plot,
                 **plot_kwargs_defaults,
