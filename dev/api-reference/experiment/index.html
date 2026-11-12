@@ -2115,7 +2115,7 @@ load from. If None, no data is loaded.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slicer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transpose_axes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.plot_data&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.plot_data">plot_data</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slicer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;superplot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transpose_axes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;normalize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.plot_data&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.plot_data">plot_data</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the dataset using plopp: https://scipp.github.io/plopp/.</p>
@@ -3530,7 +3530,7 @@ the experiment with a .h5 extension.</p>
 
 
 <h5 id="easydynamics.experiment.Experiment.plot_data" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_data</span><span class="p">(</span><span class="n">slicer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_data</span><span class="p">(</span><span class="n">slicer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">superplot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
@@ -3575,6 +3575,27 @@ the experiment with a .h5 extension.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>superplot</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, use plopp's superplot instead of plot. Like the slicer, but with a tool to
+keep the current Q slice on the figure, so several Q values can be compared while
+sliding on to others.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>transpose_axes</code>
             </td>
             <td>
@@ -3583,7 +3604,29 @@ the experiment with a .h5 extension.</p>
             <td>
               <div class="doc-md-description">
                 <p>If True, transpose the data to have dimensions in the order (energy, Q) before
-plotting, so that energy is on the x-axis. This only applies when slicer=False.</p>
+plotting, so that energy is on the x-axis. This only applies when neither slicer nor
+superplot is used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>normalize</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, divide each Q spectrum by its sum over energy before plotting, so the line
+shapes at different Q can be compared directly. Only the plot is affected; the data is
+left unchanged.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3657,7 +3700,7 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If there is no data to plot.</p>
+                <p>If there is no data to plot, or if both slicer and superplot are True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3683,7 +3726,7 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If slicer or transpose_axes are not True or False.</p>
+                <p>If slicer, superplot, transpose_axes or normalize are not True or False.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4167,7 +4210,7 @@ load from. If None, no data is loaded.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slicer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transpose_axes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.plot_data&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.plot_data">plot_data</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slicer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;superplot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transpose_axes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;normalize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.plot_data&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.plot_data">plot_data</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the dataset using plopp: https://scipp.github.io/plopp/.</p>
@@ -5396,7 +5439,7 @@ the experiment with a .h5 extension.</p>
 
 
 <h7 id="easydynamics.experiment.experiment.Experiment.plot_data" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_data</span><span class="p">(</span><span class="n">slicer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_data</span><span class="p">(</span><span class="n">slicer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">superplot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h7>
 
@@ -5441,6 +5484,27 @@ the experiment with a .h5 extension.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>superplot</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, use plopp's superplot instead of plot. Like the slicer, but with a tool to
+keep the current Q slice on the figure, so several Q values can be compared while
+sliding on to others.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>transpose_axes</code>
             </td>
             <td>
@@ -5449,7 +5513,29 @@ the experiment with a .h5 extension.</p>
             <td>
               <div class="doc-md-description">
                 <p>If True, transpose the data to have dimensions in the order (energy, Q) before
-plotting, so that energy is on the x-axis. This only applies when slicer=False.</p>
+plotting, so that energy is on the x-axis. This only applies when neither slicer nor
+superplot is used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>normalize</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, divide each Q spectrum by its sum over energy before plotting, so the line
+shapes at different Q can be compared directly. Only the plot is affected; the data is
+left unchanged.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5523,7 +5609,7 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If there is no data to plot.</p>
+                <p>If there is no data to plot, or if both slicer and superplot are True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5549,7 +5635,7 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If slicer or transpose_axes are not True or False.</p>
+                <p>If slicer, superplot, transpose_axes or normalize are not True or False.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
