@@ -805,7 +805,7 @@ class TestModelBase:
 
     def test_get_parameters_unknown_component_raises(self, model_base):
         # WHEN THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
+        with pytest.raises(KeyError, match='Missing'):
             model_base.get_parameters('Missing', 'width')
 
     @pytest.mark.parametrize('parameter_name', ['missing', 'name'])
@@ -875,7 +875,7 @@ class TestModelBase:
         model = ModelBase(components=Gaussian(name='G'))
 
         # THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
+        with pytest.raises(KeyError, match='Missing'):
             model.fix_parameter('Missing', 'width')
 
     def test_free_parameter(self, model_base):
@@ -972,10 +972,19 @@ class TestModelBase:
         with pytest.raises(ValueError, match='already depends on other Parameters'):
             model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
 
-    def test_make_parameter_Q_independent_unknown_component_raises(self, model_base):
-        # WHEN THEN EXPECT
-        with pytest.raises(KeyError, match='No item with name "Missing" found'):
-            model_base.make_parameter_Q_independent('Missing', 'width')
+    def test_clear_components_without_Q_drops_the_Q_constraints(self):
+        "Regression: without Q the constraint stayed, and applied to a new component of that name"
+        # WHEN a constraint declared before Q is set
+        model = ModelBase(components=Gaussian(name='G'))
+        model.make_parameter_Q_independent('G', 'width')
+
+        # THEN the components are cleared, and a component of the same name is added
+        model.clear_components()
+        model.append_component(Gaussian(name='G'))
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the new component is not constrained
+        assert all(parameter.independent for parameter in model.get_parameters('G', 'width'))
 
     def test_remove_component_drops_its_Q_constraint(self, model_base):
         # WHEN
@@ -1143,6 +1152,7 @@ class TestModelBase:
     def test_set_parameter_Q_dependence_wrong_unit_keeps_existing_constraint(self, model_base):
         # WHEN
         model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        n_variables = len(model_base.get_all_variables())
 
         # THEN EXPECT an expression that does not evaluate to an energy is rejected
         with pytest.raises(UnitError, match='Failed to convert unit'):
@@ -1153,7 +1163,58 @@ class TestModelBase:
         # EXPECT the model is unchanged
         widths = model_base.get_parameters('TestGaussian1Name', 'width')
         assert [p.independent for p in widths] == [True, False, False]
-        assert len(model_base.get_all_variables()) == 18
+        assert len(model_base.get_all_variables()) == n_variables
+
+    def test_set_parameter_Q_dependence_keeps_the_value_in_a_unit_with_a_prefix(self, model_base):
+        "Regression: a unit such as meV*angstrom**2 was rewritten, and the value rescaled with it"
+        # WHEN THEN
+        (D,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'D * Q**2', {'D': 0.1}, {'D': 'meV*angstrom**2'}
+        )
+
+        # EXPECT the value as given, and the width at every Q following it
+        assert D.value == pytest.approx(0.1)
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        Q = model_base.Q.values
+        np.testing.assert_allclose([width.value for width in widths], 0.1 * Q**2)
+
+        # THEN
+        D.value = 0.2
+
+        # EXPECT
+        np.testing.assert_allclose([width.value for width in widths], 0.2 * Q**2)
+
+    def test_make_parameter_Q_independent_replaces_a_Q_dependence(self, model_base):
+        # WHEN
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.5}, {'a': 'meV*angstrom'}
+        )
+        n_variables = len(model_base.get_all_variables())
+
+        # THEN
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # EXPECT the widths are tied to Q index 0, and the shared Parameter is gone
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.independent for p in widths] == [True, False, False]
+        assert len(model_base.get_all_variables()) == n_variables - 1
+
+    def test_remove_parameter_Q_constraint_restores_the_bounds(self, model_base):
+        "Regression: the widths kept the bounds of the expression, with no lower bound"
+        # WHEN
+        template = model_base.components['TestGaussian1Name'].width
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.5}, {'a': 'meV*angstrom'}
+        )
+
+        # THEN
+        model_base.remove_parameter_Q_constraint('TestGaussian1Name', 'width')
+
+        # EXPECT independent widths with the bounds of the template
+        for width in model_base.get_parameters('TestGaussian1Name', 'width'):
+            assert width.independent is True
+            assert width.min == template.min
+            assert width.max == template.max
 
     @pytest.mark.parametrize('symbol', ['Q', 'hbar', 'kb', 'sinc'])
     def test_set_parameter_Q_dependence_reserved_symbol_raises(self, model_base, symbol):

@@ -124,6 +124,38 @@ def convert_value_unit(value: float, from_unit: str | sc.Unit, to_unit: str | sc
     return sc.to_unit(sc.scalar(value, unit=str(from_unit)), str(to_unit)).value
 
 
+def relabel_parameter_unit(parameter: Parameter, unit: str | sc.Unit) -> None:
+    """
+    Set the unit of a Parameter without rescaling its value or bounds.
+
+    ``Parameter.unit`` is read-only and ``convert_unit`` rescales the value, so the underlying
+    scipp scalars are swapped directly. Creating a Parameter with the unit instead is not
+    equivalent: EasyScience rewrites a unit with a numeric factor, such as ``meV*angstrom``, in
+    base units and rescales the value with it.
+
+    Parameters
+    ----------
+    parameter : Parameter
+        The Parameter whose unit to set.
+    unit : str | sc.Unit
+        The new unit.
+    """
+    new_unit = sc.Unit(str(unit))
+    parameter._scalar = sc.scalar(  # ruff: ignore[private-member-access]
+        parameter.value,
+        unit=new_unit,
+        variance=parameter._scalar.variance,  # ruff: ignore[private-member-access]
+    )
+    parameter._min = sc.scalar(  # ruff: ignore[private-member-access]
+        parameter._min.value,  # ruff: ignore[private-member-access]
+        unit=new_unit,
+    )
+    parameter._max = sc.scalar(  # ruff: ignore[private-member-access]
+        parameter._max.value,  # ruff: ignore[private-member-access]
+        unit=new_unit,
+    )
+
+
 def convert_parameter_unit(parameter: Parameter, unit: str | sc.Unit) -> None:
     """
     Convert a parameter to a new unit, keeping dependent parameters consistent.

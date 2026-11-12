@@ -17,6 +17,7 @@ from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import kb
+from easydynamics.utils.utils import relabel_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import DescriptorNumber
 from easydynamics.variable import Parameter
@@ -186,8 +187,10 @@ class ModelBase(EasyDynamicsModelBase):
         self._mark_component_collections_patched()
 
     def clear_components(self) -> None:
-        """Clear all ModelComponents from the SampleModel."""
+        """Clear all ModelComponents from the SampleModel, and their Q constraints."""
         self._components.clear()
+        self._Q_independent_parameters = []
+        self._Q_dependences = {}
         self._on_components_change()
 
     # ------------------------------------------------------------------
@@ -570,6 +573,8 @@ class ModelBase(EasyDynamicsModelBase):
             The attribute name of the Parameter on the component, e.g. ``'width'``.
         """
         key = (component_name, parameter_name)
+        if key in self._Q_dependences:
+            self.remove_parameter_Q_constraint(component_name, parameter_name)
         if key not in self._Q_independent_parameters:
             self._get_unconstrained_parameters(component_name, parameter_name)
             self._Q_independent_parameters.append(key)
@@ -643,13 +648,13 @@ class ModelBase(EasyDynamicsModelBase):
 
         targets = self._get_parameters_with_template(component_name, parameter_name, None)
         new_parameters = {
-            symbol: Parameter(
-                name=f'{component_name} {parameter_name} {symbol}',
-                value=value,
-                unit=str(parameter_units.get(symbol, 'dimensionless')),
-            )
+            symbol: Parameter(name=f'{component_name} {parameter_name} {symbol}', value=value)
             for symbol, value in parameters.items()
         }
+        # Set afterwards rather than in the constructor, which would rescale the value for a
+        # unit with a numeric factor such as meV*angstrom.
+        for symbol, unit in parameter_units.items():
+            relabel_parameter_unit(new_parameters[symbol], unit)
         # Try the expression on a throwaway Parameter first, so that an invalid expression or
         # unit raises before any Parameter of the model is changed, also when Q is not set yet.
         probe = Parameter(name='probe', value=0.0, unit=str(targets[0].unit))
@@ -667,8 +672,9 @@ class ModelBase(EasyDynamicsModelBase):
         Undo ``make_parameter_Q_independent`` or ``set_parameter_Q_dependence``, so the Parameter
         varies freely with Q again.
 
-        Each per-Q Parameter keeps its current value. Does nothing if the Parameter has no
-        constraint.
+        Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+        flag and the others come back free, since a dependent Parameter has none. Does nothing if
+        the Parameter has no constraint.
 
         Parameters
         ----------
@@ -684,9 +690,15 @@ class ModelBase(EasyDynamicsModelBase):
             del self._Q_dependences[key]
         else:
             return
+        template = None
+        if component_name in self._components.list_component_names():
+            template = self._get_parameter(self._components, component_name, parameter_name)
         for parameter in self.get_parameters(component_name, parameter_name):
             if not parameter.independent:
                 parameter.make_independent()
+                if template is not None:
+                    # A dependent Parameter takes the bounds of its expression.
+                    parameter.min, parameter.max = template.min, template.max
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
