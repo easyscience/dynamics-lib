@@ -185,8 +185,9 @@ class ModelBase(EasyDynamicsModelBase):
         self._mark_component_collections_patched()
 
     def clear_components(self) -> None:
-        """Clear all ModelComponents from the SampleModel."""
+        """Clear all ModelComponents from the SampleModel, and their Q constraints."""
         self._components.clear()
+        self._Q_independent_parameters = []
         self._on_components_change()
 
     # ------------------------------------------------------------------
@@ -665,8 +666,9 @@ class ModelBase(EasyDynamicsModelBase):
         Undo ``make_parameter_Q_independent`` or ``set_parameter_Q_dependence``, so the Parameter
         varies freely with Q again.
 
-        Each per-Q Parameter keeps its current value. Does nothing if the Parameter has no
-        constraint.
+        Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+        flag and the others come back free, since a dependent Parameter has none. Does nothing if
+        the Parameter has no constraint.
 
         Parameters
         ----------
