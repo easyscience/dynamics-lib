@@ -23,6 +23,7 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import kb
+from easydynamics.utils.utils import relabel_parameter_unit
 
 
 class ExpressionComponent(ModelComponent):
@@ -513,7 +514,6 @@ class ExpressionComponent(ModelComponent):
         if '_parameters' not in self.__dict__ or name not in self._parameters:
             raise KeyError(f"No parameter named '{name}' in this {self.__class__.__name__}.")
         _assert_valid_unit(unit)
-        new_unit = sc.Unit(str(unit))
 
         param = self._parameters[name]
         if not param.independent:
@@ -522,15 +522,7 @@ class ExpressionComponent(ModelComponent):
                 f'by the dependency expression.'
             )
 
-        # Parameter.unit is read-only and convert_unit rescales the value, so a pure relabel
-        # has to swap the underlying scipp scalars (value and bounds) directly.
-        param._scalar = sc.scalar(  # ruff: ignore[private-member-access]
-            param.value,
-            unit=new_unit,
-            variance=param._scalar.variance,  # ruff: ignore[private-member-access]
-        )
-        param._min = sc.scalar(param._min.value, unit=new_unit)  # ruff: ignore[private-member-access]
-        param._max = sc.scalar(param._max.value, unit=new_unit)  # ruff: ignore[private-member-access]
+        relabel_parameter_unit(param, unit)
 
     @classmethod
     def _create_physical_constant(cls, name: str) -> DescriptorNumber:
