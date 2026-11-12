@@ -1543,6 +1543,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#easydynamics.base_classes.unique_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_names
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1825,6 +1836,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#easydynamics.base_classes.unique_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_names
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1909,6 +1931,17 @@
             <td>
               <div class="doc-md-description">
                 
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code&gt;unique_names&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.unique_names&lt;/code&gt;)" href="#easydynamics.base_classes.unique_names">unique_names</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fast generation of unique names for EasyScience objects.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
               </div>
             </td>
           </tr>
@@ -7756,8 +7789,171 @@ list.</p>
     </div>
 
 </div>
+<h4 id="easydynamics.base_classes.name_mixin-functions">Functions:</h4>
 
 
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="easydynamics.base_classes.unique_names" class="doc doc-heading">
+            <code>unique_names</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Fast generation of unique names for EasyScience objects.</p>
+<p>EasyScience's <code>global_object.generate_unique_name</code> scans every registered name on each call to
+find the highest number used with a prefix, so creating N objects costs O(N^2). Building the per-Q
+component collections of a model creates thousands of Parameters, and that scan dominated the time.
+Here each prefix keeps a counter instead, and only the candidate name is looked up in the registry,
+which is a dictionary lookup.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Functions:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;generate_unique_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prefix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.base_classes.unique_names.generate_unique_name&lt;/code&gt;)" href="#easydynamics.base_classes.unique_names.generate_unique_name">generate_unique_name</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Generate a unique name of the form <code>prefix_N</code> that is not registered yet.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+<h4 id="easydynamics.base_classes.unique_names-functions">Functions:</h4>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.base_classes.unique_names.generate_unique_name" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">generate_unique_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Generate a unique name of the form <code>prefix_N</code> that is not registered yet.</p>
+<p>Names are of the same form as EasyScience's own default names. Each prefix counts upwards from
+where it left off, skipping names that are already registered (e.g. ones EasyScience generated
+itself, or ones given explicitly), so a name is never handed out twice within a process.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>prefix</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The prefix of the name, typically the class name of the object.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A name that is not in the EasyScience object registry.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+<h4 id="easydynamics.base_classes.unique_names-modules">Modules</h4>
 
 
   </div>
