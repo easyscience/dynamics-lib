@@ -3838,10 +3838,10 @@ returning raw values expressed in <em>y_unit</em>.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;add_x_axis_coord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.plotting.add_x_axis_coord&lt;/code&gt;)" href="#easydynamics.utils.plotting.add_x_axis_coord">add_x_axis_coord</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;with_x_axis_dim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.plotting.with_x_axis_dim&lt;/code&gt;)" href="#easydynamics.utils.plotting.with_x_axis_dim">with_x_axis_dim</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Add an x_axis coordinate computed from the Q coordinate, for plotting against it.</p>
+                  <p>Make x_axis, computed from the Q coordinate, the dimension to plot against.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3880,15 +3880,15 @@ returning raw values expressed in <em>y_unit</em>.</p>
 <div class="doc doc-object doc-function">
 
 
-<h5 id="easydynamics.utils.plotting.add_x_axis_coord" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">add_x_axis_coord</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">)</span></code>
+<h5 id="easydynamics.utils.plotting.with_x_axis_dim" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">with_x_axis_dim</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">)</span></code>
 
 </h5>
 
 
     <div class="doc doc-contents ">
 
-        <p>Add an x_axis coordinate computed from the Q coordinate, for plotting against it.</p>
+        <p>Make x_axis, computed from the Q coordinate, the dimension to plot against.</p>
 <p>Only the coordinate is transformed; the values at each Q are unchanged.</p>
 <!-- prettier-ignore-start -->
 
@@ -3915,7 +3915,7 @@ returning raw values expressed in <em>y_unit</em>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dataset with a 'Q' coordinate.</p>
+                <p>Dataset with a 1-D 'Q' coordinate. Its dimension need not be named 'Q'.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3934,7 +3934,7 @@ returning raw values expressed in <em>y_unit</em>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the axis to add, one of the keys of <code>Q_AXIS_TRANSFORMS</code>.</p>
+                <p>Name of the axis to plot against, one of the keys of <code>Q_AXIS_TRANSFORMS</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3963,7 +3963,7 @@ returning raw values expressed in <em>y_unit</em>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A copy of data with the x_axis coordinate added.</p>
+                <p>A copy of data with the x_axis coordinate added and used as the dimension.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
