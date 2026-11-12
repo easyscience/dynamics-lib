@@ -647,8 +647,9 @@ class TestParameterAnalysis:
         args, kwargs = mock_plot.call_args
         plotted = args[0]
         assert 'coords' not in kwargs
-        assert plotted.dims == ('Q^2',)
-        assert sc.identical(plotted.coords['Q^2'], plotted.coords['Q'] ** 2)
+        for key in ['parameter1', 'Polynomial']:
+            assert plotted[key].dims == ('Q^2',)
+            assert sc.identical(plotted[key].coords['Q^2'], plotted[key].coords['Q'] ** 2)
         assert sc.identical(
             plotted['parameter1'].data,
             parameter_analysis.parameters['parameter1'].data.rename_dims(Q='Q^2'),

@@ -543,11 +543,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         # Data and model can be on different Q grids, so they cannot share one Dataset: plot a
         # dict of DataArrays instead.
-        data_and_model = dict(add_x_axis_coord(sc.Dataset(data_arrays), x_axis))
+        data_and_model = dict(with_x_axis_dim(sc.Dataset(data_arrays), x_axis))
         if model_arrays:
-            data_and_model.update(add_x_axis_coord(sc.Dataset(model_arrays), x_axis))
+            data_and_model.update(with_x_axis_dim(sc.Dataset(model_arrays), x_axis))
 
-        return pp.plot(with_x_axis_dim(data_and_model, x_axis), **plot_kwargs)
+        return pp.plot(data_and_model, **plot_kwargs)
 
     def calculate_model_dataset(
         self, bindings: list[FitBinding], Q: sc.Variable | None = None
