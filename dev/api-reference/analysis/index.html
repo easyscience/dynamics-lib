@@ -9917,7 +9917,7 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.plot">plot</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.plot">plot</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
@@ -9928,7 +9928,7 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;calculate_model_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bindings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.calculate_model_dataset&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.calculate_model_dataset">calculate_model_dataset</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;calculate_model_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bindings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.ParameterAnalysis.calculate_model_dataset&lt;/code&gt;)" href="#easydynamics.analysis.ParameterAnalysis.calculate_model_dataset">calculate_model_dataset</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Evaluate all bindings into a sc.Dataset of model predictions.</p>
@@ -11056,7 +11056,7 @@ provided, or if a binding names a dataset key that is not in the parameters Data
 
 
 <h5 id="easydynamics.analysis.ParameterAnalysis.plot" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
@@ -11117,6 +11117,26 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
                   <code>&#39;Q&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+positive, with the single dimension 'Q'. If None, the Q values of the data are used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -11184,8 +11204,8 @@ plopp's coords to choose the x-axis.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the units of the specified parameters are not consistent, or if x_axis is not one of
-the supported axes.</p>
+                <p>If the units of the specified parameters are not consistent, if x_axis is not one of
+the supported axes, or if Q is not a valid Q grid.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11217,7 +11237,7 @@ the supported axes.</p>
 
 
 <h5 id="easydynamics.analysis.ParameterAnalysis.calculate_model_dataset" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -11258,6 +11278,26 @@ the supported axes.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+positive, with the single dimension 'Q'. If None, the Q values of the data are used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -11305,7 +11345,8 @@ the supported axes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any parameter name from the bindings is not found in the parameters Dataset.</p>
+                <p>If any parameter name from the bindings is not found in the parameters Dataset, or if Q
+is not a valid Q grid.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11318,7 +11359,7 @@ the supported axes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If bindings is not a list of FitBinding objects.</p>
+                <p>If bindings is not a list of FitBinding objects, or if Q is of an unsupported type.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27529,7 +27570,7 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot">plot</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;Q&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot">plot</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the parameters and fit results as a function of Q or Q^2.</p>
@@ -27540,7 +27581,7 @@ default, None.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;calculate_model_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bindings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.calculate_model_dataset&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.calculate_model_dataset">calculate_model_dataset</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;calculate_model_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bindings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.parameter_analysis.ParameterAnalysis.calculate_model_dataset&lt;/code&gt;)" href="#easydynamics.analysis.parameter_analysis.ParameterAnalysis.calculate_model_dataset">calculate_model_dataset</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Evaluate all bindings into a sc.Dataset of model predictions.</p>
@@ -28348,7 +28389,7 @@ provided, or if a binding names a dataset key that is not in the parameters Data
 
 
 <h7 id="easydynamics.analysis.parameter_analysis.ParameterAnalysis.plot" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">'Q'</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h7>
 
@@ -28409,6 +28450,26 @@ provided, or if a binding names a dataset key that is not in the parameters Data
             </td>
             <td>
                   <code>&#39;Q&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+positive, with the single dimension 'Q'. If None, the Q values of the data are used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -28476,8 +28537,8 @@ plopp's coords to choose the x-axis.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the units of the specified parameters are not consistent, or if x_axis is not one of
-the supported axes.</p>
+                <p>If the units of the specified parameters are not consistent, if x_axis is not one of
+the supported axes, or if Q is not a valid Q grid.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28509,7 +28570,7 @@ the supported axes.</p>
 
 
 <h7 id="easydynamics.analysis.parameter_analysis.ParameterAnalysis.calculate_model_dataset" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h7>
 
@@ -28550,6 +28611,26 @@ the supported axes.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Variable&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable">Variable</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Q grid to evaluate the model on, e.g. a finer grid than the data. Must be
+positive, with the single dimension 'Q'. If None, the Q values of the data are used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -28597,7 +28678,8 @@ the supported axes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any parameter name from the bindings is not found in the parameters Dataset.</p>
+                <p>If any parameter name from the bindings is not found in the parameters Dataset, or if Q
+is not a valid Q grid.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28610,7 +28692,7 @@ the supported axes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If bindings is not a list of FitBinding objects.</p>
+                <p>If bindings is not a list of FitBinding objects, or if Q is of an unsupported type.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
