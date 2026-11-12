@@ -756,34 +756,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """Handle changes to the Q values."""
         self.create_component_collections()
 
-    @classmethod
-    def from_dict(cls, obj_dict: dict) -> 'DiffusionModelBase':
-        """
-        Re-create a diffusion model from its dictionary representation.
-
-        Parameters
-        ----------
-        obj_dict : dict
-            Dictionary representation of the diffusion model, as produced by to_dict().
-
-        Returns
-        -------
-        'DiffusionModelBase'
-            The deserialised diffusion model.
-        """
-        model = super().from_dict(obj_dict)
-        model._on_parameters_replaced()  # ruff: ignore[private-member-access]
-        return model
-
-    def _on_parameters_replaced(self) -> None:
-        """
-        Rebuild what depends on the model's parameters after ``from_dict`` replaced them.
-
-        ``from_dict`` swaps in the deserialised Parameters after ``__init__`` has built per-Q
-        components that depend on the ones it created, so those components are rebuilt here.
-        """
-        self._on_Q_change()
-
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """
         Convert Q to a numpy array of values in the canonical Q unit (1/angstrom), ensuring it is

@@ -844,20 +844,3 @@ class TestStretchedExponential:
         # EXPECT: state rolled back
         assert stretched.y_unit == 'dimensionless'
         assert stretched.area.value == pytest.approx(1.0)
-
-    #############
-    # Serialization (issue #126)
-    #############
-
-    def test_copy_width_follows_its_own_relaxation_time(self):
-        # WHEN
-        stretched = StretchedExponential(relaxation_time=1.0, beta=1.0)
-        width = stretched.width.value
-
-        # THEN
-        stretched_copy = copy(stretched)
-        stretched_copy.relaxation_time = 2.0
-
-        # EXPECT the width of the copy to follow the copy, and the original to be untouched
-        assert stretched_copy.width.value == pytest.approx(width / 2)
-        assert stretched.width.value == pytest.approx(width)

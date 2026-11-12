@@ -579,14 +579,3 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             name=obj_dict['name'],
             display_name=obj_dict['display_name'],
         )
-
-    def __copy__(self) -> ComponentCollection:
-        """
-        Create a deep copy of the ComponentCollection.
-
-        Returns
-        -------
-        ComponentCollection
-            A deep copy of the ComponentCollection.
-        """
-        return self.from_dict(self.to_dict())

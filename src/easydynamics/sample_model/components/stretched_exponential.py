@@ -830,28 +830,6 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
             ) from e
         return width
 
-    @classmethod
-    def from_dict(cls, obj_dict: dict) -> StretchedExponential:
-        """
-        Re-create a StretchedExponential from its dictionary representation.
-
-        Parameters
-        ----------
-        obj_dict : dict
-            Dictionary representation of the StretchedExponential, as produced by to_dict().
-
-        Returns
-        -------
-        StretchedExponential
-            The deserialised StretchedExponential.
-        """
-        component = super().from_dict(obj_dict)
-        # The parent replaces beta and relaxation_time with the deserialised Parameters after
-        # __init__ has made the width depend on the ones it created, so rebuild the width.
-        with contextlib.suppress(UnitError):
-            component._width = component._build_width()  # ruff: ignore[private-member-access]
-        return component
-
     @property
     def width(self) -> Parameter:
         r"""

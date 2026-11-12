@@ -1211,7 +1211,7 @@ class TestSampleModel:
     #############
 
     def test_copy(self):
-        # WHEN a sample model using every constructor argument
+        # WHEN a sample model with a component, a diffusion model and a temperature
         sample_model = SampleModel(
             components=Lorentzian(name='L', width=0.3),
             Q=np.array([0.5, 1.0]),

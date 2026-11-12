@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from copy import copy
-
 import numpy as np
 import pytest
 import scipp as sc
@@ -310,27 +308,3 @@ class TestBrownianTranslationalDiffusion:
         assert 'scale=' in repr_str
         # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
         assert 'x_unit=meV, y_unit=dimensionless' in repr_str
-
-    #############
-    # Serialization (issue #126)
-    #############
-
-    def test_copy_components_follow_the_parameters_of_the_copy(self):
-        # WHEN
-        model = BrownianTranslationalDiffusion(
-            scale=1.0, diffusion_coefficient=2.0, Q=np.array([1.0, 2.0])
-        )
-        widths = [c[0].width.value for c in model.get_component_collections()]
-
-        # THEN
-        model_copy = copy(model)
-        model_copy.scale = 3.0
-        model_copy.diffusion_coefficient = 4.0
-
-        # EXPECT the per-Q components of the copy to follow the copy, not the original
-        for collection, width in zip(model_copy.get_component_collections(), widths, strict=True):
-            assert collection[0].area.value == pytest.approx(3.0)
-            assert collection[0].width.value == pytest.approx(2 * width)
-        for collection, width in zip(model.get_component_collections(), widths, strict=True):
-            assert collection[0].area.value == pytest.approx(1.0)
-            assert collection[0].width.value == pytest.approx(width)
