@@ -14,6 +14,7 @@ import easydynamics as edyn
 import easydynamics.sample_model as sm
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.experiment import Experiment
+from easydynamics.sample_model import DeltaLorentz
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
@@ -984,6 +985,30 @@ class TestAnalysis:
         # EXPECT listing parameters did not build them as side effects
         assert analysis._fitter is None
         assert analysis._bayesian is None
+
+    def test_rebin_gives_a_diffusion_model_the_new_Q_grid_only(self):
+        # WHEN an analysis with a Q-varying DeltaLorentz, and a rebin along Q
+        Q = sc.array(dims=['Q'], values=np.linspace(0.5, 2.0, 7), unit='1/angstrom')
+        energy = sc.array(dims=['energy'], values=np.linspace(-2.0, 2.0, 21), unit='meV')
+        values = np.ones((7, 21))
+        data = sc.DataArray(
+            data=sc.array(dims=['Q', 'energy'], values=values, variances=values * 0.1),
+            coords={'Q': Q, 'energy': energy},
+        )
+        diffusion_model = DeltaLorentz(name='DL', allow_Q_variation={'A_0': True})
+        analysis = Analysis(
+            experiment=Experiment(data=data),
+            sample_model=SampleModel(diffusion_models=diffusion_model),
+        )
+        assert len(diffusion_model.Q) == 7
+
+        # THEN rebinning and using the analysis again, which applies the new Q to the models
+        analysis.rebin({'Q': 3}, confirm=True)
+        _ = analysis.analysis_list
+
+        # EXPECT the diffusion model's grid is the new Q grid only, with one A_0 per new Q
+        np.testing.assert_allclose(diffusion_model.Q.values, analysis.Q.values)
+        assert len(diffusion_model.get_independent_variables()) == 2 * 3
 
     #############
     # The bayesian sampler (the Analysis side of the contract)
