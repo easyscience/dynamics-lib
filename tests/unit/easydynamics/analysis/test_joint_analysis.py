@@ -570,6 +570,54 @@ class TestJointAnalysis:
         assert results[0].success
         assert shared.diffusion_coefficient.value == pytest.approx(true_D, rel=0.1)
 
+    def test_scales_are_the_scales_of_the_analyses(self, joint, first, second):
+        # WHEN THEN
+        scales = joint.scales
+
+        # EXPECT one per analysis, in order, fixed at 1 until freed
+        assert scales[0] is first.scale
+        assert scales[1] is second.scale
+        assert [scale.value for scale in scales] == [1.0, 1.0]
+        assert all(scale.fixed for scale in scales)
+
+    def test_scales_is_read_only(self, joint):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='scales is read-only'):
+            joint.scales = []
+
+    def test_fit_recovers_the_scale_of_the_second_data_set(self):
+        # WHEN two data sets of the same Lorentzian, the second three times more intense
+        energy = np.linspace(-3.0, 3.0, 61)
+        truth = np.array([Lorentzian(area=1.0, width=0.4).evaluate(energy) for _ in Q_FIRST])
+        shared = Lorentzian(name='L2', area=0.7, width=0.6)
+
+        def analysis(name, values):
+            result = Analysis(
+                display_name=name,
+                experiment=make_experiment(Q_FIRST, energy=energy, values=values),
+                sample_model=SampleModel(components=shared),
+                instrument_model=InstrumentModel(
+                    resolution_model=ResolutionModel(components=Gaussian(width=0.01))
+                ),
+            )
+            result.instrument_model.resolution_model.fix_all_parameters()
+            result.fix_energy_offset()
+            return result
+
+        first = analysis('first', truth)
+        second = analysis('second', 3.0 * truth)
+        joint = JointAnalysis(analyses=[first, second])
+
+        # THEN keeping the first as the reference and freeing the scale of the second
+        joint.scales[1].fixed = False
+        joint.fit()
+
+        # EXPECT one set of parameters for both, and the factor between them in the scale
+        assert second.scale.value == pytest.approx(3.0, rel=0.02)
+        assert first.scale.value == pytest.approx(1.0)
+        for Q_index in range(3):
+            assert self.l2_width(first, Q_index).value == pytest.approx(0.4, rel=0.05)
+
     #############
     # Parameters to dataset
     #############

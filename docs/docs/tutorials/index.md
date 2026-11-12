@@ -34,6 +34,9 @@ multiple `Q` and analysing complex inelastic data.
   magnetic dynamics of nanoparticles, fitting and subsequently fixing
   background parameters and fixing some parameters to be equal when
   fitting.
+- [Tutorial 3: Multiple data sets](tutorial3_multiple_data.ipynb) -
+  Learn how to fit two data sets with different resolutions together,
+  sharing the components they have in common.
 
 ## Classes and Methods
 
