@@ -471,6 +471,15 @@ class StretchedExponential(CreateParametersMixin, ModelComponent):
     Note that the x-axis has to be an energy, since the relaxation time is turned into an energy
     scale through $\hbar$.
 
+    References
+    ----------
+    1. R. Kohlrausch, *Theorie des elektrischen Rückstandes in der Leidener Flasche*, Ann. Phys.
+       **167**, 179 (1854),
+       [doi:10.1002/andp.18541670203](https://doi.org/10.1002/andp.18541670203).
+    2. G. Williams and D. C. Watts, *Non-symmetrical dielectric relaxation behaviour arising from a
+       simple empirical decay function*, Trans. Faraday Soc. **66**, 80 (1970),
+       [doi:10.1039/TF9706600080](https://doi.org/10.1039/TF9706600080).
+
     Examples
     --------
     **Creating a stretched exponential**
