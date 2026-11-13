@@ -67,6 +67,7 @@ class InstrumentModel(EasyBase):
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
         x_unit: str | sc.Unit = 'meV',
+        scale: Numeric = 1.0,
     ) -> None:
         """
         Initialize an InstrumentModel.
@@ -91,12 +92,20 @@ class InstrumentModel(EasyBase):
             energy offset will be 0.
         x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
+        scale : Numeric, default=1.0
+            The factor the model is multiplied by. It is one fixed Parameter for all Q values; see
+            the ``scale`` property.
 
         Raises
         ------
         TypeError
             If resolution_model is not a ResolutionModel or None, or if background_model is not a
             BackgroundModel or None, or if energy_offset is not a number or None.
+
+        Notes
+        -----
+        A ``TypeError`` or ``ValueError`` propagates from the ``scale`` setter if scale is not a
+        non-negative number.
         """
         super().__init__(
             display_name=display_name,
@@ -141,6 +150,11 @@ class InstrumentModel(EasyBase):
         )
         self._energy_offsets: list = []
         self._energy_offsets_is_dirty = True
+        # Named instrument_scale, as diffusion models already have a parameter named scale.
+        self._scale = Parameter(
+            name='instrument_scale', value=1.0, unit='dimensionless', fixed=True, min=0.0
+        )
+        self.scale = scale
         self._Q = _validate_and_convert_Q(Q)
         self._Q_tolerance = Q_TOLERANCE
         self._on_Q_change()
@@ -360,6 +374,48 @@ class InstrumentModel(EasyBase):
         self._energy_offset.value = value
         self._on_energy_offset_change()
 
+    @property
+    def scale(self) -> Parameter:
+        """
+        Get the scale of the instrument.
+
+        The whole model is multiplied by the scale: the sample model, after convolution with the
+        resolution, and the background. It lets data sets that measure the same sample on different
+        intensity scales be described by the same sample model. It is one Parameter for all Q
+        values, and it is fixed at 1 unless it is set or freed (``scale.fixed = False``). A free
+        scale has to be fitted with all Q together (``fit_method='simultaneous'``, or a
+        JointAnalysis).
+
+        Returns
+        -------
+        Parameter
+            The scale Parameter.
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, value: Numeric) -> None:
+        """
+        Set the value of the scale.
+
+        Parameters
+        ----------
+        value : Numeric
+            The new scale.
+
+        Raises
+        ------
+        TypeError
+            If value is not a number.
+        ValueError
+            If value is negative.
+        """
+        if not isinstance(value, Numeric):
+            raise TypeError(f'scale must be a number, got {type(value).__name__}')
+        if value < 0:
+            raise ValueError('scale must be non-negative')
+        self._scale.value = float(value)
+
     # --------------------------------------------------------------
     # Other methods
     # --------------------------------------------------------------
@@ -447,6 +503,7 @@ class InstrumentModel(EasyBase):
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
             variables = [self._energy_offsets[Q_index]]
+        variables.append(self._scale)
 
         variables.extend(self._background_model.get_all_variables(Q_index=Q_index))
         variables.extend(self._resolution_model.get_all_variables(Q_index=Q_index))

@@ -321,6 +321,33 @@ class AnalysisBase(EasyDynamicsModelBase):
         raise AttributeError('temperature is a read-only property derived from the SampleModel.')
 
     @property
+    def scale(self) -> Parameter:
+        """
+        Get the scale of the InstrumentModel: the factor the model, sample and background, is
+        multiplied by.
+
+        It is fixed at 1 unless it is set or freed (``scale.fixed = False``).
+
+        Returns
+        -------
+        Parameter
+            The scale Parameter of the associated InstrumentModel.
+        """
+        return self.instrument_model.scale
+
+    @scale.setter
+    def scale(self, value: float) -> None:
+        """
+        Set the value of the scale of the InstrumentModel.
+
+        Parameters
+        ----------
+        value : float
+            The new scale.
+        """
+        self.instrument_model.scale = value
+
+    @property
     def convolution_settings(self) -> ConvolutionSettings:
         """
         Get the convolution settings for this Analysis.

@@ -1088,6 +1088,14 @@ class TestAnalysis:
         ):
             analysis.fit(Q_index=3)
 
+    def test_fit_all_Q_independently_with_a_free_scale_raises(self, analysis):
+        # WHEN the scale, which is one parameter for all Q, is free
+        analysis.scale.fixed = False
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='cannot be fitted independently at each Q'):
+            analysis.fit(fit_method='independent')
+
     def test_fit_all_Q_independently(self, analysis):
         # WHEN
         for i in range(3):

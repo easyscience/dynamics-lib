@@ -577,6 +577,34 @@ class TestAnalysis1d:
         # EXPECT
         assert analysis1d.instrument_model.get_energy_offset(Q_index=0).fixed is False
 
+    def test_fit_recovers_a_free_scale(self):
+        # WHEN data that are 2.5 times a model whose parameters are all fixed
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/angstrom')
+        energy = sc.linspace('energy', -5.0, 5.0, num=41, unit='meV')
+        values = 2.5 * Gaussian(area=1.0, width=1.0).evaluate(energy.values)[np.newaxis, :]
+        data = sc.DataArray(
+            data=sc.array(
+                dims=['Q', 'energy'], values=values, variances=np.full(values.shape, 0.01)
+            ),
+            coords={'Q': Q, 'energy': energy},
+        )
+        sample_model = SampleModel(components=Gaussian(area=1.0, width=1.0))
+        sample_model.fix_all_parameters()
+        analysis = Analysis1d(
+            experiment=Experiment(data=data),
+            sample_model=sample_model,
+            instrument_model=InstrumentModel(),
+            Q_index=0,
+        )
+        analysis.fix_energy_offset()
+        analysis.scale.fixed = False
+
+        # THEN
+        analysis.fit()
+
+        # EXPECT
+        assert analysis.scale.value == pytest.approx(2.5, rel=1e-3)
+
     #############
     # Private methods: small utilities
     #############
@@ -700,6 +728,18 @@ class TestAnalysis1d:
         # EXPECT
         assert np.array_equal(result, np.array([1.0, 1.0, 1.0]))
 
+    def test_evaluate_direct_applies_the_scale(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+
+        # THEN
+        result = analysis1d._evaluate_direct(
+            components=Polynomial(coefficients=[1.0]), energy=None
+        )
+
+        # EXPECT
+        np.testing.assert_allclose(result, [2.0, 2.0, 2.0])
+
     def test_evaluate_with_convolution_uses_convolver(self, analysis1d):
         # WHEN
         components = Gaussian()
@@ -713,7 +753,60 @@ class TestAnalysis1d:
 
         # EXPECT
         convolver.convolution.assert_called_once()
-        assert result is convolver.convolution.return_value
+        np.testing.assert_array_equal(result, [1, 2, 3])
+
+    def test_evaluate_with_convolution_applies_the_scale_with_a_convolver(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+        convolver = MagicMock()
+        convolver.convolution = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # THEN
+        result = analysis1d._evaluate_with_convolution(
+            components=Gaussian(), energy=None, convolver=convolver
+        )
+
+        # EXPECT
+        np.testing.assert_array_equal(result, [2.0, 4.0, 6.0])
+
+    def test_evaluate_with_convolution_applies_the_scale_without_resolution(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+        components = MagicMock()
+        components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # THEN
+        result = analysis1d._evaluate_with_convolution(components=components, energy=None)
+
+        # EXPECT
+        np.testing.assert_array_equal(result, [2.0, 4.0, 6.0])
+
+    def test_evaluate_with_convolution_applies_the_scale_with_resolution(self, analysis1d_counts):
+        # WHEN
+        components = analysis1d_counts.sample_model.get_component_collection(0)
+        unscaled = analysis1d_counts._evaluate_with_convolution(components=components, energy=None)
+        assert unscaled.max() > 0.0
+
+        # THEN
+        analysis1d_counts.instrument_model.scale = 2.0
+        result = analysis1d_counts._evaluate_with_convolution(components=components, energy=None)
+
+        # EXPECT
+        np.testing.assert_allclose(result, 2.0 * unscaled)
+
+    def test_calculate_scales_the_sample_and_the_background(self, analysis1d):
+        # WHEN a model with a sample contribution and a background
+        analysis1d.sample_model.components = Gaussian(center=20.0, width=10.0)
+        analysis1d.instrument_model.background_model.components = Polynomial(coefficients=[0.5])
+        unscaled = analysis1d.calculate()
+        assert np.all(unscaled > 0.5)
+
+        # THEN
+        analysis1d.instrument_model.scale = 3.0
+        result = analysis1d.calculate()
+
+        # EXPECT
+        np.testing.assert_allclose(result, 3.0 * unscaled)
 
     def test_evaluate_with_convolution_no_resolution(self, analysis1d):
         # WHEN

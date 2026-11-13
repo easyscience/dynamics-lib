@@ -950,11 +950,22 @@ class Analysis(AnalysisBase):
         """
         Fit data for all Q indices independently.
 
+        Raises
+        ------
+        ValueError
+            If the scale is free and there is more than one Q, since it is one parameter for all Q
+            and each fit would overwrite it.
+
         Returns
         -------
         list[FitResults]
             A list of FitResults, one for each Q index.
         """
+        if not self.scale.fixed and len(self.analysis_list) > 1:
+            raise ValueError(
+                'The scale is one parameter for all Q, so it cannot be fitted independently at '
+                "each Q. Fix it, or use fit_method='simultaneous'."
+            )
         return [analysis.fit() for analysis in self.analysis_list]
 
     def _fit_all_Q_simultaneously(self) -> FitResults:

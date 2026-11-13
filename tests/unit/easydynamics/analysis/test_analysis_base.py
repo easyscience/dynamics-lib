@@ -316,6 +316,17 @@ class TestAnalysisBase:
             assert result == fake_temperature
             mock_temperature.assert_called_once()
 
+    def test_scale_is_the_scale_of_the_instrument_model(self, analysis_base):
+        # WHEN THEN EXPECT
+        assert analysis_base.scale is analysis_base.instrument_model.scale
+
+    def test_scale_setter_sets_the_scale_of_the_instrument_model(self, analysis_base):
+        # WHEN THEN
+        analysis_base.scale = 2.0
+
+        # EXPECT
+        assert analysis_base.instrument_model.scale.value == pytest.approx(2.0)
+
     def test_temperature_setter_raises(self, analysis_base):
         # WHEN THEN EXPECT
         with pytest.raises(
