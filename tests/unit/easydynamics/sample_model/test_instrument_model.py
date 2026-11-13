@@ -433,6 +433,43 @@ class TestInstrumentModel:
             assert offset.unit == instrument_model.x_unit
             assert offset.value == instrument_model.energy_offset.value
 
+    def test_Q_setter_keeps_Q_within_the_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+
+        # THEN Q values that differ in rounding only
+        instrument_model.Q = old_Q.values + 5e-5
+
+        # EXPECT the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+    def test_Q_setter_raises_beyond_the_tolerance(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='increase Q_tolerance'):
+            instrument_model.Q = instrument_model.Q.values + 2e-4
+
+    def test_Q_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+        assert instrument_model.Q_tolerance == pytest.approx(1e-4)
+
+        # THEN
+        instrument_model.Q_tolerance = 0.01
+        instrument_model.Q = old_Q.values + 0.005
+
+        # EXPECT the larger difference is accepted, and the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+        # EXPECT the resolution and background models have the tolerance too
+        assert instrument_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.resolution_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.background_model.Q_tolerance == pytest.approx(0.01)
+
+    def test_Q_tolerance_invalid_raises(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_tolerance must be a number'):
+            instrument_model.Q_tolerance = 'large'
+
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
         first_new_Q = np.array([1.0, 2.0, 3.0])
