@@ -729,3 +729,15 @@ class TestExperiment:
         assert sc.identical(copied_experiment.data, experiment.data)
         assert copied_experiment is not experiment
         assert copied_experiment.data is not experiment.data
+
+    def test_copy_experiment_without_data(self):
+        # WHEN
+        experiment = Experiment(display_name='Empty')
+
+        # THEN
+        copied_experiment = copy(experiment)
+
+        # EXPECT
+        assert copied_experiment is not experiment
+        assert copied_experiment.display_name == 'Empty'
+        assert copied_experiment.data is None
