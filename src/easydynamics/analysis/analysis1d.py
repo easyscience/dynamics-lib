@@ -814,6 +814,9 @@ class Analysis1d(AnalysisBase):
         """
         Evaluate background components directly — no convolution, no detailed balance factor.
 
+        The result is multiplied by the scale of the instrument model, as the sample contribution
+        is.
+
         Parameters
         ----------
         components : ComponentCollection | ModelComponent
@@ -835,7 +838,7 @@ class Analysis1d(AnalysisBase):
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
-        return components.evaluate(energy_with_offset)
+        return self.instrument_model.scale.value * components.evaluate(energy_with_offset)
 
     def _create_convolver(
         self,
