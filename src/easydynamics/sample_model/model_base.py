@@ -9,6 +9,7 @@ import scipp as sc
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.dependency_functions import create_dependency_functions
 from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
@@ -595,8 +596,9 @@ class ModelBase(EasyDynamicsModelBase):
         Q constraint on the Parameter is replaced.
 
         The expression may use ``Q`` (in 1/angstrom), the constants ``hbar`` and ``kb``, and the
-        symbols given in *parameters*, combined with ``+ - * / **``. Units are carried through the
-        expression, and its result must be convertible to the unit of the Parameter:
+        symbols given in *parameters*, combined with ``+ - * / **`` and the functions ``exp``,
+        ``sin``, ``cos`` and ``sinc`` (sin(x)/x) of a dimensionless argument. Units are carried
+        through the expression, and its result must be convertible to the unit of the Parameter:
         ```python
         (D,) = sample_model.set_parameter_Q_dependence(
             'Lorentzian',
@@ -627,7 +629,7 @@ class ModelBase(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If *parameters* uses the reserved symbols ``Q``, ``hbar`` or ``kb``, if
+            If *parameters* uses a reserved symbol (``Q``, a constant or a function), if
             *parameter_units* names a symbol that is not in *parameters*, or if the Parameter
             already depends on other Parameters through something other than a Q constraint.
 
@@ -637,7 +639,7 @@ class ModelBase(EasyDynamicsModelBase):
             The new Parameters, in the order of *parameters*.
         """
         parameter_units = parameter_units or {}
-        reserved = sorted({'Q', 'hbar', 'kb'} & set(parameters))
+        reserved = sorted({'Q', 'hbar', 'kb', *create_dependency_functions()} & set(parameters))
         if reserved:
             raise ValueError(f'{reserved} are reserved symbols and cannot be used as parameters.')
         unknown = sorted(set(parameter_units) - set(parameters))
@@ -847,13 +849,16 @@ class ModelBase(EasyDynamicsModelBase):
         Q : float
             The value of ``Q`` in the expression, in 1/angstrom.
         """
-        # The constants are private copies: make_dependent_on attaches the Parameter as an
-        # observer of every mapped variable, which must not accumulate on the shared constants.
+        # The constants and functions are private copies: make_dependent_on attaches the
+        # Parameter as an observer of every mapped variable, which must not accumulate on
+        # shared objects.
         dependency_map = {
             **parameters,
             'Q': DescriptorNumber(name='Q', value=float(Q), unit=CANONICAL_Q_UNIT),
             'hbar': DescriptorNumber(name='hbar', value=hbar.value, unit=str(hbar.unit)),
             'kb': DescriptorNumber(name='kb', value=kb.value, unit=str(kb.unit)),
+            # Temporary, until EasyScience supports functions in dependency expressions.
+            **create_dependency_functions(),
         }
         # easyscience propagates inf bounds through arithmetic, producing inf/inf=nan as a
         # transient intermediate; suppress the spurious numpy RuntimeWarning.

@@ -1216,7 +1216,7 @@ class TestModelBase:
             assert width.min == template.min
             assert width.max == template.max
 
-    @pytest.mark.parametrize('symbol', ['Q', 'hbar', 'kb'])
+    @pytest.mark.parametrize('symbol', ['Q', 'hbar', 'kb', 'sinc'])
     def test_set_parameter_Q_dependence_reserved_symbol_raises(self, model_base, symbol):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='reserved symbols'):
@@ -1282,3 +1282,26 @@ class TestModelBase:
         # EXPECT the same Parameters still follow the expression
         assert model_base.get_parameters('TestGaussian1Name', 'width') == widths
         assert [p.value for p in widths] == pytest.approx([0.1, 0.2, 0.3])
+
+    def test_set_parameter_Q_dependence_with_functions(self, model_base):
+        # WHEN THEN the expression uses functions of dimensionless arguments
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name',
+            'width',
+            expression='G * (1 - sinc(Q * L)) * exp(-(Q**2) * u2)',
+            parameters={'G': 0.5, 'L': 1.5, 'u2': 0.1},
+            parameter_units={'G': 'meV', 'L': 'angstrom', 'u2': 'angstrom**2'},
+        )
+
+        # EXPECT
+        Q = np.array([1.0, 2.0, 3.0])
+        expected = 0.5 * (1 - np.sin(1.5 * Q) / (1.5 * Q)) * np.exp(-(Q**2) * 0.1)
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx(expected)
+
+    def test_set_parameter_Q_dependence_function_of_quantity_with_unit_raises(self, model_base):
+        # WHEN THEN EXPECT exp(Q) is rejected, as Q is in 1/angstrom
+        with pytest.raises(SyntaxError, match='to `dimensionless` is not valid'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', 'G * exp(Q)', {'G': 0.5}, {'G': 'meV'}
+            )
