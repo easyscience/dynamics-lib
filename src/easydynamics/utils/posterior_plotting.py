@@ -6,6 +6,10 @@ Diagnostic plots for Bayesian posterior samples.
 
 These take plain arrays rather than an Analysis, so they can be used on any chain, including one
 loaded from disk. The Analysis classes wrap them in convenience methods.
+
+Each function closes its figure before returning it. Jupyter shows a returned figure as the result
+of the cell, and would show it a second time if pyplot still held it open. The returned figure can
+still be shown, changed and saved.
 """
 
 from __future__ import annotations
@@ -101,6 +105,7 @@ def plot_trace(
     if title is not None:
         fig.suptitle(title)
     fig.tight_layout()
+    plt.close(fig)
     return fig
 
 
@@ -210,6 +215,7 @@ def plot_corner(
     if title is not None:
         fig.suptitle(title)
     fig.tight_layout()
+    plt.close(fig)
     return fig
 
 
@@ -276,6 +282,7 @@ def plot_marginal(
     if title is not None:
         axis.set_title(title)
     fig.tight_layout()
+    plt.close(fig)
     return fig
 
 
@@ -349,6 +356,7 @@ def plot_correlations(
     if title is not None:
         axis.set_title(title)
     fig.tight_layout()
+    plt.close(fig)
     return fig
 
 
@@ -439,6 +447,7 @@ def plot_posterior_predictive(
     if title is not None:
         axis.set_title(title)
     fig.tight_layout()
+    plt.close(fig)
     return fig
 
 
