@@ -200,7 +200,7 @@ class JointAnalysis(EasyDynamicsBase):
     @property
     def scales(self) -> list[Parameter]:
         """
-        The scale of every analysis: the factor its sample model is multiplied by.
+        The scale of every analysis: the factor its model is multiplied by.
 
         Data sets of the same sample are rarely on the same intensity scale. Keep one scale fixed
         as the reference and free the others, e.g. ``joint.scales[1].fixed = False``, so that the
