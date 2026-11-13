@@ -445,8 +445,30 @@ class TestInstrumentModel:
 
     def test_Q_setter_raises_beyond_the_tolerance(self, instrument_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='New Q values are not similar to the old ones'):
+        with pytest.raises(ValueError, match='increase Q_tolerance'):
             instrument_model.Q = instrument_model.Q.values + 2e-4
+
+    def test_Q_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+        assert instrument_model.Q_tolerance == pytest.approx(1e-4)
+
+        # THEN
+        instrument_model.Q_tolerance = 0.01
+        instrument_model.Q = old_Q.values + 0.005
+
+        # EXPECT the larger difference is accepted, and the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+        # EXPECT the resolution and background models have the tolerance too
+        assert instrument_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.resolution_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.background_model.Q_tolerance == pytest.approx(0.01)
+
+    def test_Q_tolerance_invalid_raises(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_tolerance must be a number'):
+            instrument_model.Q_tolerance = 'large'
 
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN

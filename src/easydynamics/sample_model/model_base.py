@@ -9,10 +9,12 @@ import scipp as sc
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.utils import Q_TOLERANCE
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_Q_tolerance
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import Parameter
@@ -65,6 +67,7 @@ class ModelBase(EasyDynamicsModelBase):
             unique_name=unique_name,
         )
         self._Q = _validate_and_convert_Q(Q)
+        self._Q_tolerance = Q_TOLERANCE
 
         if components is not None and not isinstance(
             components, (ModelComponent, ComponentCollection)
@@ -312,7 +315,7 @@ class ModelBase(EasyDynamicsModelBase):
         Set the Q values of the SampleModel.
 
         If Q is already set, the old Q values are kept, and it throws an error if the new ones
-        differ from them by more than 1e-4 1/angstrom. To change Q values, first run clear_Q().
+        differ from them by more than Q_tolerance. To change Q values, first run clear_Q().
 
         Parameters
         ----------
@@ -334,11 +337,39 @@ class ModelBase(EasyDynamicsModelBase):
             self._on_Q_change()
             return
 
-        if not _Q_values_match(old_Q, new_Q):
+        if not _Q_values_match(old_Q, new_Q, self._Q_tolerance):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
+                'To accept a larger difference, increase Q_tolerance. '
                 'To change Q values, first run clear_Q().'
             )
+
+    @property
+    def Q_tolerance(self) -> float:
+        """
+        Get the largest difference at which new Q values count as the same as the model's own.
+
+        Returns
+        -------
+        float
+            The tolerance in 1/angstrom.
+        """
+        return self._Q_tolerance
+
+    @Q_tolerance.setter
+    def Q_tolerance(self, value: float) -> None:
+        """
+        Set the largest difference at which new Q values count as the same as the model's own.
+
+        Increase it to use the model with data whose Q values differ slightly from the ones the
+        model was made with. The model keeps its own Q values.
+
+        Parameters
+        ----------
+        value : float
+            The tolerance in 1/angstrom. Must be non-negative and finite.
+        """
+        self._Q_tolerance = _validate_Q_tolerance(value)
 
     def clear_Q(self, confirm: bool = False) -> None:
         """

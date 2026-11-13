@@ -26,8 +26,8 @@ angstrom = DescriptorNumber(value=1e-10, name='angstrom', unit='m')
 # The unit all Q values are normalized to and assumed to be in when given as raw numbers.
 CANONICAL_Q_UNIT = '1/angstrom'
 
-# Q values closer than this, in 1/angstrom, count as the same. It lets a model be used with data
-# whose Q values were rounded differently.
+# The default Q_tolerance of a model: Q values closer than this, in 1/angstrom, count as the
+# same. It lets a model be used with data whose Q values were rounded differently.
 Q_TOLERANCE = 1e-4
 
 
@@ -303,9 +303,9 @@ def _validate_and_convert_Q(
     return Q
 
 
-def _Q_values_match(Q1: sc.Variable, Q2: sc.Variable) -> bool:
+def _Q_values_match(Q1: sc.Variable, Q2: sc.Variable, Q_tolerance: float) -> bool:
     """
-    Check whether two sets of Q values are the same within ``Q_TOLERANCE``.
+    Check whether two sets of Q values are the same within a tolerance.
 
     Parameters
     ----------
@@ -313,13 +313,43 @@ def _Q_values_match(Q1: sc.Variable, Q2: sc.Variable) -> bool:
         The first Q values, in 1/angstrom.
     Q2 : sc.Variable
         The second Q values, in 1/angstrom.
+    Q_tolerance : float
+        The largest difference, in 1/angstrom, at which two Q values count as the same.
 
     Returns
     -------
     bool
-        True if there are equally many Q values and each pair differs by at most ``Q_TOLERANCE``.
+        True if there are equally many Q values and each pair differs by at most Q_tolerance.
     """
-    return len(Q1) == len(Q2) and bool(np.allclose(Q1.values, Q2.values, rtol=0, atol=Q_TOLERANCE))
+    return len(Q1) == len(Q2) and bool(np.allclose(Q1.values, Q2.values, rtol=0, atol=Q_tolerance))
+
+
+def _validate_Q_tolerance(Q_tolerance: float) -> float:
+    """
+    Validate a Q tolerance.
+
+    Parameters
+    ----------
+    Q_tolerance : float
+        The tolerance, in 1/angstrom.
+
+    Raises
+    ------
+    TypeError
+        If Q_tolerance is not a number.
+    ValueError
+        If Q_tolerance is negative or not finite.
+
+    Returns
+    -------
+    float
+        The tolerance.
+    """
+    if not isinstance(Q_tolerance, Numeric):
+        raise TypeError(f'Q_tolerance must be a number. Got {type(Q_tolerance).__name__}.')
+    if not 0 <= Q_tolerance < np.inf:
+        raise ValueError(f'Q_tolerance must be non-negative and finite. Got {Q_tolerance}.')
+    return float(Q_tolerance)
 
 
 def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:

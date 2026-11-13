@@ -12,6 +12,7 @@ from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_Q_tolerance
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
@@ -149,7 +150,29 @@ class TestQValuesMatch:
         Q2 = sc.array(dims=['Q'], values=other, unit='1/angstrom')
 
         # THEN EXPECT
-        assert _Q_values_match(Q1, Q2) is expected
+        assert _Q_values_match(Q1, Q2, 1e-4) is expected
+
+
+class TestValidateQTolerance:
+    @pytest.mark.parametrize('Q_tolerance', [0, 0.01, 1])
+    def test_validate_Q_tolerance(self, Q_tolerance):
+        # WHEN THEN
+        result = _validate_Q_tolerance(Q_tolerance)
+
+        # EXPECT
+        assert result == Q_tolerance
+        assert isinstance(result, float)
+
+    def test_validate_Q_tolerance_not_a_number_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_tolerance must be a number'):
+            _validate_Q_tolerance('0.01')
+
+    @pytest.mark.parametrize('Q_tolerance', [-0.01, np.inf, np.nan])
+    def test_validate_Q_tolerance_negative_or_not_finite_raises(self, Q_tolerance):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Q_tolerance must be non-negative and finite'):
+            _validate_Q_tolerance(Q_tolerance)
 
 
 class TestValidateAndConvertQ:

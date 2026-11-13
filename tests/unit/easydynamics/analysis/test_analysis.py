@@ -848,13 +848,22 @@ class TestAnalysis:
         ):
             analysis.experiment = new_experiment
 
-    def test_instrument_model_with_Q_rounded_differently_is_accepted(self, analysis):
+    @pytest.mark.parametrize(
+        'Q_difference, Q_tolerance',
+        [(5e-5, None), (0.005, 0.01)],
+        ids=['default_tolerance', 'larger_tolerance'],
+    )
+    def test_resolution_model_with_slightly_different_Q_is_accepted(
+        self, analysis, Q_difference, Q_tolerance
+    ):
         "A resolution fitted to one data set is used with another at nearly the same Q"
-        # WHEN an InstrumentModel whose Q values differ from the data in rounding only
-        resolution_model = sm.ResolutionModel(components=Gaussian(name='Resolution'))
-        instrument_model = InstrumentModel(
-            resolution_model=resolution_model, Q=analysis.Q.values + 5e-5
+        # WHEN a new InstrumentModel with a resolution model that already has Q values
+        resolution_model = sm.ResolutionModel(
+            components=Gaussian(name='Resolution'), Q=analysis.Q.values + Q_difference
         )
+        instrument_model = InstrumentModel(resolution_model=resolution_model)
+        if Q_tolerance is not None:
+            instrument_model.Q_tolerance = Q_tolerance
         resolution_parameters = resolution_model.get_all_variables()
 
         # THEN

@@ -492,8 +492,26 @@ class TestModelBase:
 
     def test_Q_setter_raises_beyond_the_tolerance(self, model_base):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='New Q values are not similar to'):
+        with pytest.raises(ValueError, match='increase Q_tolerance'):
             model_base.Q = model_base.Q.values + 2e-4
+
+    def test_Q_tolerance(self, model_base):
+        # WHEN
+        old_Q = model_base.Q
+        assert model_base.Q_tolerance == pytest.approx(1e-4)
+
+        # THEN
+        model_base.Q_tolerance = 0.01
+        model_base.Q = old_Q.values + 0.005
+
+        # EXPECT the larger difference is accepted, and the model keeps its own Q values
+        assert model_base.Q_tolerance == pytest.approx(0.01)
+        assert model_base.Q is old_Q
+
+    def test_Q_tolerance_invalid_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Q_tolerance must be non-negative and finite'):
+            model_base.Q_tolerance = -1.0
 
     def test_Q_setter_with_none(self, model_base):
         # WHEN
