@@ -1,13 +1,16 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from unittest.mock import MagicMock
 from unittest.mock import Mock
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 import scipp as sc
 from scipp import UnitError
 
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
@@ -640,6 +643,123 @@ class TestModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             model_base.convert_y_unit(123)
+
+    #############
+    # Plotting
+    #############
+
+    @pytest.fixture
+    def energy(self):
+        return sc.linspace('energy', -2.0, 2.0, 11, unit='meV')
+
+    @staticmethod
+    def _fake_slicer_figure():
+        fig = MagicMock()
+        widget = MagicMock()
+        fig.bottom_bar = [MagicMock(controls={'Q': widget})]
+        return fig, widget
+
+    def test_plot_labels_the_components_by_display_name(self, energy):
+        # WHEN
+        model = ModelBase(
+            components=Gaussian(name='GaussName', display_name='Gauss label'),
+            Q=np.array([1.0]),
+        )
+
+        # THEN rendering for real, without mocking plopp
+        fig = model.plot(energy, Q_index=0)
+
+        # EXPECT the total and the component are plotted, labelled by display name
+        labels = [text.get_text() for text in fig.ax.get_legend().get_texts()]
+        assert labels == ['Total', 'Gauss label']
+
+    def test_plot_all_Q_uses_a_slicer(self, model_base, energy):
+        # WHEN
+        fig, widget = self._fake_slicer_figure()
+
+        # THEN
+        with patch('easydynamics.sample_model.model_base.pp.slicer', return_value=fig) as slicer:
+            result = model_base.plot(energy, color={'Total': 'blue'})
+
+        # EXPECT the model at every Q is sliced along Q, keeping the energy axis
+        assert result is fig
+        plotted = slicer.call_args.args[0]
+        kwargs = slicer.call_args.kwargs
+        assert set(plotted.keys()) == {'Total', 'TestGaussian1Name', 'TestLorentzian1Name'}
+        assert plotted['Total'].dims == ('Q', 'energy')
+        assert sc.identical(plotted['Total'].coords['Q'], model_base.Q)
+        assert kwargs['keep'] == 'energy'
+        assert kwargs['color'] == {'Total': 'blue'}
+        assert widget.slider_toggler.value == '-o-'
+        fig.autoscale.assert_called_once_with()
+
+    def test_plot_single_Q(self, model_base, energy):
+        # WHEN
+        model_base.get_component_collection(1)[0].area.value = 3.0
+
+        # THEN
+        with patch('easydynamics.sample_model.model_base.pp.plot') as plot:
+            model_base.plot(energy, Q_index=1)
+
+        # EXPECT the model at that Q is plotted, with the components adding up to the total
+        plotted = plot.call_args.args[0]
+        assert plotted['Total'].dims == ('energy',)
+        assert sc.identical(plotted['Total'].coords['Q'], model_base.Q[1])
+        expected = model_base.get_component_collection(1).evaluate(energy, output='scipp')
+        assert sc.allclose(plotted['Total'].data, expected)
+        assert sc.allclose(
+            plotted['TestGaussian1Name'].data + plotted['TestLorentzian1Name'].data,
+            plotted['Total'].data,
+        )
+
+    def test_plot_without_components_plots_only_the_total(self, model_base, energy):
+        # THEN
+        with patch('easydynamics.sample_model.model_base.pp.plot') as plot:
+            fig = model_base.plot(energy, Q_index=0, plot_components=False)
+
+        # EXPECT
+        assert set(plot.call_args.args[0].keys()) == {'Total'}
+        fig.canvas.update_legend.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'energy',
+        [np.linspace(-1.0, 1.0, 5), sc.zeros(dims=['Q', 'energy'], shape=[2, 3], unit='meV')],
+        ids=['Not a Variable', 'Not 1D'],
+    )
+    def test_plot_invalid_energy_raises(self, model_base, energy):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'energy must be a 1D sc\.Variable'):
+            model_base.plot(energy)
+
+    def test_plot_invalid_plot_components_raises(self, model_base, energy):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='plot_components must be True or False'):
+            model_base.plot(energy, plot_components='yes')
+
+    def test_plot_Q_index_out_of_bounds_raises(self, model_base, energy):
+        # WHEN THEN EXPECT
+        with pytest.raises(IndexError):
+            model_base.plot(energy, Q_index=5)
+
+    @pytest.mark.parametrize(
+        'model',
+        [ModelBase(components=Gaussian()), ModelBase(Q=np.array([1.0, 2.0]))],
+        ids=['No Q', 'No components'],
+    )
+    def test_plot_without_Q_or_components_raises(self, model, energy):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Set Q and add components'):
+            model.plot(energy)
+
+    @pytest.mark.filterwarnings('ignore:Duplicate component names')
+    def test_plot_duplicate_component_names_raises(self, energy):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='Same'), Q=np.array([1.0]))
+        model.append_component(Lorentzian(name='Same'))
+
+        # THEN EXPECT
+        with pytest.raises(AmbiguousNameError, match='Same'):
+            model.plot(energy)
 
     #############
     # State versioning

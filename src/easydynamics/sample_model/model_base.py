@@ -2,13 +2,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
+from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
+from plopp.backends.matplotlib.figure import WidgetFigure
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.plotting import relabel_lines
 from easydynamics.utils.utils import Q_TOLERANCE
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
@@ -536,6 +540,103 @@ class ModelBase(EasyDynamicsModelBase):
         self._ensure_component_collections_current()
         for collection in self._component_collections:
             collection.normalize_area()
+
+    # ------------------------------------------------------------------
+    # Plotting
+    # ------------------------------------------------------------------
+
+    def plot(
+        self,
+        energy: sc.Variable,
+        Q_index: int | None = None,
+        plot_components: bool = True,
+        **kwargs: dict[str, Any],
+    ) -> WidgetFigure:
+        """
+        Plot the model and, optionally, its individual components on an energy grid.
+
+        Without Q_index, a slider selects the Q value to show. This is how to look at the
+        components of a resolution model, e.g.
+        ``analysis.instrument_model.resolution_model.plot(energy)``. Energy offsets are not
+        applied, since they belong to the instrument model, not to this model.
+
+        Uses Plopp for plotting: https://scipp.github.io/plopp/
+
+        Parameters
+        ----------
+        energy : sc.Variable
+            1D energy grid to evaluate the model on.
+        Q_index : int | None, default=None
+            Index of the Q value to plot. If None, plot all Q values.
+        plot_components : bool, default=True
+            Whether to plot the individual components as well as their sum. Each component needs a
+            unique name, and is labelled by its display name in the legend.
+        **kwargs : dict[str, Any]
+            Additional keyword arguments passed to plopp for customizing the plot.
+
+        Raises
+        ------
+        TypeError
+            If energy is not a 1D sc.Variable, or if plot_components is not a bool.
+        ValueError
+            If Q is not set or the model has no components.
+
+        Returns
+        -------
+        WidgetFigure
+            A Plopp WidgetFigure of the model.
+        """
+        if not isinstance(energy, sc.Variable) or energy.ndim != 1:
+            raise TypeError('energy must be a 1D sc.Variable.')
+        if not isinstance(plot_components, bool):
+            raise TypeError(
+                f'plot_components must be True or False, not {type(plot_components).__name__}'
+            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        self._ensure_component_collections_current()
+        collections = self._component_collections
+        if not collections or collections[0].is_empty:
+            raise ValueError('Set Q and add components to the model before plotting it.')
+
+        def to_datagroup(collection: ComponentCollection) -> sc.DataGroup:
+            values = {'Total': collection.evaluate(energy, output='scipp')}
+            if plot_components:
+                for name in collection.list_component_names():
+                    values[name] = collection.evaluate_component(energy, name, output='scipp')
+            return sc.DataGroup({
+                key: sc.DataArray(value, coords={energy.dim: energy})
+                for key, value in values.items()
+            })
+
+        model = sc.concat([to_datagroup(collection) for collection in collections], dim='Q').apply(
+            lambda da: da.assign_coords(Q=self.Q)
+        )
+
+        linestyle = dict.fromkeys(model, '--')
+        linestyle['Total'] = '-'
+        plot_kwargs = {
+            'title': self.display_name,
+            'linestyle': linestyle,
+            'marker': dict.fromkeys(model),
+            'color': {'Total': 'red'},
+        }
+        if Q_index is None:
+            plot_kwargs['keep'] = energy.dim
+        plot_kwargs.update(kwargs)
+
+        if Q_index is None:
+            fig = pp.slicer(model, **plot_kwargs)
+            for widget in fig.bottom_bar[0].controls.values():
+                widget.slider_toggler.value = '-o-'
+        else:
+            fig = pp.plot(model['Q', Q_index], **plot_kwargs)
+
+        if plot_components:
+            relabel_lines(
+                fig, {component.name: component.display_name for component in collections[0]}
+            )
+        fig.autoscale()
+        return fig
 
     # ------------------------------------------------------------------
     # Private methods

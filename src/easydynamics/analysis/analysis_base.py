@@ -14,6 +14,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import relabel_lines
 from easydynamics.variable import Parameter
 
 if TYPE_CHECKING:
@@ -668,10 +669,7 @@ class AnalysisBase(EasyDynamicsModelBase):
             Q_index=Q_index
         )
         labels = {component.name: component.display_name for component in (*sample, *background)}
-        for line in fig.ax.get_lines():
-            if line.get_label() in labels:
-                line.set_label(labels[line.get_label()])
-        fig.canvas.update_legend()
+        relabel_lines(fig, labels)
 
     #############
     # Dunder methods
