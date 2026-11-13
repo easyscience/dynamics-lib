@@ -668,7 +668,15 @@ class AnalysisBase(EasyDynamicsModelBase):
         background = self.instrument_model.background_model.get_component_collection(
             Q_index=Q_index
         )
+        resolution = self.instrument_model.resolution_model.get_component_collection(
+            Q_index=Q_index
+        )
         labels = {component.name: component.display_name for component in (*sample, *background)}
+        # Components split by resolution (split_by_resolution=True).
+        for sample_component in sample:
+            for res_component in resolution:
+                key = f'{sample_component.name} ⊗ {res_component.name}'
+                labels[key] = f'{sample_component.display_name} ⊗ {res_component.display_name}'
         relabel_lines(fig, labels)
 
     #############
