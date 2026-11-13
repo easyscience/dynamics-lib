@@ -848,6 +848,22 @@ class TestAnalysis:
         ):
             analysis.experiment = new_experiment
 
+    def test_instrument_model_with_Q_rounded_differently_is_accepted(self, analysis):
+        "A resolution fitted to one data set is used with another at nearly the same Q"
+        # WHEN an InstrumentModel whose Q values differ from the data in rounding only
+        resolution_model = sm.ResolutionModel(components=Gaussian(name='Resolution'))
+        instrument_model = InstrumentModel(
+            resolution_model=resolution_model, Q=analysis.Q.values + 5e-5
+        )
+        resolution_parameters = resolution_model.get_all_variables()
+
+        # THEN
+        analysis.instrument_model = instrument_model
+
+        # EXPECT the per-Q resolution parameters are kept, and the model can be evaluated
+        assert resolution_model.get_all_variables() == resolution_parameters
+        assert len(analysis.calculate()) == 3
+
     def test_on_sample_model_changed(self, analysis):
         # WHEN
         # Create a new sample model.

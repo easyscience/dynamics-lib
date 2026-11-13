@@ -10,6 +10,7 @@ from scipp import UnitError
 
 from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
@@ -129,6 +130,26 @@ class TestConvertUnitsWithRollback:
         assert p1.value == pytest.approx(1.0)
         assert str(p2.unit) == 'meV'
         assert p2.value == pytest.approx(2.0)
+
+
+class TestQValuesMatch:
+    @pytest.mark.parametrize(
+        'other, expected',
+        [
+            ([0.5, 1.0], True),
+            ([0.50009, 0.99991], True),
+            ([0.5002, 1.0], False),
+            ([0.5, 1.0, 1.5], False),
+        ],
+        ids=['equal', 'within_tolerance', 'beyond_tolerance', 'different_length'],
+    )
+    def test_Q_values_match(self, other, expected):
+        # WHEN
+        Q1 = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        Q2 = sc.array(dims=['Q'], values=other, unit='1/angstrom')
+
+        # THEN EXPECT
+        assert _Q_values_match(Q1, Q2) is expected
 
 
 class TestValidateAndConvertQ:

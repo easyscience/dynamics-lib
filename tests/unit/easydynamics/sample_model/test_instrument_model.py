@@ -433,6 +433,21 @@ class TestInstrumentModel:
             assert offset.unit == instrument_model.x_unit
             assert offset.value == instrument_model.energy_offset.value
 
+    def test_Q_setter_keeps_Q_within_the_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+
+        # THEN Q values that differ in rounding only
+        instrument_model.Q = old_Q.values + 5e-5
+
+        # EXPECT the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+    def test_Q_setter_raises_beyond_the_tolerance(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='New Q values are not similar to the old ones'):
+            instrument_model.Q = instrument_model.Q.values + 2e-4
+
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
         first_new_Q = np.array([1.0, 2.0, 3.0])

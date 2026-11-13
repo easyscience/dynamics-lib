@@ -12,6 +12,7 @@ from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
@@ -233,9 +234,11 @@ class InstrumentModel(EasyBase):
         """
         Set the Q values of the InstrumentModel.
 
-        If Q is already set, it raises an error if the new Q values are not similar to the old ones
-        to prevent accidental changes to the background and resolution models. To change Q values,
-        first run clear_Q().
+        If Q is already set, the old Q values are kept, and it raises an error if the new ones
+        differ from them by more than 1e-4 1/angstrom, to prevent accidental changes to the
+        background and resolution models. A resolution fitted to one data set can therefore be used
+        with another whose Q values are rounded differently. To change Q values, first run
+        clear_Q().
 
         Parameters
         ----------
@@ -257,7 +260,7 @@ class InstrumentModel(EasyBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
+        if not _Q_values_match(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'

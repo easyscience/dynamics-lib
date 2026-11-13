@@ -11,6 +11,7 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
@@ -310,8 +311,8 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Set the Q values of the SampleModel.
 
-        If Q is already set, it throws an error if the new Q values are not similar to the old
-        ones. To change Q values, first run clear_Q().
+        If Q is already set, the old Q values are kept, and it throws an error if the new ones
+        differ from them by more than 1e-4 1/angstrom. To change Q values, first run clear_Q().
 
         Parameters
         ----------
@@ -333,7 +334,7 @@ class ModelBase(EasyDynamicsModelBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
+        if not _Q_values_match(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'

@@ -480,6 +480,21 @@ class TestModelBase:
         # EXPECT
         np.testing.assert_array_equal(model_base.Q.values, old_Q.values)
 
+    def test_Q_setter_keeps_Q_within_the_tolerance(self, model_base):
+        # WHEN
+        old_Q = model_base.Q
+
+        # THEN Q values that differ in rounding only
+        model_base.Q = old_Q.values + 5e-5
+
+        # EXPECT the model keeps its own Q values
+        assert model_base.Q is old_Q
+
+    def test_Q_setter_raises_beyond_the_tolerance(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='New Q values are not similar to'):
+            model_base.Q = model_base.Q.values + 2e-4
+
     def test_Q_setter_with_none(self, model_base):
         # WHEN
         old_Q = model_base.Q
