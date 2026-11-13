@@ -332,6 +332,54 @@ class TestInstrumentModel:
         # EXPECT
         instrument_model.resolution_model.free_all_parameters.assert_called_once()
 
+    #############
+    # Scale
+    #############
+
+    def test_scale_is_fixed_at_one_by_default(self, instrument_model):
+        # WHEN THEN EXPECT
+        assert instrument_model.scale.value == pytest.approx(1.0)
+        assert instrument_model.scale.fixed is True
+        assert instrument_model.scale.name == 'instrument_scale'
+
+    def test_init_with_scale(self):
+        # WHEN THEN
+        model = InstrumentModel(scale=2.5)
+
+        # EXPECT
+        assert model.scale.value == pytest.approx(2.5)
+        assert model.scale.fixed is True
+
+    def test_scale_setter_sets_the_value(self, instrument_model):
+        # WHEN
+        scale = instrument_model.scale
+
+        # THEN
+        instrument_model.scale = 0.5
+
+        # EXPECT the same Parameter, with the new value
+        assert instrument_model.scale is scale
+        assert scale.value == pytest.approx(0.5)
+
+    @pytest.mark.parametrize(
+        'value, expected_exception',
+        [('2', TypeError), (None, TypeError), (-1.0, ValueError)],
+        ids=['string', 'None', 'negative'],
+    )
+    def test_scale_setter_invalid_raises(self, instrument_model, value, expected_exception):
+        # WHEN THEN EXPECT
+        with pytest.raises(expected_exception, match='scale must be'):
+            instrument_model.scale = value
+
+    def test_scale_is_one_variable_for_all_Q(self, instrument_model):
+        # WHEN THEN
+        per_Q = [instrument_model.get_all_variables(Q_index=Q_index) for Q_index in range(3)]
+
+        # EXPECT the same Parameter at every Q, listed once for all Q together
+        scale = instrument_model.scale
+        assert all(any(variable is scale for variable in variables) for variables in per_Q)
+        assert sum(variable is scale for variable in instrument_model.get_all_variables()) == 1
+
     def test_get_all_variables(self, instrument_model):
         # WHEN
         all_vars = instrument_model.get_all_variables()
@@ -339,6 +387,7 @@ class TestInstrumentModel:
         # THEN
         expected_var_names = {
             'energy_offset',
+            'instrument_scale',
             'Polynomial_c0',
             'Polynomial_c1',
             'Gaussian area',
@@ -349,7 +398,7 @@ class TestInstrumentModel:
         retrieved_var_names = {var.name for var in all_vars}
 
         assert expected_var_names == retrieved_var_names
-        assert len(all_vars) == 18
+        assert len(all_vars) == 19
         assert len(all_vars) == len(set(all_vars))
 
     def test_get_all_variables_no_Q(self, instrument_model):
@@ -369,6 +418,7 @@ class TestInstrumentModel:
         # THEN
         expected_var_names = {
             'energy_offset',
+            'instrument_scale',
             'Polynomial_c0',
             'Polynomial_c1',
             'Gaussian area',
@@ -379,7 +429,7 @@ class TestInstrumentModel:
         retrieved_var_names = {var.name for var in all_vars}
 
         assert expected_var_names == retrieved_var_names
-        assert len(all_vars) == 6
+        assert len(all_vars) == 7
 
     def test_get_all_variables_with_invalid_Q_index_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
@@ -432,6 +482,43 @@ class TestInstrumentModel:
             assert offset.name == 'energy_offset'
             assert offset.unit == instrument_model.x_unit
             assert offset.value == instrument_model.energy_offset.value
+
+    def test_Q_setter_keeps_Q_within_the_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+
+        # THEN Q values that differ in rounding only
+        instrument_model.Q = old_Q.values + 5e-5
+
+        # EXPECT the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+    def test_Q_setter_raises_beyond_the_tolerance(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='increase Q_tolerance'):
+            instrument_model.Q = instrument_model.Q.values + 2e-4
+
+    def test_Q_tolerance(self, instrument_model):
+        # WHEN
+        old_Q = instrument_model.Q
+        assert instrument_model.Q_tolerance == pytest.approx(1e-4)
+
+        # THEN
+        instrument_model.Q_tolerance = 0.01
+        instrument_model.Q = old_Q.values + 0.005
+
+        # EXPECT the larger difference is accepted, and the model keeps its own Q values
+        assert instrument_model.Q is old_Q
+
+        # EXPECT the resolution and background models have the tolerance too
+        assert instrument_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.resolution_model.Q_tolerance == pytest.approx(0.01)
+        assert instrument_model.background_model.Q_tolerance == pytest.approx(0.01)
+
+    def test_Q_tolerance_invalid_raises(self, instrument_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_tolerance must be a number'):
+            instrument_model.Q_tolerance = 'large'
 
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN

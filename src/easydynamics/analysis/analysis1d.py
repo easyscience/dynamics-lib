@@ -768,7 +768,8 @@ class Analysis1d(AnalysisBase):
 
         Uses the pre-built convolver when provided (fit path, for performance). If no convolver is
         given, creates a temporary one per call (plot path for individual components). Falls back
-        to direct evaluation with detailed balance if there is no resolution model.
+        to direct evaluation with detailed balance if there is no resolution model. In every case
+        the result is multiplied by the scale of the instrument model.
 
         Parameters
         ----------
@@ -794,8 +795,9 @@ class Analysis1d(AnalysisBase):
         if isinstance(components, ComponentCollection) and components.is_empty:
             return np.zeros_like(energy.values)
 
+        scale = self.instrument_model.scale.value
         if convolver is not None:
-            return convolver.convolution()
+            return scale * convolver.convolution()
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
@@ -814,14 +816,15 @@ class Analysis1d(AnalysisBase):
                     divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
                     energy_unit=self.x_unit,
                 )
-            return result
+            return scale * result
 
-        return self._build_convolution(
+        convolver = self._build_convolution(
             sample_components=components,
             resolution_components=resolution,
             energy=energy,
             energy_offset=energy_offset,
-        ).convolution()
+        )
+        return scale * convolver.convolution()
 
     def _evaluate_direct(
         self,
@@ -830,6 +833,9 @@ class Analysis1d(AnalysisBase):
     ) -> np.ndarray:
         """
         Evaluate background components directly — no convolution, no detailed balance factor.
+
+        The result is multiplied by the scale of the instrument model, as the sample contribution
+        is.
 
         Parameters
         ----------
@@ -852,7 +858,7 @@ class Analysis1d(AnalysisBase):
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
-        return components.evaluate(energy_with_offset)
+        return self.instrument_model.scale.value * components.evaluate(energy_with_offset)
 
     def _create_convolver(
         self,
