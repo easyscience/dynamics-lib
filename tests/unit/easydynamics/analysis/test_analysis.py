@@ -848,6 +848,31 @@ class TestAnalysis:
         ):
             analysis.experiment = new_experiment
 
+    @pytest.mark.parametrize(
+        'Q_difference, Q_tolerance',
+        [(5e-5, None), (0.005, 0.01)],
+        ids=['default_tolerance', 'larger_tolerance'],
+    )
+    def test_resolution_model_with_slightly_different_Q_is_accepted(
+        self, analysis, Q_difference, Q_tolerance
+    ):
+        "A resolution fitted to one data set is used with another at nearly the same Q"
+        # WHEN a new InstrumentModel with a resolution model that already has Q values
+        resolution_model = sm.ResolutionModel(
+            components=Gaussian(name='Resolution'), Q=analysis.Q.values + Q_difference
+        )
+        instrument_model = InstrumentModel(resolution_model=resolution_model)
+        if Q_tolerance is not None:
+            instrument_model.Q_tolerance = Q_tolerance
+        resolution_parameters = resolution_model.get_all_variables()
+
+        # THEN
+        analysis.instrument_model = instrument_model
+
+        # EXPECT the per-Q resolution parameters are kept, and the model can be evaluated
+        assert resolution_model.get_all_variables() == resolution_parameters
+        assert len(analysis.calculate()) == 3
+
     def test_on_sample_model_changed(self, analysis):
         # WHEN
         # Create a new sample model.

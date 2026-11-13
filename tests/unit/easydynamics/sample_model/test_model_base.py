@@ -157,6 +157,26 @@ class TestModelBase:
         assert len(all_vars) == 6
         assert not any(par.fixed for par in all_vars)
 
+    def test_fix_and_free_all_parameters_skip_dependent_parameters(self, model_base):
+        # WHEN a per-Q parameter depends on another one
+        leader = model_base.get_component_collection(0)['TestGaussian1Name'].width
+        follower = model_base.get_component_collection(1)['TestGaussian1Name'].width
+        follower.make_dependent_on('w', {'w': leader})
+
+        # THEN
+        model_base.fix_all_parameters()
+
+        # EXPECT no error, the independent parameters fixed and the dependent one left alone
+        assert leader.fixed is True
+        assert follower.independent is False
+
+        # THEN
+        model_base.free_all_parameters()
+
+        # EXPECT
+        assert leader.fixed is False
+        assert follower.independent is False
+
     def test_fix_all_parameters_with_Q_keeps_per_Q_collections(self, model_base):
         # WHEN
         collection = model_base.get_component_collection(Q_index=0)
@@ -479,6 +499,39 @@ class TestModelBase:
 
         # EXPECT
         np.testing.assert_array_equal(model_base.Q.values, old_Q.values)
+
+    def test_Q_setter_keeps_Q_within_the_tolerance(self, model_base):
+        # WHEN
+        old_Q = model_base.Q
+
+        # THEN Q values that differ in rounding only
+        model_base.Q = old_Q.values + 5e-5
+
+        # EXPECT the model keeps its own Q values
+        assert model_base.Q is old_Q
+
+    def test_Q_setter_raises_beyond_the_tolerance(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='increase Q_tolerance'):
+            model_base.Q = model_base.Q.values + 2e-4
+
+    def test_Q_tolerance(self, model_base):
+        # WHEN
+        old_Q = model_base.Q
+        assert model_base.Q_tolerance == pytest.approx(1e-4)
+
+        # THEN
+        model_base.Q_tolerance = 0.01
+        model_base.Q = old_Q.values + 0.005
+
+        # EXPECT the larger difference is accepted, and the model keeps its own Q values
+        assert model_base.Q_tolerance == pytest.approx(0.01)
+        assert model_base.Q is old_Q
+
+    def test_Q_tolerance_invalid_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Q_tolerance must be non-negative and finite'):
+            model_base.Q_tolerance = -1.0
 
     def test_Q_setter_with_none(self, model_base):
         # WHEN
