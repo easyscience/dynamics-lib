@@ -81,6 +81,7 @@ class TestJointAnalysis:
     def test_init(self, joint, first, second):
         # WHEN THEN EXPECT
         assert joint.analyses == [first, second]
+        assert joint.Q_tolerance == pytest.approx(0.01)
 
     def test_analyses_returns_a_copy(self, joint, first, second):
         # WHEN THEN
@@ -88,6 +89,42 @@ class TestJointAnalysis:
 
         # EXPECT
         assert joint.analyses == [first, second]
+
+    def test_init_accepts_custom_Q_tolerance(self, first, second):
+        # WHEN THEN
+        joint = JointAnalysis(analyses=[first, second], Q_tolerance=0.1)
+
+        # EXPECT
+        assert joint.Q_tolerance == pytest.approx(0.1)
+
+    @pytest.mark.parametrize('value', [0, 0.05, np.float64(0.05)], ids=['zero', 'float', 'numpy'])
+    def test_Q_tolerance_setter(self, joint, value):
+        # WHEN THEN
+        joint.Q_tolerance = value
+
+        # EXPECT
+        assert joint.Q_tolerance == pytest.approx(value)
+        assert type(joint.Q_tolerance) is float
+
+    @pytest.mark.parametrize(
+        'value, expected_exception',
+        [
+            ('0.1', TypeError),
+            (True, TypeError),
+            (None, TypeError),
+            (-0.1, ValueError),
+            (float('nan'), ValueError),
+            (float('inf'), ValueError),
+        ],
+        ids=['string', 'bool', 'None', 'negative', 'nan', 'inf'],
+    )
+    def test_Q_tolerance_invalid_raises(self, joint, first, value, expected_exception):
+        # WHEN THEN EXPECT the setter and the constructor both refuse it
+        with pytest.raises(expected_exception, match='Q_tolerance must be'):
+            joint.Q_tolerance = value
+        with pytest.raises(expected_exception, match='Q_tolerance must be'):
+            JointAnalysis(analyses=[first], Q_tolerance=value)
+        assert joint.Q_tolerance == pytest.approx(0.01)
 
     @pytest.mark.parametrize('name', ['analyses', 'shared_components', 'fitter'])
     def test_read_only_properties_raise(self, joint, name):
@@ -246,6 +283,93 @@ class TestJointAnalysis:
             joint.link_shared_components()
         for Q_index in range(3):
             assert self.l2_width(second, Q_index).independent is True
+
+    def test_link_shared_components_links_Q_within_tolerance(self, shared):
+        # WHEN the Q values of the second analysis are 0.004 and 0.02 from those of the first
+        first = make_analysis('first', [0.5, 1.0], [shared])
+        second = make_analysis('second', [0.504, 1.02], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second], Q_tolerance=0.01).link_shared_components()
+
+        # EXPECT only the copy within the tolerance follows the first analysis
+        assert self.l2_width(second, 0).independent is False
+        assert self.l2_width(second, 1).independent is True
+        self.l2_width(first, 0).value = 0.123
+        assert self.l2_width(second, 0).value == pytest.approx(0.123)
+
+    def test_link_shared_components_links_Q_exactly_the_tolerance_apart(self, shared):
+        # WHEN Q grids offset by the tolerance, where 0.51 - 0.5 > 0.01 > 2.01 - 2.0 in floats
+        first = make_analysis('first', [0.5, 1.0, 2.0], [shared])
+        second = make_analysis('second', [0.51, 1.01, 2.01], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second], Q_tolerance=0.01).link_shared_components()
+
+        # EXPECT every copy is linked, not just those where rounding happens to allow it
+        for Q_index in range(3):
+            assert self.l2_width(second, Q_index).independent is False
+
+    def test_link_shared_components_zero_tolerance_matches_Q_exactly(self, shared):
+        # WHEN Q values that differ by floating point noise, and by 0.001
+        first = make_analysis('first', [1.0, 1.5], [shared])
+        second = make_analysis('second', [1.0 + 1e-9, 1.501], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second], Q_tolerance=0).link_shared_components()
+
+        # EXPECT only the copy at the same Q value is linked
+        assert self.l2_width(second, 0).independent is False
+        assert self.l2_width(second, 1).independent is True
+
+    def test_link_shared_components_groups_around_the_owner(self, shared):
+        "Regression: groups started at their lowest Q, which left the third copy out"
+        # WHEN the second and third copy are both within the tolerance of the first, on either
+        # side of it, and further than the tolerance from each other
+        first = make_analysis('first', [1.000], [shared])
+        second = make_analysis('second', [0.995], [shared])
+        third = make_analysis('third', [1.006], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second, third], Q_tolerance=0.01).link_shared_components()
+
+        # EXPECT both follow the first
+        self.l2_width(first, 0).value = 0.123
+        assert self.l2_width(second, 0).value == pytest.approx(0.123)
+        assert self.l2_width(third, 0).value == pytest.approx(0.123)
+
+    def test_link_shared_components_links_to_the_nearest_owner(self, shared):
+        # WHEN a copy within the tolerance of two Q values of the first analysis
+        first = make_analysis('first', [1.0, 1.08], [shared])
+        second = make_analysis('second', [1.05], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second], Q_tolerance=0.1).link_shared_components()
+
+        # EXPECT it follows the nearer one, at Q = 1.08
+        self.l2_width(first, 0).value = 0.123
+        self.l2_width(first, 1).value = 0.456
+        assert self.l2_width(second, 0).value == pytest.approx(0.456)
+
+    def test_link_shared_components_never_links_two_copies_of_one_model(self, shared):
+        # WHEN the second analysis has pairs of Q values within the tolerance of each other: both
+        # near Q = 1.0 of the first analysis, one near its Q = 2.012, and none near at 3.0
+        first = make_analysis('first', [1.0, 2.012], [shared])
+        second = make_analysis('second', [0.996, 1.003, 2.0, 2.005, 3.0, 3.005], [shared])
+
+        # THEN
+        JointAnalysis(analyses=[first, second], Q_tolerance=0.01).link_shared_components()
+
+        # EXPECT one copy of a pair at most follows the first analysis: the nearest to its Q
+        # value. The others are independent, also of the other copy of their pair
+        for Q_index in (1, 3):
+            assert self.l2_width(second, Q_index).independent is False
+        for Q_index in (0, 2, 4, 5):
+            assert self.l2_width(second, Q_index).independent is True
+        self.l2_width(first, 0).value = 0.123
+        self.l2_width(first, 1).value = 0.456
+        assert self.l2_width(second, 1).value == pytest.approx(0.123)
+        assert self.l2_width(second, 3).value == pytest.approx(0.456)
 
     def test_link_shared_components_raises_without_Q(self, shared):
         # WHEN one analysis has no data yet
@@ -653,6 +777,25 @@ class TestJointAnalysis:
         np.testing.assert_allclose(ds.coords['Q'].values, [0.5, 1.0, 1.5, 2.0, 2.5])
         np.testing.assert_allclose(ds['L2 width'].values, [0.3, 0.3, 0.3, 0.3, np.nan])
         np.testing.assert_allclose(ds['L4 width'].values, [np.nan, 0.7, 0.7, 0.7, 0.7])
+
+    def test_parameters_to_dataset_has_one_row_per_group(self, shared):
+        "Regression: rows were matched by another rule than the links, giving a duplicate name"
+        # WHEN one component linked across Q values within the tolerance, and another shared
+        # component owned at a Q value within the tolerance of those
+        other = Lorentzian(name='L4', width=0.7)
+        analyses = [
+            make_analysis('first', [0.5, 1.0], [shared]),
+            make_analysis('second', [1.004, 1.5], [shared, other]),
+            make_analysis('third', [1.004], [other]),
+        ]
+
+        # THEN
+        ds = JointAnalysis(analyses=analyses, Q_tolerance=0.01).parameters_to_dataset()
+
+        # EXPECT a row at the Q value of every owner, and none for the copy that follows one
+        np.testing.assert_allclose(ds.coords['Q'].values, [0.5, 1.0, 1.004, 1.5])
+        np.testing.assert_allclose(ds['L2 width'].values, [0.3, 0.3, np.nan, 0.3])
+        np.testing.assert_allclose(ds['L4 width'].values, [np.nan, np.nan, 0.7, 0.7])
 
     def test_parameters_to_dataset_without_shared_components_is_empty(self):
         # WHEN
