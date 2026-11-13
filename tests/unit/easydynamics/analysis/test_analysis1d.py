@@ -728,6 +728,18 @@ class TestAnalysis1d:
         # EXPECT
         assert np.array_equal(result, np.array([1.0, 1.0, 1.0]))
 
+    def test_evaluate_direct_applies_the_scale(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+
+        # THEN
+        result = analysis1d._evaluate_direct(
+            components=Polynomial(coefficients=[1.0]), energy=None
+        )
+
+        # EXPECT
+        np.testing.assert_allclose(result, [2.0, 2.0, 2.0])
+
     def test_evaluate_with_convolution_uses_convolver(self, analysis1d):
         # WHEN
         components = Gaussian()
@@ -782,17 +794,19 @@ class TestAnalysis1d:
         # EXPECT
         np.testing.assert_allclose(result, 2.0 * unscaled)
 
-    def test_calculate_scales_the_sample_but_not_the_background(self, analysis1d):
-        # WHEN
-        analysis1d._evaluate_direct = MagicMock(return_value=np.array([0.5, 0.5, 0.5]))
-        sample = analysis1d.calculate() - 0.5
+    def test_calculate_scales_the_sample_and_the_background(self, analysis1d):
+        # WHEN a model with a sample contribution and a background
+        analysis1d.sample_model.components = Gaussian(center=20.0, width=10.0)
+        analysis1d.instrument_model.background_model.components = Polynomial(coefficients=[0.5])
+        unscaled = analysis1d.calculate()
+        assert np.all(unscaled > 0.5)
 
         # THEN
         analysis1d.instrument_model.scale = 3.0
         result = analysis1d.calculate()
 
         # EXPECT
-        np.testing.assert_allclose(result, 3.0 * sample + 0.5)
+        np.testing.assert_allclose(result, 3.0 * unscaled)
 
     def test_evaluate_with_convolution_no_resolution(self, analysis1d):
         # WHEN

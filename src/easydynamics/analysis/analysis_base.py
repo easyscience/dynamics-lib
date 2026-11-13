@@ -323,7 +323,8 @@ class AnalysisBase(EasyDynamicsModelBase):
     @property
     def scale(self) -> Parameter:
         """
-        Get the scale of the InstrumentModel: the factor the sample model is multiplied by.
+        Get the scale of the InstrumentModel: the factor the model, sample and background, is
+        multiplied by.
 
         It is fixed at 1 unless it is set or freed (``scale.fixed = False``).
 
