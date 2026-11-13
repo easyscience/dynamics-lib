@@ -157,6 +157,26 @@ class TestModelBase:
         assert len(all_vars) == 6
         assert not any(par.fixed for par in all_vars)
 
+    def test_fix_and_free_all_parameters_skip_dependent_parameters(self, model_base):
+        # WHEN a per-Q parameter depends on another one
+        leader = model_base.get_component_collection(0)['TestGaussian1Name'].width
+        follower = model_base.get_component_collection(1)['TestGaussian1Name'].width
+        follower.make_dependent_on('w', {'w': leader})
+
+        # THEN
+        model_base.fix_all_parameters()
+
+        # EXPECT no error, the independent parameters fixed and the dependent one left alone
+        assert leader.fixed is True
+        assert follower.independent is False
+
+        # THEN
+        model_base.free_all_parameters()
+
+        # EXPECT
+        assert leader.fixed is False
+        assert follower.independent is False
+
     def test_fix_all_parameters_with_Q_keeps_per_Q_collections(self, model_base):
         # WHEN
         collection = model_base.get_component_collection(Q_index=0)
