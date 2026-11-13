@@ -198,6 +198,44 @@ class JointAnalysis(EasyDynamicsBase):
         )
 
     @property
+    def scales(self) -> list[Parameter]:
+        """
+        The scale of every analysis: the factor its model is multiplied by.
+
+        Data sets of the same sample are rarely on the same intensity scale. Keep one scale fixed
+        as the reference and free the others, e.g. ``joint.scales[1].fixed = False``, so that the
+        shared components can describe all the data sets.
+
+        Returns
+        -------
+        list[Parameter]
+            The scale Parameter of each analysis' InstrumentModel, in the order of the analyses.
+        """
+        return [analysis.scale for analysis in self._analyses]
+
+    @scales.setter
+    def scales(self, _value: list[Parameter]) -> None:
+        """
+        Scales is read-only.
+
+        Set the value of a scale, or free it, on the Parameter itself.
+
+        Parameters
+        ----------
+        _value : list[Parameter]
+            The new scales. This argument is ignored, as scales is read-only.
+
+        Raises
+        ------
+        AttributeError
+            Always raised, since scales is read-only.
+        """
+        raise AttributeError(
+            'scales is read-only. Set the value of a scale, or free it, on the Parameter itself, '
+            'e.g. scales[1].value = 2.0 or scales[1].fixed = False.'
+        )
+
+    @property
     def fitter(self) -> MultiFitter:
         """
         The EasyScience MultiFitter covering every Q index of every analysis, built on first use.
