@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import warnings
+from numbers import Real
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -29,11 +30,12 @@ class JointAnalysis(EasyDynamicsBase):
     Each Analysis keeps its own experiment, sample model and instrument model, so the data sets may
     have different resolutions, energy ranges, backgrounds and Q values. A component object that
     appears in the template of more than one of the models is *shared*. Its per-Q copies are
-    grouped by Q value: at each Q value the copy from the earliest analysis owns the parameters and
-    the copies from the other analyses are made dependent on it, so one set of values describes all
-    the data sets at that Q. A copy at a Q value no other analysis has stays independent. Q values
-    are matched exactly (to six decimals), so rebin the data sets onto a common Q grid where they
-    are to share a component. If no Q values are equal at all, the component is fitted
+    grouped by Q value, taking the analyses in order: a copy joins the group whose owner is nearest
+    in Q, provided that owner is within ``Q_tolerance`` and no other Q value of the copy's own
+    model is nearer to it, and otherwise starts a new group, which it owns. The other copies in a
+    group are made dependent on the owner, so one set of values describes all the data sets at that
+    Q, and a copy alone in its group stays independent. With a ``Q_tolerance`` of 0, Q values are
+    matched exactly (to six decimals). If no Q values match at all, the component is fitted
     independently in each analysis and a warning is given.
 
     After linking, each analysis can still be fitted or sampled on its own, but a shared parameter
@@ -83,6 +85,7 @@ class JointAnalysis(EasyDynamicsBase):
     def __init__(
         self,
         analyses: list[Analysis],
+        Q_tolerance: float = 0.01,
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -92,8 +95,11 @@ class JointAnalysis(EasyDynamicsBase):
         Parameters
         ----------
         analyses : list[Analysis]
-            The analyses to fit together. Where Q values are equal, shared components are owned by
-            the earliest analysis in the list.
+            The analyses to fit together. Where Q values match, shared components are owned by the
+            earliest analysis in the list.
+        Q_tolerance : float, default=0.01
+            How far apart, in 1/angstrom, the Q values of two analyses may be for a shared
+            component to have the same parameters at both.
         display_name : str | None, default=None
             An optional display name. If None, the unique_name will be used.
         unique_name : str | None, default=None
@@ -102,9 +108,10 @@ class JointAnalysis(EasyDynamicsBase):
         Raises
         ------
         TypeError
-            If analyses is not a list of Analysis objects.
+            If analyses is not a list of Analysis objects, or Q_tolerance is not a number.
         ValueError
-            If analyses is empty or holds the same Analysis twice.
+            If analyses is empty or holds the same Analysis twice, or Q_tolerance is negative or
+            not finite.
         """
         super().__init__(display_name=display_name, unique_name=unique_name)
 
@@ -118,6 +125,7 @@ class JointAnalysis(EasyDynamicsBase):
             raise ValueError('analyses must not contain the same Analysis more than once.')
 
         self._analyses = list(analyses)
+        self.Q_tolerance = Q_tolerance
         self._fitter: MultiFitter | None = None
         self._fitter_object_ids: list[int] = []
         # The parameters made dependent by link_shared_components and the fixed flag each had
@@ -161,6 +169,41 @@ class JointAnalysis(EasyDynamicsBase):
             'analyses is read-only. Use append_analysis to add an Analysis, or create a new '
             'JointAnalysis.'
         )
+
+    @property
+    def Q_tolerance(self) -> float:
+        """
+        How far apart the Q values of two analyses may be for them to share a component there.
+
+        Returns
+        -------
+        float
+            The tolerance, in 1/angstrom.
+        """
+        return self._Q_tolerance
+
+    @Q_tolerance.setter
+    def Q_tolerance(self, value: float) -> None:
+        """
+        Set the Q tolerance. It is used by the next ``fit`` or ``link_shared_components``.
+
+        Parameters
+        ----------
+        value : float
+            The tolerance, in 1/angstrom.
+
+        Raises
+        ------
+        TypeError
+            If value is not a number.
+        ValueError
+            If value is negative or not finite.
+        """
+        if isinstance(value, bool) or not isinstance(value, Real):
+            raise TypeError('Q_tolerance must be a number.')
+        if not 0 <= value < np.inf:
+            raise ValueError('Q_tolerance must be a non-negative finite number.')
+        self._Q_tolerance = float(value)
 
     @property
     def shared_components(self) -> list[ModelComponent]:
@@ -290,7 +333,7 @@ class JointAnalysis(EasyDynamicsBase):
         """
         Add an Analysis to fit together with the others.
 
-        It is added last, so where its Q values equal those of an earlier analysis its copies of
+        It is added last, so where its Q values match those of an earlier analysis its copies of
         the shared components follow that analysis. The copies are linked by the next ``fit`` or
         ``link_shared_components``.
 
@@ -371,8 +414,9 @@ class JointAnalysis(EasyDynamicsBase):
             if all(len(copies) == 1 for copies in groups.values()):
                 warnings.warn(
                     f'Component {component.name!r} is shared, but the analyses holding it have '
-                    f'no Q value in common, so it is fitted independently in each. Rebin the '
-                    f'data onto a common Q grid to share it.',
+                    f'no Q values within {self._Q_tolerance} 1/angstrom of each other, so it is '
+                    f'fitted independently in each. Rebin the data onto a common Q grid or '
+                    f'increase Q_tolerance to share it.',
                     UserWarning,
                     stacklevel=2,
                 )
@@ -397,11 +441,12 @@ class JointAnalysis(EasyDynamicsBase):
         """
         Create a scipp dataset of the shared components' parameters over the Q values of all data.
 
-        There is one row per Q value, holding the (fitted) parameters of the copy that owns them
-        there, and NaN for a component that no analysis holds at that Q value. The dataset can be
-        plotted or passed to a ``ParameterAnalysis`` like the dataset from
-        ``Analysis.parameters_to_dataset``. The parameters that are not shared are available from
-        each analysis' own dataset.
+        There is one row per Q value of a copy that owns its parameters, holding those (fitted)
+        parameters, and NaN for a component with no owner at that Q value. A copy that follows an
+        owner has no row of its own, also where its Q value differs from the owner's within
+        ``Q_tolerance``. The dataset can be plotted or passed to a ``ParameterAnalysis`` like the
+        dataset from ``Analysis.parameters_to_dataset``. The parameters that are not shared are
+        available from each analysis' own dataset.
 
         Raises
         ------
@@ -480,8 +525,8 @@ class JointAnalysis(EasyDynamicsBase):
         Returns
         -------
         list[tuple[ModelComponent, dict[float, list[ModelComponent]]]]
-            For each shared component: its copies at each Q value (in 1/angstrom), in the order of
-            the analyses, so the first copy at a Q value is the owner.
+            For each shared component: its groups of copies, keyed by the Q value of the owner (in
+            1/angstrom). The copies are in the order of the analyses, so the first is the owner.
 
         Raises
         ------
@@ -502,10 +547,22 @@ class JointAnalysis(EasyDynamicsBase):
         for component, holders in self._shared_components():
             groups: dict[float, list[ModelComponent]] = {}
             for model, index in holders:
-                for Q_index, Q_value in enumerate(model.Q.values):
+                # Rounded, so that Q values that differ only by floating point noise match.
+                Q_values = [round(float(Q_value), 6) for Q_value in model.Q.values]
+                # The groups a copy of this model can join: those owned by the earlier models.
+                owner_Q_values = list(groups)
+                for Q_index, Q_value in enumerate(Q_values):
                     copy = model.get_component_collection(Q_index)[index]
-                    # Rounded, so that Q values that differ only by floating point noise match.
-                    groups.setdefault(round(float(Q_value), 6), []).append(copy)
+                    owner_Q = min(owner_Q_values, key=lambda Q: abs(Q - Q_value), default=Q_value)
+                    # Of the Q values of one model only the nearest joins a group, so that two
+                    # copies of one model are never linked. The distance is rounded like the Q
+                    # values, so that Q values exactly the tolerance apart match.
+                    if (
+                        round(abs(owner_Q - Q_value), 6) > self._Q_tolerance
+                        or min(Q_values, key=lambda Q: abs(Q - owner_Q)) != Q_value
+                    ):
+                        owner_Q = Q_value
+                    groups.setdefault(owner_Q, []).append(copy)
             result.append((component, groups))
         return result
 
