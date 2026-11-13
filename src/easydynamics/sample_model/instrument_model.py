@@ -90,8 +90,8 @@ class InstrumentModel(EasyBase):
         x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
         scale : Numeric, default=1.0
-            The factor the sample model is multiplied by. It is one fixed Parameter for all Q
-            values; see the ``scale`` property.
+            The factor the model is multiplied by. It is one fixed Parameter for all Q values; see
+            the ``scale`` property.
 
         Raises
         ------
@@ -344,11 +344,12 @@ class InstrumentModel(EasyBase):
         """
         Get the scale of the instrument.
 
-        The sample model, after convolution with the resolution, is multiplied by the scale; the
-        background is not. It lets data sets that measure the same sample on different intensity
-        scales be described by the same sample model. It is one Parameter for all Q values, and it
-        is fixed at 1 unless it is set or freed (``scale.fixed = False``). A free scale has to be
-        fitted with all Q together (``fit_method='simultaneous'``, or a JointAnalysis).
+        The whole model is multiplied by the scale: the sample model, after convolution with the
+        resolution, and the background. It lets data sets that measure the same sample on different
+        intensity scales be described by the same sample model. It is one Parameter for all Q
+        values, and it is fixed at 1 unless it is set or freed (``scale.fixed = False``). A free
+        scale has to be fitted with all Q together (``fit_method='simultaneous'``, or a
+        JointAnalysis).
 
         Returns
         -------
