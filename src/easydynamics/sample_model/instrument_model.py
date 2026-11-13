@@ -10,9 +10,12 @@ from easyscience.base_classes import EasyBase
 from easydynamics.sample_model.background_model import BackgroundModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
+from easydynamics.utils.utils import Q_TOLERANCE
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_Q_tolerance
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
@@ -153,6 +156,7 @@ class InstrumentModel(EasyBase):
         )
         self.scale = scale
         self._Q = _validate_and_convert_Q(Q)
+        self._Q_tolerance = Q_TOLERANCE
         self._on_Q_change()
 
     # -------------------------------------------------------------
@@ -247,9 +251,10 @@ class InstrumentModel(EasyBase):
         """
         Set the Q values of the InstrumentModel.
 
-        If Q is already set, it raises an error if the new Q values are not similar to the old ones
-        to prevent accidental changes to the background and resolution models. To change Q values,
-        first run clear_Q().
+        If Q is already set, the old Q values are kept, and it raises an error if the new ones
+        differ from them by more than Q_tolerance, to prevent accidental changes to the background
+        and resolution models. A resolution fitted to one data set can therefore be used with
+        another whose Q values are slightly different. To change Q values, first run clear_Q().
 
         Parameters
         ----------
@@ -271,11 +276,41 @@ class InstrumentModel(EasyBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
+        if not _Q_values_match(old_Q, new_Q, self._Q_tolerance):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
+                'To accept a larger difference, increase Q_tolerance. '
                 'To change Q values, first run clear_Q().'
             )
+
+    @property
+    def Q_tolerance(self) -> float:
+        """
+        Get the largest difference at which new Q values count as the same as the model's own.
+
+        Returns
+        -------
+        float
+            The tolerance in 1/angstrom.
+        """
+        return self._Q_tolerance
+
+    @Q_tolerance.setter
+    def Q_tolerance(self, value: float) -> None:
+        """
+        Set the largest difference at which new Q values count as the same as the model's own.
+
+        Increase it to use a resolution fitted to one data set with another whose Q values differ
+        slightly. The value is also set on the current resolution and background models.
+
+        Parameters
+        ----------
+        value : float
+            The tolerance in 1/angstrom. Must be non-negative and finite.
+        """
+        self._Q_tolerance = _validate_Q_tolerance(value)
+        self.resolution_model.Q_tolerance = value
+        self.background_model.Q_tolerance = value
 
     @property
     def x_unit(self) -> str | sc.Unit | None:
