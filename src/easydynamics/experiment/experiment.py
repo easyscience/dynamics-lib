@@ -693,5 +693,6 @@ class Experiment(EasyDynamicsBase):
         """
         temp = self.to_dict(skip=['unique_name'])
         new_obj = self.__class__.from_dict(temp)
-        new_obj.data = self.data.copy() if self.data is not None else None
+        if self.data is not None:
+            new_obj.data = self.data.copy()
         return new_obj
