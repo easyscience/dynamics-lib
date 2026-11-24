@@ -6,7 +6,20 @@ import pytest
 import scipp as sc
 from scipp import UnitError
 
+from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
+    BrownianTranslationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
+    ChudleyElliottJumpDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+    JumpTranslationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
+    MittagLefflerDiffusion,
+)
 from easydynamics.variable import Parameter
 
 
@@ -371,3 +384,93 @@ class TestDiffusionModelBase:
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'Q must be set in the model'):
             model._match_Q_indices(np.array([1.0]))
+
+    #############
+    # Sharing between SampleModels
+    #############
+
+    def test_collections_version_increases_when_collections_are_regenerated(self):
+        # WHEN
+        model = DiffusionModelBase(Q=[1.0, 2.0])
+        version = model.collections_version
+
+        # THEN
+        model.clear_Q(confirm=True)
+        model.Q = [1.0, 2.0, 3.0]
+
+        # EXPECT
+        assert model.collections_version > version
+
+    def test_extend_Q_sets_the_grid_of_a_model_without_Q(self, diffusion_model):
+        # WHEN THEN
+        diffusion_model.extend_Q([2.0, 1.0])
+
+        # EXPECT the values, in ascending order
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0])
+        assert len(diffusion_model.get_component_collections()) == 2
+
+    def test_extend_Q_adds_the_values_that_are_missing(self):
+        # WHEN
+        model = DiffusionModelBase(Q=[0.5, 1.0, 1.5])
+        version = model.collections_version
+
+        # THEN Q values that partly overlap with the grid
+        model.extend_Q([1.0, 1.5, 2.0])
+
+        # EXPECT the union, with the shared values once, and regenerated collections
+        np.testing.assert_allclose(model.Q.values, [0.5, 1.0, 1.5, 2.0])
+        assert len(model.get_component_collections()) == 4
+        assert model.collections_version > version
+
+    def test_extend_Q_adds_to_a_grid_with_repeated_values(self):
+        "Regression: comparing lengths dropped the new value when the grid held a duplicate"
+        # WHEN a grid set by hand with a repeated value
+        model = DiffusionModelBase(Q=[1.0, 1.0])
+
+        # THEN
+        model.extend_Q([2.0])
+
+        # EXPECT the new value is added, and the repeated one is kept once
+        np.testing.assert_allclose(model.Q.values, [1.0, 2.0])
+
+    @pytest.mark.parametrize('Q', [None, [1.0, 3.0], [1.0 + 1e-9]], ids=['None', 'held', 'close'])
+    def test_extend_Q_does_not_regenerate_when_the_grid_holds_the_values(self, Q):
+        # WHEN
+        model = DiffusionModelBase(Q=[1.0, 2.0, 3.0])
+        version = model.collections_version
+
+        # THEN
+        model.extend_Q(Q)
+
+        # EXPECT nothing changes
+        np.testing.assert_allclose(model.Q.values, [1.0, 2.0, 3.0])
+        assert model.collections_version == version
+
+    #############
+    # Origin of generated components
+    #############
+
+    @pytest.mark.parametrize(
+        'model_class',
+        [
+            BrownianTranslationalDiffusion,
+            ChudleyElliottJumpDiffusion,
+            DeltaLorentz,
+            JumpTranslationalDiffusion,
+            MittagLefflerDiffusion,
+        ],
+    )
+    def test_generated_components_return_their_diffusion_model(self, model_class):
+        # WHEN
+        model = model_class(Q=[0.5, 1.0])
+
+        # THEN the collections are regenerated when the Q grid grows
+        model.extend_Q([1.5])
+
+        # EXPECT every component, old Q values and new, records the model and no template
+        collections = model.get_component_collections()
+        assert len(collections) == 3
+        assert all(len(collection) > 0 for collection in collections)
+        components = [c for collection in collections for c in collection]
+        assert all(c.get_diffusion_model() is model for c in components)
+        assert all(c.get_template() is None for c in components)

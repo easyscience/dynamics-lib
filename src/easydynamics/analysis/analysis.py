@@ -23,8 +23,8 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
-from easydynamics.utils.plotting import add_x_axis_coord
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
@@ -405,7 +405,8 @@ class Analysis(AnalysisBase):
         Q_index : int | None, default=None
             Index of the Q value to plot. If None, plot all Q values.
         plot_components : bool, default=True
-            Whether to plot the individual components.
+            Whether to plot the individual components. Each component needs a unique name, and is
+            labelled by its display name in the legend.
         add_background : bool, default=True
             Whether to add background components to the sample model components when plotting.
             Default is True.
@@ -482,6 +483,8 @@ class Analysis(AnalysisBase):
             )
             for widget in fig.bottom_bar[0].controls.values():
                 widget.slider_toggler.value = '-o-'
+        if plot_components:
+            self._label_components_by_display_name(fig, Q_index=0)
         fig.autoscale()
         return fig
 
@@ -514,7 +517,8 @@ class Analysis(AnalysisBase):
         ------
         ValueError
             If there is no data to include in the DataGroup, or if there are no Q values available
-            for creating the DataGroup.
+            for creating the DataGroup. If include_components is True and two components share a
+            name.
 
         Returns
         -------
@@ -662,7 +666,8 @@ class Analysis(AnalysisBase):
             e.g., a Fickian diffusion width (D*Q^2) as a straight line.
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
-            title, linestyle, marker, color).
+            title, linestyle, marker, color). Use x_axis rather than plopp's coords to choose the
+            x-axis.
 
         Raises
         ------
@@ -678,7 +683,7 @@ class Analysis(AnalysisBase):
             A Plopp WidgetFigure containing the plot of the parameters.
         """
 
-        ds = add_x_axis_coord(self.parameters_to_dataset(), x_axis)
+        ds = with_x_axis_dim(self.parameters_to_dataset(), x_axis)
 
         # None or an empty list both mean 'plot all parameters'.
         if not names:
@@ -696,7 +701,6 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'coords': [x_axis],
             'linestyle': dict.fromkeys(names, 'none'),
             'marker': dict.fromkeys(names, 'o'),
             'markerfacecolor': dict.fromkeys(names, 'none'),
@@ -946,11 +950,22 @@ class Analysis(AnalysisBase):
         """
         Fit data for all Q indices independently.
 
+        Raises
+        ------
+        ValueError
+            If the scale is free and there is more than one Q, since it is one parameter for all Q
+            and each fit would overwrite it.
+
         Returns
         -------
         list[FitResults]
             A list of FitResults, one for each Q index.
         """
+        if not self.scale.fixed and len(self.analysis_list) > 1:
+            raise ValueError(
+                'The scale is one parameter for all Q, so it cannot be fitted independently at '
+                "each Q. Fix it, or use fit_method='simultaneous'."
+            )
         return [analysis.fit() for analysis in self.analysis_list]
 
     def _fit_all_Q_simultaneously(self) -> FitResults:

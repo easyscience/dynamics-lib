@@ -9,6 +9,9 @@ from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
+from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
+    BrownianTranslationalDiffusion,
+)
 from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
 
@@ -345,8 +348,8 @@ class TestResolutionModel:
         resolution_model = ResolutionModel.from_sample_model(sample_model)
         calibrated = resolution_model.get_component_collection(0)
 
-        # THEN EXPECT mutations that would rebuild the collections from the unfitted
-        # template fail loudly instead of silently discarding the calibration
+        # THEN EXPECT mutations that would change the collections from the unfitted
+        # template fail loudly instead of silently corrupting the calibration
         with pytest.raises(RuntimeError, match='calibrated'):
             resolution_model.append_component(Gaussian(name='Extra'))
         with pytest.raises(RuntimeError, match='calibrated'):
@@ -375,3 +378,28 @@ class TestResolutionModel:
         assert model.y_unit == '1/eV'
         assert model.components[0].y_unit == '1/eV'
         assert g.area.value == pytest.approx(1e3)
+
+    #############
+    # Origin of per-Q components
+    #############
+
+    def test_from_sample_model_copies_return_their_template(self):
+        # WHEN a SampleModel with a template component and a diffusion model
+        template = Gaussian(name='G')
+        sample_model = SampleModel(
+            components=template,
+            diffusion_models=BrownianTranslationalDiffusion(),
+            Q=[1.0, 2.0],
+        )
+
+        # THEN
+        resolution_model = ResolutionModel.from_sample_model(sample_model)
+
+        # EXPECT the copies of the template, which the two models share, return it; the copies
+        # of the diffusion model's components are not linked to the diffusion model
+        assert resolution_model.components['G'] is template
+        for i in range(len(sample_model.Q)):
+            collection = resolution_model.get_component_collection(i)
+            assert collection['G'].get_template() is template
+            assert collection[-1].get_template() is None
+            assert collection[-1].get_diffusion_model() is None

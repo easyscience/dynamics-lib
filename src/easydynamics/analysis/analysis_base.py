@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from collections.abc import Iterable
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
@@ -12,7 +14,13 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import relabel_lines
 from easydynamics.variable import Parameter
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from plopp.backends.matplotlib.figure import WidgetFigure
 
 
 class AnalysisBase(EasyDynamicsModelBase):
@@ -312,6 +320,33 @@ class AnalysisBase(EasyDynamicsModelBase):
         """
 
         raise AttributeError('temperature is a read-only property derived from the SampleModel.')
+
+    @property
+    def scale(self) -> Parameter:
+        """
+        Get the scale of the InstrumentModel: the factor the model, sample and background, is
+        multiplied by.
+
+        It is fixed at 1 unless it is set or freed (``scale.fixed = False``).
+
+        Returns
+        -------
+        Parameter
+            The scale Parameter of the associated InstrumentModel.
+        """
+        return self.instrument_model.scale
+
+    @scale.setter
+    def scale(self, value: float) -> None:
+        """
+        Set the value of the scale of the InstrumentModel.
+
+        Parameters
+        ----------
+        value : float
+            The new scale.
+        """
+        self.instrument_model.scale = value
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -614,6 +649,27 @@ class AnalysisBase(EasyDynamicsModelBase):
             'color': color,
             'markerfacecolor': markerfacecolor,
         }
+
+    def _label_components_by_display_name(self, fig: WidgetFigure, Q_index: int) -> None:
+        """
+        Show the display names of the components in the legend of a figure.
+
+        Plopp labels lines by DataGroup key, which must stay the unique name, so lines are
+        relabelled after plotting.
+
+        Parameters
+        ----------
+        fig : WidgetFigure
+            The figure holding the lines to relabel.
+        Q_index : int
+            The Q index to read the components from.
+        """
+        sample = self.sample_model.get_component_collection(Q_index=Q_index)
+        background = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
+        )
+        labels = {component.name: component.display_name for component in (*sample, *background)}
+        relabel_lines(fig, labels)
 
     #############
     # Dunder methods

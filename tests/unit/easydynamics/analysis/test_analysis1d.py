@@ -454,6 +454,18 @@ class TestAnalysis1d:
             datagroup['Data'] - analysis1d._create_model_array(),
         )
 
+    @pytest.mark.filterwarnings('ignore:Duplicate component names')
+    def test_datagroup_without_components_allows_duplicate_names(self, analysis1d):
+        # WHEN
+        analysis1d.sample_model.append_component(Gaussian())
+
+        # THEN
+        data_group = analysis1d.data_and_model_to_datagroup(include_components=False)
+
+        # EXPECT
+        assert 'Model' in data_group
+        assert 'Gaussian' not in data_group
+
     def test_data_and_model_to_datagroup_no_data_raises(self, analysis1d):
         # WHEN
         analysis1d.experiment._binned_data = None
@@ -499,6 +511,46 @@ class TestAnalysis1d:
         ):
             analysis1d.data_and_model_to_datagroup(include_residuals='not_a_boolean')
 
+    @staticmethod
+    def _legend_labels(fig):
+        return [text.get_text() for text in fig.ax.get_legend().get_texts()]
+
+    def test_plot_legend_shows_display_names(self, analysis1d):
+        # WHEN two components differ by name but not by display name
+        analysis1d.sample_model.components[0].display_name = 'Shared label'
+        analysis1d.sample_model.append_component(
+            Gaussian(name='Second', display_name='Shared label')
+        )
+
+        # THEN
+        fig = analysis1d.plot_data_and_model()
+
+        # EXPECT both curves are in the legend, under their display names
+        assert self._legend_labels(fig) == [
+            'Data',
+            'Model',
+            'Shared label',
+            'Shared label',
+        ]
+
+    def test_plot_legend_leaves_out_a_blank_display_name(self, analysis1d):
+        # WHEN
+        analysis1d.sample_model.components[0].display_name = ''
+
+        # THEN
+        fig = analysis1d.plot_data_and_model()
+
+        # EXPECT
+        assert self._legend_labels(fig) == ['Data', 'Model']
+
+    def test_plot_without_components_does_not_relabel(self, analysis1d):
+        # THEN
+        with patch.object(analysis1d, '_label_components_by_display_name') as relabel:
+            analysis1d.plot_data_and_model(plot_components=False)
+
+        # EXPECT
+        relabel.assert_not_called()
+
     def test_plot_data_and_model_no_Q_index_raises(self, analysis1d):
         # WHEN
         analysis1d._Q_index = None
@@ -524,6 +576,34 @@ class TestAnalysis1d:
 
         # EXPECT
         assert analysis1d.instrument_model.get_energy_offset(Q_index=0).fixed is False
+
+    def test_fit_recovers_a_free_scale(self):
+        # WHEN data that are 2.5 times a model whose parameters are all fixed
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/angstrom')
+        energy = sc.linspace('energy', -5.0, 5.0, num=41, unit='meV')
+        values = 2.5 * Gaussian(area=1.0, width=1.0).evaluate(energy.values)[np.newaxis, :]
+        data = sc.DataArray(
+            data=sc.array(
+                dims=['Q', 'energy'], values=values, variances=np.full(values.shape, 0.01)
+            ),
+            coords={'Q': Q, 'energy': energy},
+        )
+        sample_model = SampleModel(components=Gaussian(area=1.0, width=1.0))
+        sample_model.fix_all_parameters()
+        analysis = Analysis1d(
+            experiment=Experiment(data=data),
+            sample_model=sample_model,
+            instrument_model=InstrumentModel(),
+            Q_index=0,
+        )
+        analysis.fix_energy_offset()
+        analysis.scale.fixed = False
+
+        # THEN
+        analysis.fit()
+
+        # EXPECT
+        assert analysis.scale.value == pytest.approx(2.5, rel=1e-3)
 
     #############
     # Private methods: small utilities
@@ -648,6 +728,18 @@ class TestAnalysis1d:
         # EXPECT
         assert np.array_equal(result, np.array([1.0, 1.0, 1.0]))
 
+    def test_evaluate_direct_applies_the_scale(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+
+        # THEN
+        result = analysis1d._evaluate_direct(
+            components=Polynomial(coefficients=[1.0]), energy=None
+        )
+
+        # EXPECT
+        np.testing.assert_allclose(result, [2.0, 2.0, 2.0])
+
     def test_evaluate_with_convolution_uses_convolver(self, analysis1d):
         # WHEN
         components = Gaussian()
@@ -661,7 +753,60 @@ class TestAnalysis1d:
 
         # EXPECT
         convolver.convolution.assert_called_once()
-        assert result is convolver.convolution.return_value
+        np.testing.assert_array_equal(result, [1, 2, 3])
+
+    def test_evaluate_with_convolution_applies_the_scale_with_a_convolver(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+        convolver = MagicMock()
+        convolver.convolution = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # THEN
+        result = analysis1d._evaluate_with_convolution(
+            components=Gaussian(), energy=None, convolver=convolver
+        )
+
+        # EXPECT
+        np.testing.assert_array_equal(result, [2.0, 4.0, 6.0])
+
+    def test_evaluate_with_convolution_applies_the_scale_without_resolution(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.scale = 2.0
+        components = MagicMock()
+        components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # THEN
+        result = analysis1d._evaluate_with_convolution(components=components, energy=None)
+
+        # EXPECT
+        np.testing.assert_array_equal(result, [2.0, 4.0, 6.0])
+
+    def test_evaluate_with_convolution_applies_the_scale_with_resolution(self, analysis1d_counts):
+        # WHEN
+        components = analysis1d_counts.sample_model.get_component_collection(0)
+        unscaled = analysis1d_counts._evaluate_with_convolution(components=components, energy=None)
+        assert unscaled.max() > 0.0
+
+        # THEN
+        analysis1d_counts.instrument_model.scale = 2.0
+        result = analysis1d_counts._evaluate_with_convolution(components=components, energy=None)
+
+        # EXPECT
+        np.testing.assert_allclose(result, 2.0 * unscaled)
+
+    def test_calculate_scales_the_sample_and_the_background(self, analysis1d):
+        # WHEN a model with a sample contribution and a background
+        analysis1d.sample_model.components = Gaussian(center=20.0, width=10.0)
+        analysis1d.instrument_model.background_model.components = Polynomial(coefficients=[0.5])
+        unscaled = analysis1d.calculate()
+        assert np.all(unscaled > 0.5)
+
+        # THEN
+        analysis1d.instrument_model.scale = 3.0
+        result = analysis1d.calculate()
+
+        # EXPECT
+        np.testing.assert_allclose(result, 3.0 * unscaled)
 
     def test_evaluate_with_convolution_no_resolution(self, analysis1d):
         # WHEN
@@ -929,10 +1074,10 @@ class TestAnalysis1d:
 
         # ---- Sample component ----
         sample_component = MagicMock()
-        sample_component.display_name = 'sample_comp'
+        sample_component.name = 'sample_comp'
 
         sample_collection = MagicMock()
-        sample_collection.__iter__.return_value = iter([sample_component])
+        sample_collection.__iter__.side_effect = lambda: iter([sample_component])
         sample_collection.__len__.return_value = 1
 
         analysis1d.sample_model.get_component_collection = MagicMock(
@@ -941,10 +1086,10 @@ class TestAnalysis1d:
 
         # ---- Background component ----
         background_component = MagicMock()
-        background_component.display_name = 'background_comp'
+        background_component.name = 'background_comp'
 
         background_collection = MagicMock()
-        background_collection.__iter__.return_value = iter([background_component])
+        background_collection.__iter__.side_effect = lambda: iter([background_component])
         background_collection.__len__.return_value = 1
 
         analysis1d.instrument_model.background_model.get_component_collection = MagicMock(
@@ -994,6 +1139,36 @@ class TestAnalysis1d:
         assert isinstance(dataset, sc.Dataset)
         assert 'sample_comp' in dataset
         assert 'background_comp' in dataset
+
+    def test_components_dataset_is_keyed_by_name(self, analysis1d):
+        # WHEN two components differ by name but not by display name
+        analysis1d.sample_model.components[0].display_name = 'Shared label'
+        analysis1d.sample_model.append_component(
+            Gaussian(name='Second', display_name='Shared label')
+        )
+
+        # THEN
+        dataset = analysis1d._create_components_dataset_single_Q()
+
+        # EXPECT both components are kept, under their names
+        assert set(dataset.keys()) == {'Gaussian', 'Second'}
+
+    @pytest.mark.filterwarnings('ignore:Duplicate component names')
+    def test_components_dataset_refuses_duplicate_sample_names(self, analysis1d):
+        # WHEN two sample components share a name but not a display name
+        analysis1d.sample_model.append_component(Gaussian(display_name='Other'))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r"Q_index 0: \['Gaussian'\]"):
+            analysis1d._create_components_dataset_single_Q()
+
+    def test_components_dataset_refuses_a_name_shared_with_the_background(self, analysis1d):
+        # WHEN a background component has the name of a sample component
+        analysis1d.instrument_model.background_model.append_component(Gaussian())
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r"Q_index 0: \['Gaussian'\]"):
+            analysis1d._create_components_dataset_single_Q()
 
     def test_to_scipp_array(self, analysis1d):
         # WHEN
@@ -1048,10 +1223,11 @@ class TestAnalysis1d:
         analysis1d._create_convolver = MagicMock(return_value=None)
         analysis1d._convolver_is_dirty = False
         analysis1d.sample_model._component_collections_is_dirty = False
+        version = analysis1d.sample_model.state_version
 
         # THEN - append a component in-place (doesn't go through Analysis1d setters)
         analysis1d.sample_model.append_component(Gaussian(name='NewGaussian'))
-        assert analysis1d.sample_model._component_collections_is_dirty is True
+        assert analysis1d.sample_model.state_version > version
         assert analysis1d._convolver_is_dirty is False  # not yet propagated
 
         # WHEN - fit() should propagate the dirty flag and rebuild the convolver

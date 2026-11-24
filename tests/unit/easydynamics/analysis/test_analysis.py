@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from collections import Counter
+from copy import copy
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -14,6 +15,7 @@ import easydynamics as edyn
 import easydynamics.sample_model as sm
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.experiment import Experiment
+from easydynamics.sample_model import DeltaLorentz
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
@@ -421,6 +423,27 @@ class TestAnalysis:
         # Widget toggler updated
         assert fake_widget.slider_toggler.value == '-o-'
 
+    @pytest.mark.parametrize('plot_residuals', [False, True])
+    def test_plot_data_and_model_relabels_the_components(self, analysis, plot_residuals):
+        # WHEN
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {}
+
+        # THEN
+        with (
+            patch('plopp.slicer', return_value=fake_fig),
+            patch(
+                'easydynamics.analysis.analysis.slicerplot_with_residuals', return_value=fake_fig
+            ),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            patch.object(analysis, '_label_components_by_display_name') as relabel,
+        ):
+            analysis.plot_data_and_model(plot_residuals=plot_residuals)
+
+        # EXPECT
+        relabel.assert_called_once_with(fake_fig, Q_index=0)
+
     def test_plot_data_and_model_with_residuals(
         self,
         analysis,
@@ -682,8 +705,9 @@ class TestAnalysis:
         for name, data_array in dataset_passed.items():
             assert sc.identical(data_array, fake_dataset[name])
 
-        # Check default kwargs
-        assert kwargs['coords'] == ['Q']
+        # Check default kwargs. No coords kwarg: plopp's coords= drops the names that the
+        # per-line style dicts are keyed by.
+        assert 'coords' not in kwargs
 
         assert 'linestyle' in kwargs
         assert kwargs['linestyle'] == {
@@ -717,10 +741,30 @@ class TestAnalysis:
         with patch('plopp.plot') as mock_plot:
             analysis.plot_parameters(x_axis='Q^2')
 
-        # EXPECT the parameters are plotted against a Q^2 coordinate
+        # EXPECT the parameters are plotted against a Q^2 dimension
         args, kwargs = mock_plot.call_args
-        assert kwargs['coords'] == ['Q^2']
-        assert sc.identical(args[0]['width'].coords['Q^2'], Q**2)
+        assert 'coords' not in kwargs
+        assert args[0]['width'].dims == ('Q^2',)
+        assert sc.identical(args[0]['width'].coords['Q^2'], (Q**2).rename_dims(Q='Q^2'))
+
+    @pytest.mark.parametrize('x_axis', ['Q', 'Q^2'])
+    def test_plot_parameters_applies_styles(self, analysis, x_axis):
+        # WHEN rendering for real, without mocking plopp
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        fake_dataset = sc.Dataset(
+            data={'width': sc.array(dims=['Q'], values=[0.1, 0.2], unit='meV')},
+            coords={'Q': Q},
+        )
+        analysis.parameters_to_dataset = MagicMock(return_value=fake_dataset)
+
+        # THEN
+        fig = analysis.plot_parameters(x_axis=x_axis, marker={'width': 's'})
+
+        # EXPECT the per-line styles reach the line, which is labelled by name
+        lines = {line.get_label(): line for line in fig.ax.get_lines()}
+        assert lines['width'].get_linestyle() == 'None'
+        assert lines['width'].get_marker() == 's'
+        assert lines['width'].get_markerfacecolor() == 'none'
 
     def test_fix_and_free_energy_offset(self, analysis):
         # EXPECT
@@ -804,6 +848,31 @@ class TestAnalysis:
             match='New Q values are not similar to the old ones',
         ):
             analysis.experiment = new_experiment
+
+    @pytest.mark.parametrize(
+        'Q_difference, Q_tolerance',
+        [(5e-5, None), (0.005, 0.01)],
+        ids=['default_tolerance', 'larger_tolerance'],
+    )
+    def test_resolution_model_with_slightly_different_Q_is_accepted(
+        self, analysis, Q_difference, Q_tolerance
+    ):
+        "A resolution fitted to one data set is used with another at nearly the same Q"
+        # WHEN a new InstrumentModel with a resolution model that already has Q values
+        resolution_model = sm.ResolutionModel(
+            components=Gaussian(name='Resolution'), Q=analysis.Q.values + Q_difference
+        )
+        instrument_model = InstrumentModel(resolution_model=resolution_model)
+        if Q_tolerance is not None:
+            instrument_model.Q_tolerance = Q_tolerance
+        resolution_parameters = resolution_model.get_all_variables()
+
+        # THEN
+        analysis.instrument_model = instrument_model
+
+        # EXPECT the per-Q resolution parameters are kept, and the model can be evaluated
+        assert resolution_model.get_all_variables() == resolution_parameters
+        assert len(analysis.calculate()) == 3
 
     def test_on_sample_model_changed(self, analysis):
         # WHEN
@@ -943,6 +1012,30 @@ class TestAnalysis:
         assert analysis._fitter is None
         assert analysis._bayesian is None
 
+    def test_rebin_gives_a_diffusion_model_the_new_Q_grid_only(self):
+        # WHEN an analysis with a Q-varying DeltaLorentz, and a rebin along Q
+        Q = sc.array(dims=['Q'], values=np.linspace(0.5, 2.0, 7), unit='1/angstrom')
+        energy = sc.array(dims=['energy'], values=np.linspace(-2.0, 2.0, 21), unit='meV')
+        values = np.ones((7, 21))
+        data = sc.DataArray(
+            data=sc.array(dims=['Q', 'energy'], values=values, variances=values * 0.1),
+            coords={'Q': Q, 'energy': energy},
+        )
+        diffusion_model = DeltaLorentz(name='DL', allow_Q_variation={'A_0': True})
+        analysis = Analysis(
+            experiment=Experiment(data=data),
+            sample_model=SampleModel(diffusion_models=diffusion_model),
+        )
+        assert len(diffusion_model.Q) == 7
+
+        # THEN rebinning and using the analysis again, which applies the new Q to the models
+        analysis.rebin({'Q': 3}, confirm=True)
+        _ = analysis.analysis_list
+
+        # EXPECT the diffusion model's grid is the new Q grid only, with one A_0 per new Q
+        np.testing.assert_allclose(diffusion_model.Q.values, analysis.Q.values)
+        assert len(diffusion_model.get_independent_variables()) == 2 * 3
+
     #############
     # The bayesian sampler (the Analysis side of the contract)
     #############
@@ -995,6 +1088,14 @@ class TestAnalysis:
             match='Q_index 3 is out of bounds',
         ):
             analysis.fit(Q_index=3)
+
+    def test_fit_all_Q_independently_with_a_free_scale_raises(self, analysis):
+        # WHEN the scale, which is one parameter for all Q, is free
+        analysis.scale.fixed = False
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='cannot be fitted independently at each Q'):
+            analysis.fit(fit_method='independent')
 
     def test_fit_all_Q_independently(self, analysis):
         # WHEN
@@ -1471,3 +1572,17 @@ class TestAnalysis:
         assert shared, 'expected the diffusion model to contribute parameters shared across Q'
         for parameter in shared:
             assert analysis._parameter_labels().label(parameter) == parameter.name
+
+    #############
+    # Copying
+    #############
+
+    def test_copy(self, analysis):
+        # WHEN THEN
+        analysis_copy = copy(analysis)
+
+        # EXPECT an independent analysis with models of its own, which calculates the same
+        assert analysis_copy.sample_model is not analysis.sample_model
+        assert analysis_copy.instrument_model is not analysis.instrument_model
+        for copied, original in zip(analysis_copy.calculate(), analysis.calculate(), strict=True):
+            np.testing.assert_allclose(copied, original)

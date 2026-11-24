@@ -462,7 +462,8 @@ class Analysis1d(AnalysisBase):
         Parameters
         ----------
         plot_components : bool, default=True
-            Whether to plot the individual components of the model.
+            Whether to plot the individual components of the model. Each component needs a unique
+            name, and is labelled by its display name in the legend.
         add_background : bool, default=True
             Whether to add the background to the model prediction when plotting individual
             components.
@@ -502,6 +503,8 @@ class Analysis1d(AnalysisBase):
                 data_and_model,
                 **plot_kwargs_defaults,
             )
+        if plot_components:
+            self._label_components_by_display_name(fig, Q_index=self.Q_index)
         fig.autoscale()
         return fig
 
@@ -526,8 +529,8 @@ class Analysis1d(AnalysisBase):
             components.
         include_components : bool, default=True
             Whether to include the individual components of the model in the DataGroup. If True,
-            the DataGroup will include a DataArray for each component with the component's display
-            name as the key
+            the DataGroup will include a DataArray for each component with the component's name as
+            the key.
         include_residuals : bool, default=False
             Whether to include the residuals (data - model) in the DataGroup. If True, the
             DataGroup will include a DataArray with key 'Residuals' containing the residuals.
@@ -537,7 +540,7 @@ class Analysis1d(AnalysisBase):
         ValueError
             If no data is available in the experiment to include in the DataGroup. If no Q values
             are available in the experiment to create the DataGroup. If Q_index is not set to
-            create the DataGroup.
+            create the DataGroup. If include_components is True and two components share a name.
 
         Returns
         -------
@@ -749,7 +752,8 @@ class Analysis1d(AnalysisBase):
 
         Uses the pre-built convolver when provided (fit path, for performance). If no convolver is
         given, creates a temporary one per call (plot path for individual components). Falls back
-        to direct evaluation with detailed balance if there is no resolution model.
+        to direct evaluation with detailed balance if there is no resolution model. In every case
+        the result is multiplied by the scale of the instrument model.
 
         Parameters
         ----------
@@ -772,14 +776,15 @@ class Analysis1d(AnalysisBase):
         if isinstance(components, ComponentCollection) and components.is_empty:
             return np.zeros_like(energy.values)
 
+        scale = self.instrument_model.scale.value
         if convolver is not None:
-            return convolver.convolution()
+            return scale * convolver.convolution()
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
-        energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
 
         if resolution.is_empty:
+            energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
             result = components.evaluate(energy_with_offset)
             if (
                 self.temperature is not None
@@ -791,14 +796,15 @@ class Analysis1d(AnalysisBase):
                     divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
                     energy_unit=self.x_unit,
                 )
-            return result
+            return scale * result
 
-        return self._build_convolution(
+        convolver = self._build_convolution(
             sample_components=components,
             resolution_components=resolution,
             energy=energy,
             energy_offset=energy_offset,
-        ).convolution()
+        )
+        return scale * convolver.convolution()
 
     def _evaluate_direct(
         self,
@@ -807,6 +813,9 @@ class Analysis1d(AnalysisBase):
     ) -> np.ndarray:
         """
         Evaluate background components directly — no convolution, no detailed balance factor.
+
+        The result is multiplied by the scale of the instrument model, as the sample contribution
+        is.
 
         Parameters
         ----------
@@ -829,7 +838,7 @@ class Analysis1d(AnalysisBase):
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
-        return components.evaluate(energy_with_offset)
+        return self.instrument_model.scale.value * components.evaluate(energy_with_offset)
 
     def _create_convolver(
         self,
@@ -955,6 +964,12 @@ class Analysis1d(AnalysisBase):
         -------
         sc.Dataset
             A Dataset of component names to their corresponding sc.DataArrays.
+
+        Raises
+        ------
+        ValueError
+            If two sample or background components share a name, because one would replace the
+            other in the Dataset.
         """
         Q_index = self.Q_index
         if energy is None:
@@ -963,19 +978,31 @@ class Analysis1d(AnalysisBase):
         background_components = self.instrument_model.background_model.get_component_collection(
             Q_index=Q_index
         )
+        sample_components = self.sample_model.get_component_collection(Q_index=Q_index)
+
+        names = [component.name for component in (*sample_components, *background_components)]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(
+                f'Duplicate component names at Q_index {Q_index}: {duplicates}. '
+                'Rename the components so each has a unique name, or leave out the '
+                'individual components. Components generated by a diffusion model are '
+                'named by its arguments, such as lorentzian_name.'
+            )
+
         background_values = (
             self._evaluate_direct(background_components, energy) if add_background else None
         )
 
         result: dict[str, sc.DataArray] = {}
-        for component in self.sample_model.get_component_collection(Q_index=Q_index):
+        for component in sample_components:
             values = self._evaluate_with_convolution(component, energy)
             if background_values is not None:
                 values = values + background_values
-            result[component.display_name] = self._to_scipp_array(values, energy)
+            result[component.name] = self._to_scipp_array(values, energy)
 
         for component in background_components:
-            result[component.display_name] = self._to_scipp_array(
+            result[component.name] = self._to_scipp_array(
                 self._evaluate_direct(component, energy), energy
             )
 

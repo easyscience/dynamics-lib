@@ -19,23 +19,23 @@ Q_AXIS_TRANSFORMS: dict[str, Callable[[sc.Variable], sc.Variable]] = {
 }
 
 
-def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
+def with_x_axis_dim(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
-    Add an x_axis coordinate computed from the Q coordinate, for plotting against it.
+    Make x_axis, computed from the Q coordinate, the dimension to plot against.
 
     Only the coordinate is transformed; the values at each Q are unchanged.
 
     Parameters
     ----------
     data : sc.Dataset
-        Dataset with a 'Q' coordinate.
+        Dataset with a 1-D 'Q' coordinate. Its dimension need not be named 'Q'.
     x_axis : str
-        Name of the axis to add, one of the keys of ``Q_AXIS_TRANSFORMS``.
+        Name of the axis to plot against, one of the keys of ``Q_AXIS_TRANSFORMS``.
 
     Returns
     -------
     sc.Dataset
-        A copy of data with the x_axis coordinate added.
+        A copy of data with the x_axis coordinate added and used as the dimension.
 
     Raises
     ------
@@ -44,7 +44,11 @@ def add_x_axis_coord(data: sc.Dataset, x_axis: str) -> sc.Dataset:
     """
     if x_axis not in Q_AXIS_TRANSFORMS:
         raise ValueError(f"x_axis must be one of {list(Q_AXIS_TRANSFORMS)}, got '{x_axis}'.")
-    return data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](data.coords['Q'])})
+    Q = data.coords['Q']
+    out = data.assign_coords({x_axis: Q_AXIS_TRANSFORMS[x_axis](Q)})
+    if Q.dim != x_axis:
+        out = out.rename_dims({Q.dim: x_axis})
+    return out
 
 
 def slicerplot_with_residuals(
@@ -159,3 +163,24 @@ def slicerplot_with_residuals(
 
     fig1.autoscale()
     return fig1
+
+
+def relabel_lines(fig: WidgetFigure, labels: dict[str, str]) -> None:
+    """
+    Rename the lines of a figure in its legend.
+
+    Plopp labels each line by its DataGroup key, which must be unique, so lines whose label is a
+    key in ``labels`` are renamed after plotting. A blank new label leaves the line out of the
+    legend.
+
+    Parameters
+    ----------
+    fig : WidgetFigure
+        The figure holding the lines to relabel.
+    labels : dict[str, str]
+        The new label of each line, keyed by its current label.
+    """
+    for line in fig.ax.get_lines():
+        if line.get_label() in labels:
+            line.set_label(labels[line.get_label()])
+    fig.canvas.update_legend()
