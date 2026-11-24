@@ -469,6 +469,43 @@ class TestExperiment:
         with pytest.raises(ValueError, match='do not fit the data'):
             experiment_with_data.mask('bad', condition)
 
+    def test_mask_set_directly_on_the_data_reaches_fits(self, experiment_with_data):
+        # WHEN
+        version = experiment_with_data.state_version
+        energy = experiment_with_data.data.coords['energy']
+
+        # THEN
+        experiment_with_data.data.masks['high'] = energy > sc.scalar(25.0, unit='meV')
+
+        # EXPECT
+        x, _, _, _ = experiment_with_data.extract_x_y_weights_only_finite(Q_index=0)
+        np.testing.assert_array_equal(x, [10.0, 20.0])
+        assert experiment_with_data.state_version != version
+
+    def test_mask_set_directly_after_rebin_redoes_the_rebin(self):
+        # WHEN
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+        energy = experiment.data.coords['energy']
+
+        # THEN
+        experiment.data.masks['first'] = energy < sc.scalar(0.5, unit='meV')
+
+        # EXPECT the rebin is redone with the mask, as with mask()
+        assert experiment.binned_data.sizes['energy'] == 3
+        np.testing.assert_allclose(experiment.binned_data.values[:, 0], [1.0, 7.0])
+
+    def test_mask_changed_in_place_is_noticed(self, experiment_with_data):
+        # WHEN
+        experiment_with_data.mask('bad', sc.array(dims=['energy'], values=[False, False, False]))
+
+        # THEN
+        experiment_with_data.data.masks['bad'].values[0] = True
+
+        # EXPECT
+        x, _, _, _ = experiment_with_data.extract_x_y_weights_only_finite(Q_index=0)
+        np.testing.assert_array_equal(x, [20.0, 30.0])
+
     def test_state_version_changes_when_the_data_does(self, experiment_with_data):
         # WHEN
         versions = [experiment_with_data.state_version]
@@ -715,6 +752,21 @@ class TestExperiment:
             sums = sc.nansum(plotted.data, dim='energy')
             np.testing.assert_allclose(sums.values, 1.0)
             assert sc.identical(experiment.binned_data, original)
+
+    def test_plot_data_normalize_leaves_masked_points_out(self, experiment):
+        # WHEN the highest energy is masked
+        energy = experiment.data.coords['energy']
+        experiment.mask('high', energy > sc.scalar(4.5, unit='meV'))
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            patch('plopp.plot') as mock_plot,
+        ):
+            # THEN
+            experiment.plot_data(normalize=True)
+
+            # EXPECT the unmasked points of each spectrum sum to one
+            plotted = mock_plot.call_args.args[0]
+            np.testing.assert_allclose(sc.nansum(plotted, dim='energy').values, 1.0)
 
     def test_plot_data_no_data_raises(self):
         "Test plotting data raises ValueError when no data is present"

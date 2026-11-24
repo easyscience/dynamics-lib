@@ -1537,6 +1537,20 @@ class TestAnalysis1d:
         np.testing.assert_array_equal(analysis1d._masked_energy.values, [10.0, 20.0])
         assert analysis1d._convolver_model_versions[2] == analysis1d.experiment.state_version
 
+    def test_fit_after_a_mask_set_directly_on_the_data(self, analysis1d):
+        # WHEN the energy grid and convolver were built before the mask was set
+        analysis1d._prepare_for_sampling()
+        energy = analysis1d.experiment.data.coords['energy']
+
+        # THEN
+        analysis1d.experiment.data.masks['high'] = energy > sc.scalar(25.0, unit='meV')
+        analysis1d._prepare_for_sampling()
+
+        # EXPECT the model is evaluated on the energies the fit will use
+        np.testing.assert_array_equal(analysis1d._masked_energy.values, [10.0, 20.0])
+        x, _, _ = analysis1d._sampling_data()
+        np.testing.assert_array_equal(x, [10.0, 20.0])
+
     def test_fit_with_every_point_masked_raises(self, analysis1d):
         # WHEN
         analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))

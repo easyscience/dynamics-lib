@@ -82,6 +82,9 @@ class Experiment(EasyDynamicsBase):
         self._state_version = 0
         # The dimensions of the last rebin, redone when the masks change. None when not rebinned.
         self._rebin_dimensions = None
+        # A fingerprint of the data's masks when the binned data was last made, to notice masks
+        # changed directly on experiment.data.masks.
+        self._masks_at_binning = None
 
         if data is None:
             self._data = None
@@ -98,6 +101,7 @@ class Experiment(EasyDynamicsBase):
         self._binned_data = (
             self._convert_to_bin_centers(self._data) if self._data is not None else None
         )
+        self._masks_at_binning = self._masks_signature()
 
     ###########
     # Properties
@@ -116,6 +120,7 @@ class Experiment(EasyDynamicsBase):
         int
             The current state version.
         """
+        self._sync_masks()
         return self._state_version
 
     @property
@@ -152,6 +157,7 @@ class Experiment(EasyDynamicsBase):
         self._binned_data = (
             self._convert_to_bin_centers(self._data) if self._data is not None else None
         )
+        self._masks_at_binning = self._masks_signature()
         self._rebin_dimensions = None
         self._state_version += 1
 
@@ -165,6 +171,7 @@ class Experiment(EasyDynamicsBase):
         sc.DataArray | None
             The binned dataset associated with this experiment, or None if no data is loaded.
         """
+        self._sync_masks()
         return self._binned_data
 
     @binned_data.setter
@@ -407,7 +414,8 @@ class Experiment(EasyDynamicsBase):
 
         The mask is stored on :attr:`data` as a scipp mask, so plots show the masked points, and
         the last rebin is redone so that the binned data leaves them out too. Masking a name that
-        is already in use replaces that mask.
+        is already in use replaces that mask. Changing ``experiment.data.masks`` directly has the
+        same effect; this method adds a check that the condition fits the data.
 
         Parameters
         ----------
@@ -528,6 +536,7 @@ class Experiment(EasyDynamicsBase):
         binned_data = self._convert_to_bin_centers(binned_data)
         binned_data.masks['no_data'] = ~sc.isfinite(binned_data.data)
         self._binned_data = binned_data
+        self._masks_at_binning = self._masks_signature()
         self._rebin_dimensions = dim_copy
         self._state_version += 1
 
@@ -600,8 +609,9 @@ class Experiment(EasyDynamicsBase):
 
         data = self.binned_data
         if normalize:
-            # Divide by the values only: scipp cannot broadcast a divisor with variances.
-            data = data / sc.values(sc.nansum(data.data, dim='energy'))
+            # Divide by the values only: scipp cannot broadcast a divisor with variances. Summing
+            # the DataArray, not its data, leaves masked points out of the total.
+            data = data / sc.values(sc.nansum(data, dim='energy').data)
 
         plot_kwargs_defaults = {
             'title': self.display_name,
@@ -640,12 +650,34 @@ class Experiment(EasyDynamicsBase):
     # private methods
     ###########
 
+    def _masks_signature(self) -> tuple | None:
+        """
+        Fingerprint the data's masks, to notice when they change.
+
+        Returns
+        -------
+        tuple | None
+            The name, dimensions and contents of each mask, or None without data.
+        """
+        if self._data is None:
+            return None
+        return tuple(
+            (name, mask.dims, hash(mask.values.tobytes()))
+            for name, mask in sorted(self._data.masks.items())
+        )
+
+    def _sync_masks(self) -> None:
+        """Redo the binning if the data's masks were changed directly since it was last done."""
+        if self._data is not None and self._masks_signature() != self._masks_at_binning:
+            self._refresh_binned_data()
+
     def _refresh_binned_data(self) -> None:
         """Redo the last rebin, or none if there was none, after the data's masks changed."""
         if self._rebin_dimensions is not None:
             self.rebin(self._rebin_dimensions)
         else:
             self._binned_data = self._convert_to_bin_centers(self._data)
+            self._masks_at_binning = self._masks_signature()
             self._state_version += 1
 
     @staticmethod
