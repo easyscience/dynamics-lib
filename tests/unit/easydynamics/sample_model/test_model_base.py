@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -948,3 +949,650 @@ class TestModelBase:
         # EXPECT a full rebuild instead of a no-op patch that leaves no collections
         assert model_base.component_collections_is_dirty is True
         assert len(model_base.get_component_collection(0)) == 3
+
+    #############
+    # Single-parameter access (issue #70)
+    #############
+
+    def test_get_parameters(self, model_base):
+        # WHEN THEN
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+
+        # EXPECT one Parameter per Q, in Q order
+        assert widths == [
+            model_base.get_component_collection(i)['TestGaussian1Name'].width for i in range(3)
+        ]
+
+    def test_get_parameters_with_Q_index(self, model_base):
+        # WHEN THEN
+        widths = model_base.get_parameters('TestGaussian1Name', 'width', Q_index=1)
+
+        # EXPECT
+        assert widths == [model_base.get_component_collection(1)['TestGaussian1Name'].width]
+
+    def test_get_parameters_without_Q_is_empty(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='G'))
+
+        # THEN EXPECT
+        assert model.get_parameters('G', 'width') == []
+
+    def test_get_parameters_unknown_component_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(KeyError, match='Missing'):
+            model_base.get_parameters('Missing', 'width')
+
+    @pytest.mark.parametrize('parameter_name', ['missing', 'name'])
+    def test_get_parameters_unknown_parameter_raises(self, model_base, parameter_name):
+        # WHEN THEN EXPECT an attribute that is missing or is not a Parameter is rejected
+        with pytest.raises(ValueError, match=f"has no Parameter '{parameter_name}'"):
+            model_base.get_parameters('TestGaussian1Name', parameter_name)
+
+    def test_fix_parameter(self, model_base):
+        # WHEN THEN
+        model_base.fix_parameter('TestGaussian1Name', 'width')
+
+        # EXPECT only that Parameter is fixed, at every Q and in the template
+        assert all(p.fixed for p in model_base.get_parameters('TestGaussian1Name', 'width'))
+        assert model_base.components['TestGaussian1Name'].width.fixed is True
+        assert not any(p.fixed for p in model_base.get_parameters('TestGaussian1Name', 'area'))
+        assert not any(p.fixed for p in model_base.get_parameters('TestLorentzian1Name', 'width'))
+
+    def test_fix_parameter_with_value(self, model_base):
+        # WHEN THEN
+        model_base.fix_parameter('TestGaussian1Name', 'width', value=0.25)
+
+        # EXPECT the value is set at every Q and in the template
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        widths.append(model_base.components['TestGaussian1Name'].width)
+        assert all(p.fixed for p in widths)
+        assert all(p.value == pytest.approx(0.25) for p in widths)
+
+    def test_fix_parameter_with_Q_index(self, model_base):
+        # WHEN THEN
+        model_base.fix_parameter('TestGaussian1Name', 'width', Q_index=1, value=0.25)
+
+        # EXPECT only that Q is changed; the other Q and the template are left alone
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.fixed for p in widths] == [False, True, False]
+        assert [p.value for p in widths] == pytest.approx([1.0, 0.25, 1.0])
+        assert model_base.components['TestGaussian1Name'].width.fixed is False
+
+    def test_fix_parameter_survives_rebuild(self, model_base):
+        # WHEN
+        model_base.fix_parameter('TestGaussian1Name', 'width', value=0.25)
+
+        # THEN the per-Q collections are rebuilt from the template
+        model_base.clear_Q(confirm=True)
+        model_base.Q = np.array([1.0, 2.0])
+
+        # EXPECT
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert len(widths) == 2
+        assert all(p.fixed for p in widths)
+        assert all(p.value == pytest.approx(0.25) for p in widths)
+
+    def test_fix_parameter_before_Q_applies_to_later_collections(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='G'))
+
+        # THEN
+        model.fix_parameter('G', 'width')
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT
+        assert all(p.fixed for p in model.get_parameters('G', 'width'))
+        assert not any(p.fixed for p in model.get_parameters('G', 'area'))
+
+    def test_fix_parameter_unknown_component_without_Q_raises(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='G'))
+
+        # THEN EXPECT
+        with pytest.raises(KeyError, match='Missing'):
+            model.fix_parameter('Missing', 'width')
+
+    def test_free_parameter(self, model_base):
+        # WHEN
+        model_base.fix_all_parameters()
+
+        # THEN
+        model_base.free_parameter('TestGaussian1Name', 'width')
+
+        # EXPECT only that Parameter is freed, at every Q and in the template
+        assert not any(p.fixed for p in model_base.get_parameters('TestGaussian1Name', 'width'))
+        assert model_base.components['TestGaussian1Name'].width.fixed is False
+        assert all(p.fixed for p in model_base.get_parameters('TestGaussian1Name', 'area'))
+
+    def test_free_parameter_with_Q_index(self, model_base):
+        # WHEN
+        model_base.fix_all_parameters()
+
+        # THEN
+        model_base.free_parameter('TestGaussian1Name', 'width', Q_index=2)
+
+        # EXPECT only that Q is freed; the other Q and the template stay fixed
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.fixed for p in widths] == [True, True, False]
+        assert model_base.components['TestGaussian1Name'].width.fixed is True
+
+    #############
+    # Q constraints (issue #70)
+    #############
+
+    def test_make_parameter_Q_independent(self, model_base):
+        # WHEN
+        Q0_width = model_base.get_parameters('TestGaussian1Name', 'width')[0]
+        Q0_width.value = 0.5
+        Q0_width.min = 0.1
+        Q0_width.fixed = True
+
+        # THEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # EXPECT a shared Parameter, starting from the Parameter at Q index 0
+        assert width.name == 'TestGaussian1Name width (all Q)'
+        assert width.value == pytest.approx(0.5)
+        assert width.unit == Q0_width.unit
+        assert width.min == pytest.approx(0.1)
+        assert width.fixed is True
+        assert width in model_base.get_all_variables()
+
+        # EXPECT the width at every Q follows it, and other Parameters are untouched
+        width.fixed = False
+        width.value = 0.7
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert not any(p.independent for p in widths)
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7, 0.7])
+        assert all(p.independent for p in model_base.get_parameters('TestGaussian1Name', 'area'))
+
+    def test_make_parameter_Q_independent_twice_returns_the_same_parameter(self, model_base):
+        # WHEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        width.value = 0.7
+
+        # THEN
+        width_again = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # EXPECT
+        assert width_again is width
+        assert width.value == pytest.approx(0.7)
+
+    def test_make_parameter_Q_independent_survives_rebuild(self, model_base):
+        # WHEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # THEN the per-Q collections are rebuilt from the template
+        model_base.clear_Q(confirm=True)
+        model_base.Q = np.array([1.0, 2.0])
+        width.value = 0.7
+
+        # EXPECT
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7])
+
+    def test_make_parameter_Q_independent_survives_append_component(self, model_base):
+        # WHEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+
+        # THEN the per-Q collections are patched in place
+        model_base.append_component(Gaussian(name='NewGaussian'))
+        width.value = 0.7
+
+        # EXPECT the same Parameters still follow the shared one
+        assert model_base.get_parameters('TestGaussian1Name', 'width') == widths
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7, 0.7])
+
+    def test_make_parameter_Q_independent_before_Q_applies_to_later_collections(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='G', width=0.3))
+
+        # THEN
+        width = model.make_parameter_Q_independent('G', 'width')
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the shared Parameter starts from the template
+        assert width.value == pytest.approx(0.3)
+        assert not any(p.independent for p in model.get_parameters('G', 'width'))
+
+    def test_make_parameter_Q_independent_dependent_parameter_raises(self, model_base):
+        # WHEN the Parameter already depends on another Parameter at one Q
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        widths[1].make_dependent_on('a', {'a': widths[2]})
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='already depends on other Parameters'):
+            model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+    def test_clear_components_without_Q_drops_the_Q_constraints(self):
+        "Regression: without Q the constraint stayed, and applied to a new component of that name"
+        # WHEN a constraint declared before Q is set
+        model = ModelBase(components=Gaussian(name='G'))
+        model.make_parameter_Q_independent('G', 'width')
+
+        # THEN the components are cleared, and a component of the same name is added
+        model.clear_components()
+        model.append_component(Gaussian(name='G'))
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT the new component is not constrained
+        assert all(parameter.independent for parameter in model.get_parameters('G', 'width'))
+
+    def test_remove_component_drops_its_Q_constraint(self, model_base):
+        # WHEN
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # THEN a component of the same name is removed and added again
+        model_base.remove_component('TestGaussian1Name')
+        model_base.append_component(Gaussian(name='TestGaussian1Name'))
+
+        # EXPECT the new component is not tied
+        assert all(p.independent for p in model_base.get_parameters('TestGaussian1Name', 'width'))
+
+    def test_fix_parameter_of_Q_independent_parameter_raises(self, model_base):
+        # WHEN the width at every Q follows the shared Parameter, which is the one to fix
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # THEN EXPECT
+        with pytest.raises(AttributeError, match='dependent'):
+            model_base.fix_parameter('TestGaussian1Name', 'width')
+
+    def test_remove_parameter_Q_constraint(self, model_base):
+        # WHEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        width.value = 0.7
+
+        # THEN
+        model_base.remove_parameter_Q_constraint('TestGaussian1Name', 'width')
+
+        # EXPECT every Q is independent again, keeps its value, and stays so after a rebuild
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert all(p.independent for p in widths)
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7, 0.7])
+        model_base.clear_Q(confirm=True)
+        model_base.Q = np.array([1.0, 2.0])
+        assert all(p.independent for p in model_base.get_parameters('TestGaussian1Name', 'width'))
+
+    def test_remove_parameter_Q_constraint_without_constraint_is_a_no_op(self, model_base):
+        # WHEN the Parameter is dependent, but not through a Q constraint
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        widths[1].make_dependent_on('a', {'a': widths[2]})
+
+        # THEN
+        model_base.remove_parameter_Q_constraint('TestGaussian1Name', 'width')
+
+        # EXPECT the dependency is left alone
+        assert widths[1].independent is False
+
+    def test_set_parameter_Q_dependence(self, model_base):
+        # WHEN THEN
+        (D,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name',
+            'width',
+            expression='hbar * D * Q**2',
+            parameters={'D': 2.0e-9},
+            parameter_units={'D': 'm**2/s'},
+        )
+
+        # EXPECT the width at every Q follows the expression, in its own unit
+        assert D.name == 'TestGaussian1Name width D'
+        assert D.unit == 'm^2/s'
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert not any(p.independent for p in widths)
+        assert all(p.unit == 'meV' for p in widths)
+        hbar_D = 6.582119569e-13 * 2.0e-9 * 1e20  # hbar in meV*s, D in angstrom^2/s
+        expected = hbar_D * np.array([1.0, 2.0, 3.0]) ** 2
+        assert [p.value for p in widths] == pytest.approx(expected)
+
+        # THEN the shared Parameter changes
+        D.value = 4.0e-9
+
+        # EXPECT
+        assert [p.value for p in widths] == pytest.approx(2 * expected)
+
+    def test_set_parameter_Q_dependence_with_constant_and_default_unit(self, model_base):
+        # WHEN THEN a symbol has no entry in parameter_units
+        T, scale = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name',
+            'width',
+            expression='scale * kb * T',
+            parameters={'T': 100.0, 'scale': 2.0},
+            parameter_units={'T': 'K'},
+        )
+
+        # EXPECT it is dimensionless, and kb is provided
+        assert T.unit == 'K'
+        assert scale.unit == 'dimensionless'
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([2 * 8.617333262e-2 * 100.0] * 3)
+
+    @pytest.mark.parametrize('Q_index', [None, 1])
+    def test_get_all_variables_includes_Q_dependence_parameters(self, model_base, Q_index):
+        # WHEN
+        (D,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'hbar * D * Q**2', {'D': 2.0e-9}, {'D': 'm**2/s'}
+        )
+
+        # THEN
+        variables = model_base.get_all_variables(Q_index=Q_index)
+
+        # EXPECT the shared Parameter is listed once
+        assert sum(variable is D for variable in variables) == 1
+
+    def test_set_parameter_Q_dependence_survives_rebuild(self, model_base):
+        # WHEN
+        (D,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'hbar * D * Q**2', {'D': 2.0e-9}, {'D': 'm**2/s'}
+        )
+        D.value = 4.0e-9
+
+        # THEN the per-Q collections are rebuilt from the template, with new Q values
+        model_base.clear_Q(confirm=True)
+        model_base.Q = np.array([0.5, 1.5])
+
+        # EXPECT the same shared Parameter drives the new per-Q Parameters
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert not any(p.independent for p in widths)
+        assert widths[1].value == pytest.approx(9 * widths[0].value)
+        D.value = 8.0e-9
+        assert widths[0].value == pytest.approx(6.582119569e-13 * 8.0e-9 * 1e20 * 0.25)
+
+    def test_set_parameter_Q_dependence_before_Q_applies_to_later_collections(self):
+        # WHEN
+        model = ModelBase(components=Gaussian(name='G'))
+
+        # THEN
+        model.set_parameter_Q_dependence('G', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'})
+        model.Q = np.array([1.0, 2.0])
+
+        # EXPECT
+        widths = model.get_parameters('G', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.1, 0.2])
+
+    def test_set_parameter_Q_dependence_replaces_existing_constraint(self, model_base):
+        # WHEN
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+
+        # THEN
+        (b,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'b * Q**2', {'b': 0.1}, {'b': 'meV*angstrom**2'}
+        )
+
+        # EXPECT only the last constraint is in effect
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.1, 0.4, 0.9])
+        variables = model_base.get_all_variables()
+        assert [v.name for v in variables if v.name.startswith('TestGaussian1Name width ')] == [
+            b.name
+        ]
+
+    def test_set_parameter_Q_dependence_wrong_unit_keeps_existing_constraint(self, model_base):
+        # WHEN
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        n_variables = len(model_base.get_all_variables())
+
+        # THEN EXPECT an expression that does not evaluate to an energy is rejected
+        with pytest.raises(UnitError, match='Failed to convert unit'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', 'D * Q**2', {'D': 2.0e-9}, {'D': 'm**2/s'}
+            )
+
+        # EXPECT the model is unchanged
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert not any(p.independent for p in widths)
+        assert len(model_base.get_all_variables()) == n_variables
+
+    def test_set_parameter_Q_dependence_keeps_the_value_in_a_unit_with_a_prefix(self, model_base):
+        "Regression: a unit such as meV*angstrom**2 was rewritten, and the value rescaled with it"
+        # WHEN THEN
+        (D,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'D * Q**2', {'D': 0.1}, {'D': 'meV*angstrom**2'}
+        )
+
+        # EXPECT the value as given, and the width at every Q following it
+        assert D.value == pytest.approx(0.1)
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        Q = model_base.Q.values
+        np.testing.assert_allclose([width.value for width in widths], 0.1 * Q**2)
+
+        # THEN
+        D.value = 0.2
+
+        # EXPECT
+        np.testing.assert_allclose([width.value for width in widths], 0.2 * Q**2)
+
+    def test_make_parameter_Q_independent_replaces_a_Q_dependence(self, model_base):
+        # WHEN
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.5}, {'a': 'meV*angstrom'}
+        )
+        n_variables = len(model_base.get_all_variables())
+
+        # THEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # EXPECT the new shared Parameter replaces the old one, starting from the width at Q
+        # index 0
+        assert width.value == pytest.approx(0.5)
+        variables = model_base.get_all_variables()
+        assert len(variables) == n_variables
+        assert [v.name for v in variables if v.name.startswith('TestGaussian1Name width ')] == [
+            width.name
+        ]
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.5, 0.5, 0.5])
+
+    def test_remove_parameter_Q_constraint_restores_the_bounds(self, model_base):
+        "Regression: the widths kept the bounds of the expression, with no lower bound"
+        # WHEN
+        template = model_base.components['TestGaussian1Name'].width
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.5}, {'a': 'meV*angstrom'}
+        )
+
+        # THEN
+        model_base.remove_parameter_Q_constraint('TestGaussian1Name', 'width')
+
+        # EXPECT independent widths with the bounds of the template
+        for width in model_base.get_parameters('TestGaussian1Name', 'width'):
+            assert width.independent is True
+            assert width.min == template.min
+            assert width.max == template.max
+
+    @pytest.mark.parametrize('symbol', ['Q', 'hbar', 'kb', 'sinc'])
+    def test_set_parameter_Q_dependence_reserved_symbol_raises(self, model_base, symbol):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='reserved symbols'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', f'{symbol} * a', {symbol: 1.0, 'a': 1.0}
+            )
+
+    def test_set_parameter_Q_dependence_unknown_parameter_unit_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='parameter_units given for unknown parameter'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', 'a * Q', {'a': 1.0}, {'b': 'meV'}
+            )
+
+    def test_set_parameter_Q_dependence_dependent_parameter_raises(self, model_base):
+        # WHEN the Parameter already depends on another Parameter at one Q
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        widths[1].make_dependent_on('a', {'a': widths[2]})
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='already depends on other Parameters'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+            )
+
+    def test_remove_parameter_Q_constraint_removes_Q_dependence(self, model_base):
+        # WHEN
+        (a,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+
+        # THEN
+        model_base.remove_parameter_Q_constraint('TestGaussian1Name', 'width')
+
+        # EXPECT every Q is independent, keeps its value, and the shared Parameter is gone
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert all(p.independent for p in widths)
+        assert [p.value for p in widths] == pytest.approx([0.1, 0.2, 0.3])
+        assert not any(variable is a for variable in model_base.get_all_variables())
+
+    def test_remove_component_drops_its_Q_dependence(self, model_base):
+        # WHEN
+        (a,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+
+        # THEN
+        model_base.remove_component('TestGaussian1Name')
+
+        # EXPECT the shared Parameter is no longer a variable of the model
+        assert not any(variable is a for variable in model_base.get_all_variables())
+
+    def test_set_parameter_Q_dependence_survives_append_component(self, model_base):
+        # WHEN
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+
+        # THEN the per-Q collections are patched in place
+        model_base.append_component(Gaussian(name='NewGaussian'))
+
+        # EXPECT the same Parameters still follow the expression
+        assert model_base.get_parameters('TestGaussian1Name', 'width') == widths
+        assert [p.value for p in widths] == pytest.approx([0.1, 0.2, 0.3])
+
+    def test_set_parameter_Q_dependence_with_functions(self, model_base):
+        # WHEN THEN the expression uses functions of dimensionless arguments
+        model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name',
+            'width',
+            expression='G * (1 - sinc(Q * L)) * exp(-(Q**2) * u2)',
+            parameters={'G': 0.5, 'L': 1.5, 'u2': 0.1},
+            parameter_units={'G': 'meV', 'L': 'angstrom', 'u2': 'angstrom**2'},
+        )
+
+        # EXPECT
+        Q = np.array([1.0, 2.0, 3.0])
+        expected = 0.5 * (1 - np.sin(1.5 * Q) / (1.5 * Q)) * np.exp(-(Q**2) * 0.1)
+        widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx(expected)
+
+    def test_set_parameter_Q_dependence_function_of_quantity_with_unit_raises(self, model_base):
+        # WHEN THEN EXPECT exp(Q) is rejected, as Q is in 1/angstrom
+        with pytest.raises(SyntaxError, match='to `dimensionless` is not valid'):
+            model_base.set_parameter_Q_dependence(
+                'TestGaussian1Name', 'width', 'G * exp(Q)', {'G': 0.5}, {'G': 'meV'}
+            )
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_copy(self):
+        # WHEN a model whose template parameters have non-default bounds
+        lorentzian = Lorentzian(name='L', area=2.0, width=0.3)
+        lorentzian.area.min = 1.0
+        lorentzian.width.min = 0.1
+        lorentzian.width.max = 3.0
+        lorentzian.width.fixed = True
+        model_base = ModelBase(components=lorentzian, Q=np.array([0.5, 1.0]))
+
+        # THEN
+        model_copy = copy(model_base)
+
+        # EXPECT an independent model with the same Q, components and bounds at every Q
+        assert model_copy is not model_base
+        assert model_copy.unique_name != model_base.unique_name
+        np.testing.assert_array_equal(model_copy.Q.values, model_base.Q.values)
+        assert model_copy.components['L'] is not model_base.components['L']
+        original = model_base.get_all_variables()
+        copied = model_copy.get_all_variables()
+        assert len(copied) == len(original) == 6
+        for original_parameter, copied_parameter in zip(original, copied, strict=True):
+            assert copied_parameter is not original_parameter
+            assert copied_parameter.name == original_parameter.name
+            assert copied_parameter.value == original_parameter.value
+            assert copied_parameter.min == original_parameter.min
+            assert copied_parameter.max == original_parameter.max
+            assert copied_parameter.fixed == original_parameter.fixed
+
+    def test_from_dict_round_trip_without_Q(self):
+        # WHEN
+        model_base = ModelBase(components=Gaussian(name='G', width=0.2), display_name='Model')
+
+        # THEN
+        model_copy = ModelBase.from_dict(model_base.to_dict())
+
+        # EXPECT
+        assert model_copy.display_name == 'Model'
+        assert model_copy.Q is None
+        assert model_copy.components['G'].width.value == pytest.approx(0.2)
+
+    @pytest.mark.parametrize(
+        'copy_model',
+        [copy, lambda model: ModelBase.from_dict(model.to_dict())],
+        ids=['copy', 'from_dict'],
+    )
+    def test_copy_keeps_Q_independent_parameters(self, model_base, copy_model):
+        # WHEN
+        width = model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # THEN
+        model_copy = copy_model(model_base)
+        width_copy = model_copy.make_parameter_Q_independent('TestGaussian1Name', 'width')
+        width_copy.value = 0.7
+
+        # EXPECT the copy follows its own shared Parameter, not the original's
+        assert width_copy is not width
+        widths = model_copy.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7, 0.7])
+        original_widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in original_widths] == pytest.approx([1.0, 1.0, 1.0])
+
+    def test_to_dict_without_Q_constraints_has_no_constraint_entry(self, model_base):
+        # WHEN THEN
+        obj_dict = model_base.to_dict()
+
+        # EXPECT
+        assert 'Q_dependences' not in obj_dict
+
+    @pytest.mark.parametrize(
+        'copy_model',
+        [copy, lambda model: ModelBase.from_dict(model.to_dict())],
+        ids=['copy', 'from_dict'],
+    )
+    def test_copy_keeps_Q_dependences(self, model_base, copy_model):
+        # WHEN a dependence on a Parameter with a scaled unit, bounds and a fixed flag
+        (a,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+        a.min = 0.01
+        a.fixed = True
+
+        # THEN
+        model_copy = copy_model(model_base)
+        (a_copy,) = [p for p in model_copy.get_all_variables() if p.name == a.name]
+
+        # EXPECT the copy has its own Parameter, with the same value, unit, bounds and fixed flag
+        assert a_copy is not a
+        assert a_copy.value == pytest.approx(0.1)
+        assert a_copy.unit == a.unit
+        assert a_copy.min == pytest.approx(0.01)
+        assert a_copy.fixed is True
+
+        # EXPECT the widths of the copy follow the copy's Parameter, not the original's
+        a_copy.fixed = False
+        a_copy.value = 0.2
+        widths = model_copy.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.2, 0.4, 0.6])
+        original_widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in original_widths] == pytest.approx([0.1, 0.2, 0.3])

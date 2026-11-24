@@ -830,8 +830,10 @@ class SampleModel(ModelBase):
         """
         Record an in-place update, including the diffusion models' versions it corresponds to.
         """
-        super()._mark_component_collections_patched()
+        # The versions first: the base method reapplies the Q constraints, which it skips while
+        # the collections still count as stale.
         self._built_diffusion_versions = self._diffusion_versions()
+        super()._mark_component_collections_patched()
 
     # ------------------------------------------------------------------
     # dunder methods
