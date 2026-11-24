@@ -15,6 +15,8 @@ import h5py
 import numpy as np
 import scipp as sc
 
+from easydynamics.io.utils import apply_min_error
+
 # Mantid unit IDs, and the scipp coordinate each one becomes.
 _AXIS_UNITS = {
     'DeltaE': ('energy', 'meV'),
@@ -22,7 +24,11 @@ _AXIS_UNITS = {
 }
 
 
-def load_mantid_nexus(filename: str | Path, entry: str | None = None) -> sc.DataArray:
+def load_mantid_nexus(
+    filename: str | Path,
+    entry: str | None = None,
+    min_error: float | None = None,
+) -> sc.DataArray:
     """
     Load an S(Q, energy) workspace saved by Mantid's ``SaveNexusProcessed``.
 
@@ -31,6 +37,9 @@ def load_mantid_nexus(filename: str | Path, entry: str | None = None) -> sc.Data
 
     Bins that no detector reached, marked by Mantid with a zero fractional area, are set to NaN so
     they are masked out of fits rather than read as zero intensity.
+
+    Bins with zero counts are usually stored with zero error, which a fit cannot weight by. Use
+    ``min_error`` to choose what happens to them.
 
     Examples
     --------
@@ -48,6 +57,10 @@ def load_mantid_nexus(filename: str | Path, entry: str | None = None) -> sc.Data
     entry : str | None, default=None
         Name of the workspace entry to read, such as ``'mantid_workspace_2'``. Needed only when the
         file holds several workspaces.
+    min_error : float | None, default=None
+        None keeps the errors as stored. A positive number raises every error below it to it, in
+        the units of the intensity. NaN sets the bins with zero error to NaN, so fits leave them
+        out.
 
     Returns
     -------
@@ -95,6 +108,7 @@ def load_mantid_nexus(filename: str | Path, entry: str | None = None) -> sc.Data
             uncovered = workspace['frac_area'][()] == 0
             values[uncovered] = np.nan
             variances[uncovered] = np.nan
+    values, variances = apply_min_error(values, variances, min_error)
 
     data = sc.DataArray(
         data=sc.array(dims=dims, values=values, variances=variances),
