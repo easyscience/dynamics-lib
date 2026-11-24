@@ -31,7 +31,9 @@ def load_mantid_ascii(
     Load a workspace saved by Mantid's ``SaveAscii``, with energy transfer as X.
 
     Every spectrum must have the same X values. An extra column after ``X, Y, E``, such as the X
-    errors, is ignored.
+    errors, is ignored. The file should be saved with ``SaveAscii``'s default comment character,
+    ``#``, and without its ``SpectrumMetaData`` option, whose header lines cannot be told apart
+    from data rows.
 
     Examples
     --------
@@ -56,7 +58,8 @@ def load_mantid_ascii(
     min_error : float | None, default=None
         None keeps the errors as stored. A positive number raises every error below it to it, in
         the units of the intensity. NaN masks the bins with zero error with a ``'zero_error'``
-        mask, so fits and rebinning leave them out.
+        mask, so fits and rebinning leave them out; as these are usually empty bins, a floor is the
+        better choice before rebinning low-count data.
 
     Returns
     -------
@@ -75,7 +78,10 @@ def load_mantid_ascii(
     energy = spectra[0][:, 0]
     for spectrum in spectra[1:]:
         if spectrum.shape != spectra[0].shape or not np.allclose(spectrum[:, 0], energy):
-            raise ValueError('Every spectrum must have the same X values')
+            raise ValueError(
+                'Every spectrum must have the same X values. If the file was saved with '
+                "SaveAscii's SpectrumMetaData option, save it again without it."
+            )
 
     Q_values = _Q_in_inverse_angstrom(Q)
     if Q_values.ndim != 1 or Q_values.size not in (len(spectra), len(spectra) + 1):
