@@ -260,6 +260,22 @@ class TestJointAnalysis:
             assert all(parameter.independent for parameter in L1.get_all_parameters())
             assert all(parameter.independent for parameter in L3.get_all_parameters())
 
+    def test_link_shared_components_finds_copies_moved_in_a_per_Q_collection(
+        self, joint, first, second
+    ):
+        # WHEN a per-Q collection of the first analysis at Q = 1.0 was edited directly, so the
+        # shared component is no longer at its position in the template
+        first.sample_model.get_component_collection(1).pop(0)
+
+        # THEN
+        joint.link_shared_components()
+
+        # EXPECT the copy is still found by its template, and the second analysis follows it
+        assert self.l2_width(first, 1).independent is True
+        assert self.l2_width(second, 0).independent is False
+        self.l2_width(first, 1).value = 0.123
+        assert self.l2_width(second, 0).value == pytest.approx(0.123)
+
     def test_link_shared_components_links_every_parameter(self, joint, first, second):
         # WHEN THEN
         joint.link_shared_components()
