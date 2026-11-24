@@ -212,6 +212,9 @@ nav:
           - Detailed balance: tutorials/detailed_balance.ipynb
           - DeltaLorentz: tutorials/delta_lorentz.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
+          - Equivalent sites on a circle: tutorials/equivalent_sites_circle.ipynb
+          - Jump sites, log-normal distribution: tutorials/jump_sites_log_normal_distribution.ipynb
+          - 3D Gaussian model: tutorials/gaussian_model_3d.ipynb
           - Mittag-Leffler relaxation: tutorials/mittag_leffler.ipynb
           - Sample model: tutorials/sample_model.ipynb
           - Instrument model: tutorials/instrument_model.ipynb
