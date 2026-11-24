@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from collections import Counter
+from copy import copy
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -1571,3 +1572,17 @@ class TestAnalysis:
         assert shared, 'expected the diffusion model to contribute parameters shared across Q'
         for parameter in shared:
             assert analysis._parameter_labels().label(parameter) == parameter.name
+
+    #############
+    # Copying
+    #############
+
+    def test_copy(self, analysis):
+        # WHEN THEN
+        analysis_copy = copy(analysis)
+
+        # EXPECT an independent analysis with models of its own, which calculates the same
+        assert analysis_copy.sample_model is not analysis.sample_model
+        assert analysis_copy.instrument_model is not analysis.instrument_model
+        for copied, original in zip(analysis_copy.calculate(), analysis.calculate(), strict=True):
+            np.testing.assert_allclose(copied, original)
