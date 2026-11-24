@@ -2372,7 +2372,7 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;JointAnalysis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;analyses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.JointAnalysis&lt;/code&gt;)" href="#easydynamics.analysis.JointAnalysis">JointAnalysis</a></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;JointAnalysis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;analyses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q_tolerance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.JointAnalysis&lt;/code&gt;)" href="#easydynamics.analysis.JointAnalysis">JointAnalysis</a></code></td>
             <td>
               <div class="doc-md-description">
                 <p>Fit several Analysis objects together, sharing the components they have in common.</p>
@@ -9904,7 +9904,7 @@ reflect the model's current state.</p>
 
 
 <h3 id="easydynamics.analysis.JointAnalysis" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="p">,</span> <span class="n">Q_tolerance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -9917,11 +9917,12 @@ reflect the model's current state.</p>
 <p>Each Analysis keeps its own experiment, sample model and instrument model, so the data sets may
 have different resolutions, energy ranges, backgrounds and Q values. A component object that
 appears in the template of more than one of the models is <em>shared</em>. Its per-Q copies are
-grouped by Q value: at each Q value the copy from the earliest analysis owns the parameters and
-the copies from the other analyses are made dependent on it, so one set of values describes all
-the data sets at that Q. A copy at a Q value no other analysis has stays independent. Q values
-are matched exactly (to six decimals), so rebin the data sets onto a common Q grid where they
-are to share a component. If no Q values are equal at all, the component is fitted
+grouped by Q value, taking the analyses in order: a copy joins the group whose owner is nearest
+in Q, provided that owner is within <code>Q_tolerance</code> and no other Q value of the copy's own
+model is nearer to it, and otherwise starts a new group, which it owns. The other copies in a
+group are made dependent on the owner, so one set of values describes all the data sets at that
+Q, and a copy alone in its group stays independent. With a <code>Q_tolerance</code> of 0, Q values are
+matched exactly (to six decimals). If no Q values match at all, the component is fitted
 independently in each analysis and a warning is given.</p>
 <p>After linking, each analysis can still be fitted or sampled on its own, but a shared parameter
 then behaves differently in the owning analysis and in a following one:</p>
@@ -9991,8 +9992,8 @@ fits inside the energy window of the second, while <code>L2</code> is seen in bo
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The analyses to fit together. Where Q values are equal, shared components are owned by
-the earliest analysis in the list.</p>
+                <p>The analyses to fit together. Where Q values match, shared components are owned by the
+earliest analysis in the list.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10000,6 +10001,26 @@ the earliest analysis in the list.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_tolerance</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How far apart, in 1/angstrom, the Q values of two analyses may be for a shared
+component to have the same parameters at both.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.01</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -10059,7 +10080,7 @@ the earliest analysis in the list.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If analyses is not a list of Analysis objects.</p>
+                <p>If analyses is not a list of Analysis objects, or Q_tolerance is not a number.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10072,7 +10093,8 @@ the earliest analysis in the list.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If analyses is empty or holds the same Analysis twice.</p>
+                <p>If analyses is empty or holds the same Analysis twice, or Q_tolerance is negative or
+not finite.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10250,6 +10272,25 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>Get the name of the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Q_tolerance&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.JointAnalysis.Q_tolerance&lt;/code&gt;)" href="#easydynamics.analysis.JointAnalysis.Q_tolerance">Q_tolerance</a></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How far apart the Q values of two analyses may be for them to share a component there.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10463,6 +10504,58 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The name of the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="easydynamics.analysis.JointAnalysis.Q_tolerance" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">Q_tolerance</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>How far apart the Q values of two analyses may be for them to share a component there.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The tolerance, in 1/angstrom.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10936,7 +11029,7 @@ class.</p>
     <div class="doc doc-contents ">
 
         <p>Add an Analysis to fit together with the others.</p>
-<p>It is added last, so where its Q values equal those of an earlier analysis its copies of
+<p>It is added last, so where its Q values match those of an earlier analysis its copies of
 the shared components follow that analysis. The copies are linked by the next <code>fit</code> or
 <code>link_shared_components</code>.</p>
 <!-- prettier-ignore-start -->
@@ -11157,11 +11250,12 @@ width of a StretchedExponential, are left alone: they follow parameters that are
     <div class="doc doc-contents ">
 
         <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
-<p>There is one row per Q value, holding the (fitted) parameters of the copy that owns them
-there, and NaN for a component that no analysis holds at that Q value. The dataset can be
-plotted or passed to a <code>ParameterAnalysis</code> like the dataset from
-<code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are available from
-each analysis' own dataset.</p>
+<p>There is one row per Q value of a copy that owns its parameters, holding those (fitted)
+parameters, and NaN for a component with no owner at that Q value. A copy that follows an
+owner has no row of its own, also where its Q value differs from the owner's within
+<code>Q_tolerance</code>. The dataset can be plotted or passed to a <code>ParameterAnalysis</code> like the
+dataset from <code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are
+available from each analysis' own dataset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29147,7 +29241,7 @@ class.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;JointAnalysis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;analyses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis">JointAnalysis</a></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;JointAnalysis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;analyses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q_tolerance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis">JointAnalysis</a></code></td>
             <td>
               <div class="doc-md-description">
                 <p>Fit several Analysis objects together, sharing the components they have in common.</p>
@@ -29181,7 +29275,7 @@ class.</p>
 
 
 <h5 id="easydynamics.analysis.joint_analysis.JointAnalysis" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="p">,</span> <span class="n">Q_tolerance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -29194,11 +29288,12 @@ class.</p>
 <p>Each Analysis keeps its own experiment, sample model and instrument model, so the data sets may
 have different resolutions, energy ranges, backgrounds and Q values. A component object that
 appears in the template of more than one of the models is <em>shared</em>. Its per-Q copies are
-grouped by Q value: at each Q value the copy from the earliest analysis owns the parameters and
-the copies from the other analyses are made dependent on it, so one set of values describes all
-the data sets at that Q. A copy at a Q value no other analysis has stays independent. Q values
-are matched exactly (to six decimals), so rebin the data sets onto a common Q grid where they
-are to share a component. If no Q values are equal at all, the component is fitted
+grouped by Q value, taking the analyses in order: a copy joins the group whose owner is nearest
+in Q, provided that owner is within <code>Q_tolerance</code> and no other Q value of the copy's own
+model is nearer to it, and otherwise starts a new group, which it owns. The other copies in a
+group are made dependent on the owner, so one set of values describes all the data sets at that
+Q, and a copy alone in its group stays independent. With a <code>Q_tolerance</code> of 0, Q values are
+matched exactly (to six decimals). If no Q values match at all, the component is fitted
 independently in each analysis and a warning is given.</p>
 <p>After linking, each analysis can still be fitted or sampled on its own, but a shared parameter
 then behaves differently in the owning analysis and in a following one:</p>
@@ -29268,8 +29363,8 @@ fits inside the energy window of the second, while <code>L2</code> is seen in bo
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The analyses to fit together. Where Q values are equal, shared components are owned by
-the earliest analysis in the list.</p>
+                <p>The analyses to fit together. Where Q values match, shared components are owned by the
+earliest analysis in the list.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29277,6 +29372,26 @@ the earliest analysis in the list.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_tolerance</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How far apart, in 1/angstrom, the Q values of two analyses may be for a shared
+component to have the same parameters at both.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.01</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -29336,7 +29451,7 @@ the earliest analysis in the list.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If analyses is not a list of Analysis objects.</p>
+                <p>If analyses is not a list of Analysis objects, or Q_tolerance is not a number.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29349,7 +29464,8 @@ the earliest analysis in the list.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If analyses is empty or holds the same Analysis twice.</p>
+                <p>If analyses is empty or holds the same Analysis twice, or Q_tolerance is negative or
+not finite.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29489,6 +29605,25 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The analyses fitted together.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Q_tolerance&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis.Q_tolerance&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis.Q_tolerance">Q_tolerance</a></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How far apart the Q values of two analyses may be for them to share a component there.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29662,6 +29797,58 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>A copy of the list of analyses, in the order they were added.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easydynamics.analysis.joint_analysis.JointAnalysis.Q_tolerance" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">Q_tolerance</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>How far apart the Q values of two analyses may be for them to share a component there.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The tolerance, in 1/angstrom.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29980,7 +30167,7 @@ shared components can describe all the data sets.</p>
     <div class="doc doc-contents ">
 
         <p>Add an Analysis to fit together with the others.</p>
-<p>It is added last, so where its Q values equal those of an earlier analysis its copies of
+<p>It is added last, so where its Q values match those of an earlier analysis its copies of
 the shared components follow that analysis. The copies are linked by the next <code>fit</code> or
 <code>link_shared_components</code>.</p>
 <!-- prettier-ignore-start -->
@@ -30201,11 +30388,12 @@ width of a StretchedExponential, are left alone: they follow parameters that are
     <div class="doc doc-contents ">
 
         <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
-<p>There is one row per Q value, holding the (fitted) parameters of the copy that owns them
-there, and NaN for a component that no analysis holds at that Q value. The dataset can be
-plotted or passed to a <code>ParameterAnalysis</code> like the dataset from
-<code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are available from
-each analysis' own dataset.</p>
+<p>There is one row per Q value of a copy that owns its parameters, holding those (fitted)
+parameters, and NaN for a component with no owner at that Q value. A copy that follows an
+owner has no row of its own, also where its Q value differs from the owner's within
+<code>Q_tolerance</code>. The dataset can be plotted or passed to a <code>ParameterAnalysis</code> like the
+dataset from <code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are
+available from each analysis' own dataset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
