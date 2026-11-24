@@ -4,6 +4,7 @@
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.fit_binding import FitBinding
+from easydynamics.analysis.joint_analysis import JointAnalysis
 from easydynamics.analysis.parameter_analysis import ParameterAnalysis
 from easydynamics.analysis.posterior import BoundsSuggestion
 from easydynamics.analysis.posterior import BoundsSuggestions
@@ -19,6 +20,7 @@ __all__ = [
     'BoundsSuggestion',
     'BoundsSuggestions',
     'FitBinding',
+    'JointAnalysis',
     'MultiQPosteriorSampler',
     'ParameterAnalysis',
     'ParameterLabels',
