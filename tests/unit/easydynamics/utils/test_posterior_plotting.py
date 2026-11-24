@@ -34,6 +34,17 @@ def draws():
 
 
 class TestPlotTrace:
+    def test_figure_is_not_registered_with_pyplot(self, draws):
+        # WHEN
+        open_before = plt.get_fignums()
+
+        # THEN
+        plot_trace(draws=draws, names=['a', 'b', 'c'])
+
+        # EXPECT pyplot does not hold the figure, so an interactive backend does not show it a
+        # second time next to the returned Figure
+        assert plt.get_fignums() == open_before
+
     def test_one_panel_per_parameter(self, draws):
         # THEN
         fig = plot_trace(draws=draws, names=['a', 'b', 'c'])
@@ -105,6 +116,17 @@ class TestPlotTrace:
 
 
 class TestPlotCorner:
+    def test_figure_is_not_registered_with_pyplot(self, draws):
+        # WHEN
+        open_before = plt.get_fignums()
+
+        # THEN
+        plot_corner(draws=draws, names=['a', 'b', 'c'])
+
+        # EXPECT pyplot does not hold the figure, so an interactive backend does not show it a
+        # second time next to the returned Figure
+        assert plt.get_fignums() == open_before
+
     def test_grid_is_square_in_the_parameter_count(self, draws):
         # THEN
         fig = plot_corner(draws=draws, names=['a', 'b', 'c'])
@@ -202,6 +224,17 @@ class TestPlotMarginal:
     def values(self):
         return np.random.default_rng(0).normal(size=5000)
 
+    def test_figure_is_not_registered_with_pyplot(self, values):
+        # WHEN
+        open_before = plt.get_fignums()
+
+        # THEN
+        plot_marginal(values=values, name='width')
+
+        # EXPECT pyplot does not hold the figure, so an interactive backend does not show it a
+        # second time next to the returned Figure
+        assert plt.get_fignums() == open_before
+
     def test_returns_a_single_axis_figure(self, values):
         # THEN
         fig = plot_marginal(values=values, name='width')
@@ -271,6 +304,17 @@ class TestPlotMarginal:
 
 
 class TestPlotCorrelations:
+    def test_figure_is_not_registered_with_pyplot(self, draws):
+        # WHEN
+        open_before = plt.get_fignums()
+
+        # THEN
+        plot_correlations(draws=draws, names=['a', 'b', 'c'])
+
+        # EXPECT pyplot does not hold the figure, so an interactive backend does not show it a
+        # second time next to the returned Figure
+        assert plt.get_fignums() == open_before
+
     def test_labels_both_axes_with_the_names(self, draws):
         # THEN
         fig = plot_correlations(draws=draws, names=['a', 'b', 'c'])
@@ -354,6 +398,19 @@ class TestPlotCorrelations:
 
 
 class TestPlotPosteriorPredictive:
+    def test_figure_is_not_registered_with_pyplot(self):
+        # WHEN
+        open_before = plt.get_fignums()
+        x = np.linspace(0.0, 1.0, 25)
+        predictions = np.random.default_rng(0).normal(size=(50, 25))
+
+        # THEN
+        plot_posterior_predictive(x=x, y=np.zeros(25), predictions=predictions)
+
+        # EXPECT pyplot does not hold the figure, so an interactive backend does not show it a
+        # second time next to the returned Figure
+        assert plt.get_fignums() == open_before
+
     def test_returns_a_figure_with_data_and_band(self):
         # WHEN
         x = np.linspace(0.0, 1.0, 25)
