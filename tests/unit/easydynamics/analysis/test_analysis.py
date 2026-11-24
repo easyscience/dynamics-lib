@@ -1143,6 +1143,19 @@ class TestAnalysis:
         # EXPECT
         assert len(xs) == len(ys) == len(ws) == 2
 
+    def test_chain_parameters_leave_out_a_fully_masked_Q(self, analysis):
+        # WHEN
+        per_Q = len(analysis.analysis_list[0].get_free_parameters())
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        chain_parameters = analysis._chain_parameters()
+
+        # EXPECT the chain matches the MultiFitter the Sampler is built from
+        assert len(chain_parameters) == 2 * per_Q
+        masked_names = {p.unique_name for p in analysis.analysis_list[1].get_free_parameters()}
+        assert not masked_names & {p.unique_name for p in chain_parameters}
+
     def test_parameters_to_dataset_is_nan_for_a_fully_masked_Q(self, analysis):
         # WHEN
         analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))

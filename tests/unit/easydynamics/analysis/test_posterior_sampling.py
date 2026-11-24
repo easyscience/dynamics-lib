@@ -257,6 +257,22 @@ class TestPosteriorSampler:
             analysis.bayesian.check_bounds()
 
     #############
+    # State
+    #############
+
+    def test_clear_forgets_the_results(self, analysis):
+        # WHEN
+        analysis.bayesian._results = fake_chain_results(analysis._chain_parameters())
+        analysis.bayesian._sampler_is_dirty = False
+
+        # THEN
+        analysis.bayesian.clear()
+
+        # EXPECT
+        assert analysis.bayesian.results is None
+        assert analysis.bayesian._sampler_is_dirty
+
+    #############
     # Sampling
     #############
 
@@ -1923,6 +1939,22 @@ class TestMultiQPosteriorSampler:
         # EXPECT
         assert results == ['chain_Q0', None, 'chain_Q2']
         multi_q_analysis.analysis_list[1].bayesian.sample.assert_not_called()
+
+    def test_sample_independently_forgets_the_old_chain_of_a_masked_Q(self, multi_q_analysis):
+        # WHEN Q index 1 was sampled before it was masked
+        old_chain = fake_chain_results(multi_q_analysis.analysis_list[1]._chain_parameters())
+        multi_q_analysis.analysis_list[1].bayesian._results = old_chain
+        bad_Q = sc.array(dims=['Q'], values=[False, True, False])
+        multi_q_analysis.experiment.mask('bad_Q', bad_Q)
+        for index in (0, 2):
+            multi_q_analysis.analysis_list[index].bayesian.sample = MagicMock()
+
+        # THEN
+        with pytest.warns(UserWarning, match='has no data to sample'):
+            multi_q_analysis.bayesian.sample(samples=10)
+
+        # EXPECT the old chain is no longer reported as this Q index's result
+        assert multi_q_analysis.analysis_list[1].bayesian.results is None
 
     def test_extend_after_an_independent_run_points_at_the_per_q_chains(self, multi_q_analysis):
         # WHEN an independent run follows a simultaneous one, so this sampler still holds the old

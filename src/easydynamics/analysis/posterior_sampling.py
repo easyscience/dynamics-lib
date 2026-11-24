@@ -117,6 +117,16 @@ class PosteriorSampler:
     # State
     #############
 
+    def clear(self) -> None:
+        """
+        Forget the results of the last run, so they are no longer reported as current.
+
+        Used when the data a chain was sampled from is gone, such as a Q index whose every point
+        has since been masked.
+        """
+        self._results = None
+        self._sampler_is_dirty = True
+
     def invalidate(self) -> None:
         """
         Mark the underlying Sampler as needing a rebuild.
@@ -1234,12 +1244,19 @@ class MultiQPosteriorSampler(PosteriorSampler):
                 UserWarning,
                 stacklevel=2,
             )
-        return [
-            analysis1d.bayesian.sample(samples=samples, burn=burn, thin=thin, **sampler_options)
-            if analysis1d.has_data
-            else None
-            for analysis1d in per_q
-        ]
+        results = []
+        for analysis1d in per_q:
+            if analysis1d.has_data:
+                results.append(
+                    analysis1d.bayesian.sample(
+                        samples=samples, burn=burn, thin=thin, **sampler_options
+                    )
+                )
+            else:
+                # A chain from before the Q index was masked describes data that is gone.
+                analysis1d.bayesian.clear()
+                results.append(None)
+        return results
 
     def extend(
         self,

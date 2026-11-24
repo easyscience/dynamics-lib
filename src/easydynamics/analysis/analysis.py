@@ -939,10 +939,11 @@ class Analysis(AnalysisBase):
         Returns
         -------
         list[Parameter]
-            The free parameters of the whole analysis, in Q order and without duplicates.
+            The free parameters of the whole analysis, in Q order and without duplicates. A Q index
+            without data is left out, as the MultiFitter the Sampler is built from leaves it out.
         """
         parameters = {}
-        for analysis1d in self.analysis_list:
+        for analysis1d in self._analyses_with_data():
             for parameter in analysis1d.get_free_parameters():
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
