@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shutil
 from pathlib import Path
 
 import h5py
@@ -66,6 +67,25 @@ class TestLoadMantidNexus:
         assert uncovered.any()
         np.testing.assert_array_equal(np.isnan(data.values), uncovered)
         np.testing.assert_array_equal(np.isnan(data.variances), uncovered)
+
+    def test_covered_values_are_not_divided_by_frac_area(self):
+        # THEN
+        data = load_mantid_nexus(IRIS)
+
+        # EXPECT the stored values, which Mantid already divided by the fractional areas
+        covered = stored(IRIS, 'frac_area') != 0
+        np.testing.assert_array_equal(data.values[covered], stored(IRIS, 'values')[covered])
+
+    def test_unfinalized_rebinned_workspace_raises(self, tmp_path):
+        # WHEN the areas have not yet been divided out
+        path = tmp_path / 'unfinalized.nxs'
+        shutil.copy(IRIS, path)
+        with h5py.File(path, 'r+') as file:
+            file['mantid_workspace_1/workspace/frac_area'].attrs['finalized'] = np.bytes_(b'0')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='finalize it in Mantid'):
+            load_mantid_nexus(path)
 
     def test_result_is_accepted_by_experiment(self):
         # THEN

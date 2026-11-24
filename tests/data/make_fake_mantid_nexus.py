@@ -153,9 +153,8 @@ def _write_entry(
         Sample temperature to store as a time series log.
     """
     entry = _group(file, entry_name, 'NXentry')
-    entry.create_dataset('definition', data=_string('NXprocessed')).attrs['Version'] = np.bytes_(
-        b'1.0'
-    )
+    definition = entry.create_dataset('definition', data=_string('Mantid Processed Workspace'))
+    definition.attrs['Version'] = np.bytes_(b'1.0')
     entry.create_dataset('title', data=_string(title))
     entry.create_dataset('workspace_name', data=_string(f'fake_{instrument.lower()}'))
 
@@ -249,7 +248,8 @@ def write_fake_iris_sqw(path: Path) -> None:
     energy = 0.5 * (energy_edges[:-1] + energy_edges[1:])
     values = 0.01 * _sqw(Q, energy, width=0.05)
     errors = 0.1 * np.sqrt(values)
-    frac_area = np.ones_like(values)
+    # Real SofQW areas are small fractions; values are stored already divided by them.
+    frac_area = np.full_like(values, 0.002)
     # No detector reaches the high-energy corner at low Q.
     frac_area[0, -3:] = 0.0
     values[0, -3:] = 0.0

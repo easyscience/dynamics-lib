@@ -39,14 +39,15 @@ def load_mantid_nexus(
     they are masked out of fits rather than read as zero intensity.
 
     Bins with zero counts are usually stored with zero error, which a fit cannot weight by. Use
-    ``min_error`` to choose what happens to them.
+    ``min_error`` to choose what happens to them. Bins set to NaN, here or by ``min_error``, make
+    any bin they are averaged into by ``Experiment.rebin`` NaN as well.
 
     Examples
     --------
     ```python
     import easydynamics as edyn
 
-    data = edyn.load_mantid_nexus('iris108490_graphite002_sqw.nxs')
+    data = edyn.load_mantid_nexus('iris108490_graphite002_sqw.nxs', min_error=0.001)
     experiment = edyn.Experiment(display_name='NP+TCZ 2K', data=data)
     ```
 
@@ -72,7 +73,8 @@ def load_mantid_nexus(
     ------
     ValueError
         If the file holds several workspaces and no ``entry`` is given, ``entry`` is not in the
-        file, or the workspace axes are not energy transfer and momentum transfer.
+        file, the workspace axes are not energy transfer and momentum transfer, or the workspace is
+        a rebinned one that was saved before Mantid divided it by its fractional areas.
     """
     with h5py.File(filename, 'r') as file:
         entries = sorted(name for name in file if name.startswith('mantid_workspace_'))
@@ -105,6 +107,12 @@ def load_mantid_nexus(
         values = workspace['values'][()]
         variances = workspace['errors'][()] ** 2
         if 'frac_area' in workspace:
+            # A finalized RebinnedOutput already holds intensity divided by the fractional area.
+            if _decode(workspace['frac_area'].attrs.get('finalized', b'1')) != '1':
+                raise ValueError(
+                    'The workspace was saved before Mantid normalised it by its fractional '
+                    'areas; finalize it in Mantid and save it again.'
+                )
             uncovered = workspace['frac_area'][()] == 0
             values[uncovered] = np.nan
             variances[uncovered] = np.nan
