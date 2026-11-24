@@ -660,6 +660,8 @@
       
         
       
+        
+      
     
     
     
@@ -799,6 +801,34 @@
     
   
     Tutorial 2. Magnetic nanoparticles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/tutorial3_multiple_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial 3. Multiple data sets
   
 
     
@@ -9933,6 +9963,7 @@ fits inside the energy window of the second, while <code>L2</code> is seen in bo
 
 <span class="n">joint</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="o">=</span><span class="p">[</span><span class="n">analysis1</span><span class="p">,</span> <span class="n">analysis2</span><span class="p">])</span>
 <span class="n">joint</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">joint</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>  <span class="c1"># the L2 parameters over the Q values of both data sets</span>
 </code></pre></div></p>
 <!-- prettier-ignore-start -->
 
@@ -10141,6 +10172,17 @@ the earliest analysis in the list.</p>
                 </div>
               </td>
             </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;parameters_to_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.JointAnalysis.parameters_to_dataset&lt;/code&gt;)" href="#easydynamics.analysis.JointAnalysis.parameters_to_dataset">parameters_to_dataset</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
       </tbody>
     </table>
 
@@ -10246,6 +10288,25 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The template components that appear in more than one of the analyses' models.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;scales&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.JointAnalysis.scales&lt;/code&gt;)" href="#easydynamics.analysis.JointAnalysis.scales">scales</a></code></td>
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The scale of every analysis: the factor its model is multiplied by.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10506,6 +10567,61 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The shared components, in order of first appearance, each listed once.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="easydynamics.analysis.JointAnalysis.scales" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scales</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The scale of every analysis: the factor its model is multiplied by.</p>
+<p>Data sets of the same sample are rarely on the same intensity scale. Keep one scale fixed
+as the reference and free the others, e.g. <code>joint.scales[1].fixed = False</code>, so that the
+shared components can describe all the data sets.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The scale Parameter of each analysis' InstrumentModel, in the order of the analyses.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11024,6 +11140,84 @@ width of a StretchedExponential, are left alone: they follow parameters that are
 
 <!-- prettier-ignore-end -->
 </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.analysis.JointAnalysis.parameters_to_dataset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">parameters_to_dataset</span><span class="p">()</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
+<p>There is one row per Q value, holding the (fitted) parameters of the copy that owns them
+there, and NaN for a component that no analysis holds at that Q value. The dataset can be
+plotted or passed to a <code>ParameterAnalysis</code> like the dataset from
+<code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are available from
+each analysis' own dataset.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If two shared components have parameters with the same name.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Dataset&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Dataset.html#scipp.Dataset">Dataset</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dataset where each entry is a parameter, with dimension "Q" sorted in ascending Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 
     </div>
 
@@ -29046,6 +29240,7 @@ fits inside the energy window of the second, while <code>L2</code> is seen in bo
 
 <span class="n">joint</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">JointAnalysis</span><span class="p">(</span><span class="n">analyses</span><span class="o">=</span><span class="p">[</span><span class="n">analysis1</span><span class="p">,</span> <span class="n">analysis2</span><span class="p">])</span>
 <span class="n">joint</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">joint</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>  <span class="c1"># the L2 parameters over the Q values of both data sets</span>
 </code></pre></div></p>
 <!-- prettier-ignore-start -->
 
@@ -29218,6 +29413,17 @@ the earliest analysis in the list.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;parameters_to_dataset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis.parameters_to_dataset&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis.parameters_to_dataset">parameters_to_dataset</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis.to_dict&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -29302,6 +29508,25 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The template components that appear in more than one of the analyses' models.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;scales&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.analysis.joint_analysis.JointAnalysis.scales&lt;/code&gt;)" href="#easydynamics.analysis.joint_analysis.JointAnalysis.scales">scales</a></code></td>
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The scale of every analysis: the factor its model is multiplied by.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29489,6 +29714,61 @@ the earliest analysis in the list.</p>
             <td>
               <div class="doc-md-description">
                 <p>The shared components, in order of first appearance, each listed once.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easydynamics.analysis.joint_analysis.JointAnalysis.scales" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">scales</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The scale of every analysis: the factor its model is multiplied by.</p>
+<p>Data sets of the same sample are rarely on the same intensity scale. Keep one scale fixed
+as the reference and free the others, e.g. <code>joint.scales[1].fixed = False</code>, so that the
+shared components can describe all the data sets.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The scale Parameter of each analysis' InstrumentModel, in the order of the analyses.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -29904,6 +30184,84 @@ width of a StretchedExponential, are left alone: they follow parameters that are
 
 <!-- prettier-ignore-end -->
 </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.analysis.joint_analysis.JointAnalysis.parameters_to_dataset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">parameters_to_dataset</span><span class="p">()</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a scipp dataset of the shared components' parameters over the Q values of all data.</p>
+<p>There is one row per Q value, holding the (fitted) parameters of the copy that owns them
+there, and NaN for a component that no analysis holds at that Q value. The dataset can be
+plotted or passed to a <code>ParameterAnalysis</code> like the dataset from
+<code>Analysis.parameters_to_dataset</code>. The parameters that are not shared are available from
+each analysis' own dataset.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If two shared components have parameters with the same name.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Dataset&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Dataset.html#scipp.Dataset">Dataset</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dataset where each entry is a parameter, with dimension "Q" sorted in ascending Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 
     </div>
 
