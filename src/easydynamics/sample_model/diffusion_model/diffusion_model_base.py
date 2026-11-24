@@ -181,11 +181,16 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         Replace the per-Q component collections and bump ``collections_version``.
 
+        Every component in them records this model as the one that generated it.
+
         Parameters
         ----------
         value : list[ComponentCollection]
             The new collections.
         """
+        for collection in value:
+            for component in collection:
+                component._set_origin(diffusion_model=self)  # ruff: ignore[private-member-access]
         self._stored_component_collections = value
         self._collections_version += 1
 

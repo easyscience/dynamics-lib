@@ -8,6 +8,7 @@ from scipp import UnitError
 
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.variable import Parameter
 
 
@@ -186,3 +187,35 @@ class TestModelComponent:
         result = g.evaluate(da, output='scipp')
         # EXPECT: output dim must be the coord key 'energy', not the Variable dim 'x'.
         assert result.dims == ('energy',)
+
+    #############
+    # Origin
+    #############
+
+    def test_origin_is_none_by_default(self, dummy: DummyComponent):
+        # THEN EXPECT
+        assert dummy.get_template() is None
+        assert dummy.get_diffusion_model() is None
+
+    def test_set_origin_records_template_and_diffusion_model(self, dummy: DummyComponent):
+        # WHEN
+        template = Gaussian()
+        diffusion_model = DiffusionModelBase()
+
+        # THEN
+        dummy._set_origin(template=template, diffusion_model=diffusion_model)
+
+        # EXPECT
+        assert dummy.get_template() is template
+        assert dummy.get_diffusion_model() is diffusion_model
+
+    def test_origin_parameters_are_not_counted_as_the_components_own(self):
+        # WHEN a component whose parameters easyscience finds by walking its attributes
+        component = Gaussian()
+        n_variables = len(component.get_all_variables())
+
+        # THEN
+        component._set_origin(template=Gaussian(), diffusion_model=DiffusionModelBase())
+
+        # EXPECT the template's and the diffusion model's variables are not included
+        assert len(component.get_all_variables()) == n_variables

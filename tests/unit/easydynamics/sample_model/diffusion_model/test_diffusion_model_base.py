@@ -6,7 +6,20 @@ import pytest
 import scipp as sc
 from scipp import UnitError
 
+from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
+    BrownianTranslationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
+    ChudleyElliottJumpDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+    JumpTranslationalDiffusion,
+)
+from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
+    MittagLefflerDiffusion,
+)
 from easydynamics.variable import Parameter
 
 
@@ -432,3 +445,32 @@ class TestDiffusionModelBase:
         # EXPECT nothing changes
         np.testing.assert_allclose(model.Q.values, [1.0, 2.0, 3.0])
         assert model.collections_version == version
+
+    #############
+    # Origin of generated components
+    #############
+
+    @pytest.mark.parametrize(
+        'model_class',
+        [
+            BrownianTranslationalDiffusion,
+            ChudleyElliottJumpDiffusion,
+            DeltaLorentz,
+            JumpTranslationalDiffusion,
+            MittagLefflerDiffusion,
+        ],
+    )
+    def test_generated_components_return_their_diffusion_model(self, model_class):
+        # WHEN
+        model = model_class(Q=[0.5, 1.0])
+
+        # THEN the collections are regenerated when the Q grid grows
+        model.extend_Q([1.5])
+
+        # EXPECT every component, old Q values and new, records the model and no template
+        collections = model.get_component_collections()
+        assert len(collections) == 3
+        assert all(len(collection) > 0 for collection in collections)
+        components = [c for collection in collections for c in collection]
+        assert all(c.get_diffusion_model() is model for c in components)
+        assert all(c.get_template() is None for c in components)
