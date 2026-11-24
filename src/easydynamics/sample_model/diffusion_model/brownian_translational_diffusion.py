@@ -25,6 +25,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     have units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
     Q-values.
 
+    References
+    ----------
+    G. H. Vineyard, *Scattering of Slow Neutrons by a Liquid*, Phys. Rev. **110**, 999 (1958),
+    [doi:10.1103/PhysRev.110.999](https://doi.org/10.1103/PhysRev.110.999).
+
     Examples
     --------
     **Creating a BrownianTranslationalDiffusion model**

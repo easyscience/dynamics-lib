@@ -20,12 +20,7 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
     Model of the diffusion-damped Mittag-Leffler relaxation spectrum, Eq. (42) of Hassani et al.
 
     This is the spectral (energy-domain) form of the multiscale relaxation model used for
-    intrinsically disordered proteins in
-
-    A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
-    relaxation dynamics and diffusion of myelin basic protein in solution studied by quasielastic
-    neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
-    [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
+    intrinsically disordered proteins by Hassani et al. (see References).
 
     In the time domain the internal dynamics is described by the Mittag-Leffler (ML) relaxation
     function $\phi_{ML}(t) = E_\alpha(-(|t|/\tau_R)^\alpha)$ (their Eq. 28), damped by global
@@ -64,6 +59,13 @@ class DiffusionDampedMittagLeffler(CreateParametersMixin, ModelComponent):
     The profile is symmetric about $x = 0$, so there is no center parameter. Because a strictly
     positive ``damping`` is enforced, the profile stays regular at $x = 0$, where the undamped ML
     spectrum would diverge as $|\omega|^{\alpha - 1}$.
+
+    References
+    ----------
+    A. N. Hassani, L. Haris, M. Appel, T. Seydel, A. M. Stadler and G. R. Kneller, *Multiscale
+    relaxation dynamics and diffusion of myelin basic protein in solution studied by quasielastic
+    neutron scattering*, J. Chem. Phys. **156**, 025102 (2022),
+    [doi:10.1063/5.0077100](https://doi.org/10.1063/5.0077100).
 
     Examples
     --------
