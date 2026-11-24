@@ -112,3 +112,20 @@ class TestCreateDependencyFunctions:
         # EXPECT
         assert first.keys() == second.keys()
         assert all(first[name] is not second[name] for name in first)
+
+
+@pytest.mark.parametrize('function_name', ['exp', 'sin', 'cos', 'sinc'])
+def test_easyscience_cannot_apply_the_function_to_a_parameter_yet(function_name):
+    """
+    Canary: this fails once EasyScience can apply the function to a Parameter itself.
+
+    The dependency functions are then no longer needed: remove ``utils/dependency_functions.py``
+    and its uses in ``ModelBase._make_Q_dependent`` and ``ChudleyElliottJumpDiffusion``.
+    """
+    # WHEN no dependency functions are given in the dependency map
+    argument = Parameter(0.5, name='a')
+    dependent = Parameter(0.0, name='w')
+
+    # THEN EXPECT
+    with pytest.raises(SyntaxError, match=f"Error running function '{function_name}'"):
+        dependent.make_dependent_on(f'{function_name}(a)', {'a': argument})

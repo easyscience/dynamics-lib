@@ -3,8 +3,10 @@
 
 import pytest
 import scipp as sc
+from easyscience.variable import DescriptorNumber as EasyScienceDescriptorNumber
 from easyscience.variable import Parameter as EasyScienceParameter
 
+from easydynamics import base_unit_patch
 from easydynamics.variable import DescriptorNumber
 from easydynamics.variable import Parameter
 
@@ -166,3 +168,29 @@ class TestBaseUnitPatch:
         # EXPECT
         assert ratio.full_value.unit == sc.Unit('meV/THz')
         assert ratio.value == pytest.approx(1.0)
+
+    #############
+    # Canary
+    #############
+
+    def test_easyscience_still_strips_the_numeric_factor(self, monkeypatch):
+        """
+        Canary: this fails once EasyScience keeps a unit such as meV*angstrom by itself.
+
+        The patch is then no longer needed: remove ``base_unit_patch.py``, its import in
+        ``easydynamics/__init__.py`` and this test file.
+        """
+        # WHEN EasyScience's own behaviour, without the patch
+        monkeypatch.setattr(
+            EasyScienceDescriptorNumber, '_base_unit', base_unit_patch.easyscience_base_unit
+        )
+
+        # THEN
+        parameter = EasyScienceParameter(value=0.1, unit='meV*angstrom')
+        product = EasyScienceParameter(value=2.0, unit='meV') * EasyScienceParameter(
+            value=3.0, unit='angstrom'
+        )
+
+        # EXPECT the values are still rescaled to J*m
+        assert parameter.value == pytest.approx(1.602176634e-33)
+        assert product.value == pytest.approx(9.613059804e-32)
