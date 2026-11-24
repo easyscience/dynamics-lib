@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
+from dataclasses import dataclass
 
 import numpy as np
 import scipp as sc
@@ -23,6 +24,27 @@ from easydynamics.utils.utils import relabel_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import DescriptorNumber
 from easydynamics.variable import Parameter
+
+
+@dataclass
+class _QDependence:
+    """
+    The Q dependence of one Parameter of a component.
+
+    Attributes
+    ----------
+    expression : str
+        The expression giving the value of the Parameter as a function of ``Q``, e.g.
+        ``'hbar * D * Q**2'``. For a Q-independent Parameter it is just the symbol of the one
+        shared Parameter, e.g. ``'width'``.
+    parameters : dict[str, Parameter]
+        The Parameters used in the expression, keyed by their symbol in it, e.g.
+        ``{'D': <Parameter 'Lorentzian width D'>}``. They are shared by all Q, and are what a fit
+        varies.
+    """
+
+    expression: str
+    parameters: dict[str, Parameter]
 
 
 class ModelBase(EasyDynamicsModelBase):
@@ -84,10 +106,10 @@ class ModelBase(EasyDynamicsModelBase):
 
         self._components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
         self._component_collections: list[ComponentCollection] = []
-        # (component name, parameter name) -> (expression, the Parameters it uses by symbol) of
-        # every Parameter given a Q dependence, including a Q-independent one. Stored so the
+        # The Q dependence of every Parameter that has one, including a Q-independent one, keyed
+        # by (component name, parameter name), e.g. ('Lorentzian', 'width'). Stored so the
         # dependences can be reapplied when the per-Q collections are rebuilt.
-        self._Q_dependences: dict[tuple[str, str], tuple[str, dict[str, Parameter]]] = {}
+        self._Q_dependences: dict[tuple[str, str], _QDependence] = {}
         # Counter part of state_version: bumped whenever the dirty flag is raised.
         self._state_counter = 0
         # Template-collection version the per-Q collections were last built from. Compared
@@ -614,8 +636,8 @@ class ModelBase(EasyDynamicsModelBase):
             The new Parameter that sets the value at every Q.
         """
         dependence = self._Q_dependences.get((component_name, parameter_name))
-        if dependence is not None and dependence[0] == parameter_name:
-            return dependence[1][parameter_name]
+        if dependence is not None and dependence.expression == parameter_name:
+            return dependence.parameters[parameter_name]
         self.remove_parameter_Q_constraint(component_name, parameter_name)
         source = self._get_unconstrained_parameters(component_name, parameter_name)[0]
         shared = Parameter(name=f'{component_name} {parameter_name} (all Q)', value=source.value)
@@ -761,8 +783,8 @@ class ModelBase(EasyDynamicsModelBase):
             ]
         else:
             all_vars = self._component_collections[Q_index].get_all_variables()
-        for _, parameters in self._Q_dependences.values():
-            all_vars.extend(parameters.values())
+        for dependence in self._Q_dependences.values():
+            all_vars.extend(dependence.parameters.values())
         return all_vars
 
     def get_component_collection(self, Q_index: int) -> ComponentCollection:
@@ -809,16 +831,13 @@ class ModelBase(EasyDynamicsModelBase):
                 {
                     'component_name': component_name,
                     'parameter_name': parameter_name,
-                    'expression': expression,
+                    'expression': dependence.expression,
                     'parameters': {
                         symbol: parameter.to_dict(skip=skip)
-                        for symbol, parameter in parameters.items()
+                        for symbol, parameter in dependence.parameters.items()
                     },
                 }
-                for (component_name, parameter_name), (
-                    expression,
-                    parameters,
-                ) in self._Q_dependences.items()
+                for (component_name, parameter_name), dependence in self._Q_dependences.items()
             ]
         return obj_dict
 
@@ -850,9 +869,8 @@ class ModelBase(EasyDynamicsModelBase):
                 parameters[symbol] = Parameter.from_dict(parameter_dict)
                 relabel_parameter_unit(parameters[symbol], unit)
             key = (dependence['component_name'], dependence['parameter_name'])
-            model._Q_dependences[key] = (  # ruff: ignore[private-member-access]
-                dependence['expression'],
-                parameters,
+            model._Q_dependences[key] = _QDependence(  # ruff: ignore[private-member-access]
+                dependence['expression'], parameters
             )
         model._apply_Q_constraints()  # ruff: ignore[private-member-access]
         return model
@@ -957,7 +975,7 @@ class ModelBase(EasyDynamicsModelBase):
 
         self.remove_parameter_Q_constraint(component_name, parameter_name)
         self._get_unconstrained_parameters(component_name, parameter_name)
-        self._Q_dependences[component_name, parameter_name] = (expression, parameters)
+        self._Q_dependences[component_name, parameter_name] = _QDependence(expression, parameters)
         self._apply_Q_constraints()
 
     @staticmethod
@@ -1058,13 +1076,17 @@ class ModelBase(EasyDynamicsModelBase):
             return
         names = self._component_collections[0].list_component_names()
         self._Q_dependences = {
-            key: dependence for key, dependence in self._Q_dependences.items() if key[0] in names
+            (component_name, parameter_name): dependence
+            for (component_name, parameter_name), dependence in self._Q_dependences.items()
+            if component_name in names
         }
         for (component_name, parameter_name), dependence in self._Q_dependences.items():
             targets = self.get_parameters(component_name, parameter_name)
             for parameter, Q in zip(targets, self.Q.values, strict=True):
                 if parameter.independent:
-                    self._make_Q_dependent(parameter, *dependence, Q=Q)
+                    self._make_Q_dependent(
+                        parameter, dependence.expression, dependence.parameters, Q=Q
+                    )
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
