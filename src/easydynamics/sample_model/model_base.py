@@ -483,6 +483,97 @@ class ModelBase(EasyDynamicsModelBase):
         for par in self.get_fittable_parameters():
             par.fixed = False
 
+    def get_parameters(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+    ) -> list[Parameter]:
+        """
+        Get one Parameter of a component at each Q.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, get the Parameter at every Q. If int, get only the Parameter at this Q index.
+
+        Returns
+        -------
+        list[Parameter]
+            The Parameter at each requested Q, in Q order. Empty if Q is not set.
+        """
+        self._ensure_component_collections_current()
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        if Q_index is None:
+            collections = self._component_collections
+        else:
+            collections = [self._component_collections[Q_index]]
+        return [
+            self._get_parameter(collection, component_name, parameter_name)
+            for collection in collections
+        ]
+
+    def fix_parameter(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+        value: Numeric | None = None,
+    ) -> None:
+        """
+        Fix one Parameter of a component, at every Q or at a single Q.
+
+        When fixing at every Q, the template component is fixed too, so the call also takes effect
+        on per-Q collections built later.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, fix the Parameter at every Q. If int, fix it only at this Q index.
+        value : Numeric | None, default=None
+            If given, the Parameter is set to this value (in its own unit) before it is fixed.
+        """
+        for parameter in self._get_parameters_with_template(
+            component_name, parameter_name, Q_index
+        ):
+            if value is not None:
+                parameter.value = value
+            parameter.fixed = True
+
+    def free_parameter(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+    ) -> None:
+        """
+        Free one Parameter of a component, at every Q or at a single Q.
+
+        When freeing at every Q, the template component is freed too, so the call also takes effect
+        on per-Q collections built later.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, free the Parameter at every Q. If int, free it only at this Q index.
+        """
+        for parameter in self._get_parameters_with_template(
+            component_name, parameter_name, Q_index
+        ):
+            parameter.fixed = False
+
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
         Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
@@ -540,6 +631,75 @@ class ModelBase(EasyDynamicsModelBase):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _get_parameter(
+        collection: ComponentCollection,
+        component_name: str,
+        parameter_name: str,
+    ) -> Parameter:
+        """
+        Get a Parameter of a named component in a collection.
+
+        Parameters
+        ----------
+        collection : ComponentCollection
+            The collection holding the component.
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component.
+
+        Raises
+        ------
+        ValueError
+            If the component has no Parameter with the given attribute name.
+
+        Returns
+        -------
+        Parameter
+            The Parameter.
+        """
+        parameter = getattr(collection[component_name], parameter_name, None)
+        if not isinstance(parameter, Parameter):
+            raise ValueError(f'Component {component_name!r} has no Parameter {parameter_name!r}.')
+        return parameter
+
+    def _get_parameters_with_template(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None,
+    ) -> list[Parameter]:
+        """
+        Get one Parameter of a component at each Q, plus the template's when all Q are requested.
+
+        Including the template makes a change to every Q survive a rebuild of the per-Q
+        collections. Components that are not in the template (those generated by subclasses) only
+        exist per Q.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component.
+        Q_index : int | None
+            If None, get the Parameter at every Q and in the template. If int, get only the
+            Parameter at this Q index.
+
+        Returns
+        -------
+        list[Parameter]
+            The matching Parameters.
+        """
+        parameters = self.get_parameters(component_name, parameter_name, Q_index)
+        in_template = component_name in self._components.list_component_names()
+        if Q_index is None and (in_template or not parameters):
+            parameters.append(
+                self._get_parameter(self._components, component_name, parameter_name)
+            )
+        return parameters
 
     def _ensure_component_collections_current(self) -> None:
         """
