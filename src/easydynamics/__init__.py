@@ -8,6 +8,8 @@ reader never has to look up which sub-package a name came from. The sub-packages
 for anyone who prefers them; this is only the front door.
 """
 
+# Applied first, so that no EasyScience object is created before it. Temporary, see the module.
+import easydynamics.base_unit_patch
 from easydynamics.analysis import Analysis
 from easydynamics.analysis import Analysis1d
 from easydynamics.analysis import BoundsSuggestion
