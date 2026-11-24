@@ -5256,8 +5256,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -5399,7 +5400,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -47429,8 +47430,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -47572,7 +47574,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -51377,8 +51379,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -51520,7 +51523,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -55028,8 +55031,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -55171,7 +55175,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -120052,7 +120056,7 @@ ComponentCollections is returned.</p>
     </div>
 
 </div>
-
+<h6 id="easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion-functions">Functions:</h6>
 
 
 
@@ -137229,8 +137233,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -137372,7 +137377,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -141077,8 +141082,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -141220,7 +141226,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
@@ -145114,8 +145120,9 @@ diffusion model, is rejected with a ValueError.</p>
 shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
 Q constraint on the Parameter is replaced.</p>
 <p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
-symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
-expression, and its result must be convertible to the unit of the Parameter:
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code> and the functions <code>exp</code>,
+<code>sin</code>, <code>cos</code> and <code>sinc</code> (sin(x)/x) of a dimensionless argument. Units are carried
+through the expression, and its result must be convertible to the unit of the Parameter:
 <div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
     <span class="s1">'Lorentzian'</span><span class="p">,</span>
     <span class="s1">'width'</span><span class="p">,</span>
@@ -145257,7 +145264,7 @@ dimensionless.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+                <p>If <em>parameters</em> uses a reserved symbol (<code>Q</code>, a constant or a function), if
 <em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
 already depends on other Parameters through something other than a Q constraint.</p>
 <!-- prettier-ignore-start -->
