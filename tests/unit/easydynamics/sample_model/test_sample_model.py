@@ -1282,3 +1282,15 @@ class TestSampleModel:
         assert sample_model_copy.normalize_detailed_balance is False
         x = np.linspace(-1.0, 1.0, 11)
         np.testing.assert_allclose(sample_model_copy.evaluate(x), sample_model.evaluate(x))
+
+    def test_copy_keeps_Q_independent_parameters(self):
+        # WHEN
+        sample_model = SampleModel(components=Lorentzian(name='L'), Q=np.array([0.5, 1.0]))
+        sample_model.make_parameter_Q_independent('L', 'width')
+
+        # THEN
+        widths = copy(sample_model).get_parameters('L', 'width')
+        widths[0].value = 0.7
+
+        # EXPECT
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7])

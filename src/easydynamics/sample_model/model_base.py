@@ -689,6 +689,49 @@ class ModelBase(EasyDynamicsModelBase):
         for collection in self._component_collections:
             collection.normalize_area()
 
+    def to_dict(self, skip: list[str] | None = None) -> dict:
+        """
+        Convert the model to a dictionary, including its Q constraints.
+
+        Parameters
+        ----------
+        skip : list[str] | None, default=None
+            Names of fields to leave out.
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the model.
+        """
+        obj_dict = super().to_dict(skip=skip)
+        if self._Q_independent_parameters:
+            obj_dict['Q_independent_parameters'] = [
+                list(key) for key in self._Q_independent_parameters
+            ]
+        return obj_dict
+
+    @classmethod
+    def from_dict(cls, obj_dict: dict) -> 'ModelBase':
+        """
+        Re-create a model from its dictionary representation, including its Q constraints.
+
+        Parameters
+        ----------
+        obj_dict : dict
+            Dictionary representation of the model, as produced by to_dict().
+
+        Returns
+        -------
+        'ModelBase'
+            The deserialised model.
+        """
+        obj_dict = dict(obj_dict)
+        Q_independent_parameters = obj_dict.pop('Q_independent_parameters', [])
+        model = super().from_dict(obj_dict)
+        for component_name, parameter_name in Q_independent_parameters:
+            model.make_parameter_Q_independent(component_name, parameter_name)
+        return model
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------

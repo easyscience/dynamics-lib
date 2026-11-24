@@ -1141,3 +1141,31 @@ class TestModelBase:
         assert model_copy.display_name == 'Model'
         assert model_copy.Q is None
         assert model_copy.components['G'].width.value == pytest.approx(0.2)
+
+    @pytest.mark.parametrize(
+        'copy_model',
+        [copy, lambda model: ModelBase.from_dict(model.to_dict())],
+        ids=['copy', 'from_dict'],
+    )
+    def test_copy_keeps_Q_independent_parameters(self, model_base, copy_model):
+        # WHEN
+        model_base.make_parameter_Q_independent('TestGaussian1Name', 'width')
+
+        # THEN
+        model_copy = copy_model(model_base)
+        widths = model_copy.get_parameters('TestGaussian1Name', 'width')
+        widths[0].value = 0.7
+
+        # EXPECT the other Q of the copy follow its own Q index 0, not the original's
+        assert [p.independent for p in widths] == [True, False, False]
+        assert [p.value for p in widths] == pytest.approx([0.7, 0.7, 0.7])
+        assert model_base.get_parameters('TestGaussian1Name', 'width')[1].value == pytest.approx(
+            1.0
+        )
+
+    def test_to_dict_without_Q_constraints_has_no_constraint_entry(self, model_base):
+        # WHEN THEN
+        obj_dict = model_base.to_dict()
+
+        # EXPECT
+        assert 'Q_independent_parameters' not in obj_dict
