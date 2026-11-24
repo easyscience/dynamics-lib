@@ -26,6 +26,7 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import skip_Q_without_data
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -192,21 +193,23 @@ class Analysis(AnalysisBase):
         """
         The EasyScience MultiFitter covering every Q index with data, built on first use.
 
-        It is rebuilt when masks change which Q indices have data, which resets any settings, such
-        as the minimizer, made on it.
+        It is rebuilt when masks change which Q indices have data, keeping the minimizer, tolerance
+        and maximum number of evaluations set on it.
 
         Returns
         -------
         MultiFitter
             The cached MultiFitter.
         """
-        if (
-            self._fitter_is_dirty
-            or self._fitter is None
-            or self._fitter_Q_indices != self._Q_indices_with_data()
-        ):
+        if self._fitter_is_dirty or self._fitter is None:
             self._fitter = self._build_fitter()
             self._fitter_is_dirty = False
+        elif self._fitter_Q_indices != self._Q_indices_with_data():
+            old = self._fitter
+            self._fitter = self._build_fitter()
+            self._fitter.switch_minimizer(old.minimizer.enum)
+            self._fitter.tolerance = old.tolerance
+            self._fitter.max_evaluations = old.max_evaluations
         return self._fitter
 
     @property
@@ -618,6 +621,11 @@ class Analysis(AnalysisBase):
         variances = {name: [] for name in all_names}
         units = {}
 
+        fitted = {
+            parameter.unique_name
+            for analysis in self._analyses_with_data()
+            for parameter in analysis.get_all_parameters()
+        }
         for analysis in self.analysis_list:
             all_params = analysis.get_all_parameters()
             param_names = [p.name for p in all_params]
@@ -630,8 +638,9 @@ class Analysis(AnalysisBase):
             pars = {p.name: p for p in all_params}
 
             for name in all_names:
-                # A Q index without data was never fitted, so its values mean nothing.
-                if name in pars and analysis.has_data:
+                # A Q index without data was never fitted, so its own values mean nothing; a
+                # parameter it shares with a fitted Q index was fitted there.
+                if name in pars and (analysis.has_data or pars[name].unique_name in fitted):
                     p = pars[name]
 
                     # Unit consistency check
@@ -892,24 +901,6 @@ class Analysis(AnalysisBase):
         """
         return tuple(analysis.Q_index for analysis in self._analyses_with_data())
 
-    def _warn_about_Q_without_data(self, action: str) -> None:
-        """
-        Warn that the Q indices without data are skipped.
-
-        Parameters
-        ----------
-        action : str
-            What is being skipped, such as ``'fit'`` or ``'sample'``.
-        """
-        skipped = [a.Q_index for a in self.analysis_list if not a.has_data]
-        if skipped:
-            warnings.warn(
-                f'Q_index {skipped} has no data to {action}, as every point is masked, NaN or '
-                'Inf, and is skipped.',
-                UserWarning,
-                stacklevel=3,
-            )
-
     def _sampling_data(self) -> tuple[list, list, list]:
         """
         Get the per-Q data to bind to the Sampler, as lists of arrays.
@@ -920,7 +911,7 @@ class Analysis(AnalysisBase):
             The ``(x, y, weights)`` triple, one entry per Q index with data. A Q index without data
             is skipped with a warning, as the MultiFitter leaves it out too.
         """
-        self._warn_about_Q_without_data('sample')
+        skip_Q_without_data(self.analysis_list, 'sample')
         xs, ys, ws = [], [], []
         for analysis1d in self._analyses_with_data():
             x, y, weight = analysis1d._sampling_data()  # ruff: ignore[private-member-access]
@@ -1036,20 +1027,18 @@ class Analysis(AnalysisBase):
                 'The scale is one parameter for all Q, so it cannot be fitted independently at '
                 "each Q. Fix it, or use fit_method='simultaneous'."
             )
-        self._warn_about_Q_without_data('fit')
-        return [analysis.fit() if analysis.has_data else None for analysis in self.analysis_list]
+        with_data = skip_Q_without_data(self.analysis_list, 'fit')
+        return [
+            analysis.fit() if has_data else None
+            for analysis, has_data in zip(self.analysis_list, with_data, strict=True)
+        ]
 
     def _fit_all_Q_simultaneously(self) -> FitResults:
         """
         Fit data for all Q indices simultaneously.
 
         A Q index with no data, because every point is masked, NaN or Inf, is skipped with a
-        warning.
-
-        Raises
-        ------
-        ValueError
-            If no Q index has data.
+        warning; a ValueError is raised if no Q index has data.
 
         Returns
         -------
@@ -1057,10 +1046,7 @@ class Analysis(AnalysisBase):
             The results of the simultaneous fit across all Q indices, split by Q index, with None
             for a skipped Q index.
         """
-        with_data = [analysis.has_data for analysis in self.analysis_list]
-        if not any(with_data):
-            raise ValueError('No Q index has data to fit: every point is masked, NaN or Inf.')
-        self._warn_about_Q_without_data('fit')
+        with_data = skip_Q_without_data(self.analysis_list, 'fit')
         xs = []
         ys = []
         ws = []

@@ -164,6 +164,8 @@ class Analysis1d(AnalysisBase):
         bool
             True if there is at least one point to fit.
         """
+        if self.experiment is not None:
+            self.experiment._sync_masks()  # ruff: ignore[private-member-access]
         energy = self._masked_energy
         return energy is not None and len(energy) > 0
 
