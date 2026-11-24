@@ -785,3 +785,35 @@ class TestComponentCollection:
             1
         ].evaluate(x, output='scipp')
         assert sc.allclose(result, expected)
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_to_dict_passes_skip_to_the_components(self):
+        # WHEN a component with an explicit unique name
+        collection = ComponentCollection(
+            components=[Gaussian(name='G', unique_name='to_dict_skip_gaussian')]
+        )
+
+        # THEN
+        kept = collection.to_dict()
+        skipped = collection.to_dict(skip=['unique_name'])
+
+        # EXPECT
+        assert kept['components'][0]['unique_name'] == 'to_dict_skip_gaussian'
+        assert 'unique_name' not in skipped['components'][0]
+
+    def test_copy_with_an_explicit_unique_name(self):
+        "Regression: the copy kept the unique name, which is already in the registry"
+        # WHEN a component with an explicit unique name
+        collection = ComponentCollection(
+            components=[Gaussian(name='G', unique_name='copy_explicit_gaussian')]
+        )
+
+        # THEN
+        collection_copy = copy(collection)
+
+        # EXPECT a copy of the component under a name of its own
+        assert collection_copy['G'] is not collection['G']
+        assert collection_copy['G'].unique_name != 'copy_explicit_gaussian'
