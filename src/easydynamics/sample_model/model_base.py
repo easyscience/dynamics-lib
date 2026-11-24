@@ -793,19 +793,18 @@ class ModelBase(EasyDynamicsModelBase):
         if not collections or collections[0].is_empty:
             raise ValueError('Set Q and add components to the model before plotting it.')
 
-        def to_datagroup(collection: ComponentCollection) -> sc.DataGroup:
-            values = {'Total': collection.evaluate(energy, output='scipp')}
-            if plot_components:
-                for name in collection.list_component_names():
-                    values[name] = collection.evaluate_component(energy, name, output='scipp')
-            return sc.DataGroup({
-                key: sc.DataArray(value, coords={energy.dim: energy})
-                for key, value in values.items()
-            })
-
-        model = sc.concat([to_datagroup(collection) for collection in collections], dim='Q').apply(
-            lambda da: da.assign_coords(Q=self.Q)
-        )
+        # One list of per-Q curves for the total and for each component, stacked along Q.
+        curves = {'Total': [c.evaluate(energy, output='scipp') for c in collections]}
+        if plot_components:
+            for name in collections[0].list_component_names():
+                curves[name] = [
+                    c.evaluate_component(energy, name, output='scipp') for c in collections
+                ]
+        coords = {'Q': self.Q, energy.dim: energy}
+        model = sc.DataGroup({
+            key: sc.DataArray(sc.concat(values, dim='Q'), coords=coords)
+            for key, values in curves.items()
+        })
 
         linestyle = dict.fromkeys(model, '--')
         linestyle['Total'] = '-'
@@ -814,13 +813,11 @@ class ModelBase(EasyDynamicsModelBase):
             'linestyle': linestyle,
             'marker': dict.fromkeys(model),
             'color': {'Total': 'red'},
+            **kwargs,
         }
-        if Q_index is None:
-            plot_kwargs['keep'] = energy.dim
-        plot_kwargs.update(kwargs)
 
         if Q_index is None:
-            fig = pp.slicer(model, **plot_kwargs)
+            fig = pp.slicer(model, **{'keep': energy.dim, **plot_kwargs})
             for widget in fig.bottom_bar[0].controls.values():
                 widget.slider_toggler.value = '-o-'
         else:
