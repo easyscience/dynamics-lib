@@ -58,23 +58,29 @@ class TestLoadMantidNexus:
         # EXPECT
         assert data.sizes == {'Q': 4, 'energy': 12}
 
-    def test_uncovered_bins_become_nan(self):
+    def test_uncovered_bins_are_masked(self):
         # THEN
         data = load_mantid_nexus(IRIS)
 
-        # EXPECT exactly the bins with zero fractional area are NaN
+        # EXPECT exactly the bins with zero fractional area are masked, and nothing is NaN
         uncovered = stored(IRIS, 'frac_area') == 0
         assert uncovered.any()
-        np.testing.assert_array_equal(np.isnan(data.values), uncovered)
-        np.testing.assert_array_equal(np.isnan(data.variances), uncovered)
+        np.testing.assert_array_equal(data.masks['uncovered'].values, uncovered)
+        assert np.isfinite(data.values).all()
+
+    def test_no_mask_without_frac_area(self):
+        # THEN
+        data = load_mantid_nexus(IN16B)
+
+        # EXPECT
+        assert dict(data.masks) == {}
 
     def test_covered_values_are_not_divided_by_frac_area(self):
         # THEN
         data = load_mantid_nexus(IRIS)
 
         # EXPECT the stored values, which Mantid already divided by the fractional areas
-        covered = stored(IRIS, 'frac_area') != 0
-        np.testing.assert_array_equal(data.values[covered], stored(IRIS, 'values')[covered])
+        np.testing.assert_array_equal(data.values, stored(IRIS, 'values'))
 
     def test_unfinalized_rebinned_workspace_raises(self, tmp_path):
         # WHEN the areas have not yet been divided out
@@ -118,17 +124,21 @@ class TestLoadMantidNexus:
         data = load_mantid_nexus(IRIS, min_error=np.nan)
 
         # EXPECT the covered empty bins are masked as well as the uncovered ones
-        nan = np.isnan(data.values)
-        assert nan.sum() == 5
-        assert nan[2, :2].all()
-        assert not (data.variances[~nan] == 0).any()
+        zero_error = data.masks['zero_error'].values
+        assert zero_error.sum() == 5
+        assert zero_error[2, :2].all()
+        np.testing.assert_array_equal(zero_error, data.variances == 0)
 
-    def test_min_error_leaves_uncovered_bins_nan(self):
+    def test_min_error_nan_data_can_be_fitted(self):
+        # WHEN
+        experiment = Experiment(data=load_mantid_nexus(IRIS, min_error=np.nan))
+
         # THEN
-        data = load_mantid_nexus(IRIS, min_error=1.0)
+        _, _, weights, kept = experiment.extract_x_y_weights_only_finite(Q_index=2)
 
-        # EXPECT a bin no detector reached gets no error, and so stays out of fits
-        assert np.isnan(data.variances[0, -3:]).all()
+        # EXPECT the two empty bins at this Q are left out
+        assert kept.sum() == 14
+        assert np.isfinite(weights).all()
 
     def test_data_with_min_error_can_be_fitted(self):
         # WHEN

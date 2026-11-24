@@ -35,12 +35,12 @@ def load_mantid_nexus(
     The result can be given straight to an ``Experiment``. Coordinates are kept as Mantid wrote
     them, so they may be bin edges, which ``Experiment`` handles.
 
-    Bins that no detector reached, marked by Mantid with a zero fractional area, are set to NaN so
-    they are masked out of fits rather than read as zero intensity.
+    Bins that no detector reached, marked by Mantid with a zero fractional area, are masked by an
+    ``'uncovered'`` mask, so fits and rebinning leave them out rather than read them as zero
+    intensity.
 
     Bins with zero counts are usually stored with zero error, which a fit cannot weight by. Use
-    ``min_error`` to choose what happens to them. Bins set to NaN, here or by ``min_error``, make
-    any bin they are averaged into by ``Experiment.rebin`` NaN as well.
+    ``min_error`` to choose what happens to them.
 
     Examples
     --------
@@ -60,14 +60,14 @@ def load_mantid_nexus(
         file holds several workspaces.
     min_error : float | None, default=None
         None keeps the errors as stored. A positive number raises every error below it to it, in
-        the units of the intensity. NaN sets the bins with zero error to NaN, so fits leave them
-        out.
+        the units of the intensity. NaN masks the bins with zero error with a ``'zero_error'``
+        mask, so fits and rebinning leave them out.
 
     Returns
     -------
     sc.DataArray
         Dims ``('Q', 'energy')``, with ``Q`` in 1/angstrom, ``energy`` in meV and variances from
-        the stored errors.
+        the stored errors, and any masks described above.
 
     Raises
     ------
@@ -104,8 +104,12 @@ def load_mantid_nexus(
             dims.append(dim)
             coords[dim] = sc.array(dims=[dim], values=workspace[axis_name][()], unit=unit)
 
-        values = workspace['values'][()]
-        variances = workspace['errors'][()] ** 2
+        data = sc.DataArray(
+            data=sc.array(
+                dims=dims, values=workspace['values'][()], variances=workspace['errors'][()] ** 2
+            ),
+            coords=coords,
+        )
         if 'frac_area' in workspace:
             # A finalized RebinnedOutput already holds intensity divided by the fractional area.
             if _decode(workspace['frac_area'].attrs.get('finalized', b'1')) != '1':
@@ -113,15 +117,9 @@ def load_mantid_nexus(
                     'The workspace was saved before Mantid normalised it by its fractional '
                     'areas; finalize it in Mantid and save it again.'
                 )
-            uncovered = workspace['frac_area'][()] == 0
-            values[uncovered] = np.nan
-            variances[uncovered] = np.nan
-    values, variances = apply_min_error(values, variances, min_error)
+            data.masks['uncovered'] = sc.array(dims=dims, values=workspace['frac_area'][()] == 0)
 
-    data = sc.DataArray(
-        data=sc.array(dims=dims, values=values, variances=variances),
-        coords=coords,
-    )
+    apply_min_error(data, min_error)
     return data.transpose(['Q', 'energy']).copy()
 
 

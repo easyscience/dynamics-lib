@@ -7,13 +7,10 @@ import math
 from numbers import Real
 
 import numpy as np
+import scipp as sc
 
 
-def apply_min_error(
-    values: np.ndarray,
-    variances: np.ndarray,
-    min_error: float | None,
-) -> tuple[np.ndarray, np.ndarray]:
+def apply_min_error(data: sc.DataArray, min_error: float | None) -> None:
     """
     Deal with bins whose error is too small to weight a fit by.
 
@@ -23,19 +20,12 @@ def apply_min_error(
 
     Parameters
     ----------
-    values : np.ndarray
-        The intensities. Changed in place when ``min_error`` is NaN.
-    variances : np.ndarray
-        The variances, the squared errors. Changed in place unless ``min_error`` is None.
+    data : sc.DataArray
+        The loaded data, with variances. Changed in place.
     min_error : float | None
         None leaves the data as it is. A positive number raises every error below it to it, in the
-        same units as the intensity. NaN instead sets the bins whose error is zero to NaN, so fits
-        leave them out.
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        The values and variances.
+        same units as the intensity. NaN instead masks the bins whose error is zero with a
+        ``'zero_error'`` mask, so fits and rebinning leave them out.
 
     Raises
     ------
@@ -45,16 +35,13 @@ def apply_min_error(
         If ``min_error`` is not positive and finite, or NaN.
     """
     if min_error is None:
-        return values, variances
+        return
     if not isinstance(min_error, Real) or isinstance(min_error, bool):
         raise TypeError(f'min_error must be a number or None, not {type(min_error).__name__}')
 
     if math.isnan(min_error):
-        zero = variances == 0
-        values[zero] = np.nan
-        variances[zero] = np.nan
+        data.masks['zero_error'] = sc.array(dims=data.dims, values=data.variances == 0)
     elif min_error > 0 and math.isfinite(min_error):
-        np.maximum(variances, min_error**2, out=variances, where=~np.isnan(variances))
+        data.variances = np.maximum(data.variances, min_error**2)
     else:
         raise ValueError(f'min_error must be positive and finite, or NaN, not {min_error}')
-    return values, variances
