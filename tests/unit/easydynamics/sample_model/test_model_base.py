@@ -1408,3 +1408,36 @@ class TestModelBase:
 
         # EXPECT
         assert 'Q_independent_parameters' not in obj_dict
+        assert 'Q_dependences' not in obj_dict
+
+    @pytest.mark.parametrize(
+        'copy_model',
+        [copy, lambda model: ModelBase.from_dict(model.to_dict())],
+        ids=['copy', 'from_dict'],
+    )
+    def test_copy_keeps_Q_dependences(self, model_base, copy_model):
+        # WHEN a dependence on a Parameter with a scaled unit, bounds and a fixed flag
+        (a,) = model_base.set_parameter_Q_dependence(
+            'TestGaussian1Name', 'width', 'a * Q', {'a': 0.1}, {'a': 'meV*angstrom'}
+        )
+        a.min = 0.01
+        a.fixed = True
+
+        # THEN
+        model_copy = copy_model(model_base)
+        (a_copy,) = [p for p in model_copy.get_all_variables() if p.name == a.name]
+
+        # EXPECT the copy has its own Parameter, with the same value, unit, bounds and fixed flag
+        assert a_copy is not a
+        assert a_copy.value == pytest.approx(0.1)
+        assert a_copy.unit == a.unit
+        assert a_copy.min == pytest.approx(0.01)
+        assert a_copy.fixed is True
+
+        # EXPECT the widths of the copy follow the copy's Parameter, not the original's
+        a_copy.fixed = False
+        a_copy.value = 0.2
+        widths = model_copy.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in widths] == pytest.approx([0.2, 0.4, 0.6])
+        original_widths = model_base.get_parameters('TestGaussian1Name', 'width')
+        assert [p.value for p in original_widths] == pytest.approx([0.1, 0.2, 0.3])

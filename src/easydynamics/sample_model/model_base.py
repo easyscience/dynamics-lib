@@ -795,7 +795,7 @@ class ModelBase(EasyDynamicsModelBase):
 
     def to_dict(self, skip: list[str] | None = None) -> dict:
         """
-        Convert the model to a dictionary, including its Q constraints.
+        Convert the model to a dictionary, including its Q constraints and Q dependences.
 
         Parameters
         ----------
@@ -812,12 +812,28 @@ class ModelBase(EasyDynamicsModelBase):
             obj_dict['Q_independent_parameters'] = [
                 list(key) for key in self._Q_independent_parameters
             ]
+        if self._Q_dependences:
+            obj_dict['Q_dependences'] = [
+                {
+                    'component_name': component_name,
+                    'parameter_name': parameter_name,
+                    'expression': expression,
+                    'parameters': {
+                        symbol: parameter.to_dict(skip=skip)
+                        for symbol, parameter in parameters.items()
+                    },
+                }
+                for (component_name, parameter_name), (
+                    expression,
+                    parameters,
+                ) in self._Q_dependences.items()
+            ]
         return obj_dict
 
     @classmethod
     def from_dict(cls, obj_dict: dict) -> 'ModelBase':
         """
-        Re-create a model from its dictionary representation, including its Q constraints.
+        Re-create a model from a dictionary, including its Q constraints and Q dependences.
 
         Parameters
         ----------
@@ -831,9 +847,25 @@ class ModelBase(EasyDynamicsModelBase):
         """
         obj_dict = dict(obj_dict)
         Q_independent_parameters = obj_dict.pop('Q_independent_parameters', [])
+        Q_dependences = obj_dict.pop('Q_dependences', [])
         model = super().from_dict(obj_dict)
         for component_name, parameter_name in Q_independent_parameters:
             model.make_parameter_Q_independent(component_name, parameter_name)
+        for dependence in Q_dependences:
+            parameters = {}
+            for symbol, parameter_dict in dependence['parameters'].items():
+                # Read without the unit and relabel it afterwards, since EasyScience would rescale
+                # the value for a unit with a numeric factor such as meV*angstrom.
+                parameter_dict = dict(parameter_dict)
+                unit = parameter_dict.pop('unit', 'dimensionless')
+                parameters[symbol] = Parameter.from_dict(parameter_dict)
+                relabel_parameter_unit(parameters[symbol], unit)
+            key = (dependence['component_name'], dependence['parameter_name'])
+            model._Q_dependences[key] = (  # ruff: ignore[private-member-access]
+                dependence['expression'],
+                parameters,
+            )
+        model._apply_Q_constraints()  # ruff: ignore[private-member-access]
         return model
 
     # ------------------------------------------------------------------
