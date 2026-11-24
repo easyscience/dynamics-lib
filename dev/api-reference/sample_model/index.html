@@ -2885,7 +2885,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2900,7 +2900,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3106,10 +3106,21 @@ are copied into ComponentCollections for each Q value.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3873,7 +3884,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3958,7 +3969,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4061,7 +4072,9 @@ the collections' inputs are unchanged.</p>
     <div class="doc doc-contents ">
 
         <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
-<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.
+Includes the Parameters created by <code>set_parameter_Q_dependence</code>, which are shared by all
+Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5118,11 +5131,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5181,6 +5199,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.BackgroundModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -5196,8 +5388,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5223,10 +5442,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -44847,7 +45066,7 @@ directly into a ResolutionModel:
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -44862,7 +45081,7 @@ directly into a ResolutionModel:
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45024,10 +45243,21 @@ directly into a ResolutionModel:
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45850,7 +46080,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45935,7 +46165,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46038,7 +46268,9 @@ the collections' inputs are unchanged.</p>
     <div class="doc doc-contents ">
 
         <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
-<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.
+Includes the Parameters created by <code>set_parameter_Q_dependence</code>, which are shared by all
+Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46878,11 +47110,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46941,6 +47178,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.ResolutionModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -46956,8 +47367,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46983,10 +47421,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47925,7 +48363,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47940,7 +48378,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -48124,10 +48562,21 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49381,7 +49830,7 @@ Q grid) is visible to convolvers at once, before this SampleModel is next used.<
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49466,7 +49915,7 @@ Q grid) is visible to convolvers at once, before this SampleModel is next used.<
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50415,11 +50864,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50478,6 +50932,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.SampleModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -50493,8 +51121,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50520,10 +51175,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51420,7 +52075,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51435,7 +52090,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51641,10 +52296,21 @@ are copied into ComponentCollections for each Q value.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52408,7 +53074,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52493,7 +53159,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52596,7 +53262,9 @@ the collections' inputs are unchanged.</p>
     <div class="doc doc-contents ">
 
         <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
-<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.
+Includes the Parameters created by <code>set_parameter_Q_dependence</code>, which are shared by all
+Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53653,11 +54321,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53716,6 +54389,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.background_model.BackgroundModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -53731,8 +54578,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53758,10 +54632,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -85216,7 +86090,7 @@ unit for the computation without mutating the parameters.</p>
     </div>
 
 </div>
-
+<h6 id="easydynamics.sample_model.components.expression_component-functions">Functions:</h6>
 
 
 
@@ -133763,10 +134637,21 @@ are copied into ComponentCollections for each Q value.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -133810,7 +134695,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -133825,7 +134710,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135443,11 +136328,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135506,6 +136396,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.model_base.ModelBase.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -135521,8 +136585,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135548,10 +136639,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135626,7 +136717,9 @@ the Parameter has no constraint.</p>
     <div class="doc doc-contents ">
 
         <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
-<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.
+Includes the Parameters created by <code>set_parameter_Q_dependence</code>, which are shared by all
+Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135811,7 +136904,7 @@ ModelBase.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135896,7 +136989,7 @@ ModelBase.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -136463,7 +137556,7 @@ directly into a ResolutionModel:
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -136478,7 +137571,7 @@ directly into a ResolutionModel:
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -136640,10 +137733,21 @@ directly into a ResolutionModel:
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137848,7 +138952,7 @@ shape after stripping.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137933,7 +139037,7 @@ shape after stripping.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138036,7 +139140,9 @@ shape after stripping.</p>
     <div class="doc doc-contents ">
 
         <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
-<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.
+Includes the Parameters created by <code>set_parameter_Q_dependence</code>, which are shared by all
+Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138876,11 +139982,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138939,6 +140050,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.resolution_model.ResolutionModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -138954,8 +140239,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138981,10 +140293,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -139617,7 +140929,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert the model to a dictionary, including its Q constraints.</p>
+                  <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -139632,7 +140944,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+                  <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -139816,10 +141128,21 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;set_parameter_Q_dependence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expression&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.set_parameter_Q_dependence&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.set_parameter_Q_dependence">set_parameter_Q_dependence</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component follow an expression in Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+                  <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -141468,7 +142791,7 @@ None, get variables from all ComponentCollections.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the model to a dictionary, including its Q constraints.</p>
+        <p>Convert the model to a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -141553,7 +142876,7 @@ None, get variables from all ComponentCollections.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
+        <p>Re-create a model from a dictionary, including its Q constraints and Q dependences.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -142502,11 +143825,16 @@ on per-Q collections built later.</p>
     <div class="doc doc-contents ">
 
         <p>Make one Parameter of a component take the same value at every Q.</p>
-<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
-is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
-the value is determined by the fit of Q index 0 alone.</p>
-<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
-later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>This is the Q dependence where the Parameter equals a constant: the Parameter at every Q is
+made dependent on one new Parameter owned by the model, named
+<code>'&lt;component_name&gt; &lt;parameter_name&gt; (all Q)'</code>, which is what a fit varies. It starts with
+the value, unit, bounds and fixed flag of the Parameter at Q index 0, or of the template
+when Q is not set. Use <code>fit_method='simultaneous'</code>. Any other Q constraint on the
+Parameter is replaced, and calling this again returns the same Parameter.</p>
+<p>The constraint is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<p>A Parameter that already depends on other Parameters, e.g. because it is generated by a
+diffusion model, is rejected with a ValueError.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -142565,6 +143893,180 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
     </table>
 
 
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameter that sets the value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.sample_model.SampleModel.set_parameter_Q_dependence" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_parameter_Q_dependence</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_units</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component follow an expression in Q.</p>
+<p>The Parameter at every Q is made dependent on new Parameters owned by the model, which are
+shared by all Q and are what a fit varies. Use <code>fit_method='simultaneous'</code>. Any existing
+Q constraint on the Parameter is replaced.</p>
+<p>The expression may use <code>Q</code> (in 1/angstrom), the constants <code>hbar</code> and <code>kb</code>, and the
+symbols given in <em>parameters</em>, combined with <code>+ - * / **</code>. Units are carried through the
+expression, and its result must be convertible to the unit of the Parameter:
+<div class="language-python highlight"><pre><span></span><code><span class="p">(</span><span class="n">D</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">set_parameter_Q_dependence</span><span class="p">(</span>
+    <span class="s1">'Lorentzian'</span><span class="p">,</span>
+    <span class="s1">'width'</span><span class="p">,</span>
+    <span class="n">expression</span><span class="o">=</span><span class="s1">'hbar * D * Q**2'</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="mf">2.4e-9</span><span class="p">},</span>
+    <span class="n">parameter_units</span><span class="o">=</span><span class="p">{</span><span class="s1">'D'</span><span class="p">:</span> <span class="s1">'m**2/s'</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<p>The dependence is reapplied whenever the per-Q collections are rebuilt, and applies when Q
+is set later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expression</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The expression giving the value of the Parameter as a function of <code>Q</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.utils.utils.Numeric">Numeric</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Initial values of the new Parameters, keyed by their symbol in the expression.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_units</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Units of the new Parameters, keyed by symbol. Symbols without an entry are
+dimensionless.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -142580,8 +144082,35 @@ later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
-diffusion model.</p>
+                <p>If <em>parameters</em> uses the reserved symbols <code>Q</code>, <code>hbar</code> or <code>kb</code>, if
+<em>parameter_units</em> names a symbol that is not in <em>parameters</em>, or if the Parameter
+already depends on other Parameters through something other than a Q constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="easydynamics.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new Parameters, in the order of <em>parameters</em>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -142607,10 +144136,10 @@ diffusion model.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
-<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
-flag and the others come back free, since a dependent Parameter has none. Does nothing if
-the Parameter has no constraint.</p>
+        <p>Undo <code>make_parameter_Q_independent</code> or <code>set_parameter_Q_dependence</code>, so the Parameter
+varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value and comes back free, with the bounds of the
+template. Does nothing if the Parameter has no constraint.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
