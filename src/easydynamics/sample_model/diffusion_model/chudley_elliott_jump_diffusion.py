@@ -8,6 +8,7 @@ import scipp as sc
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.utils.dependency_functions import create_dependency_functions
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
@@ -404,9 +405,9 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
 
-        # Q is given as a float, so we need to add the units
-        # TODO(markbujehein): Replace sin(x)/x with sinc once it is supported for Parameters #272 # ruff: ignore[line-contains-todo]
-        return f'(hbar / tau) * (1 - sin({Q} * l.value) / ({Q} * l.value) )'
+        # Q is given as a float in 1/angstrom, so we need to add the unit. The argument of sinc
+        # carries the unit of the jump length, so the width stays right if it is converted.
+        return f'hbar / tau * (1 - sinc({Q} / angstrom * l))'
 
     def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """
@@ -422,6 +423,9 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
             'l': self.jump_length,
             'hbar': self._hbar,
             'angstrom': self._angstrom,
+            # Temporary, until EasyScience supports functions in dependency expressions. A fresh
+            # copy per call, since the dependent Parameter observes every variable in the map.
+            **create_dependency_functions(),
         }
 
     ################################
