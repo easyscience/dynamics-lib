@@ -20,7 +20,6 @@ from easydynamics.utils.utils import _validate_Q_tolerance
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import kb
-from easydynamics.utils.utils import relabel_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import DescriptorNumber
 from easydynamics.variable import Parameter
@@ -640,11 +639,14 @@ class ModelBase(EasyDynamicsModelBase):
             return dependence.parameters[parameter_name]
         self.remove_parameter_Q_constraint(component_name, parameter_name)
         source = self._get_unconstrained_parameters(component_name, parameter_name)[0]
-        shared = Parameter(name=f'{component_name} {parameter_name} (all Q)', value=source.value)
-        # Set afterwards rather than in the constructor, which would rescale the value for a unit
-        # with a numeric factor such as meV*angstrom.
-        relabel_parameter_unit(shared, source.unit)
-        shared.min, shared.max, shared.fixed = source.min, source.max, source.fixed
+        shared = Parameter(
+            name=f'{component_name} {parameter_name} (all Q)',
+            value=source.value,
+            unit=source.unit,
+            min=source.min,
+            max=source.max,
+            fixed=source.fixed,
+        )
         self._set_Q_dependence(
             component_name, parameter_name, parameter_name, {parameter_name: shared}
         )
@@ -716,13 +718,13 @@ class ModelBase(EasyDynamicsModelBase):
             raise ValueError(f'parameter_units given for unknown parameter(s): {unknown}.')
 
         new_parameters = {
-            symbol: Parameter(name=f'{component_name} {parameter_name} {symbol}', value=value)
+            symbol: Parameter(
+                name=f'{component_name} {parameter_name} {symbol}',
+                value=value,
+                unit=parameter_units.get(symbol, 'dimensionless'),
+            )
             for symbol, value in parameters.items()
         }
-        # Set afterwards rather than in the constructor, which would rescale the value for a
-        # unit with a numeric factor such as meV*angstrom.
-        for symbol, unit in parameter_units.items():
-            relabel_parameter_unit(new_parameters[symbol], unit)
         self._set_Q_dependence(component_name, parameter_name, expression, new_parameters)
         return list(new_parameters.values())
 
@@ -860,14 +862,10 @@ class ModelBase(EasyDynamicsModelBase):
         Q_dependences = obj_dict.pop('Q_dependences', [])
         model = super().from_dict(obj_dict)
         for dependence in Q_dependences:
-            parameters = {}
-            for symbol, parameter_dict in dependence['parameters'].items():
-                # Read without the unit and relabel it afterwards, since EasyScience would rescale
-                # the value for a unit with a numeric factor such as meV*angstrom.
-                parameter_dict = dict(parameter_dict)
-                unit = parameter_dict.pop('unit', 'dimensionless')
-                parameters[symbol] = Parameter.from_dict(parameter_dict)
-                relabel_parameter_unit(parameters[symbol], unit)
+            parameters = {
+                symbol: Parameter.from_dict(parameter_dict)
+                for symbol, parameter_dict in dependence['parameters'].items()
+            }
             key = (dependence['component_name'], dependence['parameter_name'])
             model._Q_dependences[key] = _QDependence(  # ruff: ignore[private-member-access]
                 dependence['expression'], parameters
