@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import warnings
+from collections import Counter
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -172,7 +173,7 @@ class JointAnalysis(EasyDynamicsBase):
         list[ModelComponent]
             The shared components, in order of first appearance, each listed once.
         """
-        return [component for component, _ in self._shared_components()]
+        return self._shared_components()
 
     @shared_components.setter
     def shared_components(self, _value: list[ModelComponent]) -> None:
@@ -405,33 +406,39 @@ class JointAnalysis(EasyDynamicsBase):
     # Private methods
     #############
 
-    def _shared_components(self) -> list[tuple[ModelComponent, list[tuple[ModelBase, int]]]]:
+    def _models(self) -> list[ModelBase]:
         """
-        Find every template component held by more than one model.
-
-        The models are the sample, resolution and background models of every analysis. A model
-        object used by several analyses counts once.
+        Get the sample, resolution and background models of every analysis.
 
         Returns
         -------
-        list[tuple[ModelComponent, list[tuple[ModelBase, int]]]]
-            For each shared component, in order of first appearance: the component and its holders
-            as ``(model, template index)``, in the order of the analyses.
+        list[ModelBase]
+            The models in the order of the analyses. A model object used by several analyses is
+            listed once.
         """
-        holders: dict[int, tuple[ModelComponent, list[tuple[ModelBase, int]]]] = {}
-        seen_models: set[int] = set()
+        models: dict[int, ModelBase] = {}
         for analysis in self._analyses:
             for model in (
                 analysis.sample_model,
                 analysis.instrument_model.resolution_model,
                 analysis.instrument_model.background_model,
             ):
-                if id(model) in seen_models:
-                    continue
-                seen_models.add(id(model))
-                for index, component in enumerate(model.components):
-                    holders.setdefault(id(component), (component, []))[1].append((model, index))
-        return [entry for entry in holders.values() if len(entry[1]) > 1]
+                models.setdefault(id(model), model)
+        return list(models.values())
+
+    def _shared_components(self) -> list[ModelComponent]:
+        """
+        Find every template component held by more than one model.
+
+        Returns
+        -------
+        list[ModelComponent]
+            The shared components, in order of first appearance, each listed once.
+        """
+        templates = [component for model in self._models() for component in model.components]
+        counts = Counter(id(component) for component in templates)
+        shared = {id(c): c for c in templates if counts[id(c)] > 1}
+        return list(shared.values())
 
     def _shared_component_groups(
         self,
@@ -460,16 +467,16 @@ class JointAnalysis(EasyDynamicsBase):
             # they lose in a rebin until the analysis is next used.
             _ = analysis.analysis_list
 
-        result = []
-        for component, holders in self._shared_components():
-            groups: dict[float, list[ModelComponent]] = {}
-            for model, index in holders:
-                for Q_index, Q_value in enumerate(model.Q.values):
-                    copy = model.get_component_collection(Q_index)[index]
-                    # Rounded, so that Q values that differ only by floating point noise match.
-                    groups.setdefault(round(float(Q_value), 6), []).append(copy)
-            result.append((component, groups))
-        return result
+        shared = {id(component): component for component in self._shared_components()}
+        groups: dict[int, dict[float, list[ModelComponent]]] = {key: {} for key in shared}
+        for model in self._models():
+            for Q_index, Q_value in enumerate(model.Q.values):
+                for copy in model.get_component_collection(Q_index):
+                    template_groups = groups.get(id(copy.get_template()))
+                    if template_groups is not None:
+                        # Rounded, so that Q values that differ only by floating point noise match.
+                        template_groups.setdefault(round(float(Q_value), 6), []).append(copy)
+        return [(component, groups[key]) for key, component in shared.items()]
 
     #############
     # Dunder methods

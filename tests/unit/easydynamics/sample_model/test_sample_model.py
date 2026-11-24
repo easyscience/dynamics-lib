@@ -1204,3 +1204,62 @@ class TestSampleModel:
         # EXPECT
         assert versions == sorted(versions)
         assert len(set(versions)) >= 4
+
+    #############
+    # Origin of per-Q components
+    #############
+
+    def test_per_Q_components_return_their_template_or_diffusion_model(self):
+        # WHEN
+        template = Gaussian(name='G')
+        diffusion_model = DeltaLorentz()
+        sample_model = SampleModel(components=template, diffusion_models=diffusion_model, Q=[1.0])
+
+        # THEN
+        collection = sample_model.get_component_collection(0)
+
+        # EXPECT the template's copy points at the template, the diffusion model's own
+        # components at the diffusion model
+        assert collection['G'].get_template() is template
+        assert collection['G'].get_diffusion_model() is None
+        generated = [c for c in collection if c is not collection['G']]
+        assert len(generated) == 2
+        assert all(c.get_diffusion_model() is diffusion_model for c in generated)
+        assert all(c.get_template() is None for c in generated)
+
+    def test_template_copies_keep_their_template_when_diffusion_components_are_replaced(self):
+        # WHEN a SampleModel whose diffusion model regenerates its components, because another
+        # SampleModel adds Q values to its grid
+        template = Gaussian(name='G')
+        diffusion_model = BrownianTranslationalDiffusion()
+        sample_model = SampleModel(components=template, diffusion_models=diffusion_model, Q=[1.0])
+        copy_before = sample_model.get_component_collection(0)['G']
+        generated_before = sample_model.get_component_collection(0)[-1]
+        SampleModel(diffusion_models=diffusion_model, Q=[2.0])
+
+        # THEN
+        collection = sample_model.get_component_collection(0)
+
+        # EXPECT the template copy is kept, and the new diffusion component records its model
+        assert collection['G'] is copy_before
+        assert collection['G'].get_template() is template
+        assert collection[-1] is not generated_before
+        assert collection[-1].get_diffusion_model() is diffusion_model
+
+    def test_appended_template_copies_return_their_template_with_a_diffusion_model(self):
+        # WHEN per-Q collections that hold a diffusion model's components are built, so a new
+        # template is inserted in place before them
+        diffusion_model = BrownianTranslationalDiffusion()
+        sample_model = SampleModel(diffusion_models=diffusion_model, Q=[1.0, 2.0])
+        _ = sample_model.get_component_collection(0)
+        new_template = Gaussian(name='G')
+
+        # THEN
+        sample_model.append_component(new_template)
+
+        # EXPECT
+        assert sample_model.component_collections_is_dirty is False
+        for i in range(len(sample_model.Q)):
+            collection = sample_model.get_component_collection(i)
+            assert collection[0].get_template() is new_template
+            assert collection[1].get_diffusion_model() is diffusion_model
