@@ -308,22 +308,43 @@ class TestChudleyElliottJumpDiffusion:
         expression = chudley_elliott_model._write_width_dependency_expression(0.5)
 
         # EXPECT
-        expected_expression = '(hbar / tau) * (1 - sin(0.5 * l.value) / (0.5 * l.value) )'
+        expected_expression = 'hbar / tau * (1 - sinc(0.5 / angstrom * l))'
         assert expression == expected_expression
 
     def test_write_width_dependency_map_expression(self, chudley_elliott_model):
         # WHEN THEN
         expression_map = chudley_elliott_model._write_width_dependency_map_expression()
 
-        # EXPECT
-        expected_map = {
-            'tau': chudley_elliott_model.residence_time,
-            'l': chudley_elliott_model.jump_length,
-            'hbar': chudley_elliott_model._hbar,
-            'angstrom': chudley_elliott_model._angstrom,
-        }
+        # EXPECT the model's variables, and the functions, which are new objects on every call
+        assert expression_map['tau'] is chudley_elliott_model.residence_time
+        assert expression_map['l'] is chudley_elliott_model.jump_length
+        assert expression_map['hbar'] is chudley_elliott_model._hbar
+        assert expression_map['angstrom'] is chudley_elliott_model._angstrom
+        assert {'exp', 'sin', 'cos', 'sinc'} <= set(expression_map)
 
-        assert expression_map == expected_map
+    def test_width_follows_jump_length_in_another_unit(self):
+        "Regression: the expression used the jump length's value, so it assumed angstrom"
+        # WHEN
+        model = ChudleyElliottJumpDiffusion(
+            residence_time=1.5, jump_length=2.0, Q=np.array([0.5, 1.0, 1.5])
+        )
+
+        # THEN the same jump length in nm, and then a new value in nm
+        model.jump_length.convert_unit('nm')
+        widths_after_conversion = [
+            collection[0].width.value for collection in model.get_component_collections()
+        ]
+        model.jump_length.value = 0.3
+        widths_after_new_value = [
+            collection[0].width.value for collection in model.get_component_collections()
+        ]
+
+        # EXPECT the widths of the components match the analytical ones
+        expected_after_conversion = ChudleyElliottJumpDiffusion(
+            residence_time=1.5, jump_length=2.0
+        ).calculate_width(np.array([0.5, 1.0, 1.5]))
+        np.testing.assert_allclose(widths_after_conversion, expected_after_conversion)
+        np.testing.assert_allclose(widths_after_new_value, model.calculate_width())
 
     def test_write_width_dependency_expression_raises(self, chudley_elliott_model):
         with pytest.raises(TypeError, match='Q must be a float'):
