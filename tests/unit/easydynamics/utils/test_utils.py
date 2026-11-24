@@ -10,7 +10,9 @@ from scipp import UnitError
 
 from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import _Q_values_match
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_Q_tolerance
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
@@ -129,6 +131,48 @@ class TestConvertUnitsWithRollback:
         assert p1.value == pytest.approx(1.0)
         assert str(p2.unit) == 'meV'
         assert p2.value == pytest.approx(2.0)
+
+
+class TestQValuesMatch:
+    @pytest.mark.parametrize(
+        'other, expected',
+        [
+            ([0.5, 1.0], True),
+            ([0.50009, 0.99991], True),
+            ([0.5002, 1.0], False),
+            ([0.5, 1.0, 1.5], False),
+        ],
+        ids=['equal', 'within_tolerance', 'beyond_tolerance', 'different_length'],
+    )
+    def test_Q_values_match(self, other, expected):
+        # WHEN
+        Q1 = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        Q2 = sc.array(dims=['Q'], values=other, unit='1/angstrom')
+
+        # THEN EXPECT
+        assert _Q_values_match(Q1, Q2, 1e-4) is expected
+
+
+class TestValidateQTolerance:
+    @pytest.mark.parametrize('Q_tolerance', [0, 0.01, 1])
+    def test_validate_Q_tolerance(self, Q_tolerance):
+        # WHEN THEN
+        result = _validate_Q_tolerance(Q_tolerance)
+
+        # EXPECT
+        assert result == Q_tolerance
+        assert isinstance(result, float)
+
+    def test_validate_Q_tolerance_not_a_number_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_tolerance must be a number'):
+            _validate_Q_tolerance('0.01')
+
+    @pytest.mark.parametrize('Q_tolerance', [-0.01, np.inf, np.nan])
+    def test_validate_Q_tolerance_negative_or_not_finite_raises(self, Q_tolerance):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Q_tolerance must be non-negative and finite'):
+            _validate_Q_tolerance(Q_tolerance)
 
 
 class TestValidateAndConvertQ:

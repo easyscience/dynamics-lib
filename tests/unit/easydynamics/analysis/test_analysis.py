@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from collections import Counter
+from copy import copy
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -848,6 +849,31 @@ class TestAnalysis:
         ):
             analysis.experiment = new_experiment
 
+    @pytest.mark.parametrize(
+        'Q_difference, Q_tolerance',
+        [(5e-5, None), (0.005, 0.01)],
+        ids=['default_tolerance', 'larger_tolerance'],
+    )
+    def test_resolution_model_with_slightly_different_Q_is_accepted(
+        self, analysis, Q_difference, Q_tolerance
+    ):
+        "A resolution fitted to one data set is used with another at nearly the same Q"
+        # WHEN a new InstrumentModel with a resolution model that already has Q values
+        resolution_model = sm.ResolutionModel(
+            components=Gaussian(name='Resolution'), Q=analysis.Q.values + Q_difference
+        )
+        instrument_model = InstrumentModel(resolution_model=resolution_model)
+        if Q_tolerance is not None:
+            instrument_model.Q_tolerance = Q_tolerance
+        resolution_parameters = resolution_model.get_all_variables()
+
+        # THEN
+        analysis.instrument_model = instrument_model
+
+        # EXPECT the per-Q resolution parameters are kept, and the model can be evaluated
+        assert resolution_model.get_all_variables() == resolution_parameters
+        assert len(analysis.calculate()) == 3
+
     def test_on_sample_model_changed(self, analysis):
         # WHEN
         # Create a new sample model.
@@ -1062,6 +1088,14 @@ class TestAnalysis:
             match='Q_index 3 is out of bounds',
         ):
             analysis.fit(Q_index=3)
+
+    def test_fit_all_Q_independently_with_a_free_scale_raises(self, analysis):
+        # WHEN the scale, which is one parameter for all Q, is free
+        analysis.scale.fixed = False
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='cannot be fitted independently at each Q'):
+            analysis.fit(fit_method='independent')
 
     def test_fit_all_Q_independently(self, analysis):
         # WHEN
@@ -1538,3 +1572,17 @@ class TestAnalysis:
         assert shared, 'expected the diffusion model to contribute parameters shared across Q'
         for parameter in shared:
             assert analysis._parameter_labels().label(parameter) == parameter.name
+
+    #############
+    # Copying
+    #############
+
+    def test_copy(self, analysis):
+        # WHEN THEN
+        analysis_copy = copy(analysis)
+
+        # EXPECT an independent analysis with models of its own, which calculates the same
+        assert analysis_copy.sample_model is not analysis.sample_model
+        assert analysis_copy.instrument_model is not analysis.instrument_model
+        for copied, original in zip(analysis_copy.calculate(), analysis.calculate(), strict=True):
+            np.testing.assert_allclose(copied, original)
