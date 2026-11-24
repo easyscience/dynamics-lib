@@ -205,6 +205,7 @@ nav:
           - Tutorial 0. More Advanced: tutorials/tutorial0_more_advanced.ipynb
           - Tutorial 1. Brownian Diffusion: tutorials/tutorial1_brownian.ipynb
           - Tutorial 2. Magnetic nanoparticles: tutorials/tutorial2_nanoparticles.ipynb
+          - Tutorial 3. Multiple data sets: tutorials/tutorial3_multiple_data.ipynb
       - Classes and Methods:
           - Components: tutorials/components.ipynb
           - Component collection: tutorials/component_collection.ipynb

@@ -586,6 +586,114 @@ class TestJointAnalysis:
         assert results[0].success
         assert shared.diffusion_coefficient.value == pytest.approx(true_D, rel=0.1)
 
+    def test_scales_are_the_scales_of_the_analyses(self, joint, first, second):
+        # WHEN THEN
+        scales = joint.scales
+
+        # EXPECT one per analysis, in order, fixed at 1 until freed
+        assert scales[0] is first.scale
+        assert scales[1] is second.scale
+        assert [scale.value for scale in scales] == [1.0, 1.0]
+        assert all(scale.fixed for scale in scales)
+
+    def test_scales_is_read_only(self, joint):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='scales is read-only'):
+            joint.scales = []
+
+    def test_fit_recovers_the_scale_of_the_second_data_set(self):
+        # WHEN two data sets of the same Lorentzian, the second three times more intense
+        energy = np.linspace(-3.0, 3.0, 61)
+        truth = np.array([Lorentzian(area=1.0, width=0.4).evaluate(energy) for _ in Q_FIRST])
+        shared = Lorentzian(name='L2', area=0.7, width=0.6)
+
+        def analysis(name, values):
+            result = Analysis(
+                display_name=name,
+                experiment=make_experiment(Q_FIRST, energy=energy, values=values),
+                sample_model=SampleModel(components=shared),
+                instrument_model=InstrumentModel(
+                    resolution_model=ResolutionModel(components=Gaussian(width=0.01))
+                ),
+            )
+            result.instrument_model.resolution_model.fix_all_parameters()
+            result.fix_energy_offset()
+            return result
+
+        first = analysis('first', truth)
+        second = analysis('second', 3.0 * truth)
+        joint = JointAnalysis(analyses=[first, second])
+
+        # THEN keeping the first as the reference and freeing the scale of the second
+        joint.scales[1].fixed = False
+        joint.fit()
+
+        # EXPECT one set of parameters for both, and the factor between them in the scale
+        assert second.scale.value == pytest.approx(3.0, rel=0.02)
+        assert first.scale.value == pytest.approx(1.0)
+        for Q_index in range(3):
+            assert self.l2_width(first, Q_index).value == pytest.approx(0.4, rel=0.05)
+
+    #############
+    # Parameters to dataset
+    #############
+
+    def test_parameters_to_dataset_covers_union_of_Q(self, joint, first, second):
+        # WHEN linked models with distinct per-Q values on the shared component
+        joint.link_shared_components()
+        for Q_index, width in enumerate([0.11, 0.12, 0.13]):
+            self.l2_width(first, Q_index).value = width
+        self.l2_width(second, 2).value = 0.14
+
+        # THEN
+        ds = joint.parameters_to_dataset()
+
+        # EXPECT the Q values of both analyses, the owner's values where they overlap
+        np.testing.assert_allclose(ds.coords['Q'].values, [0.5, 1.0, 1.5, 2.0])
+        assert ds.coords['Q'].unit == sc.Unit('1/angstrom')
+        assert set(ds.keys()) == {'L2 area', 'L2 center', 'L2 width'}
+        np.testing.assert_allclose(ds['L2 width'].values, [0.11, 0.12, 0.13, 0.14])
+        assert ds['L2 width'].unit == sc.Unit('meV')
+        assert ds['L2 width'].variances is not None
+
+    def test_parameters_to_dataset_is_nan_where_a_component_is_absent(self, shared, first):
+        # WHEN a second shared component, held at other Q values than the first one
+        other = Lorentzian(name='L4', width=0.7)
+        second = make_analysis('second', Q_SECOND, [shared, other])
+        third = make_analysis('third', [2.0, 2.5], [other])
+
+        # THEN
+        ds = JointAnalysis(analyses=[first, second, third]).parameters_to_dataset()
+
+        # EXPECT one row per Q value of any analysis, NaN where a component is not held
+        np.testing.assert_allclose(ds.coords['Q'].values, [0.5, 1.0, 1.5, 2.0, 2.5])
+        np.testing.assert_allclose(ds['L2 width'].values, [0.3, 0.3, 0.3, 0.3, np.nan])
+        np.testing.assert_allclose(ds['L4 width'].values, [np.nan, 0.7, 0.7, 0.7, 0.7])
+
+    def test_parameters_to_dataset_without_shared_components_is_empty(self):
+        # WHEN
+        first = make_analysis('first', Q_FIRST, [Lorentzian(name='L1')])
+        second = make_analysis('second', Q_FIRST, [Lorentzian(name='L3')])
+
+        # THEN
+        ds = JointAnalysis(analyses=[first, second]).parameters_to_dataset()
+
+        # EXPECT
+        assert len(ds.keys()) == 0
+        assert ds.coords['Q'].shape == (0,)
+
+    def test_parameters_to_dataset_duplicate_names_raise(self):
+        # WHEN two shared components whose parameters have the same names
+        shared_a = Lorentzian(name='L')
+        shared_b = Lorentzian(name='L')
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            first = make_analysis('first', Q_FIRST, [shared_a, shared_b])
+            second = make_analysis('second', Q_FIRST, [shared_a, shared_b])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Duplicate parameter name'):
+            JointAnalysis(analyses=[first, second]).parameters_to_dataset()
+
     #############
     # Dunder methods
     #############

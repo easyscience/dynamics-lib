@@ -7,10 +7,13 @@ import warnings
 from collections import Counter
 from typing import TYPE_CHECKING
 
+import numpy as np
+import scipp as sc
 from easyscience.fitting.multi_fitter import MultiFitter
 
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 
 if TYPE_CHECKING:
     from easyscience.fitting.minimizers.utils import FitResults
@@ -74,6 +77,7 @@ class JointAnalysis(EasyDynamicsBase):
 
     joint = edyn.JointAnalysis(analyses=[analysis1, analysis2])
     joint.fit()
+    joint.parameters_to_dataset()  # the L2 parameters over the Q values of both data sets
     ```
     """
 
@@ -192,6 +196,44 @@ class JointAnalysis(EasyDynamicsBase):
         raise AttributeError(
             'shared_components is read-only. To share a component, add the same component object '
             'to the models of several analyses.'
+        )
+
+    @property
+    def scales(self) -> list[Parameter]:
+        """
+        The scale of every analysis: the factor its model is multiplied by.
+
+        Data sets of the same sample are rarely on the same intensity scale. Keep one scale fixed
+        as the reference and free the others, e.g. ``joint.scales[1].fixed = False``, so that the
+        shared components can describe all the data sets.
+
+        Returns
+        -------
+        list[Parameter]
+            The scale Parameter of each analysis' InstrumentModel, in the order of the analyses.
+        """
+        return [analysis.scale for analysis in self._analyses]
+
+    @scales.setter
+    def scales(self, _value: list[Parameter]) -> None:
+        """
+        Scales is read-only.
+
+        Set the value of a scale, or free it, on the Parameter itself.
+
+        Parameters
+        ----------
+        _value : list[Parameter]
+            The new scales. This argument is ignored, as scales is read-only.
+
+        Raises
+        ------
+        AttributeError
+            Always raised, since scales is read-only.
+        """
+        raise AttributeError(
+            'scales is read-only. Set the value of a scale, or free it, on the Parameter itself, '
+            'e.g. scales[1].value = 2.0 or scales[1].fixed = False.'
         )
 
     @property
@@ -351,6 +393,52 @@ class JointAnalysis(EasyDynamicsBase):
                             )
                         self._linked.append((parameter, parameter.fixed))
                         parameter.make_dependent_on('shared', {'shared': owner_parameter})
+
+    def parameters_to_dataset(self) -> sc.Dataset:
+        """
+        Create a scipp dataset of the shared components' parameters over the Q values of all data.
+
+        There is one row per Q value, holding the (fitted) parameters of the copy that owns them
+        there, and NaN for a component that no analysis holds at that Q value. The dataset can be
+        plotted or passed to a ``ParameterAnalysis`` like the dataset from
+        ``Analysis.parameters_to_dataset``. The parameters that are not shared are available from
+        each analysis' own dataset.
+
+        Raises
+        ------
+        ValueError
+            If two shared components have parameters with the same name.
+
+        Returns
+        -------
+        sc.Dataset
+            A dataset where each entry is a parameter, with dimension "Q" sorted in ascending Q.
+        """
+        # For every parameter of a shared component: the owner's Parameter at each Q value.
+        columns: dict[str, dict[float, Parameter]] = {}
+        for _, groups in self._shared_component_groups():
+            for Q_value, (owner, *_followers) in groups.items():
+                for parameter in owner.get_all_parameters():
+                    column = columns.setdefault(parameter.name, {})
+                    if Q_value in column:
+                        raise ValueError(
+                            f'Duplicate parameter name {parameter.name!r} at Q = {Q_value}. '
+                            f'Rename the shared components so all parameters have unique names.'
+                        )
+                    column[Q_value] = parameter
+
+        Q_values = sorted({Q_value for column in columns.values() for Q_value in column})
+        ds = sc.Dataset(coords={'Q': sc.array(dims=['Q'], values=Q_values, unit=CANONICAL_Q_UNIT)})
+        for name, column in columns.items():
+            parameters = [column.get(Q_value) for Q_value in Q_values]
+            ds[name] = sc.array(
+                dims=['Q'],
+                values=[np.nan if p is None else p.value for p in parameters],
+                variances=[np.nan if p is None else p.variance for p in parameters],
+                unit=next(iter(column.values())).unit,
+                dtype=float,
+            )
+        return ds
 
     #############
     # Private methods
