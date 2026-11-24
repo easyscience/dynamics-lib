@@ -26,6 +26,7 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import verify_has_data
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -130,6 +131,8 @@ class Analysis(AnalysisBase):
         self._fitter = None
         self._fitter_is_dirty = True
         self._bayesian = None
+        # The experiment state_version the last sampling run saw; see _prepare_for_sampling.
+        self._seen_experiment_version = None
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -278,6 +281,7 @@ class Analysis(AnalysisBase):
         """
         old_Q = np.asarray(self.Q.values) if self.Q is not None else None
         old_binned_data = self.experiment._binned_data  # ruff: ignore[private-member-access]
+        old_rebin_dimensions = self.experiment._rebin_dimensions  # ruff: ignore[private-member-access]
 
         self.experiment.rebin(dimensions)
         new_Q = np.asarray(self.Q.values) if self.Q is not None else None
@@ -290,6 +294,7 @@ class Analysis(AnalysisBase):
 
         if q_changed and not confirm:
             self.experiment._binned_data = old_binned_data  # ruff: ignore[private-member-access]
+            self.experiment._rebin_dimensions = old_rebin_dimensions  # ruff: ignore[private-member-access]
             raise ValueError(
                 'Rebinning changed Q values, which requires clearing Q from sample_model and '
                 'instrument_model (including resolution and background sub-models). '
@@ -862,7 +867,7 @@ class Analysis(AnalysisBase):
         """
         xs, ys, ws = [], [], []
         for analysis1d in self.analysis_list:
-            x, y, weight, _ = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            x, y, weight = analysis1d._sampling_data()  # ruff: ignore[private-member-access]
             xs.append(x)
             ys.append(y)
             ws.append(weight)
@@ -920,8 +925,15 @@ class Analysis(AnalysisBase):
         Rebuild every per-Q convolver against its masked energy grid.
 
         Mirrors what a simultaneous fit does, so that the model evaluations seen by the sampler
-        match the ones the fit would have made.
+        match the ones the fit would have made. Data changed since the last run, by a rebin or a
+        mask on the experiment itself, makes the Sampler, which binds its data when built, be
+        rebuilt.
         """
+        experiment_version = self.experiment.state_version
+        if experiment_version != self._seen_experiment_version:
+            if self._bayesian is not None:
+                self._bayesian.invalidate()
+            self._seen_experiment_version = experiment_version
         for analysis1d in self.analysis_list:
             _, _, _, mask = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
             mask_var = sc.array(dims=['energy'], values=mask)
@@ -988,6 +1000,7 @@ class Analysis(AnalysisBase):
             x, y, weight, mask = self.experiment.extract_x_y_weights_only_finite(
                 analysis1d.Q_index
             )
+            verify_has_data(x, analysis1d.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)

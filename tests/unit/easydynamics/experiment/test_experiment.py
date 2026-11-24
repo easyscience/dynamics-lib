@@ -364,6 +364,143 @@ class TestExperiment:
             experiment.rebin({'Q': [0.5, 1.0, 1.5], 'energy': 7})
 
     ##############
+    # test masking
+    ##############
+
+    def test_mask_leaves_points_out_of_fits(self, experiment_with_data):
+        # WHEN
+        energy = experiment_with_data.data.coords['energy']
+
+        # THEN
+        experiment_with_data.mask('high', energy > sc.scalar(25.0, unit='meV'))
+
+        # EXPECT
+        assert 'high' in experiment_with_data.data.masks
+        x, _, _, _ = experiment_with_data.extract_x_y_weights_only_finite(Q_index=0)
+        np.testing.assert_array_equal(x, [10.0, 20.0])
+
+    def test_mask_after_rebin_redoes_the_rebin(self):
+        # WHEN
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+        energy = experiment.data.coords['energy']
+
+        # THEN
+        experiment.mask('first', energy < sc.scalar(0.5, unit='meV'))
+
+        # EXPECT the masked point is left out of its new bin, which keeps the rebinned shape
+        assert experiment.binned_data.sizes['energy'] == 3
+        np.testing.assert_allclose(experiment.binned_data.values[:, 0], [1.0, 7.0])
+
+    def test_mask_replaces_a_mask_of_the_same_name(self, experiment_with_data):
+        # WHEN
+        energy = experiment_with_data.data.coords['energy']
+        experiment_with_data.mask('cut', energy > sc.scalar(15.0, unit='meV'))
+
+        # THEN
+        experiment_with_data.mask('cut', energy > sc.scalar(25.0, unit='meV'))
+
+        # EXPECT
+        np.testing.assert_array_equal(
+            experiment_with_data.data.masks['cut'].values, [False, False, True]
+        )
+
+    def test_mask_is_a_copy_of_the_condition(self, experiment_with_data):
+        # WHEN
+        condition = sc.array(dims=['Q'], values=[True, False, False])
+
+        # THEN
+        experiment_with_data.mask('bad_Q', condition)
+        condition.values[1] = True
+
+        # EXPECT
+        np.testing.assert_array_equal(
+            experiment_with_data.data.masks['bad_Q'].values, [True, False, False]
+        )
+
+    def test_remove_mask_puts_the_points_back(self):
+        # WHEN
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+        experiment.mask('first', experiment.data.coords['energy'] < sc.scalar(0.5, unit='meV'))
+
+        # THEN
+        experiment.remove_mask('first')
+
+        # EXPECT
+        assert 'first' not in experiment.data.masks
+        np.testing.assert_allclose(experiment.binned_data.values[:, 0], [0.5, 6.5])
+
+    def test_remove_mask_unknown_name_raises(self, experiment_with_data):
+        # THEN EXPECT
+        with pytest.raises(KeyError, match="No mask named 'nope'"):
+            experiment_with_data.remove_mask('nope')
+
+    def test_mask_name_not_string_raises(self, experiment_with_data):
+        # THEN EXPECT
+        with pytest.raises(TypeError, match='Mask name must be a string'):
+            experiment_with_data.mask(1, sc.array(dims=['Q'], values=[True, False, False]))
+
+    @pytest.mark.parametrize(
+        'condition',
+        [[True, False, False], sc.array(dims=['Q'], values=[1.0, 0.0, 0.0])],
+        ids=['list', 'float_variable'],
+    )
+    def test_mask_condition_not_boolean_variable_raises(self, experiment_with_data, condition):
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=r'boolean sc\.Variable'):
+            experiment_with_data.mask('bad', condition)
+
+    def test_mask_without_data_raises(self):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No data to mask'):
+            Experiment().mask('bad', sc.array(dims=['Q'], values=[True]))
+
+    @pytest.mark.parametrize(
+        'condition',
+        [
+            sc.array(dims=['energy'], values=[True, False, False, False]),
+            sc.array(dims=['temperature'], values=[True]),
+        ],
+        ids=['bin_edges', 'unknown_dim'],
+    )
+    def test_mask_condition_not_fitting_the_data_raises(self, experiment_with_data, condition):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='do not fit the data'):
+            experiment_with_data.mask('bad', condition)
+
+    def test_state_version_changes_when_the_data_does(self, experiment_with_data):
+        # WHEN
+        versions = [experiment_with_data.state_version]
+        bad_Q = sc.array(dims=['Q'], values=[True, False, False])
+
+        # THEN
+        for change in [
+            lambda: experiment_with_data.rebin({'energy': 3}),
+            lambda: experiment_with_data.mask('bad_Q', bad_Q),
+            lambda: experiment_with_data.remove_mask('bad_Q'),
+            lambda: setattr(experiment_with_data, 'data', experiment_with_data.data.copy()),
+            experiment_with_data.remove_data,
+        ]:
+            change()
+            versions.append(experiment_with_data.state_version)
+
+        # EXPECT every change gives a new version
+        assert len(set(versions)) == len(versions)
+
+    def test_setting_data_forgets_the_rebin(self):
+        # WHEN
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+
+        # THEN
+        experiment.data = self._rebin_input()
+        experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False]))
+
+        # EXPECT masking the new data does not rebin it
+        assert experiment.binned_data.sizes['energy'] == 6
+
+    ##############
     # test setters and getters
     ##############
 

@@ -77,6 +77,11 @@ class Experiment(EasyDynamicsBase):
             display_name=display_name,
             unique_name=unique_name,
         )
+        # Bumped whenever the data an analysis would fit changes, so analyses that cache
+        # anything derived from it can tell their cache is stale.
+        self._state_version = 0
+        # The dimensions of the last rebin, redone when the masks change. None when not rebinned.
+        self._rebin_dimensions = None
 
         if data is None:
             self._data = None
@@ -97,6 +102,21 @@ class Experiment(EasyDynamicsBase):
     ###########
     # Properties
     ###########
+
+    @property
+    def state_version(self) -> int:
+        """
+        Get a counter that changes whenever the data, its binning or its masks change.
+
+        Analyses compare it with the value they last saw to know when to rebuild what they derived
+        from the data.
+
+        Returns
+        -------
+        int
+            The current state version.
+        """
+        return self._state_version
 
     @property
     def data(self) -> sc.DataArray | None:
@@ -132,6 +152,8 @@ class Experiment(EasyDynamicsBase):
         self._binned_data = (
             self._convert_to_bin_centers(self._data) if self._data is not None else None
         )
+        self._rebin_dimensions = None
+        self._state_version += 1
 
     @property
     def binned_data(self) -> sc.DataArray | None:
@@ -376,6 +398,71 @@ class Experiment(EasyDynamicsBase):
         """Remove the dataset from the experiment."""
         self._data = None
         self._binned_data = None
+        self._rebin_dimensions = None
+        self._state_version += 1
+
+    def mask(self, name: str, condition: sc.Variable) -> None:
+        """
+        Mask part of the data, so that fits and rebinning leave it out.
+
+        The mask is stored on :attr:`data` as a scipp mask, so plots show the masked points, and
+        the last rebin is redone so that the binned data leaves them out too. Masking a name that
+        is already in use replaces that mask.
+
+        Parameters
+        ----------
+        name : str
+            Name of the mask.
+        condition : sc.Variable
+            Boolean variable that is True for the points to mask. Its dimensions must be some of
+            the data's, ``'Q'`` and ``'energy'``, with the same lengths, so build it from the
+            coordinates of :attr:`data` rather than of :attr:`binned_data`, e.g.
+            ``experiment.data.coords['energy'] > sc.scalar(1.0, unit='meV')``.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is not a string or ``condition`` is not a boolean sc.Variable.
+        ValueError
+            If there is no data, or ``condition`` does not fit the data's shape.
+        """
+        if not isinstance(name, str):
+            raise TypeError(f'Mask name must be a string, not {type(name).__name__}')
+        if not isinstance(condition, sc.Variable) or condition.dtype != sc.DType.bool:
+            raise TypeError('condition must be a boolean sc.Variable.')
+        if self._data is None:
+            raise ValueError('No data to mask. Please load data first.')
+        for dim in condition.dims:
+            if dim not in self._data.dims or condition.sizes[dim] != self._data.sizes[dim]:
+                raise ValueError(
+                    f'condition has sizes {condition.sizes}, which do not fit the data, with '
+                    f'sizes {self._data.sizes}. If it was built from bin-edge coordinates, build '
+                    'it from their midpoints, sc.midpoints(...), instead.'
+                )
+
+        self._data.masks[name] = condition.copy()
+        self._refresh_binned_data()
+
+    def remove_mask(self, name: str) -> None:
+        """
+        Remove a mask added with :meth:`mask`, or one the data was loaded with.
+
+        Parameters
+        ----------
+        name : str
+            Name of the mask.
+
+        Raises
+        ------
+        KeyError
+            If there is no mask with that name.
+        """
+        if self._data is None or name not in self._data.masks:
+            masks = [] if self._data is None else list(self._data.masks)
+            raise KeyError(f'No mask named {name!r}; the masks are {masks}')
+
+        del self._data.masks[name]
+        self._refresh_binned_data()
 
     def rebin(self, dimensions: dict[str, int | sc.Variable]) -> None:
         """
@@ -441,6 +528,8 @@ class Experiment(EasyDynamicsBase):
         binned_data = self._convert_to_bin_centers(binned_data)
         binned_data.masks['no_data'] = ~sc.isfinite(binned_data.data)
         self._binned_data = binned_data
+        self._rebin_dimensions = dim_copy
+        self._state_version += 1
 
     ###########
     # other methods
@@ -550,6 +639,14 @@ class Experiment(EasyDynamicsBase):
     ###########
     # private methods
     ###########
+
+    def _refresh_binned_data(self) -> None:
+        """Redo the last rebin, or none if there was none, after the data's masks changed."""
+        if self._rebin_dimensions is not None:
+            self.rebin(self._rebin_dimensions)
+        else:
+            self._binned_data = self._convert_to_bin_centers(self._data)
+            self._state_version += 1
 
     @staticmethod
     def _validate_coordinates(data: sc.DataArray) -> None:
