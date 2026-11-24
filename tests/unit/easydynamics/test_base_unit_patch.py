@@ -122,14 +122,47 @@ class TestBaseUnitPatch:
         assert parameter.unit == 'dimensionless'
         assert parameter.value == pytest.approx(1000.0)
 
-    def test_ratio_of_compatible_units_is_dimensionless(self):
+    @pytest.mark.parametrize(
+        ('numerator_unit', 'denominator_unit', 'expected'),
+        [
+            ('m', 'mm', 1000.0),
+            ('mm', 'm', 0.001),
+            ('meV', 'ueV', 1000.0),
+            ('ueV', 'meV', 0.001),
+            ('eV', 'meV', 1000.0),
+            ('meV', 'J', 1.602176634e-22),
+            ('angstrom', 'nm', 0.1),
+            ('m', 'angstrom', 1.0e10),
+            ('ps', 'ns', 0.001),
+            ('K', 'mK', 1000.0),
+            ('1/angstrom', '1/nm', 10.0),
+            ('meV*angstrom', 'meV*nm', 0.1),
+            ('meV', 'meV', 1.0),
+        ],
+    )
+    def test_ratio_of_compatible_units_is_dimensionless(
+        self, numerator_unit, denominator_unit, expected
+    ):
+        "Scipp gives such a ratio a unit that is only a number, e.g. 1000 for m/mm"
         # WHEN
-        metre = Parameter(1.0, name='a', unit='m')
-        millimetre = Parameter(1.0, name='b', unit='mm')
+        numerator = Parameter(1.0, name='a', unit=numerator_unit)
+        denominator = Parameter(1.0, name='b', unit=denominator_unit)
 
         # THEN
-        ratio = metre / millimetre
+        ratio = numerator / denominator
 
         # EXPECT
         assert ratio.unit == 'dimensionless'
-        assert ratio.value == pytest.approx(1000.0)
+        assert ratio.value == pytest.approx(expected)
+
+    def test_ratio_of_unrelated_units_keeps_its_unit(self):
+        # WHEN
+        energy = Parameter(1.0, name='E', unit='meV')
+        frequency = Parameter(1.0, name='f', unit='THz')
+
+        # THEN
+        ratio = energy / frequency
+
+        # EXPECT
+        assert ratio.full_value.unit == sc.Unit('meV/THz')
+        assert ratio.value == pytest.approx(1.0)
