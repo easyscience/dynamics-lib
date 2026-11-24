@@ -6103,17 +6103,6 @@ NaN leaves a gap in the lines rather than inventing a value.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;relabel_parameter_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.utils.relabel_parameter_unit&lt;/code&gt;)" href="#easydynamics.utils.utils.relabel_parameter_unit">relabel_parameter_unit</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Set the unit of a Parameter without rescaling its value or bounds.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_parameter_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.utils.convert_parameter_unit&lt;/code&gt;)" href="#easydynamics.utils.utils.convert_parameter_unit">convert_parameter_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -6496,84 +6485,6 @@ no-conversion case, kept cheap for hot paths).</p>
 
 <!-- prettier-ignore-end -->
               </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="easydynamics.utils.utils.relabel_parameter_unit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">relabel_parameter_unit</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Set the unit of a Parameter without rescaling its value or bounds.</p>
-<p><code>Parameter.unit</code> is read-only and <code>convert_unit</code> rescales the value, so the underlying
-scipp scalars are swapped directly. Creating a Parameter with the unit instead is not
-equivalent: EasyScience rewrites a unit with a numeric factor, such as <code>meV*angstrom</code>, in
-base units and rescales the value with it.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>parameter</code>
-            </td>
-            <td>
-                  <code><span title="easydynamics.variable.Parameter">Parameter</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The Parameter whose unit to set.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>unit</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | <span title="scipp">sc</span>.<a class="autorefs autorefs-external" title="&lt;code&gt;scipp.Unit&lt;/code&gt;" href="https://scipp.github.io/generated/classes/scipp.Unit.html#scipp.Unit">Unit</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The new unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
             </td>
           </tr>
       </tbody>
