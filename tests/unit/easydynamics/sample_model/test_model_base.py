@@ -828,3 +828,32 @@ class TestModelBase:
         # EXPECT a full rebuild instead of a no-op patch that leaves no collections
         assert model_base.component_collections_is_dirty is True
         assert len(model_base.get_component_collection(0)) == 3
+
+    #############
+    # Template of per-Q copies
+    #############
+
+    def test_per_Q_copies_return_their_template(self, model_base):
+        # THEN
+        collections = [model_base.get_component_collection(i) for i in range(len(model_base.Q))]
+
+        # EXPECT every per-Q copy points at the template it was copied from
+        for collection in collections:
+            for template, component in zip(model_base.components, collection, strict=True):
+                assert component is not template
+                assert component.get_template() is template
+        assert all(template.get_template() is None for template in model_base.components)
+
+    def test_appended_per_Q_copies_return_their_template(self, model_base):
+        # WHEN per-Q collections are built, so the new component is inserted in place
+        _ = model_base.get_component_collection(0)
+        new_template = Gaussian(name='NewGaussian')
+
+        # THEN
+        model_base.append_component(new_template)
+
+        # EXPECT
+        assert model_base.component_collections_is_dirty is False
+        for i in range(len(model_base.Q)):
+            component = model_base.get_component_collection(i)['NewGaussian']
+            assert component.get_template() is new_template
