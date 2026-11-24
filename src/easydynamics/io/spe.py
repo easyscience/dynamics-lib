@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-Read ASCII ``.spe`` files, as written by Mslice, the FOCUS reduction and older Mantid versions.
+Read ASCII ``.spe`` files whose angle block holds the detectors' scattering angles.
 
 An ``.spe`` file holds intensity on a grid of scattering angle by energy transfer. Each detector's
 angle is turned into the momentum transfer it has at zero energy transfer,
-``Q = 4 pi sin(phi / 2) / lambda``, which needs the incident wavelength.
+``Q = 4 pi sin(phi / 2) / lambda``, which needs the incident wavelength. Some programs, such as
+Mantid's ``SaveSPE``, write placeholder numbers in the angle block and the real angles in a
+separate ``.par`` or ``.phx`` file; those files are not read yet.
 """
 
 import math
@@ -66,7 +68,8 @@ def load_spe(
     min_error : float | None, default=None
         None keeps the errors as stored. A positive number raises every error below it to it, in
         the units of the intensity. NaN masks the bins with zero error with a ``'zero_error'``
-        mask, so fits and rebinning leave them out.
+        mask, so fits and rebinning leave them out; as these are usually empty bins, a floor is the
+        better choice before rebinning low-count data.
 
     Returns
     -------
@@ -77,13 +80,15 @@ def load_spe(
     Raises
     ------
     ValueError
-        If ``wavelength`` is not positive, or is None and no ``.par`` file gives it, or the file is
-        not laid out as an ``.spe`` file.
+        If ``wavelength`` is not positive, or is None and no ``.par`` file gives it, the file is
+        not laid out as an ``.spe`` file, or its angle block holds placeholder numbers rather than
+        angles.
     """
     path = Path(filename)
     if wavelength is None:
-        par = path.with_suffix('.par')
-        wavelength = _wavelength_from_par(par) if par.exists() else None
+        pars = [path.with_suffix(suffix) for suffix in ('.par', '.PAR')]
+        par = next((par for par in pars if par.exists()), None)
+        wavelength = _wavelength_from_par(par) if par is not None else None
         if wavelength is None:
             raise ValueError(
                 f'No wavelength given, and no .par file with a Wavelength line next to '
@@ -93,9 +98,17 @@ def load_spe(
         raise ValueError(f'wavelength must be a positive number in angstrom, not {wavelength}')
 
     phi, energy, intensity, error = _read_spe(path)
+    # Consecutive numbers counting up from 0, 0.5 or 1 are detector numbers standing in for angles.
+    if phi.size > 2 and np.allclose(np.diff(phi), 1.0) and phi[0] in (0.0, 0.5, 1.0):
+        raise ValueError(
+            f'{path.name}: the angle block holds the placeholder numbers {phi[0]:g}, '
+            f'{phi[1]:g}, ... rather than scattering angles; the angles are in a .par or .phx '
+            'file, which load_spe does not read yet.'
+        )
     if phi.size == intensity.shape[0] + 1:
         phi = 0.5 * (phi[:-1] + phi[1:])
-    Q = 4.0 * np.pi * np.sin(np.radians(phi) / 2.0) / wavelength
+    # Detectors on the far side of the beam may be written with negative angles.
+    Q = 4.0 * np.pi * np.sin(np.radians(np.abs(phi)) / 2.0) / wavelength
     order = np.argsort(Q, kind='stable')
 
     null = intensity[order] <= _NULL_DATA
@@ -189,8 +202,9 @@ def _parse_numbers(lines: list[str]) -> np.ndarray:
     np.ndarray
         The numbers, in the order they appear.
     """
-    text = _RUN_TOGETHER.sub(' ', ' '.join(lines))
-    return np.array(text.split(), dtype=float)
+    # Fortran programs may write the exponent with a D, as in 1.0D-02.
+    text = ' '.join(lines).replace('D', 'e').replace('d', 'e')
+    return np.array(_RUN_TOGETHER.sub(' ', text).split(), dtype=float)
 
 
 def _wavelength_from_par(path: Path) -> float | None:

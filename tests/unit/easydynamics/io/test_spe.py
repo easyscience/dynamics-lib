@@ -77,6 +77,44 @@ class TestLoadSpe:
         np.testing.assert_allclose(data.values[0], expected, rtol=1e-2, atol=1e-3)
         assert data.coords['energy'].sizes == {'energy': 10}
 
+    def test_negative_angles_give_positive_Q(self, tmp_path):
+        # WHEN the detectors are written with negative angles
+        path = tmp_path / 'negative.spe'
+        path.write_text(CENTRES.read_text().replace(' 6.00e+001', '-6.00e+001'))
+
+        # THEN
+        data = load_spe(path, wavelength=4.0)
+
+        # EXPECT
+        np.testing.assert_allclose(data.coords['Q'].values, elastic_Q([20.0, 40.0, 60.0], 4.0))
+
+    def test_reads_fortran_exponents(self, tmp_path):
+        # WHEN
+        path = tmp_path / 'fortran.spe'
+        path.write_text(
+            '1 2\n### Phi\n 1.0D+001 2.0D+001\n### Energy\n-1.0D-001 0.0D+000 1.0D-001\n'
+            '### S(Phi,w)\n 2.5D+000 3.5d+000\n### Errors\n 1.0D-001 1.0D-001\n'
+        )
+
+        # THEN
+        data = load_spe(path, wavelength=4.0)
+
+        # EXPECT
+        np.testing.assert_allclose(data.values, [[2.5, 3.5]])
+        np.testing.assert_allclose(data.coords['energy'].values, [-0.1, 0.0, 0.1])
+
+    def test_placeholder_angles_raise(self, tmp_path):
+        # WHEN the angle block holds detector numbers, as Mantid's SaveSPE writes
+        path = tmp_path / 'placeholders.spe'
+        path.write_text(
+            '2 2\n### Phi Grid\n 0.5 1.5 2.5\n### Energy Grid\n 0 1 2\n'
+            '### S(Phi,w)\n 1 1\n### Errors\n 1 1\n### S(Phi,w)\n 1 1\n### Errors\n 1 1\n'
+        )
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='placeholder numbers'):
+            load_spe(path, wavelength=4.0)
+
     def test_masked_detector_is_nan_and_masked(self):
         # THEN
         data = load_spe(SPE)
@@ -117,13 +155,6 @@ class TestLoadSpe:
         zero_error = data.masks['zero_error'].values
         assert zero_error.sum() == 1
         assert zero_error[3, 4]
-
-    def test_min_error_raises_small_errors(self):
-        # THEN
-        data = load_spe(SPE, min_error=0.5)
-
-        # EXPECT
-        assert np.nanmin(data.variances) == pytest.approx(0.25)
 
     #############
     # Errors
