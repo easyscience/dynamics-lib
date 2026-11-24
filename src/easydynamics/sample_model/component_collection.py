@@ -514,9 +514,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             f'Components: {comp_names})'
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self, skip: list[str] | None = None) -> dict:
         """
         Serialise the ComponentCollection to a dictionary.
+
+        Parameters
+        ----------
+        skip : list[str] | None, default=None
+            Field names to leave out of the components' dictionaries, e.g. ``['unique_name']``.
 
         Returns
         -------
@@ -530,7 +535,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             'y_unit': str(self.y_unit),
             'name': self.name,
             'display_name': self.display_name,
-            'components': [c.to_dict() for c in self._data],
+            'components': [c.to_dict(skip=skip) for c in self._data],
         }
 
     @classmethod
@@ -574,14 +579,3 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             name=obj_dict['name'],
             display_name=obj_dict['display_name'],
         )
-
-    def __copy__(self) -> ComponentCollection:
-        """
-        Create a deep copy of the ComponentCollection.
-
-        Returns
-        -------
-        ComponentCollection
-            A deep copy of the ComponentCollection.
-        """
-        return self.from_dict(self.to_dict())

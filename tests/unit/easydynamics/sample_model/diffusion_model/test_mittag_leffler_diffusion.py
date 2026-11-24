@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -510,3 +512,27 @@ class TestMittagLefflerDiffusion:
         assert 'diffusion_coefficient=' in repr_str
         assert 'relaxation_rate=' in repr_str
         assert 'alpha=' in repr_str
+
+    #############
+    # Serialization (issue #126)
+    #############
+
+    def test_copy_A_1_and_components_follow_the_A_0_of_the_copy(self):
+        # WHEN
+        model = MittagLefflerDiffusion(A_0=0.4, Q=np.array([1.0, 2.0]))
+
+        # THEN
+        model_copy = copy(model)
+        model_copy.A_0 = 0.1
+
+        # EXPECT A_1 = 1 - A_0 in the copy, and components matching a model built with that A_0
+        assert model_copy.A_1.value == pytest.approx(0.9)
+        assert model.A_1.value == pytest.approx(0.6)
+        x = np.linspace(-1.0, 1.0, 11)
+        fresh = MittagLefflerDiffusion(A_0=0.1, Q=np.array([1.0, 2.0]))
+        for copied, expected in zip(
+            model_copy.get_component_collections(),
+            fresh.get_component_collections(),
+            strict=True,
+        ):
+            np.testing.assert_allclose(copied.evaluate(x), expected.evaluate(x))
