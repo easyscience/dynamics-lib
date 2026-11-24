@@ -229,6 +229,8 @@ class TestAnalysis1d:
         fake_weights = np.array([0.1, 0.2, 0.3])
         fake_mask = np.array([True, False, True])
 
+        # The energy grid is computed on first use; compute it now, from the real data
+        assert analysis1d._masked_energy is not None
         analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
             return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
@@ -1550,6 +1552,28 @@ class TestAnalysis1d:
         np.testing.assert_array_equal(analysis1d._masked_energy.values, [10.0, 20.0])
         x, _, _ = analysis1d._sampling_data()
         np.testing.assert_array_equal(x, [10.0, 20.0])
+
+    def test_fit_with_every_point_masked_and_a_resolution_raises(self, analysis1d):
+        # WHEN the convolver, which a resolution model needs, cannot be built on no energies
+        analysis1d.instrument_model.resolution_model = ResolutionModel(components=Gaussian())
+        analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))
+
+        # THEN EXPECT the error says why, rather than coming from the convolver
+        with pytest.raises(ValueError, match='Q_index 0 has no data to fit'):
+            analysis1d.fit()
+
+    def test_model_evaluation_does_not_recheck_the_masks(self, analysis1d):
+        # WHEN the analysis is ready to fit
+        analysis1d._prepare_for_sampling()
+
+        # THEN the energy grid is read, as on every model evaluation
+        with patch.object(
+            Experiment, '_masks_signature', side_effect=AssertionError('masks checked')
+        ):
+            energy = analysis1d._masked_energy
+
+        # EXPECT it came from the cache, without fingerprinting the masks
+        assert energy is not None
 
     def test_fit_with_every_point_masked_raises(self, analysis1d):
         # WHEN

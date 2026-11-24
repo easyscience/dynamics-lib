@@ -543,6 +543,8 @@ class Analysis(AnalysisBase):
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
 
+        # Pick up masks changed directly on experiment.data before computing anything from it.
+        self.experiment._sync_masks()  # ruff: ignore[private-member-access]
         custom_energy = energy is not None
         energy = self._verify_energy(energy) if energy is not None else self.energy
 

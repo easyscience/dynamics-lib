@@ -506,6 +506,17 @@ class TestExperiment:
         x, _, _, _ = experiment_with_data.extract_x_y_weights_only_finite(Q_index=0)
         np.testing.assert_array_equal(x, [20.0, 30.0])
 
+    def test_mask_set_on_rebinned_data_raises(self):
+        # WHEN a mask is set on the binned data, which a rebin rebuilds from the data
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+        bad = sc.array(dims=['energy'], values=[True, False, False])
+        experiment.binned_data.masks['bad'] = bad
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=r'were set on experiment\.binned_data'):
+            experiment.extract_x_y_weights_only_finite(Q_index=0)
+
     def test_state_version_changes_when_the_data_does(self, experiment_with_data):
         # WHEN
         versions = [experiment_with_data.state_version]
@@ -1012,6 +1023,17 @@ class TestExperiment:
         assert sc.identical(copied_experiment.data, experiment.data)
         assert copied_experiment is not experiment
         assert copied_experiment.data is not experiment.data
+
+    def test_copy_experiment_keeps_the_rebin(self):
+        # WHEN
+        experiment = Experiment(data=self._rebin_input())
+        experiment.rebin({'energy': 3})
+
+        # THEN
+        copied = copy(experiment)
+
+        # EXPECT
+        assert sc.identical(copied.binned_data, experiment.binned_data)
 
     def test_copy_experiment_without_data(self):
         # WHEN

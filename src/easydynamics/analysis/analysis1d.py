@@ -387,6 +387,10 @@ class Analysis1d(AnalysisBase):
             self._invalidate_bayesian_sampler()
             self._seen_experiment_version = experiment_version
 
+        # Check for data before the convolver, which cannot be built on an empty energy grid.
+        if self._masked_energy is not None:
+            verify_has_data(self._masked_energy.values, self._Q_index)
+
         self._ensure_convolver_current()
 
     def _model_state_versions(self) -> tuple:
@@ -578,6 +582,8 @@ class Analysis1d(AnalysisBase):
         if self.Q_index is None:
             raise ValueError('Q_index must be set to create DataGroup.')
 
+        # Pick up masks changed directly on experiment.data before computing anything from it.
+        self.experiment._sync_masks()  # ruff: ignore[private-member-access]
         energy = self._verify_energy(energy)
         custom_energy = energy is not None
 
@@ -652,7 +658,10 @@ class Analysis1d(AnalysisBase):
         """
         Get the experiment's energy grid at this Q index, without masked or non-finite points.
 
-        Computed on first use and again whenever the experiment's data, binning or masks change.
+        Computed on first use and again whenever the experiment's data, binning or masks change. It
+        is read on every model evaluation, so it reads the experiment's raw version counter rather
+        than ``state_version``, which first checks for masks changed directly on the data: every
+        entry point, such as a fit, a sampling run or a plot, has done that check already.
 
         Returns
         -------
@@ -661,7 +670,8 @@ class Analysis1d(AnalysisBase):
         """
         if self._Q_index is None or self.experiment is None:
             return None
-        key = (id(self.experiment), self._Q_index, self.experiment.state_version)
+        version = self.experiment._state_version  # ruff: ignore[private-member-access]
+        key = (id(self.experiment), self._Q_index, version)
         if key != self._masked_energy_key:
             self._masked_energy_cache = self.experiment.get_masked_energy(Q_index=self._Q_index)
             self._masked_energy_key = key

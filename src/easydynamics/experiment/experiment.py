@@ -663,12 +663,29 @@ class Experiment(EasyDynamicsBase):
             return None
         return tuple(
             (name, mask.dims, hash(mask.values.tobytes()))
-            for name, mask in sorted(self._data.masks.items())
+            for name, mask in self._data.masks.items()
         )
 
     def _sync_masks(self) -> None:
-        """Redo the binning if the data's masks were changed directly since it was last done."""
-        if self._data is not None and self._masks_signature() != self._masks_at_binning:
+        """
+        Redo the binning if the data's masks were changed directly since it was last done.
+
+        Raises
+        ------
+        ValueError
+            If a mask was set on the binned data, which is rebuilt from the data and would lose it.
+        """
+        if self._data is None:
+            return
+        if self._binned_data is not None and self._binned_data is not self._data:
+            extra = set(self._binned_data.masks) - set(self._data.masks) - {'no_data'}
+            if extra:
+                raise ValueError(
+                    f'Masks {sorted(extra)} were set on experiment.binned_data, which is rebuilt '
+                    'from experiment.data and would lose them. Set them with experiment.mask(), '
+                    'or on experiment.data.masks, instead.'
+                )
+        if self._masks_signature() != self._masks_at_binning:
             self._refresh_binned_data()
 
     def _refresh_binned_data(self) -> None:
@@ -857,4 +874,6 @@ class Experiment(EasyDynamicsBase):
         new_obj = self.__class__.from_dict(temp)
         if self.data is not None:
             new_obj.data = self.data.copy()
+            if self._rebin_dimensions is not None:
+                new_obj.rebin(dict(self._rebin_dimensions))
         return new_obj
