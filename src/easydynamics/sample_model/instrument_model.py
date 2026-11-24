@@ -5,7 +5,7 @@ from copy import copy
 from functools import partial
 
 import scipp as sc
-from easyscience.base_classes import EasyBase
+from easyscience.base_classes import ModelBase
 
 from easydynamics.sample_model.background_model import BackgroundModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
@@ -23,7 +23,7 @@ from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import Parameter
 
 
-class InstrumentModel(EasyBase):
+class InstrumentModel(ModelBase):
     """
     InstrumentModel represents a model of the instrument in an experiment at various Q.
 
