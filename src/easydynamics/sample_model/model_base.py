@@ -83,6 +83,9 @@ class ModelBase(EasyDynamicsModelBase):
 
         self._components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
         self._component_collections: list[ComponentCollection] = []
+        # (component name, parameter name) of every Parameter tied to a single value across Q.
+        # Stored so the ties can be reapplied when the per-Q collections are rebuilt.
+        self._Q_independent_parameters: list[tuple[str, str]] = []
         # Counter part of state_version: bumped whenever the dirty flag is raised.
         self._state_counter = 0
         # Template-collection version the per-Q collections were last built from. Compared
@@ -183,8 +186,9 @@ class ModelBase(EasyDynamicsModelBase):
         self._mark_component_collections_patched()
 
     def clear_components(self) -> None:
-        """Clear all ModelComponents from the SampleModel."""
+        """Clear all ModelComponents from the SampleModel, and their Q constraints."""
         self._components.clear()
+        self._Q_independent_parameters = []
         self._on_components_change()
 
     # ------------------------------------------------------------------
@@ -487,6 +491,154 @@ class ModelBase(EasyDynamicsModelBase):
         for par in self.get_fittable_parameters():
             par.fixed = False
 
+    def get_parameters(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+    ) -> list[Parameter]:
+        """
+        Get one Parameter of a component at each Q.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, get the Parameter at every Q. If int, get only the Parameter at this Q index.
+
+        Returns
+        -------
+        list[Parameter]
+            The Parameter at each requested Q, in Q order. Empty if Q is not set.
+        """
+        self._ensure_component_collections_current()
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        if Q_index is None:
+            collections = self._component_collections
+        else:
+            collections = [self._component_collections[Q_index]]
+        return [
+            self._get_parameter(collection, component_name, parameter_name)
+            for collection in collections
+        ]
+
+    def fix_parameter(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+        value: Numeric | None = None,
+    ) -> None:
+        """
+        Fix one Parameter of a component, at every Q or at a single Q.
+
+        When fixing at every Q, the template component is fixed too, so the call also takes effect
+        on per-Q collections built later.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, fix the Parameter at every Q. If int, fix it only at this Q index.
+        value : Numeric | None, default=None
+            If given, the Parameter is set to this value (in its own unit) before it is fixed.
+        """
+        for parameter in self._get_parameters_with_template(
+            component_name, parameter_name, Q_index
+        ):
+            if value is not None:
+                parameter.value = value
+            parameter.fixed = True
+
+    def free_parameter(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None = None,
+    ) -> None:
+        """
+        Free one Parameter of a component, at every Q or at a single Q.
+
+        When freeing at every Q, the template component is freed too, so the call also takes effect
+        on per-Q collections built later.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        Q_index : int | None, default=None
+            If None, free the Parameter at every Q. If int, free it only at this Q index.
+        """
+        for parameter in self._get_parameters_with_template(
+            component_name, parameter_name, Q_index
+        ):
+            parameter.fixed = False
+
+    def make_parameter_Q_independent(self, component_name: str, parameter_name: str) -> None:
+        """
+        Make one Parameter of a component take the same value at every Q.
+
+        The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+        is varied in a fit. Use ``fit_method='simultaneous'``: when each Q is fitted independently,
+        the value is determined by the fit of Q index 0 alone.
+
+        The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+        later. Use ``remove_parameter_Q_constraint`` to undo it.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+
+        Raises
+        ------
+        ValueError
+            If the Parameter already depends on other Parameters, e.g. because it is generated by a
+            diffusion model.
+        """
+        key = (component_name, parameter_name)
+        if key not in self._Q_independent_parameters:
+            parameters = self._get_parameters_with_template(component_name, parameter_name, None)
+            if not all(parameter.independent for parameter in parameters):
+                raise ValueError(
+                    f'Parameter {parameter_name!r} of component {component_name!r} already '
+                    'depends on other Parameters, so it cannot be made Q-independent.'
+                )
+            self._Q_independent_parameters.append(key)
+        self._apply_Q_constraints()
+
+    def remove_parameter_Q_constraint(self, component_name: str, parameter_name: str) -> None:
+        """
+        Undo ``make_parameter_Q_independent``, so the Parameter varies freely with Q again.
+
+        Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+        flag and the others come back free, since a dependent Parameter has none. Does nothing if
+        the Parameter has no constraint.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component, e.g. ``'width'``.
+        """
+        key = (component_name, parameter_name)
+        if key not in self._Q_independent_parameters:
+            return
+        self._Q_independent_parameters.remove(key)
+        for parameter in self.get_parameters(component_name, parameter_name)[1:]:
+            parameter.make_independent()
+
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
         Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
@@ -540,6 +692,49 @@ class ModelBase(EasyDynamicsModelBase):
         self._ensure_component_collections_current()
         for collection in self._component_collections:
             collection.normalize_area()
+
+    def to_dict(self, skip: list[str] | None = None) -> dict:
+        """
+        Convert the model to a dictionary, including its Q constraints.
+
+        Parameters
+        ----------
+        skip : list[str] | None, default=None
+            Names of fields to leave out.
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the model.
+        """
+        obj_dict = super().to_dict(skip=skip)
+        if self._Q_independent_parameters:
+            obj_dict['Q_independent_parameters'] = [
+                list(key) for key in self._Q_independent_parameters
+            ]
+        return obj_dict
+
+    @classmethod
+    def from_dict(cls, obj_dict: dict) -> 'ModelBase':
+        """
+        Re-create a model from its dictionary representation, including its Q constraints.
+
+        Parameters
+        ----------
+        obj_dict : dict
+            Dictionary representation of the model, as produced by to_dict().
+
+        Returns
+        -------
+        'ModelBase'
+            The deserialised model.
+        """
+        obj_dict = dict(obj_dict)
+        Q_independent_parameters = obj_dict.pop('Q_independent_parameters', [])
+        model = super().from_dict(obj_dict)
+        for component_name, parameter_name in Q_independent_parameters:
+            model.make_parameter_Q_independent(component_name, parameter_name)
+        return model
 
     # ------------------------------------------------------------------
     # Plotting
@@ -642,6 +837,78 @@ class ModelBase(EasyDynamicsModelBase):
     # Private methods
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _get_parameter(
+        collection: ComponentCollection,
+        component_name: str,
+        parameter_name: str,
+    ) -> Parameter:
+        """
+        Get a Parameter of a named component in a collection.
+
+        Parameters
+        ----------
+        collection : ComponentCollection
+            The collection holding the component.
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component.
+
+        Raises
+        ------
+        ValueError
+            If the component has no Parameter with the given attribute name.
+
+        Returns
+        -------
+        Parameter
+            The Parameter.
+        """
+        parameter = getattr(collection[component_name], parameter_name, None)
+        if not isinstance(parameter, Parameter):
+            raise ValueError(f'Component {component_name!r} has no Parameter {parameter_name!r}.')
+        return parameter
+
+    def _get_parameters_with_template(
+        self,
+        component_name: str,
+        parameter_name: str,
+        Q_index: int | None,
+    ) -> list[Parameter]:
+        """
+        Get one Parameter of a component at each Q, plus the template's when all Q are requested.
+
+        Including the template makes a change to every Q survive a rebuild of the per-Q
+        collections. Components that are not in the template (those generated by subclasses) only
+        exist per Q.
+
+        Parameters
+        ----------
+        component_name : str
+            The name of the component the Parameter belongs to.
+        parameter_name : str
+            The attribute name of the Parameter on the component.
+        Q_index : int | None
+            If None, get the Parameter at every Q and in the template. If int, get only the
+            Parameter at this Q index.
+
+        Returns
+        -------
+        list[Parameter]
+            The matching Parameters.
+        """
+        parameters = self.get_parameters(component_name, parameter_name, Q_index)
+        if Q_index is None and (component_name, parameter_name) in self._Q_independent_parameters:
+            # Only Q index 0 holds the value; the other Q follow it and cannot be fixed or set.
+            parameters = parameters[:1]
+        in_template = component_name in self._components.list_component_names()
+        if Q_index is None and (in_template or not parameters):
+            parameters.append(
+                self._get_parameter(self._components, component_name, parameter_name)
+            )
+        return parameters
+
     def _ensure_component_collections_current(self) -> None:
         """
         Rebuild component collections if any dependency has changed since they were last built.
@@ -652,6 +919,26 @@ class ModelBase(EasyDynamicsModelBase):
         if self.component_collections_is_dirty:
             self._generate_component_collections()
             self._component_collections_is_dirty = False
+            self._apply_Q_constraints()
+
+    def _apply_Q_constraints(self) -> None:
+        """
+        Tie every Q-independent Parameter to its value at Q index 0 in the per-Q collections.
+
+        Called after the per-Q collections are rebuilt or patched. Parameters that are already tied
+        are left alone, and constraints on components that no longer exist are dropped.
+        """
+        if self.component_collections_is_dirty or not self._component_collections:
+            return
+        names = self._component_collections[0].list_component_names()
+        self._Q_independent_parameters = [
+            key for key in self._Q_independent_parameters if key[0] in names
+        ]
+        for component_name, parameter_name in self._Q_independent_parameters:
+            first, *others = self.get_parameters(component_name, parameter_name)
+            for parameter in others:
+                if parameter.independent:
+                    parameter.make_dependent_on('a', {'a': first})
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
@@ -715,6 +1002,7 @@ class ModelBase(EasyDynamicsModelBase):
         """
         self._state_counter += 1
         self._component_collections_is_dirty = False
+        self._apply_Q_constraints()
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
