@@ -2885,7 +2885,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2900,7 +2900,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2999,7 +2999,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;clear_components&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.clear_components&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.clear_components">clear_components</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Clear all ModelComponents from the SampleModel.</p>
+                  <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3088,6 +3088,28 @@ are copied into ComponentCollections for each Q value.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.BackgroundModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.BackgroundModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3851,8 +3873,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3874,12 +3895,11 @@ the collections' inputs are unchanged.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3904,12 +3924,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3919,21 +3938,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -3954,8 +3958,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3977,12 +3980,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4007,52 +4009,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4566,7 +4527,7 @@ so the per-Q parameters of the remaining components are kept.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Clear all ModelComponents from the SampleModel.</p>
+        <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5135,6 +5096,189 @@ on per-Q collections built later.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.BackgroundModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.BackgroundModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -44703,7 +44847,7 @@ directly into a ResolutionModel:
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -44718,7 +44862,7 @@ directly into a ResolutionModel:
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -44862,6 +45006,28 @@ directly into a ResolutionModel:
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45684,8 +45850,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45707,12 +45872,11 @@ the collections' inputs are unchanged.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45737,12 +45901,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45752,21 +45915,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -45787,8 +45935,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45810,12 +45957,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -45840,52 +45986,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46751,6 +46856,189 @@ on per-Q collections built later.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.ResolutionModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.ResolutionModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -47637,7 +47925,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47652,7 +47940,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47729,7 +48017,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;clear_components&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.clear_components&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.clear_components">clear_components</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Clear all ModelComponents from the SampleModel.</p>
+                  <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47818,6 +48106,28 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.SampleModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.SampleModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49071,8 +49381,7 @@ Q grid) is visible to convolvers at once, before this SampleModel is next used.<
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49094,12 +49403,11 @@ Q grid) is visible to convolvers at once, before this SampleModel is next used.<
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49124,12 +49432,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49139,21 +49446,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -49174,8 +49466,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49197,12 +49488,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49227,52 +49517,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49575,7 +49824,7 @@ so the per-Q parameters of the remaining components are kept.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Clear all ModelComponents from the SampleModel.</p>
+        <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50144,6 +50393,189 @@ on per-Q collections built later.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.SampleModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.SampleModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -50988,7 +51420,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51003,7 +51435,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51102,7 +51534,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;clear_components&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.clear_components&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.clear_components">clear_components</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Clear all ModelComponents from the SampleModel.</p>
+                  <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51191,6 +51623,28 @@ are copied into ComponentCollections for each Q value.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.background_model.BackgroundModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.background_model.BackgroundModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51954,8 +52408,7 @@ the collections' inputs are unchanged.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51977,12 +52430,11 @@ the collections' inputs are unchanged.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52007,12 +52459,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52022,21 +52473,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -52057,8 +52493,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52080,12 +52515,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52110,52 +52544,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52669,7 +53062,7 @@ so the per-Q parameters of the remaining components are kept.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Clear all ModelComponents from the SampleModel.</p>
+        <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53238,6 +53631,189 @@ on per-Q collections built later.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.background_model.BackgroundModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.background_model.BackgroundModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -133080,7 +133656,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;clear_components&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.clear_components&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.clear_components">clear_components</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Clear all ModelComponents from the SampleModel.</p>
+                  <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -133176,6 +133752,28 @@ are copied into ComponentCollections for each Q value.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_all_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.get_all_variables&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.get_all_variables">get_all_variables</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -133212,7 +133810,7 @@ are copied into ComponentCollections for each Q value.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -133227,7 +133825,7 @@ are copied into ComponentCollections for each Q value.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -134254,7 +134852,7 @@ so the per-Q parameters of the remaining components are kept.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Clear all ModelComponents from the SampleModel.</p>
+        <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -134836,6 +135434,189 @@ on per-Q collections built later.</p>
 <div class="doc doc-object doc-function">
 
 
+<h7 id="easydynamics.sample_model.model_base.ModelBase.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.model_base.ModelBase.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h7 id="easydynamics.sample_model.model_base.ModelBase.get_all_variables" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
@@ -135030,8 +135811,7 @@ ModelBase.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135053,12 +135833,11 @@ ModelBase.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135083,12 +135862,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135098,21 +135876,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -135133,8 +135896,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135156,12 +135918,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135186,52 +135947,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135743,7 +136463,7 @@ directly into a ResolutionModel:
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135758,7 +136478,7 @@ directly into a ResolutionModel:
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -135902,6 +136622,28 @@ directly into a ResolutionModel:
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137106,8 +137848,7 @@ shape after stripping.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137129,12 +137870,11 @@ shape after stripping.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137159,12 +137899,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137174,21 +137913,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -137209,8 +137933,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137232,12 +137955,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -137262,52 +137984,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138186,6 +138867,189 @@ on per-Q collections built later.</p>
 <div class="doc doc-object doc-function">
 
 
+<h7 id="easydynamics.sample_model.resolution_model.ResolutionModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.resolution_model.ResolutionModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h7 id="easydynamics.sample_model.resolution_model.ResolutionModel.get_component_collection" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_component_collection</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
 
@@ -138753,7 +139617,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.to_dict">to_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert an EasyScience object into a full dictionary using</p>
+                  <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138768,7 +139632,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
   &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.from_dict">from_dict</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Re-create an EasyScience object with DescriptorNumber attributes</p>
+                  <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138845,7 +139709,7 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;clear_components&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.clear_components&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.clear_components">clear_components</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Clear all ModelComponents from the SampleModel.</p>
+                  <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -138934,6 +139798,28 @@ or detailed_balance_settings is not a DetailedBalanceSettings instance.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Free one Parameter of a component, at every Q or at a single Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;make_parameter_Q_independent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.make_parameter_Q_independent&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.make_parameter_Q_independent">make_parameter_Q_independent</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Make one Parameter of a component take the same value at every Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_parameter_Q_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;component_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameter_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.sample_model.SampleModel.remove_parameter_Q_constraint&lt;/code&gt;)" href="#easydynamics.sample_model.sample_model.SampleModel.remove_parameter_Q_constraint">remove_parameter_Q_constraint</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140582,8 +141468,7 @@ None, get variables from all ComponentCollections.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert an EasyScience object into a full dictionary using
-<code>SerializerBase</code>s generic <code>convert_to_dict</code> method.</p>
+        <p>Convert the model to a dictionary, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140605,12 +141490,11 @@ None, get variables from all ComponentCollections.</p>
                 <code>skip</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-dictionary. By default, None.</p>
+                <p>Names of fields to leave out.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140635,12 +141519,11 @@ dictionary. By default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
+                <p>Dictionary representation of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140650,21 +141533,6 @@ EasyScience object.</p>
       </tbody>
     </table>
 
-
-<details class="note" open>
-  <summary><p>Notes</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end --></summary>
-  <p>A <code>unique_name</code> that was generated automatically is not
-written; only an explicitly supplied one is, so that a
-deserialized object gets a fresh name instead of clashing with
-the original. Likewise <code>display_name</code> is omitted when it is
-<code>None</code>. Pass <code>skip</code> to drop further fields.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-</details>
 
     </div>
 
@@ -140685,8 +141553,7 @@ the original. Likewise <code>display_name</code> is omitted when it is
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object with DescriptorNumber attributes
-from a full encoded dictionary.</p>
+        <p>Re-create a model from its dictionary representation, including its Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140708,12 +141575,11 @@ from a full encoded dictionary.</p>
                 <code>obj_dict</code>
             </td>
             <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>to_dict</code>) of an EasyScience object.</p>
+                <p>Dictionary representation of the model, as produced by to_dict().</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -140738,52 +141604,11 @@ from a full encoded dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;easyscience.base_classes.model_base.ModelBase&lt;/code&gt;" href="https://easyscience.github.io/core/latest/api-reference/base_classes/#easyscience.base_classes.model_base.ModelBase">ModelBase</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ModelBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;MyModelBase&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;meV&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y_unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#x27;dimensionless&#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase">ModelBase</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="SyntaxError">SyntaxError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a deserialized parameter cannot be attached back to the
-class definition.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the input dictionary does not describe the expected
-class.</p>
+                <p>The deserialised model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -141086,7 +141911,7 @@ so the per-Q parameters of the remaining components are kept.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Clear all ModelComponents from the SampleModel.</p>
+        <p>Clear all ModelComponents from the SampleModel, and their Q constraints.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -141655,6 +142480,189 @@ on per-Q collections built later.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.sample_model.SampleModel.make_parameter_Q_independent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_parameter_Q_independent</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make one Parameter of a component take the same value at every Q.</p>
+<p>The Parameter at every other Q is made dependent on the one at Q index 0, so only that one
+is varied in a fit. Use <code>fit_method='simultaneous'</code>: when each Q is fitted independently,
+the value is determined by the fit of Q index 0 alone.</p>
+<p>The tie is reapplied whenever the per-Q collections are rebuilt, and applies when Q is set
+later. Use <code>remove_parameter_Q_constraint</code> to undo it.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Parameter already depends on other Parameters, e.g. because it is generated by a
+diffusion model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.sample_model.SampleModel.remove_parameter_Q_constraint" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_parameter_Q_constraint</span><span class="p">(</span><span class="n">component_name</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Undo <code>make_parameter_Q_independent</code>, so the Parameter varies freely with Q again.</p>
+<p>Each per-Q Parameter keeps its current value. The Parameter at Q index 0 keeps its fixed
+flag and the others come back free, since a dependent Parameter has none. Does nothing if
+the Parameter has no constraint.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>component_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the component the Parameter belongs to.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameter_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The attribute name of the Parameter on the component, e.g. <code>'width'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
