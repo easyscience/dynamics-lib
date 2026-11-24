@@ -280,14 +280,21 @@ class ResolutionModel(ModelBase):
             # clear the dirty flag in one final step.
             collections = []
             for index in range(len(sample_model.Q)):
-                source = copy(sample_model.get_component_collection(Q_index=index))
+                original = sample_model.get_component_collection(Q_index=index)
+                source = copy(original)
                 filtered = ComponentCollection(
                     name=source.name,
                     display_name=source.display_name,
                     x_unit=source.x_unit,
                     y_unit=source.y_unit,
                 )
-                for component in source:
+                for original_component, component in zip(original, source, strict=True):
+                    # The templates are shared with the SampleModel, so a copy of a template's
+                    # per-Q copy is a per-Q copy of the same template. Components of diffusion
+                    # models are not linked: the diffusion model does not regenerate these.
+                    component._set_origin(  # ruff: ignore[private-member-access]
+                        template=original_component.get_template()
+                    )
                     if isinstance(component, DeltaFunction):
                         stripped_deltas += 1
                         continue

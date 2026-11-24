@@ -186,7 +186,7 @@ class ModelBase(EasyDynamicsModelBase):
             return
         added = self._components[n_before:]
         for collection in self._component_collections:
-            for offset, new_component in enumerate(copy(added)):
+            for offset, new_component in enumerate(self._copy_templates(added)):
                 collection.insert(n_before + offset, new_component)
         self._mark_component_collections_patched()
 
@@ -1197,7 +1197,27 @@ class ModelBase(EasyDynamicsModelBase):
 
         self._component_collections = []
         for _ in range(len(self.Q)):
-            self._component_collections.append(copy(self._components))
+            self._component_collections.append(self._copy_templates(self._components))
+
+    @staticmethod
+    def _copy_templates(templates: ComponentCollection) -> ComponentCollection:
+        """
+        Copy template components for one Q value, recording each copy's template.
+
+        Parameters
+        ----------
+        templates : ComponentCollection
+            The template components to copy.
+
+        Returns
+        -------
+        ComponentCollection
+            The copies, in the same order, each returning its template from ``get_template``.
+        """
+        copies = copy(templates)
+        for template, component in zip(templates, copies, strict=True):
+            component._set_origin(template=template)  # ruff: ignore[private-member-access]
+        return copies
 
     def _can_patch_component_collections(self) -> bool:
         """
