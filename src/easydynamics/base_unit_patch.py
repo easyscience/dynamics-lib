@@ -44,4 +44,6 @@ def _base_unit(self: EasyScienceDescriptorNumber) -> str:
     return 'dimensionless'
 
 
+# Kept so a test can check whether EasyScience still strips the factor without the patch.
+easyscience_base_unit = EasyScienceDescriptorNumber._base_unit  # ruff: ignore[private-member-access]
 EasyScienceDescriptorNumber._base_unit = _base_unit  # ruff: ignore[private-member-access]
