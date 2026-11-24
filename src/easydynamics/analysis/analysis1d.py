@@ -451,6 +451,7 @@ class Analysis1d(AnalysisBase):
         add_background: bool = True,
         plot_residuals: bool = False,
         energy: sc.Variable | None = None,
+        split_by_resolution: bool = False,
         **kwargs: dict[str, Any],
     ) -> WidgetFigure:
         """
@@ -472,6 +473,11 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for plotting. If None, the energy grid from the experiment
             is used.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components, e.g. 'Lorentzian ⊗ Res. Gauss' and 'Lorentzian ⊗ Res. Lorentz',
+            which add up to the convolved component. Only used if plot_components is True and there
+            is a resolution.
         **kwargs : dict[str, Any]
             Keyword arguments to pass to the plotting function.
 
@@ -485,6 +491,7 @@ class Analysis1d(AnalysisBase):
             add_background=add_background,
             include_components=plot_components,
             include_residuals=plot_residuals,
+            split_by_resolution=split_by_resolution,
         )
 
         plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
@@ -514,6 +521,7 @@ class Analysis1d(AnalysisBase):
         add_background: bool = True,
         include_components: bool = True,
         include_residuals: bool = False,
+        split_by_resolution: bool = False,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation, and
@@ -534,13 +542,18 @@ class Analysis1d(AnalysisBase):
         include_residuals : bool, default=False
             Whether to include the residuals (data - model) in the DataGroup. If True, the
             DataGroup will include a DataArray with key 'Residuals' containing the residuals.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components, keyed 'sample_name ⊗ resolution_name'. Only used if
+            include_components is True and there is a resolution.
 
         Raises
         ------
         ValueError
             If no data is available in the experiment to include in the DataGroup. If no Q values
             are available in the experiment to create the DataGroup. If Q_index is not set to
-            create the DataGroup. If include_components is True and two components share a name.
+            create the DataGroup. If include_components is True and two components share a name, or
+            split_by_resolution is True and two resolution components share a name.
 
         Returns
         -------
@@ -560,6 +573,7 @@ class Analysis1d(AnalysisBase):
         self._verify_bool(add_background, 'add_background')
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
+        self._verify_bool(split_by_resolution, 'split_by_resolution')
 
         if self.Q_index is None:
             raise ValueError('Q_index must be set to create DataGroup.')
@@ -590,6 +604,7 @@ class Analysis1d(AnalysisBase):
             components = self._create_components_dataset_single_Q(
                 add_background=add_background,
                 energy=energy,
+                split_by_resolution=split_by_resolution,
             )
 
             for key in components:
@@ -746,6 +761,7 @@ class Analysis1d(AnalysisBase):
         components: ComponentCollection | ModelComponent,
         energy: sc.Variable | None,
         convolver: Convolution | None = None,
+        resolution: ComponentCollection | ModelComponent | None = None,
     ) -> np.ndarray:
         """
         Evaluate sample components, applying convolution and detailed balance as appropriate.
@@ -763,6 +779,9 @@ class Analysis1d(AnalysisBase):
             Energy grid to use. If None, uses the masked energy from the experiment.
         convolver : Convolution | None, default=None
             Pre-built Convolution to reuse. If None, a new one is created if needed.
+        resolution : ComponentCollection | ModelComponent | None, default=None
+            Resolution to convolve with, e.g. a single resolution component. If None, the
+            resolution model at the current Q index is used. Ignored if a convolver is given.
 
         Returns
         -------
@@ -781,10 +800,11 @@ class Analysis1d(AnalysisBase):
             return scale * convolver.convolution()
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
-        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
+        energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
+        if resolution is None:
+            resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
 
-        if resolution.is_empty:
-            energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
+        if isinstance(resolution, ComponentCollection) and resolution.is_empty:
             result = components.evaluate(energy_with_offset)
             if (
                 self.temperature is not None
@@ -948,6 +968,7 @@ class Analysis1d(AnalysisBase):
         self,
         add_background: bool = True,
         energy: sc.Variable | None = None,
+        split_by_resolution: bool = False,
     ) -> sc.Dataset:
         """
         Create sc.DataArrays for all sample and background components.
@@ -959,6 +980,10 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
             experiment is used.
+        split_by_resolution : bool, default=False
+            Whether to split each sample component into its convolutions with the individual
+            resolution components, keyed 'sample_name ⊗ resolution_name'. Ignored if there is no
+            resolution.
 
         Returns
         -------
@@ -968,8 +993,9 @@ class Analysis1d(AnalysisBase):
         Raises
         ------
         ValueError
-            If two sample or background components share a name, because one would replace the
-            other in the Dataset.
+            If two entries would have the same name, because one would replace the other in the
+            Dataset: two sample or background components that share a name, or, with
+            split_by_resolution, two resolution components that share a name.
         """
         Q_index = self.Q_index
         if energy is None:
@@ -980,7 +1006,25 @@ class Analysis1d(AnalysisBase):
         )
         sample_components = self.sample_model.get_component_collection(Q_index=Q_index)
 
-        names = [component.name for component in (*sample_components, *background_components)]
+        # None stands for the whole resolution: one entry per sample component, as without
+        # the split.
+        resolutions = [None]
+        if split_by_resolution:
+            resolutions = list(
+                self.instrument_model.resolution_model.get_component_collection(Q_index=Q_index)
+            ) or [None]
+
+        def key(component: ModelComponent, resolution: ModelComponent | None) -> str:
+            if resolution is None:
+                return component.name
+            return f'{component.name} ⊗ {resolution.name}'
+
+        names = [
+            key(component, resolution)
+            for component in sample_components
+            for resolution in resolutions
+        ]
+        names.extend(component.name for component in background_components)
         duplicates = sorted({name for name in names if names.count(name) > 1})
         if duplicates:
             raise ValueError(
@@ -996,10 +1040,11 @@ class Analysis1d(AnalysisBase):
 
         result: dict[str, sc.DataArray] = {}
         for component in sample_components:
-            values = self._evaluate_with_convolution(component, energy)
-            if background_values is not None:
-                values = values + background_values
-            result[component.name] = self._to_scipp_array(values, energy)
+            for resolution in resolutions:
+                values = self._evaluate_with_convolution(component, energy, resolution=resolution)
+                if background_values is not None:
+                    values = values + background_values
+                result[key(component, resolution)] = self._to_scipp_array(values, energy)
 
         for component in background_components:
             result[component.name] = self._to_scipp_array(
