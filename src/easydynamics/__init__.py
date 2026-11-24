@@ -27,6 +27,7 @@ from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.io import load_mantid_nexus
+from easydynamics.io import load_spe
 from easydynamics.sample_model import BackgroundModel
 from easydynamics.sample_model import BrownianTranslationalDiffusion
 from easydynamics.sample_model import ChudleyElliottJumpDiffusion
@@ -98,6 +99,7 @@ __all__ = [
     'detailed_balance_factor',
     'hbar',
     'load_mantid_nexus',
+    'load_spe',
     'plot_corner',
     'plot_posterior_predictive',
     'plot_trace',
