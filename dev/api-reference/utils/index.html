@@ -3859,6 +3859,17 @@ returning raw values expressed in <em>y_unit</em>.</p>
                 </div>
               </td>
             </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;relabel_lines&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.plotting.relabel_lines&lt;/code&gt;)" href="#easydynamics.utils.plotting.relabel_lines">relabel_lines</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Rename the lines of a figure in its legend.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
       </tbody>
     </table>
 
@@ -4210,6 +4221,83 @@ contains a residuals array.</p>
 
 <!-- prettier-ignore-end -->
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.utils.plotting.relabel_lines" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">relabel_lines</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Rename the lines of a figure in its legend.</p>
+<p>Plopp labels each line by its DataGroup key, which must be unique, so lines whose label is a
+key in <code>labels</code> are renamed after plotting. A blank new label leaves the line out of the
+legend.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fig</code>
+            </td>
+            <td>
+                  <code><span title="plopp.backends.matplotlib.figure.WidgetFigure">WidgetFigure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The figure holding the lines to relabel.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>labels</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new label of each line, keyed by its current label.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
