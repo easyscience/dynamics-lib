@@ -1226,8 +1226,18 @@ class MultiQPosteriorSampler(PosteriorSampler):
             return result
         # The per-Q chains live on their own samplers; this one then holds nothing of its own.
         self._results = None
+        skipped = [analysis1d.Q_index for analysis1d in per_q if not analysis1d.has_data]
+        if skipped:
+            warnings.warn(
+                f'Q_index {skipped} has no data to sample, as every point is masked, NaN or Inf, '
+                'and is skipped.',
+                UserWarning,
+                stacklevel=2,
+            )
         return [
             analysis1d.bayesian.sample(samples=samples, burn=burn, thin=thin, **sampler_options)
+            if analysis1d.has_data
+            else None
             for analysis1d in per_q
         ]
 

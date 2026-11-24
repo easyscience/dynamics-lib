@@ -1909,6 +1909,21 @@ class TestMultiQPosteriorSampler:
     # Extending and persistence
     #############
 
+    def test_sample_independently_skips_a_fully_masked_Q(self, multi_q_analysis):
+        # WHEN
+        bad_Q = sc.array(dims=['Q'], values=[False, True, False])
+        multi_q_analysis.experiment.mask('bad_Q', bad_Q)
+        for analysis1d in multi_q_analysis.analysis_list:
+            analysis1d.bayesian.sample = MagicMock(return_value=f'chain_Q{analysis1d.Q_index}')
+
+        # THEN
+        with pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to sample'):
+            results = multi_q_analysis.bayesian.sample(samples=10)
+
+        # EXPECT
+        assert results == ['chain_Q0', None, 'chain_Q2']
+        multi_q_analysis.analysis_list[1].bayesian.sample.assert_not_called()
+
     def test_extend_after_an_independent_run_points_at_the_per_q_chains(self, multi_q_analysis):
         # WHEN an independent run follows a simultaneous one, so this sampler still holds the old
         # simultaneous chain while the latest chains live per Q

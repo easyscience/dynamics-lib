@@ -965,6 +965,7 @@ class TestAnalysis:
         fake_fitter.fit.return_value = 'simultaneous_result'
         analysis._fitter = fake_fitter
         analysis._fitter_is_dirty = False
+        analysis._fitter_Q_indices = (0, 1, 2)
 
         # THEN
         result = analysis.fit(fit_method='simultaneous')
@@ -1072,17 +1073,88 @@ class TestAnalysis:
         # EXPECT
         mock_invalidate.assert_called_once()
 
-    @pytest.mark.parametrize('simultaneously', [False, True], ids=['independent', 'simultaneous'])
-    def test_fit_with_a_fully_masked_Q_raises(self, analysis, simultaneously):
+    def test_fit_independently_skips_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        for analysis1d in analysis.analysis_list:
+            analysis1d.fit = MagicMock(return_value=f'result_Q{analysis1d.Q_index}')
+
+        # THEN
+        with pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to fit'):
+            results = analysis.fit()
+
+        # EXPECT
+        assert results == ['result_Q0', None, 'result_Q2']
+        analysis.analysis_list[1].fit.assert_not_called()
+
+    def test_fit_simultaneously_skips_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        fake_fitter = MagicMock()
+        fake_fitter.fit.return_value = ['result_Q0', 'result_Q2']
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.analysis.MultiFitter', return_value=fake_fitter) as mock,
+            pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to fit'),
+        ):
+            results = analysis.fit(fit_method='simultaneous')
+
+        # EXPECT the fitter covers only the Q with data, and the results line up with Q again
+        assert mock.call_args.kwargs['fit_objects'] == [
+            analysis.analysis_list[0],
+            analysis.analysis_list[2],
+        ]
+        assert len(fake_fitter.fit.call_args.kwargs['x']) == 2
+        assert results == ['result_Q0', None, 'result_Q2']
+
+    def test_fit_simultaneously_with_every_Q_masked_raises(self, analysis):
+        # WHEN
+        analysis.experiment.mask('everything', sc.array(dims=['Q'], values=[True] * 3))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No Q index has data to fit'):
+            analysis.fit(fit_method='simultaneous')
+
+    def test_fitter_is_rebuilt_only_when_the_Q_with_data_change(self, analysis):
+        # WHEN
+        fitter = analysis.fitter
+        energy = analysis.experiment.data.coords['energy']
+
+        # THEN a mask that leaves every Q with data keeps the fitter, and its settings
+        analysis.experiment.mask('high', energy > sc.scalar(25.0, unit='meV'))
+        kept = analysis.fitter
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        rebuilt = analysis.fitter
+
+        # EXPECT
+        assert kept is fitter
+        assert rebuilt is not fitter
+        assert len(rebuilt.fit_object) == 2
+
+    def test_sampling_data_skips_a_fully_masked_Q(self, analysis):
         # WHEN
         analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
 
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='Q_index 1 has no data to fit'):
-            if simultaneously:
-                analysis._fit_all_Q_simultaneously()
-            else:
-                analysis._fit_all_Q_independently()
+        # THEN
+        with pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to sample'):
+            xs, ys, ws = analysis._sampling_data()
+
+        # EXPECT
+        assert len(xs) == len(ys) == len(ws) == 2
+
+    def test_parameters_to_dataset_is_nan_for_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        dataset = analysis.parameters_to_dataset()
+
+        # EXPECT a Q that was never fitted shows no values
+        for name in dataset:
+            values = dataset[name].values
+            assert np.isnan(values[1])
+            assert np.isfinite(values[[0, 2]]).all()
 
     def test_bayesian_is_invalidated_when_the_sample_model_changes(self, analysis):
         # WHEN

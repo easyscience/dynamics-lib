@@ -155,6 +155,19 @@ class Analysis1d(AnalysisBase):
     #############
 
     @property
+    def has_data(self) -> bool:
+        """
+        Whether this Q index has any point left to fit once masked, NaN and Inf points are removed.
+
+        Returns
+        -------
+        bool
+            True if there is at least one point to fit.
+        """
+        energy = self._masked_energy
+        return energy is not None and len(energy) > 0
+
+    @property
     def Q_index(self) -> int | None:
         """
         Get the Q index associated with this Analysis.
