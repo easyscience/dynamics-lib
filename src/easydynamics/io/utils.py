@@ -25,7 +25,10 @@ def apply_min_error(data: sc.DataArray, min_error: float | None) -> None:
     min_error : float | None
         None leaves the data as it is. A positive number raises every error below it to it, in the
         same units as the intensity. NaN instead masks the bins whose error is zero with a
-        ``'zero_error'`` mask, so fits and rebinning leave them out.
+        ``'zero_error'`` mask, so fits and rebinning leave them out. Those bins are usually ones in
+        which nothing was counted, so leaving them out raises the average intensity wherever they
+        are common, as when rebinning low-count data; a floor keeps them, with a small weight, and
+        is then the better choice.
 
     Raises
     ------

@@ -61,7 +61,8 @@ def load_mantid_nexus(
     min_error : float | None, default=None
         None keeps the errors as stored. A positive number raises every error below it to it, in
         the units of the intensity. NaN masks the bins with zero error with a ``'zero_error'``
-        mask, so fits and rebinning leave them out.
+        mask, so fits and rebinning leave them out; as these are usually empty bins, a floor is the
+        better choice before rebinning low-count data.
 
     Returns
     -------
@@ -73,8 +74,9 @@ def load_mantid_nexus(
     ------
     ValueError
         If the file holds several workspaces and no ``entry`` is given, ``entry`` is not in the
-        file, the workspace axes are not energy transfer and momentum transfer, or the workspace is
-        a rebinned one that was saved before Mantid divided it by its fractional areas.
+        file, the workspace axes are not energy transfer and momentum transfer, the energy bins
+        differ between spectra, or the workspace is a rebinned one that was saved before Mantid
+        divided it by its fractional areas or with squared errors.
     """
     with h5py.File(filename, 'r') as file:
         entries = sorted(name for name in file if name.startswith('mantid_workspace_'))
@@ -101,8 +103,14 @@ def load_mantid_nexus(
                     'first, for example with SofQW.'
                 )
             dim, unit = _AXIS_UNITS[unit_id]
+            values = workspace[axis_name][()]
+            if values.ndim != 1:
+                raise ValueError(
+                    f'{axis_name} differs between spectra; rebin the workspace in Mantid so every '
+                    'spectrum has the same energy bins.'
+                )
             dims.append(dim)
-            coords[dim] = sc.array(dims=[dim], values=workspace[axis_name][()], unit=unit)
+            coords[dim] = sc.array(dims=[dim], values=values, unit=unit)
 
         data = sc.DataArray(
             data=sc.array(
@@ -112,10 +120,16 @@ def load_mantid_nexus(
         )
         if 'frac_area' in workspace:
             # A finalized RebinnedOutput already holds intensity divided by the fractional area.
-            if _decode(workspace['frac_area'].attrs.get('finalized', b'1')) != '1':
+            attrs = workspace['frac_area'].attrs
+            if _decode(attrs.get('finalized', b'1')) != '1':
                 raise ValueError(
                     'The workspace was saved before Mantid normalised it by its fractional '
                     'areas; finalize it in Mantid and save it again.'
+                )
+            if _decode(attrs.get('sqrd_errors', b'0')) != '0':
+                raise ValueError(
+                    'The workspace was saved with squared errors, which this loader does not '
+                    'read; save it from Mantid with ordinary errors.'
                 )
             data.masks['uncovered'] = sc.array(dims=dims, values=workspace['frac_area'][()] == 0)
 

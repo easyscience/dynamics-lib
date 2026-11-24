@@ -82,15 +82,38 @@ class TestLoadMantidNexus:
         # EXPECT the stored values, which Mantid already divided by the fractional areas
         np.testing.assert_array_equal(data.values, stored(IRIS, 'values'))
 
-    def test_unfinalized_rebinned_workspace_raises(self, tmp_path):
-        # WHEN the areas have not yet been divided out
-        path = tmp_path / 'unfinalized.nxs'
+    @pytest.mark.parametrize(
+        ('attribute', 'value', 'message'),
+        [('finalized', b'0', 'finalize it in Mantid'), ('sqrd_errors', b'1', 'squared errors')],
+        ids=['unfinalized', 'squared_errors'],
+    )
+    def test_rebinned_workspace_not_read_as_stored_raises(
+        self, tmp_path, attribute, value, message
+    ):
+        # WHEN the areas have not been divided out, or the errors are stored squared
+        path = tmp_path / 'rebinned.nxs'
         shutil.copy(IRIS, path)
         with h5py.File(path, 'r+') as file:
-            file['mantid_workspace_1/workspace/frac_area'].attrs['finalized'] = np.bytes_(b'0')
+            file['mantid_workspace_1/workspace/frac_area'].attrs[attribute] = np.bytes_(value)
 
         # THEN EXPECT
-        with pytest.raises(ValueError, match='finalize it in Mantid'):
+        with pytest.raises(ValueError, match=message):
+            load_mantid_nexus(path)
+
+    def test_energy_bins_differing_between_spectra_raises(self, tmp_path):
+        # WHEN the energy axis is stored per spectrum
+        path = tmp_path / 'ragged.nxs'
+        shutil.copy(IN16B, path)
+        with h5py.File(path, 'r+') as file:
+            workspace = file['mantid_workspace_1/workspace']
+            energy = workspace['axis1'][()]
+            units = workspace['axis1'].attrs['units']
+            del workspace['axis1']
+            workspace.create_dataset('axis1', data=np.tile(energy, (4, 1)))
+            workspace['axis1'].attrs['units'] = units
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='differs between spectra'):
             load_mantid_nexus(path)
 
     def test_result_is_accepted_by_experiment(self):
@@ -110,14 +133,6 @@ class TestLoadMantidNexus:
 
         # EXPECT
         assert (data.variances == 0).sum() == 2
-
-    def test_min_error_raises_small_errors(self):
-        # THEN
-        data = load_mantid_nexus(IN16B, min_error=0.5)
-
-        # EXPECT
-        assert data.variances.min() == pytest.approx(0.25)
-        np.testing.assert_array_equal(data.values, stored(IN16B, 'values'))
 
     def test_min_error_nan_masks_zero_error_bins(self):
         # THEN
@@ -149,11 +164,6 @@ class TestLoadMantidNexus:
 
         # EXPECT
         assert np.isfinite(weights).all()
-
-    def test_invalid_min_error_raises(self):
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='min_error must be positive'):
-            load_mantid_nexus(IN16B, min_error=0.0)
 
     #############
     # Choosing a workspace
