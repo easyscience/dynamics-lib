@@ -26,7 +26,7 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.plotting import with_x_axis_dim
 from easydynamics.utils.utils import _in_notebook
-from easydynamics.utils.utils import verify_has_data
+from easydynamics.utils.utils import skip_Q_without_data
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -131,6 +131,8 @@ class Analysis(AnalysisBase):
         self._fitter = None
         self._fitter_is_dirty = True
         self._bayesian = None
+        # The Q indices the cached MultiFitter covers: those with data when it was built.
+        self._fitter_Q_indices = None
         # The experiment state_version the last sampling run saw; see _prepare_for_sampling.
         self._seen_experiment_version = None
         super().__init__(
@@ -189,7 +191,10 @@ class Analysis(AnalysisBase):
     @property
     def fitter(self) -> MultiFitter:
         """
-        The EasyScience MultiFitter covering every Q index, built on first use.
+        The EasyScience MultiFitter covering every Q index with data, built on first use.
+
+        It is rebuilt when masks change which Q indices have data, keeping the minimizer, tolerance
+        and maximum number of evaluations set on it.
 
         Returns
         -------
@@ -199,6 +204,12 @@ class Analysis(AnalysisBase):
         if self._fitter_is_dirty or self._fitter is None:
             self._fitter = self._build_fitter()
             self._fitter_is_dirty = False
+        elif self._fitter_Q_indices != self._Q_indices_with_data():
+            old = self._fitter
+            self._fitter = self._build_fitter()
+            self._fitter.switch_minimizer(old.minimizer.enum)
+            self._fitter.tolerance = old.tolerance
+            self._fitter.max_evaluations = old.max_evaluations
         return self._fitter
 
     @property
@@ -610,6 +621,11 @@ class Analysis(AnalysisBase):
         variances = {name: [] for name in all_names}
         units = {}
 
+        fitted = {
+            parameter.unique_name
+            for analysis in self._analyses_with_data()
+            for parameter in analysis.get_all_parameters()
+        }
         for analysis in self.analysis_list:
             all_params = analysis.get_all_parameters()
             param_names = [p.name for p in all_params]
@@ -622,7 +638,9 @@ class Analysis(AnalysisBase):
             pars = {p.name: p for p in all_params}
 
             for name in all_names:
-                if name in pars:
+                # A Q index without data was never fitted, so its own values mean nothing; a
+                # parameter it shares with a fitted Q index was fitted there.
+                if name in pars and (analysis.has_data or pars[name].unique_name in fitted):
                     p = pars[name]
 
                     # Unit consistency check
@@ -851,12 +869,37 @@ class Analysis(AnalysisBase):
         Returns
         -------
         MultiFitter
-            A MultiFitter over the Analysis1d objects and their fit functions.
+            A MultiFitter over the Analysis1d objects with data and their fit functions.
         """
-        return MultiFitter(
-            fit_objects=self.analysis_list,
-            fit_functions=self.get_fit_functions(),
-        )
+        self._fitter_Q_indices = self._Q_indices_with_data()
+        fit_objects = self.analysis_list
+        fit_functions = self.get_fit_functions()
+        if len(self._fitter_Q_indices) != len(fit_objects):
+            fit_objects = [fit_objects[index] for index in self._fitter_Q_indices]
+            fit_functions = [fit_functions[index] for index in self._fitter_Q_indices]
+        return MultiFitter(fit_objects=fit_objects, fit_functions=fit_functions)
+
+    def _analyses_with_data(self) -> list[Analysis1d]:
+        """
+        Get the per-Q analyses that have data to fit.
+
+        Returns
+        -------
+        list[Analysis1d]
+            The analyses whose Q index has at least one point that is not masked, NaN or Inf.
+        """
+        return [analysis for analysis in self.analysis_list if analysis.has_data]
+
+    def _Q_indices_with_data(self) -> tuple[int, ...]:
+        """
+        Get the Q indices that have data to fit.
+
+        Returns
+        -------
+        tuple[int, ...]
+            The Q indices with at least one point that is not masked, NaN or Inf.
+        """
+        return tuple(analysis.Q_index for analysis in self._analyses_with_data())
 
     def _sampling_data(self) -> tuple[list, list, list]:
         """
@@ -865,10 +908,12 @@ class Analysis(AnalysisBase):
         Returns
         -------
         tuple[list, list, list]
-            The ``(x, y, weights)`` triple, one entry per Q index.
+            The ``(x, y, weights)`` triple, one entry per Q index with data. A Q index without data
+            is skipped with a warning, as the MultiFitter leaves it out too.
         """
+        skip_Q_without_data(self.analysis_list, 'sample')
         xs, ys, ws = [], [], []
-        for analysis1d in self.analysis_list:
+        for analysis1d in self._analyses_with_data():
             x, y, weight = analysis1d._sampling_data()  # ruff: ignore[private-member-access]
             xs.append(x)
             ys.append(y)
@@ -885,10 +930,11 @@ class Analysis(AnalysisBase):
         Returns
         -------
         list[Parameter]
-            The free parameters of the whole analysis, in Q order and without duplicates.
+            The free parameters of the whole analysis, in Q order and without duplicates. A Q index
+            without data is left out, as the MultiFitter the Sampler is built from leaves it out.
         """
         parameters = {}
-        for analysis1d in self.analysis_list:
+        for analysis1d in self._analyses_with_data():
             for parameter in analysis1d.get_free_parameters():
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
@@ -936,7 +982,7 @@ class Analysis(AnalysisBase):
             if self._bayesian is not None:
                 self._bayesian.invalidate()
             self._seen_experiment_version = experiment_version
-        for analysis1d in self.analysis_list:
+        for analysis1d in self._analyses_with_data():
             _, _, _, mask = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
             mask_var = sc.array(dims=['energy'], values=mask)
             analysis1d.refresh_convolver(
@@ -973,36 +1019,44 @@ class Analysis(AnalysisBase):
         Returns
         -------
         list[FitResults]
-            A list of FitResults, one for each Q index.
+            A list of FitResults, one for each Q index, with None for a Q index that has no data
+            because every point is masked, NaN or Inf. Such a Q index is skipped with a warning.
         """
         if not self.scale.fixed and len(self.analysis_list) > 1:
             raise ValueError(
                 'The scale is one parameter for all Q, so it cannot be fitted independently at '
                 "each Q. Fix it, or use fit_method='simultaneous'."
             )
-        return [analysis.fit() for analysis in self.analysis_list]
+        with_data = skip_Q_without_data(self.analysis_list, 'fit')
+        return [
+            analysis.fit() if has_data else None
+            for analysis, has_data in zip(self.analysis_list, with_data, strict=True)
+        ]
 
     def _fit_all_Q_simultaneously(self) -> FitResults:
         """
         Fit data for all Q indices simultaneously.
 
+        A Q index with no data, because every point is masked, NaN or Inf, is skipped with a
+        warning; a ValueError is raised if no Q index has data.
+
         Returns
         -------
         FitResults
-            The results of the simultaneous fit across all Q indices.
+            The results of the simultaneous fit across all Q indices, split by Q index, with None
+            for a skipped Q index.
         """
-
+        with_data = skip_Q_without_data(self.analysis_list, 'fit')
         xs = []
         ys = []
         ws = []
 
         # TODO: consider using scipp built-in masking instead of numpy boolean masks,  # ruff: ignore[line-contains-todo, missing-todo-author, missing-todo-link]
 
-        for analysis1d in self.analysis_list:
+        for analysis1d in self._analyses_with_data():
             x, y, weight, mask = self.experiment.extract_x_y_weights_only_finite(
                 analysis1d.Q_index
             )
-            verify_has_data(x, analysis1d.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
@@ -1016,11 +1070,15 @@ class Analysis(AnalysisBase):
 
         # Use the configured fitter rather than a throwaway MultiFitter, so minimizer and
         # tolerance settings applied through the ``fitter`` property take effect.
-        return self.fitter.fit(
+        result = self.fitter.fit(
             x=xs,
             y=ys,
             weights=ws,
         )
+        if all(with_data):
+            return result
+        per_Q = iter(result)
+        return [next(per_Q) if has_data else None for has_data in with_data]
 
     def get_all_variables(self) -> list[Parameter]:
         """

@@ -139,6 +139,24 @@ class TestAnalysis1d:
         analysis1d._evaluate_with_convolution.assert_called_once()
         analysis1d._evaluate_direct.assert_called_once()
 
+    def test_has_data(self, analysis1d):
+        # WHEN THEN EXPECT
+        assert analysis1d.has_data
+
+    def test_has_data_false_when_every_point_is_masked(self, analysis1d):
+        # WHEN
+        analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))
+
+        # THEN EXPECT
+        assert not analysis1d.has_data
+
+    def test_has_data_false_without_Q_index(self, analysis1d):
+        # WHEN
+        analysis1d.Q_index = None
+
+        # THEN EXPECT
+        assert not analysis1d.has_data
+
     #############
     # The cached fitter
     #############

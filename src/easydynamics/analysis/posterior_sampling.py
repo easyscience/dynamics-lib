@@ -31,6 +31,7 @@ from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.analysis.posterior import unbounded_parameters
 from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import skip_Q_without_data
 from easydynamics.utils.utils import verify_Q_index
 
 if TYPE_CHECKING:
@@ -1144,6 +1145,26 @@ class MultiQPosteriorSampler(PosteriorSampler):
         super().__init__(**kwargs)
         self._per_q = per_q
 
+    @staticmethod
+    def _counts(analysis1d: object) -> bool:
+        """
+        Whether a per-Q chain should be reported.
+
+        A chain is left out once every point of its Q index is masked: it was sampled from data
+        that is no longer there.
+
+        Parameters
+        ----------
+        analysis1d : object
+            The per-Q analysis.
+
+        Returns
+        -------
+        bool
+            True if the Q index has a chain and data.
+        """
+        return analysis1d.bayesian.results is not None and analysis1d.has_data
+
     @property
     def results_per_q(self) -> list[SamplingResults | None] | None:
         """
@@ -1154,10 +1175,13 @@ class MultiQPosteriorSampler(PosteriorSampler):
         Returns
         -------
         list[SamplingResults | None] | None
-            One entry per Q index, None where that Q has not been sampled, or None overall if no Q
-            index has been sampled.
+            One entry per Q index, None where that Q has not been sampled or has no data left, or
+            None overall if no Q index has been sampled.
         """
-        results = [analysis1d.bayesian.results for analysis1d in self._per_q()]
+        results = [
+            analysis1d.bayesian.results if self._counts(analysis1d) else None
+            for analysis1d in self._per_q()
+        ]
         return results if any(result is not None for result in results) else None
 
     def sample(
@@ -1226,9 +1250,12 @@ class MultiQPosteriorSampler(PosteriorSampler):
             return result
         # The per-Q chains live on their own samplers; this one then holds nothing of its own.
         self._results = None
+        with_data = skip_Q_without_data(per_q, 'sample')
         return [
             analysis1d.bayesian.sample(samples=samples, burn=burn, thin=thin, **sampler_options)
-            for analysis1d in per_q
+            if has_data
+            else None
+            for analysis1d, has_data in zip(per_q, with_data, strict=True)
         ]
 
     def extend(
@@ -1345,7 +1372,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
         qualify = self._labels().label if labeller is None else labeller
         entries = []
         for analysis1d in self._per_q():
-            if analysis1d.bayesian.results is None:
+            if not self._counts(analysis1d):
                 continue
             entries.extend(analysis1d.bayesian.summary(labeller=qualify).entries)
         return PosteriorSummary(entries)
@@ -1365,7 +1392,7 @@ class MultiQPosteriorSampler(PosteriorSampler):
             return super().set_parameters_to_median()
         changed = []
         for analysis1d in self._per_q():
-            if analysis1d.bayesian.results is not None:
+            if self._counts(analysis1d):
                 changed.extend(analysis1d.bayesian.set_parameters_to_median())
         return changed
 

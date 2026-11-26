@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import contextlib
+import inspect
+import warnings
 from collections.abc import Callable
 
 import numpy as np
@@ -91,6 +93,59 @@ def verify_has_data(x: np.ndarray, Q_index: int) -> None:
             f'Q_index {Q_index} has no data to fit: every point is masked, NaN or Inf. '
             'Remove the mask or leave this Q index out of the fit.'
         )
+
+
+def skip_Q_without_data(analyses: list, action: str) -> list[bool]:
+    """
+    Find which per-Q analyses have data, warning about those that are skipped.
+
+    Parameters
+    ----------
+    analyses : list
+        The per-Q analyses, each with ``has_data`` and ``Q_index``.
+    action : str
+        What is being done, such as ``'fit'`` or ``'sample'``, for the messages.
+
+    Returns
+    -------
+    list[bool]
+        For each analysis, whether it has data.
+
+    Raises
+    ------
+    ValueError
+        If no analysis has data.
+    """
+    with_data = [analysis.has_data for analysis in analyses]
+    if not any(with_data):
+        raise ValueError(f'No Q index has data to {action}: every point is masked, NaN or Inf.')
+    skipped = [a.Q_index for a, has_data in zip(analyses, with_data, strict=True) if not has_data]
+    if skipped:
+        warnings.warn(
+            f'Q_index {skipped} has no data to {action}, as every point is masked, NaN or Inf, '
+            'and is skipped.',
+            UserWarning,
+            stacklevel=_stacklevel_outside_package(),
+        )
+    return with_data
+
+
+def _stacklevel_outside_package() -> int:
+    """
+    Compute the stacklevel that points a warning at the first frame outside easydynamics.
+
+    Returns
+    -------
+    int
+        The stacklevel for a ``warnings.warn`` call made directly by this function's caller.
+    """
+    frame = inspect.currentframe()
+    frame = None if frame is None else frame.f_back
+    level = 1
+    while frame is not None and frame.f_globals.get('__name__', '').startswith('easydynamics.'):
+        frame = frame.f_back
+        level += 1
+    return level
 
 
 def convert_units_with_rollback(

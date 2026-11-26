@@ -15,6 +15,7 @@ from easyscience.fitting.multi_fitter import MultiFitter
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.utils.utils import CANONICAL_Q_UNIT
+from easydynamics.utils.utils import skip_Q_without_data
 
 if TYPE_CHECKING:
     from easyscience.fitting.minimizers.utils import FitResults
@@ -284,7 +285,8 @@ class JointAnalysis(EasyDynamicsBase):
         """
         The EasyScience MultiFitter covering every Q index of every analysis, built on first use.
 
-        It is rebuilt whenever an analysis replaces its per-Q Analysis1d objects.
+        A Q index with no data, because every point is masked, NaN or Inf, is left out. The fitter
+        is rebuilt whenever that changes or an analysis replaces its per-Q Analysis1d objects.
 
         Returns
         -------
@@ -292,7 +294,10 @@ class JointAnalysis(EasyDynamicsBase):
             The cached MultiFitter.
         """
         fit_objects = [
-            analysis1d for analysis in self._analyses for analysis1d in analysis.analysis_list
+            analysis1d
+            for analysis in self._analyses
+            for analysis1d in analysis.analysis_list
+            if analysis1d.has_data
         ]
         object_ids = [id(fit_object) for fit_object in fit_objects]
         if self._fitter is None or object_ids != self._fitter_object_ids:
@@ -367,7 +372,7 @@ class JointAnalysis(EasyDynamicsBase):
         -------
         list[FitResults]
             One FitResults per data set: every Q index of the first analysis, then of the second,
-            and so on.
+            and so on. A Q index with no data is skipped with a warning, and its entry is None.
 
         Notes
         -----
@@ -376,14 +381,25 @@ class JointAnalysis(EasyDynamicsBase):
         """
         self.link_shared_components()
 
+        analyses1d = [a1d for analysis in self._analyses for a1d in analysis.analysis_list]
+        with_data = skip_Q_without_data(analyses1d, 'fit')
         xs, ys, ws = [], [], []
         for analysis in self._analyses:
+            if not any(analysis1d.has_data for analysis1d in analysis.analysis_list):
+                continue
             analysis._prepare_for_sampling()  # ruff: ignore[private-member-access]
-            x, y, weights = analysis._sampling_data()  # ruff: ignore[private-member-access]
+            # The analysis leaves out its Q indices without data, as the fitter does.
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', UserWarning)
+                x, y, weights = analysis._sampling_data()  # ruff: ignore[private-member-access]
             xs.extend(x)
             ys.extend(y)
             ws.extend(weights)
-        return self.fitter.fit(x=xs, y=ys, weights=ws)
+        result = self.fitter.fit(x=xs, y=ys, weights=ws)
+        if all(with_data):
+            return result
+        per_data_set = iter(result)
+        return [next(per_data_set) if has_data else None for has_data in with_data]
 
     def link_shared_components(self) -> None:
         """

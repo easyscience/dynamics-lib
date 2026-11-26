@@ -9,6 +9,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting.minimizers import Minimizers
 from easyscience.fitting.multi_fitter import MultiFitter
 
 import easydynamics as edyn
@@ -965,6 +966,7 @@ class TestAnalysis:
         fake_fitter.fit.return_value = 'simultaneous_result'
         analysis._fitter = fake_fitter
         analysis._fitter_is_dirty = False
+        analysis._fitter_Q_indices = (0, 1, 2)
 
         # THEN
         result = analysis.fit(fit_method='simultaneous')
@@ -1072,17 +1074,140 @@ class TestAnalysis:
         # EXPECT
         mock_invalidate.assert_called_once()
 
-    @pytest.mark.parametrize('simultaneously', [False, True], ids=['independent', 'simultaneous'])
-    def test_fit_with_a_fully_masked_Q_raises(self, analysis, simultaneously):
+    def test_fit_independently_skips_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        for analysis1d in analysis.analysis_list:
+            analysis1d.fit = MagicMock(return_value=f'result_Q{analysis1d.Q_index}')
+
+        # THEN
+        with pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to fit'):
+            results = analysis.fit()
+
+        # EXPECT
+        assert results == ['result_Q0', None, 'result_Q2']
+        analysis.analysis_list[1].fit.assert_not_called()
+
+    def test_fit_simultaneously_skips_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        fake_fitter = MagicMock()
+        fake_fitter.fit.return_value = ['result_Q0', 'result_Q2']
+
+        # THEN
+        with (
+            patch('easydynamics.analysis.analysis.MultiFitter', return_value=fake_fitter) as mock,
+            pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to fit'),
+        ):
+            results = analysis.fit(fit_method='simultaneous')
+
+        # EXPECT the fitter covers only the Q with data, and the results line up with Q again
+        assert mock.call_args.kwargs['fit_objects'] == [
+            analysis.analysis_list[0],
+            analysis.analysis_list[2],
+        ]
+        assert len(fake_fitter.fit.call_args.kwargs['x']) == 2
+        assert results == ['result_Q0', None, 'result_Q2']
+
+    @pytest.mark.parametrize('fit_method', ['independent', 'simultaneous'])
+    def test_fit_with_every_Q_masked_raises(self, analysis, fit_method):
+        # WHEN
+        analysis.experiment.mask('everything', sc.array(dims=['Q'], values=[True] * 3))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No Q index has data to fit'):
+            analysis.fit(fit_method=fit_method)
+
+    def test_sampling_data_with_every_Q_masked_raises(self, analysis):
+        # WHEN
+        analysis.experiment.mask('everything', sc.array(dims=['Q'], values=[True] * 3))
+
+        # THEN EXPECT the reason, rather than a complaint that every parameter is fixed
+        with pytest.raises(ValueError, match='No Q index has data to sample'):
+            analysis._sampling_data()
+
+    def test_skip_warning_points_at_the_callers_line(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        for analysis1d in analysis.analysis_list:
+            analysis1d.fit = MagicMock()
+
+        # THEN
+        with pytest.warns(UserWarning, match='has no data to fit') as record:
+            analysis.fit()
+
+        # EXPECT
+        assert record[0].filename == __file__
+
+    def test_fitter_keeps_its_settings_when_the_Q_with_data_change(self, analysis):
+        # WHEN
+        analysis.fitter.switch_minimizer(Minimizers.Bumps)
+        analysis.fitter.tolerance = 1e-3
+        analysis.fitter.max_evaluations = 123
+
+        # THEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        fitter = analysis.fitter
+
+        # EXPECT
+        assert len(fitter.fit_object) == 2
+        assert fitter.minimizer.enum == Minimizers.Bumps
+        assert fitter.tolerance == pytest.approx(1e-3)
+        assert fitter.max_evaluations == 123
+
+    def test_fitter_is_rebuilt_only_when_the_Q_with_data_change(self, analysis):
+        # WHEN
+        fitter = analysis.fitter
+        energy = analysis.experiment.data.coords['energy']
+
+        # THEN a mask that leaves every Q with data keeps the fitter, and its settings
+        analysis.experiment.mask('high', energy > sc.scalar(25.0, unit='meV'))
+        kept = analysis.fitter
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        rebuilt = analysis.fitter
+
+        # EXPECT
+        assert kept is fitter
+        assert rebuilt is not fitter
+        assert len(rebuilt.fit_object) == 2
+
+    def test_sampling_data_skips_a_fully_masked_Q(self, analysis):
         # WHEN
         analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
 
-        # THEN EXPECT
-        with pytest.raises(ValueError, match='Q_index 1 has no data to fit'):
-            if simultaneously:
-                analysis._fit_all_Q_simultaneously()
-            else:
-                analysis._fit_all_Q_independently()
+        # THEN
+        with pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to sample'):
+            xs, ys, ws = analysis._sampling_data()
+
+        # EXPECT
+        assert len(xs) == len(ys) == len(ws) == 2
+
+    def test_chain_parameters_leave_out_a_fully_masked_Q(self, analysis):
+        # WHEN
+        per_Q = len(analysis.analysis_list[0].get_free_parameters())
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        chain_parameters = analysis._chain_parameters()
+
+        # EXPECT the chain matches the MultiFitter the Sampler is built from
+        assert len(chain_parameters) == 2 * per_Q
+        masked_names = {p.unique_name for p in analysis.analysis_list[1].get_free_parameters()}
+        assert not masked_names & {p.unique_name for p in chain_parameters}
+
+    def test_parameters_to_dataset_is_nan_for_a_fully_masked_Q(self, analysis):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        dataset = analysis.parameters_to_dataset()
+
+        # EXPECT a Q that was never fitted shows none of its own values, but keeps the scale,
+        # which is one parameter for every Q and was fitted at the others
+        for name in dataset:
+            values = dataset[name].values
+            assert np.isfinite(values[[0, 2]]).all()
+            assert np.isfinite(values[1]) == (name == 'instrument_scale')
 
     def test_bayesian_is_invalidated_when_the_sample_model_changes(self, analysis):
         # WHEN
