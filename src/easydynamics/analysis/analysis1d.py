@@ -24,6 +24,7 @@ from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.utils import verify_has_data
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import DescriptorNumber
 from easydynamics.variable import Parameter
@@ -118,7 +119,13 @@ class Analysis1d(AnalysisBase):
         # Initialize state read by observer callbacks (e.g. _on_experiment_changed) before
         # super().__init__ wires the sub-models and fires them.
         self._Q_index = None
-        self._masked_energy = None
+        # The masked energy grid, and the (experiment, Q index, experiment state version) it was
+        # computed for; see the _masked_energy property.
+        self._masked_energy_cache = None
+        self._masked_energy_key = None
+        # The experiment state_version the last fit or sampling run saw, to tell when the data
+        # bound by the Sampler has gone stale.
+        self._seen_experiment_version = None
         self._fit_result = None
         self._convolver = None
         self._convolver_is_dirty = True
@@ -142,9 +149,6 @@ class Analysis1d(AnalysisBase):
 
         verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         self._Q_index = Q_index
-
-        if self._Q_index is not None and self.experiment is not None:
-            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
 
     #############
     # Properties
@@ -341,11 +345,12 @@ class Analysis1d(AnalysisBase):
         Returns
         -------
         tuple[np.ndarray, np.ndarray, np.ndarray]
-            The ``(x, y, weights)`` triple.
+            The ``(x, y, weights)`` triple. Raises a ValueError if every point at the Q index is
+            masked, NaN or Inf.
         """
-        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
-            Q_index=self._require_Q_index()
-        )
+        Q_index = self._require_Q_index()
+        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(Q_index=Q_index)
+        verify_has_data(x, Q_index)
         return x, y, weights
 
     def _chain_parameters(self) -> list[Parameter]:
@@ -375,6 +380,17 @@ class Analysis1d(AnalysisBase):
         if None in current or current != self._convolver_model_versions:
             self._convolver_is_dirty = True
 
+        # The Sampler binds its data when built, so data changed since the last run (a rebin or
+        # a mask on the experiment itself) means it must be rebuilt.
+        experiment_version = self.experiment.state_version
+        if experiment_version != self._seen_experiment_version:
+            self._invalidate_bayesian_sampler()
+            self._seen_experiment_version = experiment_version
+
+        # Check for data before the convolver, which cannot be built on an empty energy grid.
+        if self._masked_energy is not None:
+            verify_has_data(self._masked_energy.values, self._Q_index)
+
         self._ensure_convolver_current()
 
     def _model_state_versions(self) -> tuple:
@@ -384,13 +400,15 @@ class Analysis1d(AnalysisBase):
         Returns
         -------
         tuple
-            The ``(sample_model, resolution_model)`` state versions. ``None`` entries, for models
-            that do not expose ``state_version`` yet, never compare equal to a recorded build
-            version, so the convolver is then conservatively rebuilt.
+            The ``(sample_model, resolution_model, experiment)`` state versions; the convolver is
+            built on the experiment's masked energy grid. ``None`` entries, for models that do not
+            expose ``state_version`` yet, never compare equal to a recorded build version, so the
+            convolver is then conservatively rebuilt.
         """
         return (
             getattr(self.sample_model, 'state_version', None),
             getattr(self.instrument_model.resolution_model, 'state_version', None),
+            getattr(self.experiment, 'state_version', None),
         )
 
     def as_fit_function(
@@ -564,6 +582,8 @@ class Analysis1d(AnalysisBase):
         if self.Q_index is None:
             raise ValueError('Q_index must be set to create DataGroup.')
 
+        # Pick up masks changed directly on experiment.data before computing anything from it.
+        self.experiment._sync_masks()  # ruff: ignore[private-member-access]
         energy = self._verify_energy(energy)
         custom_energy = energy is not None
 
@@ -620,8 +640,6 @@ class Analysis1d(AnalysisBase):
             (sc.Variable).
         """
         self.experiment.rebin(dimensions)
-        if self._Q_index is not None and self.experiment is not None:
-            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
         self._invalidate_bayesian_sampler()
 
@@ -634,6 +652,30 @@ class Analysis1d(AnalysisBase):
     #############
     # Private methods: small utilities
     #############
+
+    @property
+    def _masked_energy(self) -> sc.Variable | None:
+        """
+        Get the experiment's energy grid at this Q index, without masked or non-finite points.
+
+        Computed on first use and again whenever the experiment's data, binning or masks change. It
+        is read on every model evaluation, so it reads the experiment's raw version counter rather
+        than ``state_version``, which first checks for masks changed directly on the data: every
+        entry point, such as a fit, a sampling run or a plot, has done that check already.
+
+        Returns
+        -------
+        sc.Variable | None
+            The masked energy grid, or None without a Q index or an experiment.
+        """
+        if self._Q_index is None or self.experiment is None:
+            return None
+        version = self.experiment._state_version  # ruff: ignore[private-member-access]
+        key = (id(self.experiment), self._Q_index, version)
+        if key != self._masked_energy_key:
+            self._masked_energy_cache = self.experiment.get_masked_energy(Q_index=self._Q_index)
+            self._masked_energy_key = key
+        return self._masked_energy_cache
 
     def _require_Q_index(self) -> int:
         """
@@ -662,13 +704,6 @@ class Analysis1d(AnalysisBase):
         This method is called whenever the Q index is changed. It updates the masked energy from
         the experiment for the new Q index and marks the convolver as dirty.
         """
-        if self._Q_index is None:
-            self._masked_energy = None
-            self._convolver_is_dirty = True
-            self._invalidate_bayesian_sampler()
-            return
-        masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
-        self._masked_energy = masked_energy
         self._convolver_is_dirty = True
         # A different Q index means different data, and the Sampler binds its data at construction.
         self._invalidate_bayesian_sampler()
@@ -676,9 +711,7 @@ class Analysis1d(AnalysisBase):
     def _on_experiment_changed(self) -> None:
         """Mark the convolver as dirty when the experiment changes."""
         super()._on_experiment_changed()
-        # Refresh masked energy if Q_index is already set (i.e. post-init experiment swap).
-        if self._Q_index is not None and self.experiment is not None:
-            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
+        self._masked_energy_key = None
         self._convolver_is_dirty = True
         self._invalidate_bayesian_sampler()
 

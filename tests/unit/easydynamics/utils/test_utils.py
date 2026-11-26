@@ -19,8 +19,20 @@ from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import convert_value_unit
 from easydynamics.utils.utils import energy_to_scipp
 from easydynamics.utils.utils import prepare_x_for_evaluate
+from easydynamics.utils.utils import verify_has_data
 from easydynamics.utils.utils import verify_Q_index
 from easydynamics.variable import Parameter
+
+
+class TestVerifyHasData:
+    def test_points_left_passes(self):
+        # WHEN THEN EXPECT no error
+        verify_has_data(np.array([1.0]), Q_index=0)
+
+    def test_no_points_left_raises(self):
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index 3 has no data to fit'):
+            verify_has_data(np.array([]), Q_index=3)
 
 
 class TestVerifyQIndex:

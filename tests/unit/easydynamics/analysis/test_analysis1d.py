@@ -229,6 +229,8 @@ class TestAnalysis1d:
         fake_weights = np.array([0.1, 0.2, 0.3])
         fake_mask = np.array([True, False, True])
 
+        # The energy grid is computed on first use; compute it now, from the real data
+        assert analysis1d._masked_energy is not None
         analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
             return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
@@ -1068,7 +1070,7 @@ class TestAnalysis1d:
 
         # Choose a particular Q_index, but without using the setter to
         # avoid validation logic
-        analysis1d._Q_index = 5
+        analysis1d._Q_index = 2
 
         # Mock all the things
 
@@ -1204,18 +1206,19 @@ class TestAnalysis1d:
         # WHEN - capture the current masked_energy object
         energy_before = analysis1d._masked_energy
 
-        # THEN - patch get_masked_energy to verify it is called during rebin
+        # THEN - patch get_masked_energy to verify it is called after the rebin
         with patch.object(
             analysis1d.experiment,
             'get_masked_energy',
             wraps=analysis1d.experiment.get_masked_energy,
         ) as mock_get_energy:
             analysis1d.rebin({'Q': 1})
+            energy_after = analysis1d._masked_energy
 
-        # EXPECT - get_masked_energy was called to refresh _masked_energy
+        # EXPECT - get_masked_energy was called once, when the energy was next used
         mock_get_energy.assert_called_once_with(Q_index=analysis1d.Q_index)
         # And _masked_energy is a different object now (re-fetched from experiment)
-        assert analysis1d._masked_energy is not energy_before
+        assert energy_after is not energy_before
 
     def test_fit_marks_convolver_dirty_when_sample_model_components_change(self, analysis1d):
         """Issue #68: fit() should detect in-place component changes and rebuild the convolver."""
@@ -1509,6 +1512,76 @@ class TestAnalysis1d:
 
         # EXPECT
         mock_invalidate.assert_called_once()
+
+    def test_bayesian_is_invalidated_when_the_experiment_is_masked(self, analysis1d):
+        # WHEN the data is masked on the experiment itself, after the sampler was built
+        sampler = analysis1d.bayesian
+        analysis1d._prepare_for_sampling()
+        analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis1d._prepare_for_sampling()
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    def test_masking_the_experiment_updates_the_energy_grid_and_convolver(self, analysis1d):
+        # WHEN
+        analysis1d._prepare_for_sampling()
+        energy = analysis1d.experiment.data.coords['energy']
+
+        # THEN
+        analysis1d.experiment.mask('high', energy > sc.scalar(25.0, unit='meV'))
+        analysis1d._prepare_for_sampling()
+
+        # EXPECT the model is evaluated on the energies the fit will use
+        np.testing.assert_array_equal(analysis1d._masked_energy.values, [10.0, 20.0])
+        assert analysis1d._convolver_model_versions[2] == analysis1d.experiment.state_version
+
+    def test_fit_after_a_mask_set_directly_on_the_data(self, analysis1d):
+        # WHEN the energy grid and convolver were built before the mask was set
+        analysis1d._prepare_for_sampling()
+        energy = analysis1d.experiment.data.coords['energy']
+
+        # THEN
+        analysis1d.experiment.data.masks['high'] = energy > sc.scalar(25.0, unit='meV')
+        analysis1d._prepare_for_sampling()
+
+        # EXPECT the model is evaluated on the energies the fit will use
+        np.testing.assert_array_equal(analysis1d._masked_energy.values, [10.0, 20.0])
+        x, _, _ = analysis1d._sampling_data()
+        np.testing.assert_array_equal(x, [10.0, 20.0])
+
+    def test_fit_with_every_point_masked_and_a_resolution_raises(self, analysis1d):
+        # WHEN the convolver, which a resolution model needs, cannot be built on no energies
+        analysis1d.instrument_model.resolution_model = ResolutionModel(components=Gaussian())
+        analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))
+
+        # THEN EXPECT the error says why, rather than coming from the convolver
+        with pytest.raises(ValueError, match='Q_index 0 has no data to fit'):
+            analysis1d.fit()
+
+    def test_model_evaluation_does_not_recheck_the_masks(self, analysis1d):
+        # WHEN the analysis is ready to fit
+        analysis1d._prepare_for_sampling()
+
+        # THEN the energy grid is read, as on every model evaluation
+        with patch.object(
+            Experiment, '_masks_signature', side_effect=AssertionError('masks checked')
+        ):
+            energy = analysis1d._masked_energy
+
+        # EXPECT it came from the cache, without fingerprinting the masks
+        assert energy is not None
+
+    def test_fit_with_every_point_masked_raises(self, analysis1d):
+        # WHEN
+        analysis1d.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))
+
+        # THEN EXPECT a clear error rather than one from deep inside the minimizer
+        with pytest.raises(ValueError, match='Q_index 0 has no data to fit'):
+            analysis1d.fit()
 
     #############
     # Regression tests

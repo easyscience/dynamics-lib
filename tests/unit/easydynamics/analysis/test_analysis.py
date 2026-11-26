@@ -1059,6 +1059,31 @@ class TestAnalysis:
         # EXPECT
         mock_invalidate.assert_called_once()
 
+    def test_bayesian_is_invalidated_when_the_experiment_is_masked(self, analysis):
+        # WHEN the data is masked on the experiment itself, after the sampler was built
+        sampler = analysis.bayesian
+        analysis._prepare_for_sampling()
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        with patch.object(sampler, 'invalidate') as mock_invalidate:
+            analysis._prepare_for_sampling()
+
+        # EXPECT
+        mock_invalidate.assert_called_once()
+
+    @pytest.mark.parametrize('simultaneously', [False, True], ids=['independent', 'simultaneous'])
+    def test_fit_with_a_fully_masked_Q_raises(self, analysis, simultaneously):
+        # WHEN
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index 1 has no data to fit'):
+            if simultaneously:
+                analysis._fit_all_Q_simultaneously()
+            else:
+                analysis._fit_all_Q_independently()
+
     def test_bayesian_is_invalidated_when_the_sample_model_changes(self, analysis):
         # WHEN
         sampler = analysis.bayesian
@@ -1405,6 +1430,19 @@ class TestAnalysis:
         # EXPECT - experiment Q was rolled back; analysis is unchanged
         assert sc.allclose(analysis.Q, old_Q)
         assert len(analysis.analysis_list) == 3
+
+    def test_rebin_rolls_back_the_remembered_rebin_on_failed_confirm(self, analysis):
+        # WHEN
+        analysis.rebin({'energy': 3})
+
+        with pytest.raises(ValueError, match='confirm=True'):
+            analysis.rebin({'Q': 1})
+
+        # THEN a mask redoes the last rebin
+        analysis.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[True, False, False]))
+
+        # EXPECT it is the kept rebin that is redone, not the refused one
+        assert analysis.experiment.binned_data.sizes['Q'] == 3
 
     def test_rebin_without_Q_change_does_not_require_confirm(self, analysis):
         # WHEN - energy rebin leaves Q unchanged, so no confirm required

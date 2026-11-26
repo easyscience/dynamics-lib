@@ -70,6 +70,29 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
         raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(Q)}')
 
 
+def verify_has_data(x: np.ndarray, Q_index: int) -> None:
+    """
+    Verify that a Q index has data left to fit once masked and non-finite points are removed.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        The energies left at that Q index.
+    Q_index : int
+        The Q index, for the error message.
+
+    Raises
+    ------
+    ValueError
+        If no points are left.
+    """
+    if len(x) == 0:
+        raise ValueError(
+            f'Q_index {Q_index} has no data to fit: every point is masked, NaN or Inf. '
+            'Remove the mask or leave this Q index out of the fit.'
+        )
+
+
 def convert_units_with_rollback(
     conversions: list[tuple[Callable[[str | sc.Unit], None], str | sc.Unit, str | sc.Unit]],
 ) -> None:
