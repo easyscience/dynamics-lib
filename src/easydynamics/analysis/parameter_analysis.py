@@ -16,6 +16,7 @@ from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
+from easydynamics.analysis.posterior_sampling import _FixedParameters
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.plotting import with_x_axis_dim
@@ -263,6 +264,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
         Fit the parameters using the specified fit functions and settings.
 
+        Free parameters that none of the bound predictions depend on -- e.g. a diffusion model's
+        ``scale`` when only its ``'width'`` is fitted -- are held fixed during the fit. They cannot
+        be determined by the data, and leaving them free makes the covariance matrix singular, so
+        no error bars could be estimated for any parameter.
+
         A ``ValueError`` is raised if no parameters Dataset is provided, if no fit bindings are
         provided, or if a binding names a dataset key that is not in the parameters Dataset.
 
@@ -272,9 +278,108 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The results of the fit
         """
 
-        xs, ys, ws, _, _ = self._build_fit_inputs()
+        xs, ys, ws, funcs, _ = self._build_fit_inputs()
         self._invalidate_fitter_if_targets_changed()
-        return self.fitter.fit(x=xs, y=ys, weights=ws)
+        parameters = self._chain_parameters()
+        unused = self._unused_parameters(xs, funcs)
+        if len(unused) == len(parameters):
+            # Holding everything fixed would leave nothing to fit; let the minimizer report it.
+            unused = []
+        with _FixedParameters(unused):
+            return self.fitter.fit(x=xs, y=ys, weights=ws)
+
+    def _unused_parameters(self, xs: list, funcs: list) -> list[Parameter]:
+        """
+        Find the free parameters that no fit function depends on.
+
+        Each parameter is nudged and the fit functions re-evaluated at the data points. A parameter
+        counts as unused only if nudging it changes nothing both at the current values and with
+        every other parameter nudged as well, so a parameter whose effect merely vanishes at the
+        starting point (``A * B`` with ``A = 0``) is not mistaken for an unused one. A parameter
+        that cannot be nudged within its bounds, or whose probe raises, is kept. All values are
+        restored afterwards.
+
+        Parameters
+        ----------
+        xs : list
+            The x values of each fit target.
+        funcs : list
+            The fit function of each fit target.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters that do not affect any fit function.
+        """
+        parameters = self._chain_parameters()
+        originals = [parameter.value for parameter in parameters]
+        nudged = [self._nudged_value(parameter) for parameter in parameters]
+        all_nudged = [
+            original if value is None else value
+            for value, original in zip(nudged, originals, strict=True)
+        ]
+
+        def changes(index: int, baseline: list[float], value: float) -> bool:
+            """
+            Check whether moving one parameter away from a baseline changes any fit function.
+
+            Parameters
+            ----------
+            index : int
+                The index of the parameter to move.
+            baseline : list[float]
+                The values of all parameters to start from.
+            value : float
+                The value to move the parameter to.
+
+            Returns
+            -------
+            bool
+                True if any fit function's output changes, or if evaluating one raises.
+            """
+            for parameter, baseline_value in zip(parameters, baseline, strict=True):
+                parameter.value = baseline_value
+            try:
+                before = [np.asarray(func(x)) for func, x in zip(funcs, xs, strict=True)]
+                parameters[index].value = value
+                after = [np.asarray(func(x)) for func, x in zip(funcs, xs, strict=True)]
+            except Exception:
+                return True
+            return not all(np.array_equal(b, a) for b, a in zip(before, after, strict=True))
+
+        try:
+            return [
+                parameter
+                for index, parameter in enumerate(parameters)
+                if nudged[index] is not None
+                and not changes(index, originals, nudged[index])
+                and not changes(index, all_nudged, originals[index])
+            ]
+        finally:
+            for parameter, original in zip(parameters, originals, strict=True):
+                parameter.value = original
+
+    @staticmethod
+    def _nudged_value(parameter: Parameter) -> float | None:
+        """
+        Get a value 10% away from the parameter's current value, within its bounds.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to nudge.
+
+        Returns
+        -------
+        float | None
+            The nudged value, or None if no value within the bounds differs from the current one.
+        """
+        value = parameter.value
+        step = 0.1 * abs(value) if value != 0 else 0.1
+        for candidate in (value + step, value - step):
+            if parameter.min <= candidate <= parameter.max:
+                return candidate
+        return None
 
     def _build_fit_inputs(self) -> tuple[list, list, list, list, list]:
         """
