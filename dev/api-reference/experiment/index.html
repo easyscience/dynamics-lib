@@ -3460,9 +3460,6 @@ the experiment with a .h5 extension.</p>
     <div class="doc doc-contents ">
 
         <p>Rebin the dataset along specified dimensions.</p>
-<p>Each new bin is the mean of the points that fall in it, leaving out points that are masked
-or whose value or variance is NaN or Inf. A new bin with no such point left is NaN and
-masked by a <code>'no_data'</code> mask.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3786,7 +3783,7 @@ left unchanged.</p>
     <div class="doc doc-contents ">
 
         <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing
-any NaN and Inf values and any masked points.</p>
+any NaN and Inf values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3869,7 +3866,7 @@ infinite weights.</p>
             <td>
               <div class="doc-md-description">
                 <p>The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
-with NaNs, Infs and masked points removed. The mask is True for the points kept.</p>
+with NaNs and Infs removed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5372,9 +5369,6 @@ the experiment with a .h5 extension.</p>
     <div class="doc doc-contents ">
 
         <p>Rebin the dataset along specified dimensions.</p>
-<p>Each new bin is the mean of the points that fall in it, leaving out points that are masked
-or whose value or variance is NaN or Inf. A new bin with no such point left is NaN and
-masked by a <code>'no_data'</code> mask.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5698,7 +5692,7 @@ left unchanged.</p>
     <div class="doc doc-contents ">
 
         <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing
-any NaN and Inf values and any masked points.</p>
+any NaN and Inf values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5781,7 +5775,7 @@ infinite weights.</p>
             <td>
               <div class="doc-md-description">
                 <p>The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
-with NaNs, Infs and masked points removed. The mask is True for the points kept.</p>
+with NaNs and Infs removed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
