@@ -1,15 +1,4 @@
 window.MathJax = {
-  startup: {
-    ready() {
-      // The widget HTML manager still calls the MathJax 2 typesetting API.
-      MathJax.Hub = {
-        Queue: ([, , element]) => {
-          MathJax.startup.promise = MathJax.startup.promise.then(() => MathJax.typesetPromise([element]))
-        },
-      }
-      MathJax.startup.defaultReady()
-    },
-  },
   tex: {
     //inlineMath: [['\\(', '\\)']],
     //displayMath: [['\\[', '\\]']],
