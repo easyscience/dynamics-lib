@@ -5,15 +5,16 @@
 {% if page.nb_url %}
   {# Parse notebook path/URL #}
   {% set parts = page.nb_url.split('/') %}
-  {% set tutorial_name = parts[-2] %}
   {% set filename = parts[-1] %}
+  {% set notebook_dir = page.file.dest_uri.rpartition('/')[0] %}
+  {% set notebook_path = (notebook_dir ~ '/' if notebook_dir else '') ~ filename %}
 
   {# Colab url #}
   {% set base_colab_url = "https://colab.research.google.com/github/" %}
   {% set colab_url =
     base_colab_url ~ config.extra.vars.github_repository ~
     "/blob/gh-pages/" ~ config.extra.vars.docs_version ~
-    "/tutorials/" ~ tutorial_name ~ "/" ~ filename
+    "/" ~ notebook_path
   %}
 
   {# Download link: relative to the current page #}

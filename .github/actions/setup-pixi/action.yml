@@ -33,8 +33,22 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: prefix-dev/setup-pixi@v0.9.5
+    - name: Read required Pixi version
+      id: pixi-version
+      shell: bash
+      run: |
+        version=$(sed -nE \
+          "s/^requires-pixi[[:space:]]*=[[:space:]]*['\"]==([0-9]+\.[0-9]+\.[0-9]+)['\"].*$/\1/p" \
+          pixi.toml)
+        if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "::error::Set requires-pixi to an exact version in pixi.toml."
+          exit 1
+        fi
+        echo "version=v$version" >> "$GITHUB_OUTPUT"
+
+    - uses: prefix-dev/setup-pixi@v0.11.3
       with:
+        pixi-version: ${{ steps.pixi-version.outputs.version }}
         environments: ${{ inputs.environments }}
         activate-environment: ${{ inputs.activate-environment }}
         run-install: ${{ inputs.run-install }}
