@@ -12,6 +12,7 @@ energy.
 """
 
 import math
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -19,6 +20,9 @@ import scipp as sc
 from numpy.typing import ArrayLike
 
 from easydynamics.io.utils import apply_min_error
+
+# No QENS instrument reaches this Q, in 1/angstrom; a larger first field is a scattering angle.
+_MAX_Q = 10.0
 
 
 def load_inx(
@@ -35,8 +39,8 @@ def load_inx(
     gives an incident energy holds a scattering angle there instead, so its Q must be given.
 
     Every spectrum must have the same X values. Fields too wide for the file's fixed-width columns
-    are written as ``*****``: a row whose X is such a field is left out, and an intensity or error
-    written so becomes NaN, which fits and rebinning leave out.
+    are written as ``*****``: a row whose X is such a field is left out, with a warning, and an
+    intensity or error written so becomes NaN, which fits and rebinning leave out.
 
     Examples
     --------
@@ -73,9 +77,9 @@ def load_inx(
     Raises
     ------
     ValueError
-        If the file holds no spectra, the spectra do not share their X values, ``Q`` is None and
-        the file gives a scattering angle rather than Q, or ``Q`` does not have one value per
-        spectrum or one more.
+        If the file is not laid out as an ``.inx`` file, the spectra do not share their X values,
+        ``Q`` is None and the file gives a scattering angle or no plausible Q, or ``Q`` does not
+        have one value per spectrum or one more.
     """
     path = Path(filename)
     blocks = _read_blocks(path)
@@ -86,8 +90,6 @@ def load_inx(
     for _, rows in blocks[1:]:
         if rows.shape != blocks[0][1].shape or not np.allclose(rows[:, 0], energy, equal_nan=True):
             raise ValueError('Every spectrum must have the same X values')
-    keep = np.isfinite(energy)
-
     if Q is None:
         if any(info[1] != 0 for info, _ in blocks):
             raise ValueError(
@@ -95,6 +97,13 @@ def load_inx(
                 'scattering angle rather than Q. Pass the Q of each spectrum with Q=...'
             )
         Q_values = np.array([info[0] for info, _ in blocks])
+        implausible = ~(np.isfinite(Q_values) & (Q_values > 0) & (Q_values < _MAX_Q))
+        if implausible.any():
+            raise ValueError(
+                f'{path.name}: the information line of spectrum {int(np.argmax(implausible))} '
+                f'starts with {Q_values[implausible][0]}, which is not a plausible Q in '
+                '1/angstrom and may be a scattering angle. Pass the Q of each spectrum with Q=...'
+            )
     elif isinstance(Q, sc.Variable):
         Q_values = sc.to_unit(Q, '1/angstrom', copy=True).values.astype(float)
     else:
@@ -103,6 +112,15 @@ def load_inx(
         raise ValueError(
             f'Q must be one-dimensional with {len(blocks)} values, one per spectrum, or '
             f'{len(blocks) + 1} bin edges, not shape {Q_values.shape}'
+        )
+
+    keep = np.isfinite(energy)
+    if not keep.all():
+        warnings.warn(
+            f'{path.name}: {int((~keep).sum())} of {keep.size} rows have an X value too wide for '
+            'its column (*****) and are left out.',
+            UserWarning,
+            stacklevel=2,
         )
 
     data = sc.DataArray(
@@ -139,7 +157,8 @@ def _read_blocks(path: Path) -> list[tuple[list[float], np.ndarray]]:
     Raises
     ------
     ValueError
-        If a block's header line does not add up, or the file ends inside a block.
+        If a block's header line does not add up, a block lacks an information line or data, a
+        field is not a number, or the file ends inside a block.
     """
     lines = path.read_text(errors='replace').splitlines()
     blocks = []
@@ -157,36 +176,64 @@ def _read_blocks(path: Path) -> list[tuple[list[float], np.ndarray]]:
             ) from error
         if len(header) < 4 or header[1] + header[2] + header[-1] != header[0]:
             raise ValueError(f'{path.name}, line {i + 1}: the header line does not add up')
-        n_lines, n_title, n_data = header[0], header[1], header[-1]
+        n_lines, n_title, n_info, n_data = header[0], header[1], header[2], header[-1]
+        if n_info < 1 or n_data < 1:
+            raise ValueError(
+                f'{path.name}, line {i + 1}: a spectrum needs an information line and data rows'
+            )
         if i + n_lines >= len(lines):
             raise ValueError(f'{path.name} ends inside the spectrum starting at line {i + 1}')
-        info = [_number(field) for field in lines[i + 1 + n_title].split()]
-        first_row = i + 1 + n_lines - n_data
-        rows = [line.split()[:3] for line in lines[first_row : first_row + n_data]]
-        if any(len(row) < 3 for row in rows):
+        info_line = i + 1 + n_title
+        info = _numbers(lines[info_line].split(), path, info_line)
+        if len(info) < 2:
             raise ValueError(
-                f'{path.name}: the spectrum starting at line {i + 1} has a row without X, Y and E'
+                f'{path.name}, line {info_line + 1}: the information line should start with Q or '
+                'an angle, and the incident energy'
             )
-        rows = [[_number(field) for field in row] for row in rows]
+        first_row = i + 1 + n_lines - n_data
+        rows = []
+        for line_index in range(first_row, first_row + n_data):
+            fields = lines[line_index].split()[:3]
+            if len(fields) < 3:
+                raise ValueError(f'{path.name}, line {line_index + 1}: expected X, Y and E')
+            rows.append(_numbers(fields, path, line_index))
         blocks.append((info, np.array(rows, dtype=float)))
         i += 1 + n_lines
     return blocks
 
 
-def _number(field: str) -> float:
+def _numbers(fields: list[str], path: Path, line_index: int) -> list[float]:
     """
-    Read one number, giving NaN for a field written as ``*****`` because it was too wide.
+    Read the numbers of one line, giving NaN for a field written as ``*****`` because it was wide.
 
     Parameters
     ----------
-    field : str
-        The field.
+    fields : list[str]
+        The fields of the line.
+    path : Path
+        The file, for the error message.
+    line_index : int
+        The line, counted from zero, for the error message.
 
     Returns
     -------
-    float
-        The number, which may be infinite or NaN.
+    list[float]
+        The numbers, which may be infinite or NaN.
+
+    Raises
+    ------
+    ValueError
+        If a field is not a number.
     """
-    if field and set(field) == {'*'}:
-        return math.nan
-    return float(field)
+    numbers = []
+    for field in fields:
+        if set(field) == {'*'}:
+            numbers.append(math.nan)
+            continue
+        try:
+            numbers.append(float(field))
+        except ValueError as error:
+            raise ValueError(
+                f'{path.name}, line {line_index + 1}: {field!r} is not a number'
+            ) from error
+    return numbers

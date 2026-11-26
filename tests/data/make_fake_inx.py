@@ -14,8 +14,7 @@ made up. Remake them with:
     energy, energies in microelectronvolts, and one point with zero error.
 ``fake_angle.inx``
     One spectrum whose information line starts with a scattering angle and gives an incident
-    energy, with an energy and an intensity too wide for their columns (``*****``) and an
-    infinite intensity.
+    energy, with an energy too wide for its column (``*****``) and an infinite intensity.
 """
 
 from pathlib import Path
@@ -81,6 +80,5 @@ if __name__ == '__main__':
     rows = [f'{x:15.5f} {v:12.5e} {0.1 * v:11.4e}' for x, v in zip(ENERGY, y, strict=True)]
     rows[0] = '     **********  1.00000e-31  1.0000e-33'
     rows[1] = f'{ENERGY[1]:15.5f}          Inf  1.0000e-30'
-    rows[4] = rows[4][:15] + '   **********' + rows[4][28:]
     info = ' 105.00   3.000  1.2033  300.000   1.0 0'
     (OUTPUT_DIRECTORY / 'fake_angle.inx').write_text('\n'.join(block(info, rows)) + '\n')
