@@ -693,7 +693,10 @@ class Experiment(EasyDynamicsBase):
         var = var[mask]
 
         if np.any(var == 0):
-            raise ValueError('Cannot compute weights: some variances are zero.')
+            raise ValueError(
+                'Cannot compute weights: some variances are zero. Mask those points, or give '
+                'them an error with the min_error option of the easydynamics.io loaders.'
+            )
 
         weights = 1.0 / var**0.5
 

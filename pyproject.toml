@@ -27,7 +27,7 @@ dependencies = [
   'numpy',  # Numerical arrays (used directly throughout the library)
   'scipy',  # Numerical routines (convolution, interpolation, special functions)
   'scipp',  # Labelled multi-dimensional arrays; backs Experiment data handling
-  'h5py',  # HDF5 backend for scipp's HDF5 I/O (Experiment.load_hdf5)
+  'h5py',  # HDF5 I/O: backend for scipp's (Experiment.load_hdf5) and read directly by the loaders
   'matplotlib',  # Plotting (posterior trace, corner, and predictive plots)
   'pooch',  # Data downloader
   'darkdetect',  # Detecting dark mode (system-level)

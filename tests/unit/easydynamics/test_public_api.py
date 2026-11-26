@@ -23,6 +23,7 @@ SUB_PACKAGES = [
     'easydynamics.base_classes',
     'easydynamics.convolution',
     'easydynamics.experiment',
+    'easydynamics.io',
     'easydynamics.sample_model',
     'easydynamics.sample_model.components',
     'easydynamics.sample_model.diffusion_model',
