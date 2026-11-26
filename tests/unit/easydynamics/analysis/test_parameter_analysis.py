@@ -366,7 +366,8 @@ class TestParameterAnalysis:
             # Expect 3 fits:
             # - parameter1 → 1 callable
             # - parameter3 → 2 callables (area + width)
-            assert len(kwargs['fit_objects']) == 3
+            # but each of the 2 models is passed once
+            assert len(kwargs['fit_objects']) == 2
             assert len(kwargs['fit_functions']) == 3
 
             # --- Fit called correctly ---
@@ -1440,6 +1441,24 @@ class TestParameterAnalysis:
         # EXPECT
         assert isinstance(analysis.fitter, MultiFitter)
         assert analysis.fitter is analysis.fitter
+
+    def test_fitter_passes_a_model_with_several_targets_once(self, caplog):
+        # WHEN one model is fitted against both its area and its width
+        model = JumpTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, relaxation_time=1.0, scale=0.5
+        )
+        binding = FitBinding(
+            model=model, targets={'width': 'Lorentzian width', 'area': 'Lorentzian area'}
+        )
+        analysis = ParameterAnalysis(parameters=make_dataset(), bindings=binding)
+
+        # THEN
+        results = analysis.fit()
+
+        # EXPECT no duplicate-item warning, and still one result per target
+        assert 'already in EasyList' not in caplog.text
+        assert len(analysis.fitter.fit_functions) == 2
+        assert len(results) == 2
 
     def test_fit_still_returns_per_target_results(self, analysis):
         # THEN
