@@ -604,6 +604,40 @@ class TestJointAnalysis:
         assert list(fitter._fit_objects) == first.analysis_list + second.analysis_list
         assert len(fitter.fit_functions) == 6
 
+    def test_fitter_leaves_out_a_fully_masked_Q(self, joint, first, second):
+        # WHEN
+        second.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+
+        # THEN
+        fitter = joint.fitter
+
+        # EXPECT
+        expected = [*first.analysis_list, second.analysis_list[0], second.analysis_list[2]]
+        assert list(fitter._fit_objects) == expected
+
+    def test_fit_skips_a_fully_masked_Q_and_keeps_results_in_order(self, shared):
+        # WHEN the second analysis' middle Q index is masked
+        first = make_analysis('first', Q_FIRST, [shared])
+        second = make_analysis('second', Q_SECOND, [shared])
+        second.experiment.mask('bad_Q', sc.array(dims=['Q'], values=[False, True, False]))
+        joint = JointAnalysis(analyses=[first, second])
+        fitter = MagicMock()
+        fitter.fit.return_value = ['r0', 'r1', 'r2', 'r3', 'r5']
+
+        # THEN
+        with (
+            patch.object(JointAnalysis, 'fitter', new_callable=PropertyMock, return_value=fitter),
+            pytest.warns(UserWarning, match=r'Q_index \[1\] has no data to fit') as record,
+        ):
+            results = joint.fit()
+
+        # EXPECT the data of the masked Q index is left out, its result is None, and the warning
+        # comes once, from the joint fit, pointing at this line
+        assert len(fitter.fit.call_args.kwargs['x']) == 5
+        assert results == ['r0', 'r1', 'r2', 'r3', None, 'r5']
+        assert len(record) == 1
+        assert record[0].filename == __file__
+
     def test_linking_leaves_one_free_parameter_per_Q_group(self, joint, first, second):
         # WHEN THEN
         joint.link_shared_components()
