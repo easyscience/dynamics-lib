@@ -268,6 +268,65 @@ class TestExperiment:
         assert dimensions == original
         assert isinstance(dimensions['Q'], float)
 
+    @staticmethod
+    def _rebin_input():
+        "Two Q rows of six energy points, so rebinning to 3 energy bins averages pairs"
+        values = np.arange(12.0).reshape(2, 6)
+        return sc.DataArray(
+            data=sc.array(dims=['Q', 'energy'], values=values, variances=np.full((2, 6), 4.0)),
+            coords={
+                'Q': sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/Angstrom'),
+                'energy': sc.arange('energy', 6.0, unit='meV'),
+            },
+        )
+
+    def test_rebin_leaves_out_nan_points(self):
+        # WHEN
+        data = self._rebin_input()
+        data.values[0, 0] = np.nan
+        data.variances[1, 2] = np.nan
+        experiment = Experiment(data=data)
+
+        # THEN
+        experiment.rebin({'energy': 3})
+
+        # EXPECT the bins holding a NaN are the mean of their other point, not NaN
+        rebinned = experiment.binned_data
+        np.testing.assert_allclose(rebinned.values, [[1.0, 2.5, 4.5], [6.5, 9.0, 10.5]])
+        np.testing.assert_allclose(rebinned.variances, [[4.0, 2.0, 2.0], [2.0, 4.0, 2.0]])
+        assert not rebinned.masks['no_data'].values.any()
+
+    def test_rebin_leaves_out_masked_points(self):
+        # WHEN
+        data = self._rebin_input()
+        data.masks['bad'] = sc.array(dims=['Q', 'energy'], values=np.arange(12).reshape(2, 6) == 3)
+        data.masks['high_energy'] = data.coords['energy'] > sc.scalar(4.5, unit='meV')
+        experiment = Experiment(data=data)
+
+        # THEN
+        experiment.rebin({'energy': 3})
+
+        # EXPECT
+        np.testing.assert_allclose(
+            experiment.binned_data.values, [[0.5, 2.0, 4.0], [6.5, 8.5, 10.0]]
+        )
+
+    def test_rebin_masks_bins_with_no_usable_points(self):
+        # WHEN
+        data = self._rebin_input()
+        data.values[0, :2] = np.nan
+        data.masks['bad_Q'] = sc.array(dims=['Q'], values=[False, True])
+        experiment = Experiment(data=data)
+
+        # THEN
+        experiment.rebin({'energy': 3})
+
+        # EXPECT
+        np.testing.assert_array_equal(
+            experiment.binned_data.masks['no_data'].values,
+            [[True, False, False], [True, True, True]],
+        )
+
     def test_rebin_no_data_raises(self):
         "Test rebinning data when no data is present"
         # WHEN
@@ -674,6 +733,41 @@ class TestExperiment:
         assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
         # Mask should indicate which values were removed
         assert np.array_equal(mask, [False, False, True])
+
+    def test_extract_x_y_weights_only_finite_leaves_out_masked_points(self, experiment_with_data):
+        # WHEN a point is masked both by a Q-energy mask and by an energy-only mask, and the
+        # masked point has a zero variance that would otherwise raise
+        data = experiment_with_data.data.copy()
+        data.variances[0, 1] = 0.0
+        data.masks['bad'] = sc.array(
+            dims=['Q', 'energy'], values=[[False, True, False]] + [[False] * 3] * 2
+        )
+        data.masks['high_energy'] = sc.array(dims=['energy'], values=[False, False, True])
+        experiment = Experiment(data=data)
+
+        # THEN
+        x, y, weights, mask = experiment.extract_x_y_weights_only_finite(Q_index=0)
+
+        # EXPECT
+        np.testing.assert_array_equal(mask, [True, False, False])
+        np.testing.assert_array_equal(x, [10.0])
+        np.testing.assert_array_equal(y, [1.0])
+        assert len(weights) == 1
+
+    def test_extract_x_y_weights_only_finite_Q_mask_leaves_out_the_whole_Q(
+        self, experiment_with_data
+    ):
+        # WHEN
+        data = experiment_with_data.data.copy()
+        data.masks['bad_Q'] = sc.array(dims=['Q'], values=[True, False, False])
+        experiment = Experiment(data=data)
+
+        # THEN
+        x, _, _, mask = experiment.extract_x_y_weights_only_finite(Q_index=0)
+
+        # EXPECT
+        assert len(x) == 0
+        assert not mask.any()
 
     def testextract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
         "Test getting x y and weights when variances are None"

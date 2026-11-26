@@ -381,6 +381,10 @@ class Experiment(EasyDynamicsBase):
         """
         Rebin the dataset along specified dimensions.
 
+        Each new bin is the mean of the points that fall in it, leaving out points that are masked
+        or whose value or variance is NaN or Inf. A new bin with no such point left is NaN and
+        masked by a ``'no_data'`` mask.
+
         Parameters
         ----------
         dimensions : dict[str, int | sc.Variable]
@@ -407,6 +411,12 @@ class Experiment(EasyDynamicsBase):
         # sc.bin cannot handle multi-dimensional dense data with bin-edge
         # coordinates, so convert them to bin centers first.
         binned_data = self._convert_to_bin_centers(self._data.copy())
+        # sc.bin leaves masked points out of the new bins, so mask the unusable ones too. The
+        # mask is dropped by the binning along with any others.
+        unusable = ~np.isfinite(binned_data.values)
+        if binned_data.variances is not None:
+            unusable |= ~np.isfinite(binned_data.variances)
+        binned_data.masks['_rebin_not_finite'] = sc.array(dims=binned_data.dims, values=unusable)
         dim_copy = dimensions.copy()
         for dim, value in dim_copy.items():
             if not isinstance(dim, str):
@@ -429,6 +439,7 @@ class Experiment(EasyDynamicsBase):
 
         binned_data = binned_data.bins.mean()
         binned_data = self._convert_to_bin_centers(binned_data)
+        binned_data.masks['no_data'] = ~sc.isfinite(binned_data.data)
         self._binned_data = binned_data
 
     ###########
@@ -586,6 +597,26 @@ class Experiment(EasyDynamicsBase):
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
 
+    def _masked_points(self, Q_index: int) -> np.ndarray:
+        """
+        Find the energy points that any of the data's masks cover at the given Q index.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to look at.
+
+        Returns
+        -------
+        np.ndarray
+            Boolean array of length n_energy, True where a point is masked.
+        """
+        data = self.binned_data['Q', Q_index]
+        masked = np.zeros(data.sizes['energy'], dtype=bool)
+        for mask in data.masks.values():
+            masked |= sc.broadcast(mask, sizes=data.sizes).values
+        return masked
+
     def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Extract the x, y, and weights arrays from the experiment for the given Q index.
@@ -626,7 +657,7 @@ class Experiment(EasyDynamicsBase):
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Extract the x, y, and weights arrays from the experiment for the given Q index, removing
-        any NaN and Inf values.
+        any NaN and Inf values and any masked points.
 
         Parameters
         ----------
@@ -643,9 +674,10 @@ class Experiment(EasyDynamicsBase):
         -------
         tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
             The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
-            with NaNs and Infs removed.
+            with NaNs, Infs and masked points removed. The mask is True for the points kept.
         """
         x, y, var = self._extract_x_y_var(Q_index)
+        masked = self._masked_points(Q_index)
 
         if var is None:
             mask = np.isfinite(y) & np.isfinite(x)
@@ -654,6 +686,7 @@ class Experiment(EasyDynamicsBase):
             var = np.ones_like(y)
         else:
             mask = np.isfinite(y) & np.isfinite(var) & np.isfinite(x)
+        mask &= ~masked
 
         x = x[mask]
         y = y[mask]
