@@ -337,16 +337,19 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Build the MultiFitter over the binding models.
 
         Unlike the other Analysis classes, the objects being fitted are the binding models rather
-        than this object, so the parameters live on those models.
+        than this object, so the parameters live on those models. A model fitted against several
+        targets is passed once: the fit objects only supply the parameters, and the MultiFitter
+        ignores duplicates with a warning.
 
         Returns
         -------
         MultiFitter
-            A MultiFitter over the per-target models and fit functions.
+            A MultiFitter over the binding models and the per-target fit functions.
         """
         _, _, _, funcs, models = self._build_fit_inputs()
         self._fitter_targets = self._target_signature()
-        return MultiFitter(fit_objects=models, fit_functions=funcs)
+        unique_models = list({model.unique_name: model for model in models}.values())
+        return MultiFitter(fit_objects=unique_models, fit_functions=funcs)
 
     def _target_signature(self) -> tuple:
         """
