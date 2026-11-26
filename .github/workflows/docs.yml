@@ -114,9 +114,11 @@ jobs:
       - name: Pre-build site step
         run: pixi run python -c "import easydynamics"
 
-      # Prepare the Jupyter notebooks for documentation (strip output, etc.).
-      - name: Prepare notebooks
-        run: pixi run notebook-prepare
+      - name: Strip notebook outputs
+        run: pixi run notebook-strip
+
+      - name: Add static plot setup to notebooks
+        run: pixi run notebook-prepare-docs
 
       # Execute all Jupyter notebooks to generate output cells (plots, tables, etc.).
       # Uses multiple cores for parallel execution to speed up the process.
@@ -132,6 +134,11 @@ jobs:
         run: |
           pixi run docs-build-local
           pixi run docs-inventory-check
+
+      # Replace setup with a hidden Colab installer after HTML rendering.
+      # Update both downloads and the executed copies used by Mike's rebuild.
+      - name: Prepare notebooks for download and Colab
+        run: pixi run notebook-prepare-colab
 
       # Upload the static files from the docs/site/ directory to be used for
       # local check

@@ -84,6 +84,9 @@ extra:
 # Customization to be included by the theme
 extra_css:
   - assets/stylesheets/extra.css
+  # ipywidgets resolves its bundled Font Awesome fonts relative to the generated HTML
+  # page, where they do not exist. Load the font from CDN so widget icons render.
+  - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css
 
 extra_javascript:
   - assets/javascripts/extra.js
@@ -176,6 +179,7 @@ plugins:
             - url: https://numpy.org/doc/stable/objects.inv
             - url: https://easyscience.github.io/core/latest/objects.inv
   - search
+  - markdown-exec
 
 # Determines additional directories to watch when running mkdocs serve
 watch:

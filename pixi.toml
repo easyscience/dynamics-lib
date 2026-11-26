@@ -3,6 +3,9 @@
 ###########
 
 [workspace]
+# Use the same Pixi version locally and in CI.
+requires-pixi = '==0.84.1'
+
 # Supported platforms for the lock file (pixi.lock)
 platforms = [
   'win-64',
@@ -44,9 +47,9 @@ python = '3.14.*'
 # editable installations.
 
 [feature.dev.dependencies]
-nodejs = '*'  # Required for Prettier (non-Python formatting)
-jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'  # Interactive Python shell
+nodejs = '*'       # Required for Prettier (non-Python formatting)
+jupyterlab = '*'   # Jupyter notebooks
+ipython = '*'      # Interactive Python shell
 pixi-kernel = '*'  # Pixi Jupyter kernel
 
 [feature.dev.pypi-dependencies]
@@ -57,8 +60,8 @@ easydynamics = { path = '.', editable = true, extras = ['dev'] }
 # of editable installations.
 
 [feature.user.dependencies]
-jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'  # Interactive Python shell
+jupyterlab = '*'   # Jupyter notebooks
+ipython = '*'      # Interactive Python shell
 pixi-kernel = '*'  # Pixi Jupyter kernel
 
 [feature.user.pypi-dependencies]
@@ -181,15 +184,17 @@ cov = { depends-on = [
 
 notebook-convert = 'jupytext docs/docs/tutorials/*.py --from py:percent --to ipynb'
 notebook-strip = 'nbstripout docs/docs/tutorials/**/*.ipynb'
-notebook-tweak = 'python tools/tweak_notebooks.py docs/docs/tutorials/'
+notebook-prepare-docs = 'python tools/prepare_notebooks_for_docs.py docs/docs/tutorials/'
 notebook-exec = { cmd = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --overwrite --color=yes -n auto -v', depends-on = [
   'prefetch-tutorial-data',
 ] }
+# Prepare downloads and the executed notebooks Mike reads when rebuilding the site.
+notebook-prepare-colab = 'python tools/prepare_notebooks_for_colab.py docs/site/ docs/docs/tutorials/'
 
 notebook-prepare = { depends-on = [
   # 'notebook-convert',
   'notebook-strip',
-  # 'notebook-tweak',
+  'notebook-prepare-docs',
 ] }
 
 ########################
@@ -276,8 +281,7 @@ dist-build = 'python -m build --wheel --outdir dist'
 npm-config = 'npm config set registry https://registry.npmjs.org/'
 # --prefix . keeps the install inside this repository: without it, npm walks up the directory
 # tree and a stray package.json in a parent directory can silently pin an old prettier.
-# @latest keeps local runs on the same version CI installs.
-prettier-install = 'npm install --prefix . --no-save --no-audit --no-fund prettier@latest prettier-plugin-toml@latest'
+prettier-install = 'npm install --prefix . --no-save --no-audit --no-fund prettier@3.9.9 prettier-plugin-toml@3.0.2'
 
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
 

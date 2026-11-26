@@ -4,6 +4,8 @@
 name: PyPI publishing
 
 on:
+  pull_request:
+    branches: [master]
   # Runs on creating a new tag starting with 'v', e.g. 'v1.0.3'
   push:
     tags: ['v*']
@@ -11,25 +13,77 @@ on:
   workflow_dispatch:
 
 jobs:
-  pypi-publish:
+  build:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
-      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
       - name: Check-out repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # full history with tags to get the version number by versioningit
+          fetch-depth: 0 # versioningit needs the Git tags.
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
+        with:
+          # Setup activation can rewrite pixi.lock. pixi run handles activation.
+          activate-environment: 'false'
 
+      # Fail early if the committed lockfile needs updating.
+      - name: Check Pixi lockfile
+        run: pixi lock --check
+
+      # Changes to tracked files can give the package a +dirty version.
+      - name: Check working tree
+        run: git diff --exit-code HEAD --
+
+      - name: Simulate a release tag
+        if: startsWith(github.ref, 'refs/tags/v') == false
+        run: git tag v9999.0.0
+
+      # --frozen stops pixi from rewriting pixi.lock, which would make the
+      # tree dirty and give versioningit a '+dirty' version which PyPI rejects
       # Build the Python package (to dist/ folder)
       - name: Create Python package
-        run: pixi run default-build
+        run: pixi run --frozen default-build
+
+      - name: Check package version
+        run: |
+          for package in dist/*; do
+            if [[ ! -f "$package" ]]; then
+              echo "::error::No package files found in dist/."
+              exit 1
+            fi
+            case "${package##*/}" in
+              *+*)
+                echo "::error::$package has a local version, which PyPI rejects."
+                exit 1
+                ;;
+            esac
+          done
+
+      - name: Save packages for publishing
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v7
+        with:
+          name: pypi-packages
+          path: dist/
+          if-no-files-found: error
+
+  pypi-publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+
+    steps:
+      - name: Download checked packages
+        uses: actions/download-artifact@v8
+        with:
+          name: pypi-packages
+          path: dist/
 
       # Publish the package to PyPI (from dist/ folder)
       # Instead of publishing with personal access token, we use

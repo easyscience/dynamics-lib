@@ -149,7 +149,7 @@ jobs:
             echo
             echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
 
-            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.11 -> py-311-env
+            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.12 -> py-312-env
 
             echo "Building wheel in environment: $env"
             pixi run --environment $env dist-build
