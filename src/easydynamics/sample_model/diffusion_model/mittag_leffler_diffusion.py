@@ -590,6 +590,32 @@ class MittagLefflerDiffusion(DiffusionModelBase):
 
         return self.A_1.value * np.ones_like(Q)
 
+    def _width_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the width depends on.
+
+        The diffusion coefficient.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_width`` depends on.
+        """
+        return [self.diffusion_coefficient]
+
+    def _QISF_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the QISF depends on.
+
+        A_0 (A_1 = 1 - A_0), or its per-Q values. The EISF depends on the same parameters.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_QISF`` depends on.
+        """
+        return [self.A_0, *self._A_0_list]
+
     def calculate_relaxation_rate_spectrum(self, rate: np.ndarray, Q: Q_type = None) -> np.ndarray:
         r"""
         Calculate the relaxation rate spectrum p(lambda) of Eq. (37) of Hassani et al.
@@ -764,6 +790,7 @@ class MittagLefflerDiffusion(DiffusionModelBase):
                 label=f'{self.display_name} area',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
+                parameters=(self.scale, *self._QISF_parameters()),
             ),
             FitTarget(
                 name='width',
@@ -772,6 +799,7 @@ class MittagLefflerDiffusion(DiffusionModelBase):
                 label=f'{self.display_name} width',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.x_unit),
+                parameters=tuple(self._width_parameters()),
             ),
             FitTarget(
                 name='elastic_area',
@@ -780,6 +808,7 @@ class MittagLefflerDiffusion(DiffusionModelBase):
                 label=f'{self.display_name} elastic_area',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
+                parameters=(self.scale, *self._QISF_parameters()),
             ),
         ]
 

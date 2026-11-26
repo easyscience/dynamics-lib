@@ -41,6 +41,7 @@ class TestFitTarget:
         assert target.dataset_key is None
         assert target.x_unit is None
         assert target.y_unit is None
+        assert target.parameters is None
 
     def test_fit_target_is_frozen(self):
         # WHEN

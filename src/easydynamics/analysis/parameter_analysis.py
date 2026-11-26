@@ -16,6 +16,7 @@ from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.analysis.posterior_labels import ParameterLabels
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
+from easydynamics.analysis.posterior_sampling import _FixedParameters
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.plotting import with_x_axis_dim
@@ -263,6 +264,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
         Fit the parameters using the specified fit functions and settings.
 
+        Free parameters that none of the bound predictions depend on -- e.g. a diffusion model's
+        ``scale`` when only its ``'width'`` is fitted -- are held fixed during the fit. The data
+        cannot determine them, and leaving them free would make the covariance matrix singular, so
+        no error bars could be estimated for any parameter.
+
         A ``ValueError`` is raised if no parameters Dataset is provided, if no fit bindings are
         provided, or if a binding names a dataset key that is not in the parameters Dataset.
 
@@ -274,7 +280,38 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         xs, ys, ws, _, _ = self._build_fit_inputs()
         self._invalidate_fitter_if_targets_changed()
-        return self.fitter.fit(x=xs, y=ys, weights=ws)
+        with _FixedParameters(self._unused_parameters()):
+            return self.fitter.fit(x=xs, y=ys, weights=ws)
+
+    def _unused_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters that no bound prediction depends on.
+
+        Each FitTarget declares the parameters its function depends on; a target that declares none
+        (``parameters=None``) is taken to depend on every parameter of its model. A declared
+        parameter that has been made dependent on others also counts as using those, e.g. when one
+        model's diffusion coefficient is tied to another's.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the binding models that no fit target depends on.
+        """
+        used = set()
+        for binding in self.bindings:
+            for target in binding.get_targets():
+                declared = target.parameters
+                if declared is None:
+                    declared = binding.model.get_all_parameters()
+                pending = list(declared)
+                while pending:
+                    parameter = pending.pop()
+                    if parameter.unique_name in used:
+                        continue
+                    used.add(parameter.unique_name)
+                    if not getattr(parameter, 'independent', True):
+                        pending.extend(parameter.dependency_map.values())
+        return [p for p in self._chain_parameters() if p.unique_name not in used]
 
     def _build_fit_inputs(self) -> tuple[list, list, list, list, list]:
         """

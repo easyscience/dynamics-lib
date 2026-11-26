@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from easydynamics.variable import Parameter
+
 
 @dataclass(frozen=True)
 class FitTarget:
@@ -37,6 +39,10 @@ class FitTarget:
         The unit *function* expects its input in, or None if no unit conversion applies.
     y_unit : str | None
         The unit of *function*'s output, or None if no unit conversion applies.
+    parameters : tuple[Parameter, ...] | None, default=None
+        The independent parameters *function* depends on. ``ParameterAnalysis`` holds the model's
+        other free parameters fixed when fitting, since the data cannot determine them. None, the
+        default, means the function may depend on every parameter of the model.
     """
 
     name: str
@@ -45,3 +51,4 @@ class FitTarget:
     label: str
     x_unit: str | None
     y_unit: str | None
+    parameters: tuple[Parameter, ...] | None = None

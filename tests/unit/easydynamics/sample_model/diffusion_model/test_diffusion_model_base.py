@@ -378,6 +378,17 @@ class TestDiffusionModelBase:
         assert targets[0].dataset_key == 'Lorentzian area'
         assert targets[1].dataset_key == 'Lorentzian width'
 
+    def test_get_fit_targets_declares_every_parameter_by_default(self):
+        # WHEN a model that does not say what its predictions depend on
+        model = DiffusionModelBase(lorentzian_name='Lorentzian')
+
+        # THEN
+        targets = model.get_fit_targets()
+
+        # EXPECT every parameter is declared, so none is held fixed by mistake
+        all_names = {parameter.name for parameter in model.get_all_parameters()}
+        assert all({parameter.name for parameter in t.parameters} == all_names for t in targets)
+
     def test_match_Q_indices_raises_when_Q_not_set(self):
         # WHEN a diffusion model with no Q set
         model = DiffusionModelBase()

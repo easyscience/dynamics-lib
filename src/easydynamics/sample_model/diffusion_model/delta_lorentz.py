@@ -482,6 +482,33 @@ class DeltaLorentz(DiffusionModelBase):
         A_1_values = [self.A_1.value] * len(Q)
         return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
+    def _width_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the width depends on.
+
+        The Lorentzian width, or its per-Q values.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_width`` depends on.
+        """
+        return [self.lorentzian_width, *self._lorentzian_width_list]
+
+    def _QISF_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the QISF depends on.
+
+        The mean square displacement and A_0 (A_1 = 1 - A_0), or its per-Q values. The EISF depends
+        on the same parameters.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_QISF`` depends on.
+        """
+        return [self.mean_u_squared, self.A_0, *self._A_0_list]
+
     def create_component_collections(
         self,
     ) -> list[ComponentCollection]:
@@ -620,6 +647,7 @@ class DeltaLorentz(DiffusionModelBase):
                 label=f'{self.display_name} delta_area',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
+                parameters=(self.scale, *self._QISF_parameters()),
             )
         )
         return targets

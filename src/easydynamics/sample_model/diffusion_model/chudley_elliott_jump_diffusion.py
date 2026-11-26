@@ -304,6 +304,32 @@ class ChudleyElliottJumpDiffusion(DiffusionModelBase):
 
         return np.ones_like(Q)
 
+    def _width_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the width depends on.
+
+        The jump length and residence time.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_width`` depends on.
+        """
+        return [self.jump_length, self.residence_time]
+
+    def _QISF_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the QISF depends on.
+
+        None, the QISF is 1.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_QISF`` depends on.
+        """
+        return []
+
     def create_component_collections(
         self,
     ) -> list[ComponentCollection]:

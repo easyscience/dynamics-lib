@@ -514,9 +514,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         Get the fittable predictions of the diffusion model as FitTargets.
 
         The base implementation declares ``'area'`` (``scale * QISF(Q)``) and ``'width'`` (the HWHM
-        ``Gamma(Q)``), with default dataset keys derived from the Lorentzian component's name.
-        Subclasses with additional predictions (e.g. a delta-function weight) extend this list. The
-        targets are snapshots: units and default keys reflect the model state at call time.
+        ``Gamma(Q)``), with default dataset keys derived from the Lorentzian component's name, and
+        with the parameters each depends on taken from ``_QISF_parameters`` and
+        ``_width_parameters``. Subclasses with additional predictions (e.g. a delta-function
+        weight) extend this list. The targets are snapshots: units and default keys reflect the
+        model state at call time.
 
         Returns
         -------
@@ -531,6 +533,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 label=f'{self.display_name} area',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
+                parameters=(self.scale, *self._QISF_parameters()),
             ),
             FitTarget(
                 name='width',
@@ -539,8 +542,39 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 label=f'{self.display_name} width',
                 x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.x_unit),
+                parameters=tuple(self._width_parameters()),
             ),
         ]
+
+    def _width_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the width depends on.
+
+        Subclasses override this to declare exactly what ``calculate_width`` uses. The base
+        implementation returns every parameter, which is always safe: a parameter missing here is
+        held fixed when only the width is fitted.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_width`` depends on.
+        """
+        return list(self.get_all_parameters())
+
+    def _QISF_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the QISF depends on.
+
+        Subclasses override this to declare exactly what ``calculate_QISF`` uses. The base
+        implementation returns every parameter, which is always safe: a parameter missing here is
+        held fixed when only the area is fitted.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_QISF`` depends on.
+        """
+        return list(self.get_all_parameters())
 
     # ------------------------------------------------------------------
     # Methods

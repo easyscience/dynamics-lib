@@ -1433,6 +1433,112 @@ class TestParameterAnalysis:
         assert 'bindings=' in repr_str
 
     #############
+    # Unused parameters
+    #############
+
+    def test_fit_holds_parameters_the_targets_do_not_use_fixed(self):
+        # WHEN only the width is fitted, which does not depend on scale
+        model = JumpTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, relaxation_time=1.0, scale=0.5
+        )
+        binding = FitBinding(model=model, targets={'width': 'Lorentzian width'})
+        analysis = ParameterAnalysis(parameters=make_dataset(), bindings=binding)
+
+        # THEN
+        results = analysis.fit()
+
+        # EXPECT scale is left out of the fit, so error bars can be estimated, and is free again
+        assert results[0].n_pars == 2
+        assert 'Could not estimate error-bars' not in results[0].message
+        assert model.scale.value == pytest.approx(0.5)
+        assert model.scale.fixed is False
+
+    def test_fit_leaves_parameters_the_user_fixed_alone(self):
+        # WHEN
+        model = JumpTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, relaxation_time=1.0, scale=0.5
+        )
+        model.relaxation_time.fixed = True
+        binding = FitBinding(model=model, targets={'width': 'Lorentzian width'})
+        analysis = ParameterAnalysis(parameters=make_dataset(), bindings=binding)
+
+        # THEN
+        analysis.fit()
+
+        # EXPECT
+        assert model.relaxation_time.fixed is True
+
+    def test_fit_frees_unused_parameters_even_if_the_fit_raises(self):
+        # WHEN
+        model = JumpTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, relaxation_time=1.0, scale=0.5
+        )
+        binding = FitBinding(model=model, targets={'width': 'Lorentzian width'})
+        analysis = ParameterAnalysis(parameters=make_dataset(), bindings=binding)
+
+        # THEN EXPECT
+        with (
+            patch.object(MultiFitter, 'fit', side_effect=RuntimeError('boom')),
+            pytest.raises(RuntimeError, match='boom'),
+        ):
+            analysis.fit()
+        assert model.scale.fixed is False
+
+    def test_unused_parameters_follows_the_declarations_of_the_bound_targets(self):
+        # WHEN
+        model = JumpTranslationalDiffusion()
+        width_only = FitBinding(model=model, targets={'width': 'Lorentzian width'})
+        area_only = FitBinding(model=model, targets={'area': 'Lorentzian area'})
+        analysis = ParameterAnalysis(parameters=make_dataset())
+
+        # THEN
+        analysis.bindings = width_only
+        unused_for_width = analysis._unused_parameters()
+        analysis.bindings = area_only
+        unused_for_area = analysis._unused_parameters()
+        analysis.bindings = [width_only, area_only]
+        unused_for_both = analysis._unused_parameters()
+
+        # EXPECT
+        assert unused_for_width == [model.scale]
+        assert {p.name for p in unused_for_area} == {'diffusion_coefficient', 'relaxation_time'}
+        assert unused_for_both == []
+
+    def test_unused_parameters_follows_parameters_made_dependent_on_others(self):
+        # WHEN b's diffusion coefficient is tied to a's, and only b's width is fitted
+        a = JumpTranslationalDiffusion()
+        b = JumpTranslationalDiffusion()
+        b.diffusion_coefficient.make_dependent_on('d', {'d': a.diffusion_coefficient})
+        analysis = ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                FitBinding(model=a, targets={'area': 'Lorentzian area'}),
+                FitBinding(model=b, targets={'width': 'Lorentzian width'}),
+            ],
+        )
+
+        # THEN
+        unused = analysis._unused_parameters()
+
+        # EXPECT a's diffusion coefficient is used through b's width
+        unused_names = {parameter.unique_name for parameter in unused}
+        assert a.diffusion_coefficient.unique_name not in unused_names
+        assert a.relaxation_time.unique_name in unused_names
+
+    def test_unused_parameters_treats_undeclared_targets_as_using_everything(self):
+        # WHEN a component model, whose target does not declare its parameters
+        model = Polynomial(coefficients=[1.0, 2.0], x_unit=None, y_unit=None)
+        analysis = ParameterAnalysis(
+            parameters=make_dataset(), bindings=FitBinding(model=model, targets='Lorentzian width')
+        )
+
+        # THEN
+        unused = analysis._unused_parameters()
+
+        # EXPECT
+        assert unused == []
+
+    #############
     # The cached fitter
     #############
 

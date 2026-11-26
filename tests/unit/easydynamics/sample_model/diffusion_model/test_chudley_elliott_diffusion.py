@@ -11,6 +11,10 @@ from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion im
 from easydynamics.sample_model.diffusion_model.chudley_elliott_jump_diffusion import (
     ChudleyElliottJumpDiffusion,
 )
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import declared_names
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import (
+    undeclared_parameters_with_effect,
+)
 
 
 class TestChudleyElliottJumpDiffusion:
@@ -370,3 +374,14 @@ class TestChudleyElliottJumpDiffusion:
         assert 'scale=' in repr_str
         # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
         assert 'x_unit=meV, y_unit=dimensionless' in repr_str
+
+    def test_fit_targets_declare_the_parameters_they_depend_on(self):
+        # WHEN
+        model = ChudleyElliottJumpDiffusion()
+
+        # THEN
+        declared = declared_names(model)
+
+        # EXPECT no target depends on a parameter it does not declare
+        assert declared == {'area': ['scale'], 'width': ['jump_length', 'residence_time']}
+        assert undeclared_parameters_with_effect(model) == {'area': [], 'width': []}
