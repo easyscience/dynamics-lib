@@ -11,6 +11,10 @@ from easydynamics.sample_model.components.delta_function import DeltaFunction
 from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.variable import Parameter
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import declared_names
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import (
+    undeclared_parameters_with_effect,
+)
 
 
 class TestDeltaLorentz:
@@ -1030,6 +1034,36 @@ class TestDeltaLorentz:
         assert [t.name for t in targets] == ['area', 'width', 'delta_area']
         delta_area = next(t for t in targets if t.name == 'delta_area')
         assert delta_area.dataset_key == 'Delta function area'
+
+    def test_fit_targets_declare_the_parameters_they_depend_on(self):
+        # WHEN
+        model = DeltaLorentz()
+
+        # THEN
+        declared = declared_names(model)
+
+        # EXPECT no target depends on a parameter it does not declare
+        assert declared == {
+            'area': ['scale', 'mean_u_squared', 'A_0'],
+            'width': ['lorentzian_width'],
+            'delta_area': ['scale', 'mean_u_squared', 'A_0'],
+        }
+        assert undeclared_parameters_with_effect(model) == {
+            'area': [],
+            'width': [],
+            'delta_area': [],
+        }
+
+    def test_fit_targets_declare_the_per_Q_parameters_they_depend_on(self):
+        # WHEN the width and A_0 vary with Q
+        Q = np.linspace(0.5, 1.5, 4)
+        model = DeltaLorentz(Q=Q, allow_Q_variation={'A_0': True, 'lorentzian_width': True})
+
+        # THEN
+        missing = undeclared_parameters_with_effect(model, Q)
+
+        # EXPECT the per-Q values are declared too
+        assert missing == {'area': [], 'width': [], 'delta_area': []}
 
     def test_calculate_width_raises_when_Q_variation_enabled_but_Q_unset(self):
         # WHEN Q-variation enabled for the width but Q never set on the model (empty per-Q list)

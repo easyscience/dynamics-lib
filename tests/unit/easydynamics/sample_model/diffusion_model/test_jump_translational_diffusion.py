@@ -10,6 +10,10 @@ from scipp.constants import hbar as scipp_hbar
 from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
     JumpTranslationalDiffusion,
 )
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import declared_names
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import (
+    undeclared_parameters_with_effect,
+)
 
 
 class TestJumpTranslationalDiffusion:
@@ -301,3 +305,17 @@ class TestJumpTranslationalDiffusion:
         assert 'scale=' in repr_str
         # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
         assert 'x_unit=meV, y_unit=dimensionless' in repr_str
+
+    def test_fit_targets_declare_the_parameters_they_depend_on(self):
+        # WHEN
+        model = JumpTranslationalDiffusion()
+
+        # THEN
+        declared = declared_names(model)
+
+        # EXPECT no target depends on a parameter it does not declare
+        assert declared == {
+            'area': ['scale'],
+            'width': ['diffusion_coefficient', 'relaxation_time'],
+        }
+        assert undeclared_parameters_with_effect(model) == {'area': [], 'width': []}

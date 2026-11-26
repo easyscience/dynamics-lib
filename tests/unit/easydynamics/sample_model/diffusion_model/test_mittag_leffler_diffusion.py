@@ -16,6 +16,10 @@ from easydynamics.sample_model.diffusion_model.mittag_leffler_diffusion import (
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 from easydynamics.variable import Parameter
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import declared_names
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import (
+    undeclared_parameters_with_effect,
+)
 
 ALL_Q_VARIATION = {'A_0': True, 'relaxation_rate': True, 'alpha': True}
 
@@ -381,6 +385,28 @@ class TestMittagLefflerDiffusion:
         np.testing.assert_allclose(
             targets['elastic_area'].function(Q), model_with_Q.calculate_EISF(Q) * 2.0
         )
+
+    def test_fit_targets_declare_the_parameters_they_depend_on(self, model, model_with_Q):
+        # THEN
+        declared = declared_names(model)
+
+        # EXPECT relaxation_rate and alpha feed no target; no target depends on a parameter it
+        # does not declare, also with per-Q values
+        assert declared == {
+            'area': ['scale', 'A_0'],
+            'width': ['diffusion_coefficient'],
+            'elastic_area': ['scale', 'A_0'],
+        }
+        assert undeclared_parameters_with_effect(model) == {
+            'area': [],
+            'width': [],
+            'elastic_area': [],
+        }
+        assert undeclared_parameters_with_effect(model_with_Q, model_with_Q.Q.values) == {
+            'area': [],
+            'width': [],
+            'elastic_area': [],
+        }
 
     #############
     # Formulas from the paper

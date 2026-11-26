@@ -12,6 +12,10 @@ from scipp.constants import hbar as scipp_hbar
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import declared_names
+from tests.unit.easydynamics.sample_model.diffusion_model.fit_target_checks import (
+    undeclared_parameters_with_effect,
+)
 
 
 class TestBrownianTranslationalDiffusion:
@@ -334,3 +338,14 @@ class TestBrownianTranslationalDiffusion:
         for collection, width in zip(model.get_component_collections(), widths, strict=True):
             assert collection[0].area.value == pytest.approx(1.0)
             assert collection[0].width.value == pytest.approx(width)
+
+    def test_fit_targets_declare_the_parameters_they_depend_on(self):
+        # WHEN
+        model = BrownianTranslationalDiffusion()
+
+        # THEN
+        declared = declared_names(model)
+
+        # EXPECT no target depends on a parameter it does not declare
+        assert declared == {'area': ['scale'], 'width': ['diffusion_coefficient']}
+        assert undeclared_parameters_with_effect(model) == {'area': [], 'width': []}

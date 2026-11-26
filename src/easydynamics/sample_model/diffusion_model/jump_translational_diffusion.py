@@ -299,6 +299,32 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         return np.ones_like(Q)
 
+    def _width_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the width depends on.
+
+        The diffusion coefficient and relaxation time.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_width`` depends on.
+        """
+        return [self.diffusion_coefficient, self.relaxation_time]
+
+    def _QISF_parameters(self) -> list[Parameter]:
+        """
+        Get the independent parameters the QISF depends on.
+
+        None, the QISF is 1.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters ``calculate_QISF`` depends on.
+        """
+        return []
+
     def create_component_collections(
         self,
     ) -> list[ComponentCollection]:

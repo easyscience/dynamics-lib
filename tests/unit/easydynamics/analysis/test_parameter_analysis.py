@@ -1447,7 +1447,7 @@ class TestParameterAnalysis:
         # THEN
         results = analysis.fit()
 
-        # EXPECT scale is left out of the fit, so error bars can be estimated
+        # EXPECT scale is left out of the fit, so error bars can be estimated, and is free again
         assert results[0].n_pars == 2
         assert 'Could not estimate error-bars' not in results[0].message
         assert model.scale.value == pytest.approx(0.5)
@@ -1458,7 +1458,7 @@ class TestParameterAnalysis:
         model = JumpTranslationalDiffusion(
             diffusion_coefficient=2.4e-9, relaxation_time=1.0, scale=0.5
         )
-        model.scale.fixed = True
+        model.relaxation_time.fixed = True
         binding = FitBinding(model=model, targets={'width': 'Lorentzian width'})
         analysis = ParameterAnalysis(parameters=make_dataset(), bindings=binding)
 
@@ -1466,32 +1466,7 @@ class TestParameterAnalysis:
         analysis.fit()
 
         # EXPECT
-        assert model.scale.fixed is True
-
-    def test_fit_does_not_hold_every_parameter_fixed(self):
-        # WHEN no parameter affects the prediction
-        analysis = ParameterAnalysis(
-            parameters=make_dataset(),
-            bindings=FitBinding(
-                model=Polynomial(coefficients=[1.0], x_unit=None, y_unit=None),
-                targets='Lorentzian width',
-            ),
-        )
-
-        # THEN
-        with (
-            patch.object(
-                ParameterAnalysis,
-                '_unused_parameters',
-                side_effect=lambda *_: list(analysis._chain_parameters()),
-            ),
-            patch.object(MultiFitter, 'fit') as fit,
-        ):
-            fit.side_effect = lambda **_: [p.fixed for p in analysis._chain_parameters()]
-            fixed_during_fit = analysis.fit()
-
-        # EXPECT the parameters stay free, so the minimizer reports the problem itself
-        assert fixed_during_fit == [False]
+        assert model.relaxation_time.fixed is True
 
     def test_fit_frees_unused_parameters_even_if_the_fit_raises(self):
         # WHEN
@@ -1509,81 +1484,59 @@ class TestParameterAnalysis:
             analysis.fit()
         assert model.scale.fixed is False
 
-    def test_unused_parameters_finds_parameters_without_effect(self):
-        # WHEN C is unused too, but its bounds leave no room to probe it
-        a = Parameter(name='A', value=1.0)
-        b = Parameter(name='B', value=2.0)
-        c = Parameter(name='C', value=1.0, min=0.95, max=1.05)
+    def test_unused_parameters_follows_the_declarations_of_the_bound_targets(self):
+        # WHEN
+        model = JumpTranslationalDiffusion()
+        width_only = FitBinding(model=model, targets={'width': 'Lorentzian width'})
+        area_only = FitBinding(model=model, targets={'area': 'Lorentzian area'})
         analysis = ParameterAnalysis(parameters=make_dataset())
 
         # THEN
-        with patch.object(ParameterAnalysis, '_chain_parameters', return_value=[a, b, c]):
-            unused = analysis._unused_parameters([Q], [lambda x: a.value * x])
+        analysis.bindings = width_only
+        unused_for_width = analysis._unused_parameters()
+        analysis.bindings = area_only
+        unused_for_area = analysis._unused_parameters()
+        analysis.bindings = [width_only, area_only]
+        unused_for_both = analysis._unused_parameters()
 
-        # EXPECT only B is found unused, and the probe leaves the values as they were
-        assert unused == [b]
-        assert a.value == pytest.approx(1.0)
-        assert b.value == pytest.approx(2.0)
+        # EXPECT
+        assert unused_for_width == [model.scale]
+        assert {p.name for p in unused_for_area} == {'diffusion_coefficient', 'relaxation_time'}
+        assert unused_for_both == []
 
-    def test_unused_parameters_keeps_parameters_whose_effect_vanishes_at_the_start(self):
-        # WHEN B has no effect while A is zero, but it does once A moves
-        model = sm.ExpressionComponent(
-            expression='A*B*x',
-            parameters={'A': 0.0, 'B': 2.0},
-            x_unit=None,
-            y_unit=None,
+    def test_unused_parameters_follows_parameters_made_dependent_on_others(self):
+        # WHEN b's diffusion coefficient is tied to a's, and only b's width is fitted
+        a = JumpTranslationalDiffusion()
+        b = JumpTranslationalDiffusion()
+        b.diffusion_coefficient.make_dependent_on('d', {'d': a.diffusion_coefficient})
+        analysis = ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                FitBinding(model=a, targets={'area': 'Lorentzian area'}),
+                FitBinding(model=b, targets={'width': 'Lorentzian width'}),
+            ],
         )
+
+        # THEN
+        unused = analysis._unused_parameters()
+
+        # EXPECT a's diffusion coefficient is used through b's width
+        unused_names = {parameter.unique_name for parameter in unused}
+        assert a.diffusion_coefficient.unique_name not in unused_names
+        assert a.relaxation_time.unique_name in unused_names
+
+    def test_unused_parameters_treats_undeclared_targets_as_using_everything(self):
+        # WHEN a component model, whose target does not declare its parameters
+        model = Polynomial(coefficients=[1.0, 2.0], x_unit=None, y_unit=None)
         analysis = ParameterAnalysis(
             parameters=make_dataset(), bindings=FitBinding(model=model, targets='Lorentzian width')
         )
-        xs, _, _, funcs, _ = analysis._build_fit_inputs()
 
         # THEN
-        unused = analysis._unused_parameters(xs, funcs)
+        unused = analysis._unused_parameters()
 
         # EXPECT
         assert unused == []
-
-    def test_unused_parameters_keeps_parameters_whose_probe_raises(self):
-        # WHEN
-        parameter = Parameter(name='p', value=1.0)
-        analysis = ParameterAnalysis(parameters=make_dataset())
-
-        def func(x):
-            if parameter.value != pytest.approx(1.0):
-                raise ValueError('outside the domain')
-            return x
-
-        # THEN
-        with patch.object(ParameterAnalysis, '_chain_parameters', return_value=[parameter]):
-            unused = analysis._unused_parameters([Q], [func])
-
-        # EXPECT
-        assert unused == []
-        assert parameter.value == pytest.approx(1.0)
-
-    @pytest.mark.parametrize(
-        ('value', 'lower', 'upper', 'expected'),
-        [
-            (2.0, -np.inf, np.inf, 2.2),
-            (2.0, -np.inf, 2.0, 1.8),
-            (0.0, -np.inf, np.inf, 0.1),
-            (1.0, 0.95, 1.05, None),
-        ],
-        ids=['up', 'down at the upper bound', 'from zero', 'no room'],
-    )
-    def test_nudged_value(self, value, lower, upper, expected):
-        # WHEN
-        parameter = Parameter(name='p', value=value, min=lower, max=upper)
-
-        # THEN
-        nudged = ParameterAnalysis._nudged_value(parameter)
-
-        # EXPECT
-        if expected is None:
-            assert nudged is None
-        else:
-            assert nudged == pytest.approx(expected)
 
     #############
     # The cached fitter
